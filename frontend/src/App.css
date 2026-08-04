@@ -1,0 +1,24 @@
+.hello {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: 100svh;
+  text-align: center;
+}
+
+.hello .logo {
+  width: 48px;
+  height: 48px;
+}
+
+.hello h1 {
+  font-size: 48px;
+  color: var(--accent);
+}
+
+.hello p {
+  color: var(--text);
+  font-size: 18px;
+}
