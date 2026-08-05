@@ -10,15 +10,15 @@ Naming: `feat/name`, `fix/name`, `ci/name`, `refactor/name`
 
 Format: `type: short description in English`
 
-| Type | When |
-|---|---|
-| `feat:` | new feature |
-| `fix:` | bug fix |
-| `ci:` | pipeline, GitHub Actions |
+| Type        | When                                     |
+| ----------- | ---------------------------------------- |
+| `feat:`     | new feature                              |
+| `fix:`      | bug fix                                  |
+| `ci:`       | pipeline, GitHub Actions                 |
 | `refactor:` | reorganization without changing behavior |
-| `docs:` | README, comments |
-| `test:` | test scripts |
-| `chore:` | Makefile, .gitignore, config |
+| `docs:`     | README, comments                         |
+| `test:`     | test scripts                             |
+| `chore:`    | Makefile, .gitignore, config             |
 
 Examples:
 
@@ -33,4 +33,4 @@ docs: update README with installation steps
 
 - One PR = one single feature or fix
 - The pipeline must be green before merging
-- Your teammate must approve before merging
+- Codeowners must approve before merging
