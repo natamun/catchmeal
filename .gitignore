@@ -1,3 +1,6 @@
 # dotenv environment variable files
 .env
 .env.local
+
+# PDF files
+*.pdf
