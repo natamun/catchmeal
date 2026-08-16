@@ -6,7 +6,7 @@ services:
       args:
         VITE_API_URL: ${VITE_API_URL}
     ports:
-      - "8080:80"
+      - '8080:80'
     restart: unless-stopped
 
   backend:
@@ -14,7 +14,7 @@ services:
       context: ./backend
       dockerfile: Dockerfile.prod
     ports:
-      - "3000:3000"
+      - '3000:3000'
     environment:
       FRONTEND_URL: ${FRONTEND_URL}
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}

@@ -12,16 +12,31 @@ export default function MealList({ meals }: { meals: Meal[] }) {
         Repas du jour
       </h2>
       {meals.length === 0 ? (
-        <p className="text-green-500 text-sm text-center py-4">Aucun repas ajouté</p>
+        <p className="text-green-500 text-sm text-center py-4">
+          Aucun repas ajouté
+        </p>
       ) : (
-        <ul className="flex flex-col gap-3" aria-label="Liste des repas du jour">
+        <ul
+          className="flex flex-col gap-3"
+          aria-label="Liste des repas du jour"
+        >
           {meals.map((meal) => (
-            <li key={meal.id} className="flex items-center justify-between py-2 border-b border-green-200 last:border-0">
+            <li
+              key={meal.id}
+              className="flex items-center justify-between py-2 border-b border-green-200 last:border-0"
+            >
               <div>
                 <p className="font-medium text-green-800">{meal.name}</p>
-                <p className="text-xs text-green-500"><time>{meal.time}</time></p>
+                <p className="text-xs text-green-500">
+                  <time>{meal.time}</time>
+                </p>
               </div>
-              <span className="text-green-300 font-semibold" aria-label={`${meal.calories} kilocalories`}>{meal.calories} kcal</span>
+              <span
+                className="text-green-300 font-semibold"
+                aria-label={`${meal.calories} kilocalories`}
+              >
+                {meal.calories} kcal
+              </span>
             </li>
           ))}
         </ul>

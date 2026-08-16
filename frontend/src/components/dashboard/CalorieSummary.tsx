@@ -22,7 +22,14 @@ export default function CalorieSummary({ consumed, goal }: Props) {
           role="img"
           aria-label={`${Math.round(pct)}% de l'objectif calorique atteint`}
         >
-          <circle cx="50" cy="50" r="40" fill="none" stroke="#2D6A4F" strokeWidth="10" />
+          <circle
+            cx="50"
+            cy="50"
+            r="40"
+            fill="none"
+            stroke="#2D6A4F"
+            strokeWidth="10"
+          />
           <circle
             cx="50"
             cy="50"
@@ -35,9 +42,16 @@ export default function CalorieSummary({ consumed, goal }: Props) {
           />
         </svg>
         <div>
-          <p className="text-4xl font-bold text-green-800" aria-label={`${consumed} kilocalories consommées`}>{consumed}</p>
+          <p
+            className="text-4xl font-bold text-green-800"
+            aria-label={`${consumed} kilocalories consommées`}
+          >
+            {consumed}
+          </p>
           <p className="text-sm text-green-500">kcal consommées</p>
-          <p className="mt-2 text-green-300 font-semibold" aria-live="polite">{remaining} kcal restantes</p>
+          <p className="mt-2 text-green-300 font-semibold" aria-live="polite">
+            {remaining} kcal restantes
+          </p>
           <p className="text-xs text-green-500">Objectif : {goal} kcal</p>
         </div>
       </div>

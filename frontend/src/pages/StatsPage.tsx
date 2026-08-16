@@ -22,7 +22,9 @@ export default function StatsPage() {
             <button
               key={p}
               className={`text-xs font-medium px-3 py-1.5 rounded-lg transition-colors cursor-pointer ${
-                i === 0 ? 'bg-white text-green-800 shadow-sm' : 'text-green-500 hover:text-green-600'
+                i === 0
+                  ? 'bg-white text-green-800 shadow-sm'
+                  : 'text-green-500 hover:text-green-600'
               }`}
             >
               {p}
@@ -33,14 +35,22 @@ export default function StatsPage() {
 
       {/* Bar chart calories */}
       <div className="bg-white rounded-2xl p-6 border border-green-200 shadow-sm">
-        <p className="text-sm font-semibold text-green-500 uppercase tracking-wide mb-6">Calories / jour</p>
+        <p className="text-sm font-semibold text-green-500 uppercase tracking-wide mb-6">
+          Calories / jour
+        </p>
         <div className="flex items-end gap-2 h-36">
           {WEEKLY.map((d) => {
             const pct = (d.kcal / MAX) * 100;
             return (
-              <div key={d.day} className="flex-1 flex flex-col items-center gap-1">
+              <div
+                key={d.day}
+                className="flex-1 flex flex-col items-center gap-1"
+              >
                 <span className="text-xs text-green-500">{d.kcal}</span>
-                <div className="w-full flex items-end bg-green-100 rounded-lg overflow-hidden" style={{ height: '80px' }}>
+                <div
+                  className="w-full flex items-end bg-green-100 rounded-lg overflow-hidden"
+                  style={{ height: '80px' }}
+                >
                   <div
                     className="w-full bg-green-400 rounded-lg transition-all"
                     style={{ height: `${pct}%` }}
@@ -55,7 +65,9 @@ export default function StatsPage() {
 
       {/* Macros moyenne */}
       <div className="bg-white rounded-2xl p-6 border border-green-200 shadow-sm">
-        <p className="text-sm font-semibold text-green-500 uppercase tracking-wide mb-4">Moyenne des macros</p>
+        <p className="text-sm font-semibold text-green-500 uppercase tracking-wide mb-4">
+          Moyenne des macros
+        </p>
         <div className="grid grid-cols-3 gap-4 text-center">
           {[
             { label: 'Protéines', value: '112g', color: 'text-green-300' },
@@ -72,11 +84,18 @@ export default function StatsPage() {
 
       {/* Poids */}
       <div className="bg-white rounded-2xl p-6 border border-green-200 shadow-sm">
-        <p className="text-sm font-semibold text-green-500 uppercase tracking-wide mb-4">Évolution du poids</p>
+        <p className="text-sm font-semibold text-green-500 uppercase tracking-wide mb-4">
+          Évolution du poids
+        </p>
         <div className="flex items-center gap-4">
           <div>
-            <p className="text-3xl font-bold text-green-800">74.2 <span className="text-base font-normal text-green-500">kg</span></p>
-            <p className="text-sm text-green-300 font-medium mt-1">▼ 5.8 kg depuis le début</p>
+            <p className="text-3xl font-bold text-green-800">
+              74.2{' '}
+              <span className="text-base font-normal text-green-500">kg</span>
+            </p>
+            <p className="text-sm text-green-300 font-medium mt-1">
+              ▼ 5.8 kg depuis le début
+            </p>
           </div>
           <div className="flex-1 h-px bg-green-100" />
           <div className="text-right">

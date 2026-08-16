@@ -15,9 +15,27 @@ const MOCK_MEALS: Meal[] = [
 ];
 
 const MOCK_FRIENDS: FriendActivity[] = [
-  { id: 1, username: 'alice', action: 'a ajouté un repas (540 kcal)', time: 'il y a 5 min', online: true },
-  { id: 2, username: 'bob', action: 'a atteint son objectif du jour 🎉', time: 'il y a 23 min', online: false },
-  { id: 3, username: 'carol', action: 'a enregistré son poids (63 kg)', time: 'il y a 1h', online: true },
+  {
+    id: 1,
+    username: 'alice',
+    action: 'a ajouté un repas (540 kcal)',
+    time: 'il y a 5 min',
+    online: true,
+  },
+  {
+    id: 2,
+    username: 'bob',
+    action: 'a atteint son objectif du jour 🎉',
+    time: 'il y a 23 min',
+    online: false,
+  },
+  {
+    id: 3,
+    username: 'carol',
+    action: 'a enregistré son poids (63 kg)',
+    time: 'il y a 1h',
+    online: true,
+  },
 ];
 
 const consumed = MOCK_MEALS.reduce((sum, m) => sum + m.calories, 0);
@@ -32,9 +50,12 @@ export default function Dashboard() {
         </div>
         <CalorieSummary consumed={consumed} goal={2000} />
         <MacroBreakdown
-          protein={95} proteinGoal={150}
-          carbs={180} carbsGoal={250}
-          fat={42} fatGoal={65}
+          protein={95}
+          proteinGoal={150}
+          carbs={180}
+          carbsGoal={250}
+          fat={42}
+          fatGoal={65}
         />
         <MealList meals={MOCK_MEALS} />
         <WeightWidget currentWeight={74.2} startWeight={80} goalWeight={70} />

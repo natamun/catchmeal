@@ -26,7 +26,10 @@ export default function ProfilePage() {
       {/* Stats rapides */}
       <div className="grid grid-cols-3 gap-3">
         {STATS.map((s) => (
-          <div key={s.label} className="bg-white rounded-2xl p-4 border border-green-200 shadow-sm text-center">
+          <div
+            key={s.label}
+            className="bg-white rounded-2xl p-4 border border-green-200 shadow-sm text-center"
+          >
             <p className="text-2xl font-bold text-green-300">{s.value}</p>
             <p className="text-xs text-green-500 mt-1">{s.label}</p>
           </div>
@@ -35,7 +38,9 @@ export default function ProfilePage() {
 
       {/* Objectifs */}
       <div className="bg-white rounded-2xl border border-green-200 shadow-sm overflow-hidden">
-        <p className="text-xs font-semibold text-green-500 uppercase tracking-wide px-5 pt-5 pb-3">Mes objectifs</p>
+        <p className="text-xs font-semibold text-green-500 uppercase tracking-wide px-5 pt-5 pb-3">
+          Mes objectifs
+        </p>
         {[
           { label: 'Objectif calorique', value: '2 000 kcal / jour' },
           { label: 'Poids cible', value: '70 kg' },
@@ -53,7 +58,9 @@ export default function ProfilePage() {
 
       {/* Compte */}
       <div className="bg-white rounded-2xl border border-green-200 shadow-sm overflow-hidden">
-        <p className="text-xs font-semibold text-green-500 uppercase tracking-wide px-5 pt-5 pb-3">Compte</p>
+        <p className="text-xs font-semibold text-green-500 uppercase tracking-wide px-5 pt-5 pb-3">
+          Compte
+        </p>
         {[
           { label: 'Exporter mes données', danger: false },
           { label: 'Politique de confidentialité', danger: false },
@@ -62,12 +69,25 @@ export default function ProfilePage() {
           <button
             key={item.label}
             className={`w-full flex items-center justify-between px-5 py-4 text-sm cursor-pointer transition-colors text-left ${
-              item.danger ? 'text-red-500 hover:bg-red-50' : 'text-green-600 hover:bg-white'
+              item.danger
+                ? 'text-red-500 hover:bg-red-50'
+                : 'text-green-600 hover:bg-white'
             } ${i < arr.length - 1 ? 'border-b border-green-200' : ''}`}
           >
             {item.label}
-            <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 opacity-40" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="w-4 h-4 opacity-40"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M9 5l7 7-7 7"
+              />
             </svg>
           </button>
         ))}

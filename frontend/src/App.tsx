@@ -25,15 +25,27 @@ export default function App() {
   if (page === 'landing') {
     return (
       <Suspense fallback={null}>
-        <LandingPage onLogin={() => setPage('dashboard')} onRegister={() => setPage('dashboard')} />
+        <LandingPage
+          onLogin={() => setPage('dashboard')}
+          onRegister={() => setPage('dashboard')}
+        />
       </Suspense>
     );
   }
 
   return (
     <div className="min-h-screen bg-green-50 md:pl-56">
-      <main id="main-content" className="px-6 pt-6 pb-24 md:pb-8 max-w-6xl mx-auto">
-        <Suspense fallback={<div className="flex items-center justify-center h-40 text-green-500 text-sm">Chargement...</div>}>
+      <main
+        id="main-content"
+        className="px-6 pt-6 pb-24 md:pb-8 max-w-6xl mx-auto"
+      >
+        <Suspense
+          fallback={
+            <div className="flex items-center justify-center h-40 text-green-500 text-sm">
+              Chargement...
+            </div>
+          }
+        >
           {pages[activeTab]}
         </Suspense>
       </main>
