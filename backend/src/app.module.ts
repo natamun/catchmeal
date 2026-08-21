@@ -7,6 +7,7 @@ import { AuthModule } from './auth/auth.module';
 import { DashboardAnalyticsModule } from './dashboard-analytics/dashboard-analytics.module';
 import { FoodItemsModule } from './food-items/food-items.module';
 import { FriendsModule } from './friends/friends.module';
+import { GdprModule } from './gdpr/gdpr.module';
 import { MealsModule } from './meals/meals.module';
 import { UsersModule } from './users/users.module';
 
@@ -22,6 +23,7 @@ import { UsersModule } from './users/users.module';
     DashboardAnalyticsModule,
     UsersModule,
     FriendsModule,
+    GdprModule,
   ],
   controllers: [AppController],
   providers: [AppService],
