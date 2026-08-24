@@ -7,18 +7,6 @@ export class DashboardAnalyticsService {
   constructor(private readonly prisma: PrismaService) {}
 
   /**
-   *  Async function to get all Meal for a user
-   * @param userId - Id of a user to get data
-   * @returns All meals matching the userId, including their MealItems
-   */
-  // async getMealForUser(userId: number) {
-  //   return this.prisma.meal.findMany({
-  //     where: { userId: userId },
-  //     include: { items: true },
-  //   });
-  // }
-
-  /**
    *  Async function to get all data about a user to build their dashboard
    * @param userId - Id of a user to get data
    * @param from - Start date of the period to analyze
@@ -33,7 +21,7 @@ export class DashboardAnalyticsService {
   async getDashboard(userId: number, from: Date, to: Date) {
     const [meals, weightLogs, goals] = await Promise.all([
       this.prisma.meal.findMany({
-        where: { userId: userId, loggedAt: { gte: from, lte: to} },
+        where: { userId: userId, loggedAt: { gte: from, lte: to } },
         include: { items: true },
       }),
 
@@ -59,7 +47,6 @@ export class DashboardAnalyticsService {
       fat: number;
     }
 
-    //  Total Macro for a day
     const totalsByDay: Record<string, MacroTotalsDay> = {};
     for (const meal of meals) {
       const day = meal.loggedAt.toISOString().split('T')[0];
@@ -86,17 +73,20 @@ export class DashboardAnalyticsService {
       if (!date) {
         return null;
       }
-      const newDate  = new Date(date);
+      const newDate = new Date(date);
       newDate.setHours(23, 59, 59, 999);
       const applicable = goals.filter((g) => g.startDate <= newDate);
       return applicable[applicable.length - 1] ?? null;
-    }
+    };
 
-    const allDays = Array.from(new Set([
-      ...Object.keys(totalsByDay),
-      ...Object.keys(weightLogsDay),
-      ...goals.map((item: GoalSetting) => item.startDate.toISOString().split('T')[0]),
-    ])
+    const allDays = Array.from(
+      new Set([
+        ...Object.keys(totalsByDay),
+        ...Object.keys(weightLogsDay),
+        ...goals.map(
+          (item: GoalSetting) => item.startDate.toISOString().split('T')[0],
+        ),
+      ]),
     ).sort();
     const dashboard = allDays.map((day) => {
       const goal = getGoalDate(new Date(day));
