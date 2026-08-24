@@ -1,22 +1,10 @@
-import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
-import { GoalSetting, WeightLog } from '../generated/prisma/client';
+import { Injectable } from "@nestjs/common";
+import { PrismaService } from "../prisma/prisma.service";
+import { GoalSetting, WeightLog } from "../generated/prisma/client";
 
 @Injectable()
 export class DashboardAnalyticsService {
   constructor(private readonly prisma: PrismaService) {}
-
-  /**
-   *  Async function to get all Meal for a user
-   * @param userId - Id of a user to get data
-   * @returns All meals matching the userId, including their MealItems
-   */
-  // async getMealForUser(userId: number) {
-  //   return this.prisma.meal.findMany({
-  //     where: { userId: userId },
-  //     include: { items: true },
-  //   });
-  // }
 
   /**
    *  Async function to get all data about a user to build their dashboard
@@ -33,18 +21,18 @@ export class DashboardAnalyticsService {
   async getDashboard(userId: number, from: Date, to: Date) {
     const [meals, weightLogs, goals] = await Promise.all([
       this.prisma.meal.findMany({
-        where: { userId: userId, loggedAt: { gte: from, lte: to} },
+        where: { userId: userId, loggedAt: { gte: from, lte: to } },
         include: { items: true },
       }),
 
       this.prisma.weightLog.findMany({
         where: { userId: userId, loggedAt: { gte: from, lte: to } },
-        orderBy: { loggedAt: 'asc' },
+        orderBy: { loggedAt: "asc" },
       }),
 
       this.prisma.goalSetting.findMany({
         where: { userId: userId, startDate: { gte: from, lte: to } },
-        orderBy: { startDate: 'asc' },
+        orderBy: { startDate: "asc" },
       }),
     ]);
 
@@ -62,7 +50,7 @@ export class DashboardAnalyticsService {
     //  Total Macro for a day
     const totalsByDay: Record<string, MacroTotalsDay> = {};
     for (const meal of meals) {
-      const day = meal.loggedAt.toISOString().split('T')[0];
+      const day = meal.loggedAt.toISOString().split("T")[0];
       if (!totalsByDay[day]) {
         totalsByDay[day] = { kcal: 0, protein: 0, carbs: 0, fat: 0 };
       }
@@ -78,7 +66,7 @@ export class DashboardAnalyticsService {
 
     const weightLogsDay: Record<string, WeightLog> = {};
     for (const log of weightLogs) {
-      const day = log.loggedAt.toISOString().split('T')[0];
+      const day = log.loggedAt.toISOString().split("T")[0];
       weightLogsDay[day] = log;
     }
 
@@ -86,17 +74,20 @@ export class DashboardAnalyticsService {
       if (!date) {
         return null;
       }
-      const newDate  = new Date(date);
+      const newDate = new Date(date);
       newDate.setHours(23, 59, 59, 999);
       const applicable = goals.filter((g) => g.startDate <= newDate);
       return applicable[applicable.length - 1] ?? null;
-    }
+    };
 
-    const allDays = Array.from(new Set([
-      ...Object.keys(totalsByDay),
-      ...Object.keys(weightLogsDay),
-      ...goals.map((item: GoalSetting) => item.startDate.toISOString().split('T')[0]),
-    ])
+    const allDays = Array.from(
+      new Set([
+        ...Object.keys(totalsByDay),
+        ...Object.keys(weightLogsDay),
+        ...goals.map(
+          (item: GoalSetting) => item.startDate.toISOString().split("T")[0],
+        ),
+      ]),
     ).sort();
     const dashboard = allDays.map((day) => {
       const goal = getGoalDate(new Date(day));
