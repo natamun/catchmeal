@@ -1,8 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { DashboardAnalyticsService } from './dashboard-analytics.service';
 import { DashboardAnalyticsController } from './dashboard-analytics.controller';
-import { PrismaService } from '../prisma/prisma.service';
-import { getDefaultAutoSelectFamily } from 'net';
 
 describe('DashboardAnalyticsController', () => {
   let controller: DashboardAnalyticsController;
@@ -33,8 +31,8 @@ describe('DashboardAnalyticsController', () => {
     analysticsMock.getDashboard.mockResolvedValue([]);
     const dashboard = await controller.getDashboard(
       1,
-      '2026-08-11',
-      '2026-08-12',
+      new Date('2026-08-11'),
+      new Date('2026-08-12'),
     );
     expect(dashboard).toEqual([]);
   });
@@ -43,8 +41,8 @@ describe('DashboardAnalyticsController', () => {
     analysticsMock.getDashboard.mockResolvedValue([]);
     const dashboard = await controller.getDashboard(
       1,
-      '2026-01-10',
-      '2026-01-12',
+      new Date('2026-01-10'),
+      new Date('2026-01-12'),
     );
     expect(analysticsMock.getDashboard).toHaveBeenCalledWith(
       1,

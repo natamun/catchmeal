@@ -15,8 +15,13 @@ export class DashboardAnalyticsService {
    *  - day: date string(YYY-MM-DD)
    *  - totalKcal: sum of calories logged at day
    *  - goalKcal: the calorie goal or null if none was set
-   *  - isOverGoal: whether totalKcal exceeded goalKcal, or null if no goal
    *  - weight: the weight logged that day or null if none was set
+   *  - totalProtein: the total amount of protein consumed per day
+   *  - totalCarbs: the total amount of carbs consumed per day
+   *  - totalFat: the total amount of fat consumed per day
+   *  - objective: lose or gain weight
+   *  - bodyFat: the value of body fat
+   *  - noteWeight: the comment about your weight
    */
   async getDashboard(userId: number, from: Date, to: Date) {
     const [meals, weightLogs, goals] = await Promise.all([
@@ -35,10 +40,6 @@ export class DashboardAnalyticsService {
         orderBy: { startDate: 'asc' },
       }),
     ]);
-
-    if (meals.length === 0 && weightLogs.length === 0 && goals.length === 0) {
-      return null;
-    }
 
     interface MacroTotalsDay {
       kcal: number;
@@ -70,9 +71,6 @@ export class DashboardAnalyticsService {
     }
 
     const getGoalDate = (date: Date) => {
-      if (!date) {
-        return null;
-      }
       const newDate = new Date(date);
       newDate.setHours(23, 59, 59, 999);
       const applicable = goals.filter((g) => g.startDate <= newDate);
@@ -93,12 +91,12 @@ export class DashboardAnalyticsService {
       return {
         day,
         totalKcal: totalsByDay[day]?.kcal ?? null,
+        goalKcal: goal?.dailyCalories ?? null,
+        weight: weightLogsDay[day]?.weight ?? null,
         totalProtein: totalsByDay[day]?.protein ?? null,
         totalCarbs: totalsByDay[day]?.carbs ?? null,
         totalFat: totalsByDay[day]?.fat ?? null,
-        goalKcal: goal?.dailyCalories ?? null,
         objective: goal?.objective ?? null,
-        weight: weightLogsDay[day]?.weight ?? null,
         bodyFat: weightLogsDay[day]?.bodyFat ?? null,
         noteWeight: weightLogsDay[day]?.note ?? null,
       };

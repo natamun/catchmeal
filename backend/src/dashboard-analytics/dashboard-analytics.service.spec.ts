@@ -43,7 +43,7 @@ describe('DashboardAnalyticsService', () => {
     expect(service).toBeDefined();
   });
 
-  it('should be return null when no data exists', async () => {
+  it('should be return an empty array [] when no data exists', async () => {
     prismaMock.meal.findMany.mockResolvedValue([]);
     prismaMock.weightLog.findMany.mockResolvedValue([]);
     prismaMock.goalSetting.findMany.mockResolvedValue([]);
@@ -53,7 +53,7 @@ describe('DashboardAnalyticsService', () => {
       new Date('2026-08-01'),
       new Date('2026-08-31'),
     );
-    expect(dashboard).toBeNull();
+    expect(dashboard).toEqual([]);
   });
 
   it('should be return only meal table', async () => {

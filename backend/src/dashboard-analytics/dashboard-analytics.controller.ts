@@ -5,7 +5,7 @@ import {
   Param,
   Query,
   ParseIntPipe,
-  HttpCode,
+  ParseDatePipe,
 } from '@nestjs/common';
 
 @Controller('users/:userId')
@@ -15,13 +15,13 @@ export class DashboardAnalyticsController {
   @Get('dashboard')
   getDashboard(
     @Param('userId', ParseIntPipe) userId: number,
-    @Query('from') from?: string,
-    @Query('to') to?: string,
+    @Query('from', new ParseDatePipe({ optional: true })) from?: Date,
+    @Query('to', new ParseDatePipe({ optional: true })) to?: Date,
   ) {
     const fromDate = from
-      ? new Date(from)
+      ? from
       : new Date(new Date().setDate(new Date().getDate() - 7));
-    const toDate = to ? new Date(to) : new Date();
+    const toDate = to ? to : new Date();
     return this.analyticsService.getDashboard(userId, fromDate, toDate);
   }
 }
