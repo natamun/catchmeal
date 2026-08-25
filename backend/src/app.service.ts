@@ -13,7 +13,12 @@ export class AppService {
     await this.prisma.user.upsert({
       where: { username: 'kcal' },
       update: {},
-      create: { username: 'kcal', name: 'todefine' },
+      create: {
+        username: 'kcal',
+        name: 'todefine',
+        passwordHash: 'blabla',
+        email: 'test@gmail.com',
+      },
     });
     return this.prisma.user.findMany();
   }
