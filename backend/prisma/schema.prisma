@@ -34,10 +34,12 @@ model Friend {
   id                Int     @id @default(autoincrement())
   userId            Int
   friendId          Int
-  note              String?
-  lastTimeConnected Int
+  note              String? @db.VarChar(255)
+  lastTimeConnected DateTime
   user              User    @relation("UserFriends", fields: [userId], references: [id])
   friendUser        User    @relation("FriendOf", fields: [friendId], references: [id])
+  @@index([userId])
+  @@index([friendId])
 }
 
 model Message {
@@ -57,7 +59,7 @@ model WeightLog {
   weight    Float
   bodyFat   Float?
   loggedAt  DateTime @default(now())
-  note      String?
+  note      String?  @db.VarChar(255)
   @@index([userId, loggedAt])
 }
 
@@ -68,6 +70,7 @@ model Meal {
   typeMeal  String
   loggedAt  DateTime  @default(now())
   items MealItem[]
+  @@index([userId, loggedAt])
 }
 
 model MealItem {
@@ -89,4 +92,5 @@ model GoalSetting {
   dailyCalories Int
   objective     String?
   startDate     DateTime @default(now())
+  @@index([userId, startDate])
 }
