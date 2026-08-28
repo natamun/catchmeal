@@ -7,9 +7,10 @@ import { AuthService } from './auth.service';
 import { PassportAuthController } from './passport-auth.controller';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { LocalStrategy } from './strategies/local.strategy';
+import { FortyTwoStrategy } from './strategies/forty-two.strategy';
 
 @Module({
-  providers: [AuthService, LocalStrategy, JwtStrategy],
+  providers: [AuthService, LocalStrategy, JwtStrategy, FortyTwoStrategy],
   controllers: [PassportAuthController],
   imports: [
     UsersModule,
