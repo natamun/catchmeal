@@ -14,7 +14,83 @@ datasource db {
 }
 
 model User {
+  id                Int           @id @default(autoincrement())
+  username          String        @unique
+  name              String
+  email             String        @unique
+  passwordHash      String
+  role              String        @default("User")
+  createAt          DateTime      @default(now())
+  meal              Meal[]
+  friendOf          Friend[]      @relation("FriendOf")
+  userFriend        Friend[]      @relation("UserFriends")
+  senderMessage     Message[]     @relation("SenderMessage")
+  receiverMessage   Message[]     @relation("ReceivedMessage")
+  weightLogs        WeightLog[]
+  goalSettings      GoalSetting[]
+}
+
+model Friend {
+  id                Int     @id @default(autoincrement())
+  userId            Int
+  friendId          Int
+  note              String? @db.VarChar(255)
+  lastTimeConnected DateTime
+  user              User    @relation("UserFriends", fields: [userId], references: [id])
+  friendUser        User    @relation("FriendOf", fields: [friendId], references: [id])
+  @@index([userId])
+  @@index([friendId])
+}
+
+model Message {
+  id          Int       @id @default(autoincrement())
+  receiverId  Int
+  senderId    Int
+  content     String
+  sentAt      DateTime  @default(now())
+  sender      User      @relation("SenderMessage", fields: [senderId], references: [id])
+  receiver    User      @relation("ReceivedMessage", fields: [receiverId], references: [id])
+}
+
+model WeightLog {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  weight    Float
+  bodyFat   Float?
+  loggedAt  DateTime @default(now())
+  note      String?  @db.VarChar(255)
+  @@index([userId, loggedAt])
+}
+
+model Meal {
+  id        Int       @id @default(autoincrement())
+  userId    Int
+  user      User      @relation(fields: [userId], references: [id])
+  typeMeal  String
+  loggedAt  DateTime  @default(now())
+  items MealItem[]
+  @@index([userId, loggedAt])
+}
+
+model MealItem {
   id       Int    @id @default(autoincrement())
-  username String @unique
+  mealId   Int
+  meal     Meal   @relation(fields: [mealId], references: [id])
   name     String
+  quantity Float
+  kcal     Float
+  protein  Float
+  carbs    Float
+  fat      Float
+}
+
+model GoalSetting {
+  id            Int      @id @default(autoincrement())
+  userId        Int
+  user          User     @relation(fields: [userId], references: [id])
+  dailyCalories Int
+  objective     String?
+  startDate     DateTime @default(now())
+  @@index([userId, startDate])
 }
