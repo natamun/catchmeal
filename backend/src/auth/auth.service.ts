@@ -41,6 +41,12 @@ type AuthResult = {
   activityLevel?: string | null;
 };
 
+interface OAuthUserParams {
+  username: string;
+  name: string;
+  email: string;
+}
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -50,18 +56,13 @@ export class AuthService {
 
   async validateUser(input: AuthInput): Promise<SignInData | null> {
     const user = await this.usersService.findUserByName(input.username);
-
-    if (!user) {
-      return null;
-    }
+    if (!user) return null;
 
     const passwordMatches = await bcrypt.compare(
       input.password,
       user.passwordHash,
     );
-    if (!passwordMatches) {
-      return null;
-    }
+    if (!passwordMatches) return null;
 
     return {
       userId: user.id,
@@ -78,6 +79,38 @@ export class AuthService {
       birthDate: user.birthDate,
       activityLevel: user.activityLevel,
     };
+  }
+
+  async findOrCreateFromOAuth(params: OAuthUserParams): Promise<SignInData> {
+    const { username, name, email } = params;
+
+    const existingUser = await this.usersService.findUserByName(username);
+    if (existingUser) {
+      return {
+        userId: existingUser.id,
+        username: existingUser.username,
+        name: existingUser.name,
+        avatarUrl: existingUser.avatarUrl,
+        height: existingUser.height,
+        targetWeight: existingUser.targetWeight,
+        dailyCalorieGoal: existingUser.dailyCalorieGoal,
+        dailyProteinGoal: existingUser.dailyProteinGoal,
+        dailyCarbsGoal: existingUser.dailyCarbsGoal,
+        dailyFatGoal: existingUser.dailyFatGoal,
+        gender: existingUser.gender,
+        birthDate: existingUser.birthDate,
+        activityLevel: existingUser.activityLevel,
+      };
+    }
+
+    const newUser = await this.usersService.create({
+      username,
+      name,
+      email,
+      passwordHash: '',
+    });
+
+    return { userId: newUser.id, username: newUser.username };
   }
 
   async register(dto: RegisterDto): Promise<AuthResult> {
@@ -106,11 +139,7 @@ export class AuthService {
   }
 
   async signIn(user: SignInData): Promise<AuthResult> {
-    const tokenPayload = {
-      sub: user.userId,
-      username: user.username,
-    };
-
+    const tokenPayload = { sub: user.userId, username: user.username };
     const accessToken = await this.jwtService.signAsync(tokenPayload);
 
     return {
