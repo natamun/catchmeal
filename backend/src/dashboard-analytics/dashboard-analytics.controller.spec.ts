@@ -39,6 +39,11 @@ describe('DashboardAnalyticsController', () => {
 
   it('should be call with userId: 1, from: 2026-01-10, to: 2026-01-12', async () => {
     analysticsMock.getDashboard.mockResolvedValue([]);
+    await controller.getDashboard(
+      1,
+      new Date('2026-01-10'),
+      new Date('2026-01-12'),
+    );
     expect(analysticsMock.getDashboard).toHaveBeenCalledWith(
       1,
       new Date('2026-01-10'),
@@ -47,11 +52,15 @@ describe('DashboardAnalyticsController', () => {
   });
 
   it('should be call with userId: 1 and last 7 days', async () => {
+    const now = new Date('2026-01-15T12:00:00.000Z');
+    jest.useFakeTimers().setSystemTime(now);
     analysticsMock.getDashboard.mockResolvedValue([]);
+    await controller.getDashboard(1);
     expect(analysticsMock.getDashboard).toHaveBeenCalledWith(
       1,
-      new Date(new Date().setDate(new Date().getDate() - 7)),
-      new Date(),
+      new Date(new Date(now).setDate(now.getDate() - 7)),
+      now,
     );
+    jest.useRealTimers();
   });
 });
