@@ -13,13 +13,18 @@ datasource db {
   provider = "postgresql"
 }
 
+enum Role {
+  USER
+  ADMIN
+}
+
 model User {
   id                Int           @id @default(autoincrement())
   username          String        @unique
   name              String
   email             String        @unique
   passwordHash      String
-  role              String        @default("User")
+  role              Role          @default(USER)
   createAt          DateTime      @default(now())
   meal              Meal[]
   friendOf          Friend[]      @relation("FriendOf")
