@@ -13,12 +13,12 @@ export default function FriendsActivity({
   activities: FriendActivity[];
 }) {
   return (
-    <div className="bg-white rounded-2xl p-6 shadow-sm border border-green-200">
-      <h2 className="text-sm font-semibold text-green-500 uppercase tracking-wide mb-4">
+    <div className="rounded-2xl border border-green-200 bg-white p-6 shadow-sm">
+      <h2 className="mb-4 text-sm font-semibold tracking-wide text-green-500 uppercase">
         Activité des amis
       </h2>
       {activities.length === 0 ? (
-        <p className="text-green-500 text-sm text-center py-4">
+        <p className="py-4 text-center text-sm text-green-500">
           Aucune activité récente
         </p>
       ) : (
@@ -31,19 +31,19 @@ export default function FriendsActivity({
                 aria-label={`Avatar de ${a.username}${a.online ? ', en ligne' : ', hors ligne'}`}
               >
                 <div
-                  className="w-9 h-9 rounded-full bg-green-100 flex items-center justify-center text-green-400 font-bold text-sm"
+                  className="flex h-9 w-9 items-center justify-center rounded-full bg-green-100 text-sm font-bold text-green-400"
                   aria-hidden="true"
                 >
                   {a.username[0].toUpperCase()}
                 </div>
                 {a.online && (
                   <span
-                    className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-300 rounded-full border-2 border-white"
+                    className="absolute right-0 bottom-0 h-2.5 w-2.5 rounded-full border-2 border-white bg-green-300"
                     aria-hidden="true"
                   />
                 )}
               </div>
-              <div className="flex-1 min-w-0">
+              <div className="min-w-0 flex-1">
                 <p className="text-sm text-green-800">
                   <span className="font-semibold">{a.username}</span> {a.action}
                 </p>

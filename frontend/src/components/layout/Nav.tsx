@@ -19,7 +19,7 @@ const TABS: { id: Tab; label: string; icon: React.ReactNode }[] = [
     icon: (
       <svg
         xmlns="http://www.w3.org/2000/svg"
-        className="w-5 h-5 shrink-0"
+        className="h-5 w-5 shrink-0"
         fill="none"
         viewBox="0 0 24 24"
         stroke="currentColor"
@@ -39,7 +39,7 @@ const TABS: { id: Tab; label: string; icon: React.ReactNode }[] = [
     icon: (
       <svg
         xmlns="http://www.w3.org/2000/svg"
-        className="w-5 h-5 shrink-0"
+        className="h-5 w-5 shrink-0"
         fill="none"
         viewBox="0 0 24 24"
         stroke="currentColor"
@@ -59,7 +59,7 @@ const TABS: { id: Tab; label: string; icon: React.ReactNode }[] = [
     icon: (
       <svg
         xmlns="http://www.w3.org/2000/svg"
-        className="w-5 h-5 shrink-0"
+        className="h-5 w-5 shrink-0"
         fill="none"
         viewBox="0 0 24 24"
         stroke="currentColor"
@@ -79,7 +79,7 @@ const TABS: { id: Tab; label: string; icon: React.ReactNode }[] = [
     icon: (
       <svg
         xmlns="http://www.w3.org/2000/svg"
-        className="w-5 h-5 shrink-0"
+        className="h-5 w-5 shrink-0"
         fill="none"
         viewBox="0 0 24 24"
         stroke="currentColor"
@@ -99,7 +99,7 @@ const TABS: { id: Tab; label: string; icon: React.ReactNode }[] = [
     icon: (
       <svg
         xmlns="http://www.w3.org/2000/svg"
-        className="w-5 h-5 shrink-0"
+        className="h-5 w-5 shrink-0"
         fill="none"
         viewBox="0 0 24 24"
         stroke="currentColor"
@@ -124,10 +124,10 @@ function NavButton({ tab, isActive, variant, onClick }: NavButtonProps) {
       <button
         onClick={onClick}
         aria-current={isActive ? 'page' : undefined}
-        className={`${baseClass} flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium w-full text-left ${
+        className={`${baseClass} flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-medium ${
           isActive
             ? 'bg-green-100 text-green-300'
-            : 'text-green-500 hover:text-green-800 hover:bg-green-100'
+            : 'text-green-500 hover:bg-green-100 hover:text-green-800'
         }`}
       >
         <span aria-hidden="true">{tab.icon}</span>
@@ -141,7 +141,7 @@ function NavButton({ tab, isActive, variant, onClick }: NavButtonProps) {
       onClick={onClick}
       aria-current={isActive ? 'page' : undefined}
       aria-label={tab.label}
-      className={`${baseClass} w-full flex flex-col items-center gap-1 py-3 text-xs font-medium ${
+      className={`${baseClass} flex w-full flex-col items-center gap-1 py-3 text-xs font-medium ${
         isActive ? 'text-green-300' : 'text-green-500 hover:text-green-600'
       }`}
     >
@@ -157,9 +157,9 @@ export default function Nav({ active, onChange }: Props) {
       {/* Sidebar — desktop */}
       <aside
         aria-label="Navigation principale"
-        className="hidden md:flex flex-col fixed top-0 left-0 h-full w-56 bg-white border-r border-green-200 py-6 z-10"
+        className="fixed top-0 left-0 z-10 hidden h-full w-56 flex-col border-r border-green-200 bg-white py-6 md:flex"
       >
-        <span className="text-lg font-bold text-green-300 tracking-tight px-6 mb-8">
+        <span className="mb-8 px-6 text-lg font-bold tracking-tight text-green-300">
           KcalApp
         </span>
         <nav>
@@ -179,7 +179,7 @@ export default function Nav({ active, onChange }: Props) {
       </aside>
 
       {/* Bottom bar — mobile */}
-      <footer className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-green-200 z-10">
+      <footer className="fixed right-0 bottom-0 left-0 z-10 border-t border-green-200 bg-white md:hidden">
         <nav aria-label="Navigation principale">
           <ul className="flex">
             {TABS.map((tab) => (

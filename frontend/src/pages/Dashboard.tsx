@@ -1,12 +1,12 @@
-import Header from '../components/layout/Header';
-import ScannerShortcut from '../components/dashboard/ScannerShortcut';
 import CalorieSummary from '../components/dashboard/CalorieSummary';
+import FriendsActivity, {
+  type FriendActivity,
+} from '../components/dashboard/FriendsActivity';
 import MacroBreakdown from '../components/dashboard/MacroBreakdown';
-import MealList from '../components/dashboard/MealList';
+import MealList, { type Meal } from '../components/dashboard/MealList';
+import ScannerShortcut from '../components/dashboard/ScannerShortcut';
 import WeightWidget from '../components/dashboard/WeightWidget';
-import FriendsActivity from '../components/dashboard/FriendsActivity';
-import type { Meal } from '../components/dashboard/MealList';
-import type { FriendActivity } from '../components/dashboard/FriendsActivity';
+import Header from '../components/layout/Header';
 
 const MOCK_MEALS: Meal[] = [
   { id: 1, name: "Flocons d'avoine", calories: 320, time: '08:15' },

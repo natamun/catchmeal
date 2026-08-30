@@ -1,12 +1,12 @@
 export default function ScannerShortcut() {
   return (
     <button
-      className="w-full flex items-center justify-center gap-3 bg-green-1000 hover:bg-green-500 active:bg-green-500 text-white font-semibold rounded-2xl py-4 shadow-sm transition-colors cursor-pointer focus-visible:outline-2 focus-visible:outline-green-500 focus-visible:outline-offset-2"
+      className="bg-green-1000 flex w-full cursor-pointer items-center justify-center gap-3 rounded-2xl py-4 font-semibold text-white shadow-sm transition-colors hover:bg-green-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-500 active:bg-green-500"
       aria-label="Ouvrir le scanner de code-barre"
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"
-        className="w-6 h-6"
+        className="h-6 w-6"
         fill="none"
         viewBox="0 0 24 24"
         stroke="currentColor"

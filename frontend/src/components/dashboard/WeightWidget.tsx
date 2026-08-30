@@ -15,18 +15,18 @@ export default function WeightWidget({
   const losing = goalWeight < startWeight;
 
   return (
-    <div className="bg-white rounded-2xl p-6 shadow-sm border border-green-200">
-      <h2 className="text-sm font-semibold text-green-500 uppercase tracking-wide mb-4">
+    <div className="rounded-2xl border border-green-200 bg-white p-6 shadow-sm">
+      <h2 className="mb-4 text-sm font-semibold tracking-wide text-green-500 uppercase">
         Poids & Objectif
       </h2>
-      <div className="flex items-end gap-2 mb-4">
+      <div className="mb-4 flex items-end gap-2">
         <span
           className="text-4xl font-bold text-green-800"
           aria-label={`Poids actuel : ${currentWeight} kilogrammes`}
         >
           {currentWeight}
         </span>
-        <span className="text-green-500 mb-1" aria-hidden="true">
+        <span className="mb-1 text-green-500" aria-hidden="true">
           kg
         </span>
         <span
@@ -40,7 +40,7 @@ export default function WeightWidget({
         </span>
       </div>
       <div
-        className="h-2 bg-green-100 rounded-full overflow-hidden mb-2"
+        className="mb-2 h-2 overflow-hidden rounded-full bg-green-100"
         role="progressbar"
         aria-valuenow={Math.round(pct)}
         aria-valuemin={0}
@@ -48,7 +48,7 @@ export default function WeightWidget({
         aria-label={`Progression vers l'objectif : ${Math.round(pct)}%`}
       >
         <div
-          className="h-full bg-green-1000 rounded-full transition-all"
+          className="bg-green-1000 h-full rounded-full transition-all"
           style={{ width: `${pct}%` }}
         />
       </div>

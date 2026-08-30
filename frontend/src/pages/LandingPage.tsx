@@ -10,7 +10,7 @@ const FEATURES = [
     icon: (
       <svg
         xmlns="http://www.w3.org/2000/svg"
-        className="w-5 h-5"
+        className="h-5 w-5"
         fill="none"
         viewBox="0 0 24 24"
         stroke="currentColor"
@@ -30,7 +30,7 @@ const FEATURES = [
     icon: (
       <svg
         xmlns="http://www.w3.org/2000/svg"
-        className="w-5 h-5"
+        className="h-5 w-5"
         fill="none"
         viewBox="0 0 24 24"
         stroke="currentColor"
@@ -50,7 +50,7 @@ const FEATURES = [
     icon: (
       <svg
         xmlns="http://www.w3.org/2000/svg"
-        className="w-5 h-5"
+        className="h-5 w-5"
         fill="none"
         viewBox="0 0 24 24"
         stroke="currentColor"
@@ -70,7 +70,7 @@ const FEATURES = [
     icon: (
       <svg
         xmlns="http://www.w3.org/2000/svg"
-        className="w-5 h-5"
+        className="h-5 w-5"
         fill="none"
         viewBox="0 0 24 24"
         stroke="currentColor"
@@ -115,16 +115,16 @@ const SWISS_RETAILERS = [
 
 export default function LandingPage({ onLogin, onRegister }: Props) {
   return (
-    <div className="min-h-screen bg-white flex flex-col">
+    <div className="flex min-h-screen flex-col bg-white">
       {/* Nav */}
-      <nav className="flex items-center justify-between px-8 py-4 max-w-6xl mx-auto w-full border-b border-green-200">
-        <span className="text-lg font-bold text-green-300 tracking-tight">
+      <nav className="mx-auto flex w-full max-w-6xl items-center justify-between border-b border-green-200 px-8 py-4">
+        <span className="text-lg font-bold tracking-tight text-green-300">
           KcalApp
         </span>
         <div className="flex items-center gap-2 text-xs text-green-600">
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            className="w-3.5 h-3.5"
+            className="h-3.5 w-3.5"
             viewBox="0 0 20 20"
             fill="currentColor"
           >
@@ -138,7 +138,7 @@ export default function LandingPage({ onLogin, onRegister }: Props) {
         </div>
         <button
           onClick={onLogin}
-          className="text-sm font-medium text-green-600 hover:text-green-300 transition-colors cursor-pointer"
+          className="cursor-pointer text-sm font-medium text-green-600 transition-colors hover:text-green-300"
         >
           Connexion
         </button>
@@ -148,37 +148,37 @@ export default function LandingPage({ onLogin, onRegister }: Props) {
       <main id="main-content">
         <section
           aria-labelledby="hero-title"
-          className="flex flex-col items-center justify-center text-center px-8 py-20 max-w-6xl mx-auto w-full"
+          className="mx-auto flex w-full max-w-6xl flex-col items-center justify-center px-8 py-20 text-center"
         >
-          <div className="inline-flex items-center gap-2 bg-green-100 border border-green-100 text-green-400 text-xs font-medium px-3 py-1 rounded-full mb-6">
+          <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-green-100 bg-green-100 px-3 py-1 text-xs font-medium text-green-400">
             <span
-              className="w-1.5 h-1.5 rounded-full bg-green-1000 inline-block"
+              className="bg-green-1000 inline-block h-1.5 w-1.5 rounded-full"
               aria-hidden="true"
             />
             Conçu et hébergé en Suisse
           </div>
           <h1
             id="hero-title"
-            className="text-5xl md:text-6xl font-bold text-green-800 leading-tight mb-4"
+            className="mb-4 text-5xl leading-tight font-bold text-green-800 md:text-6xl"
           >
             Prenez le contrôle
             <br />
             <span className="text-green-400">de votre alimentation.</span>
           </h1>
-          <p className="text-green-600 text-lg mb-8 max-w-xl leading-relaxed">
+          <p className="mb-8 max-w-xl text-lg leading-relaxed text-green-600">
             Suivez vos calories, scannez vos produits du quotidien et progressez
             avec vos amis. Simple, précis, respectueux de vos données.
           </p>
-          <div className="flex flex-col gap-3 w-full max-w-xs">
+          <div className="flex w-full max-w-xs flex-col gap-3">
             <button
               onClick={onRegister}
-              className="w-full bg-green-500 hover:bg-green-500 text-white font-semibold py-3 rounded-xl transition-colors cursor-pointer shadow-sm"
+              className="w-full cursor-pointer rounded-xl bg-green-500 py-3 font-semibold text-white shadow-sm transition-colors hover:bg-green-500"
             >
               Créer un compte
             </button>
             <button
               onClick={onLogin}
-              className="w-full bg-white hover:bg-green-100 text-green-800 font-semibold py-3 rounded-xl border border-green-200 transition-colors cursor-pointer"
+              className="w-full cursor-pointer rounded-xl border border-green-200 bg-white py-3 font-semibold text-green-800 transition-colors hover:bg-green-100"
             >
               J'ai déjà un compte
             </button>
@@ -188,19 +188,19 @@ export default function LandingPage({ onLogin, onRegister }: Props) {
         {/* Comment ça marche */}
         <section
           aria-labelledby="steps-title"
-          className="px-8 py-16 bg-white border-y border-green-200"
+          className="border-y border-green-200 bg-white px-8 py-16"
         >
-          <div className="max-w-6xl mx-auto">
-            <p className="text-xs font-semibold text-green-400 uppercase tracking-widest mb-2">
+          <div className="mx-auto max-w-6xl">
+            <p className="mb-2 text-xs font-semibold tracking-widest text-green-400 uppercase">
               Comment ça marche
             </p>
             <h2
               id="steps-title"
-              className="text-3xl font-bold text-green-800 mb-10"
+              className="mb-10 text-3xl font-bold text-green-800"
             >
               Trois étapes pour démarrer
             </h2>
-            <div className="grid md:grid-cols-3 gap-8">
+            <div className="grid gap-8 md:grid-cols-3">
               {STEPS.map((step) => (
                 <div key={step.number} className="flex flex-col gap-3">
                   <span
@@ -210,7 +210,7 @@ export default function LandingPage({ onLogin, onRegister }: Props) {
                     {step.number}
                   </span>
                   <h3 className="font-semibold text-green-800">{step.title}</h3>
-                  <p className="text-sm text-green-600 leading-relaxed">
+                  <p className="text-sm leading-relaxed text-green-600">
                     {step.desc}
                   </p>
                 </div>
@@ -222,20 +222,20 @@ export default function LandingPage({ onLogin, onRegister }: Props) {
         {/* Produits suisses */}
         <section
           aria-labelledby="retailers-title"
-          className="px-8 py-16 max-w-6xl mx-auto w-full"
+          className="mx-auto w-full max-w-6xl px-8 py-16"
         >
-          <div className="md:grid md:grid-cols-2 md:gap-16 md:items-start">
+          <div className="md:grid md:grid-cols-2 md:items-start md:gap-16">
             <div>
-              <p className="text-xs font-semibold text-green-400 uppercase tracking-widest mb-2">
+              <p className="mb-2 text-xs font-semibold tracking-widest text-green-400 uppercase">
                 Base de données
               </p>
               <h2
                 id="retailers-title"
-                className="text-3xl font-bold text-green-800 mb-4"
+                className="mb-4 text-3xl font-bold text-green-800"
               >
                 Compatible avec vos courses du quotidien
               </h2>
-              <p className="text-sm text-green-600 leading-relaxed">
+              <p className="text-sm leading-relaxed text-green-600">
                 KcalApp s'appuie sur OpenFoodFacts, une base de données
                 collaborative et ouverte qui référence des millions de produits
                 alimentaires dans le monde entier — dont une large couverture
@@ -243,19 +243,19 @@ export default function LandingPage({ onLogin, onRegister }: Props) {
                 répertorié, vous pouvez contribuer à l'enrichir directement
                 depuis l'application.
               </p>
-              <p className="text-xs text-green-600 mt-4">
+              <p className="mt-4 text-xs text-green-600">
                 La disponibilité des produits dépend des contributions de la
                 communauté OpenFoodFacts. KcalApp n'est pas affilié aux
                 enseignes mentionnées.
               </p>
             </div>
-            <div className="grid grid-cols-2 gap-3 mt-8 md:mt-0">
+            <div className="mt-8 grid grid-cols-2 gap-3 md:mt-0">
               {SWISS_RETAILERS.map((r) => (
                 <div
                   key={r.name}
-                  className="bg-white rounded-xl p-4 border border-green-200 shadow-sm"
+                  className="rounded-xl border border-green-200 bg-white p-4 shadow-sm"
                 >
-                  <p className="font-semibold text-green-800 text-sm mb-1">
+                  <p className="mb-1 text-sm font-semibold text-green-800">
                     {r.name}
                   </p>
                   <p className="text-xs text-green-600">{r.note}</p>
@@ -268,31 +268,31 @@ export default function LandingPage({ onLogin, onRegister }: Props) {
         {/* Features */}
         <section
           aria-labelledby="features-title"
-          className="px-8 py-16 bg-white border-y border-green-200"
+          className="border-y border-green-200 bg-white px-8 py-16"
         >
-          <div className="max-w-6xl mx-auto">
-            <p className="text-xs font-semibold text-green-400 uppercase tracking-widest mb-2">
+          <div className="mx-auto max-w-6xl">
+            <p className="mb-2 text-xs font-semibold tracking-widest text-green-400 uppercase">
               Fonctionnalités
             </p>
             <h2
               id="features-title"
-              className="text-3xl font-bold text-green-800 mb-10"
+              className="mb-10 text-3xl font-bold text-green-800"
             >
               Tout ce dont vous avez besoin
             </h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
               {FEATURES.map((f) => (
                 <div
                   key={f.title}
-                  className="rounded-xl p-5 border border-green-200 shadow-sm bg-white"
+                  className="rounded-xl border border-green-200 bg-white p-5 shadow-sm"
                 >
-                  <div className="w-9 h-9 rounded-lg bg-green-100 flex items-center justify-center text-green-300 mb-4">
+                  <div className="mb-4 flex h-9 w-9 items-center justify-center rounded-lg bg-green-100 text-green-300">
                     {f.icon}
                   </div>
-                  <h3 className="font-semibold text-green-800 mb-2 text-sm">
+                  <h3 className="mb-2 text-sm font-semibold text-green-800">
                     {f.title}
                   </h3>
-                  <p className="text-xs text-green-600 leading-relaxed">
+                  <p className="text-xs leading-relaxed text-green-600">
                     {f.desc}
                   </p>
                 </div>
@@ -304,20 +304,20 @@ export default function LandingPage({ onLogin, onRegister }: Props) {
         {/* Données & confidentialité */}
         <section
           aria-labelledby="privacy-title"
-          className="px-8 py-16 max-w-6xl mx-auto w-full"
+          className="mx-auto w-full max-w-6xl px-8 py-16"
         >
-          <div className="md:grid md:grid-cols-2 md:gap-16 md:items-start">
+          <div className="md:grid md:grid-cols-2 md:items-start md:gap-16">
             <div>
-              <p className="text-xs font-semibold text-green-400 uppercase tracking-widest mb-2">
+              <p className="mb-2 text-xs font-semibold tracking-widest text-green-400 uppercase">
                 Confidentialité
               </p>
               <h2
                 id="privacy-title"
-                className="text-3xl font-bold text-green-800 mb-4"
+                className="mb-4 text-3xl font-bold text-green-800"
               >
                 Vos données de santé vous appartiennent
               </h2>
-              <p className="text-sm text-green-600 leading-relaxed mb-6">
+              <p className="mb-6 text-sm leading-relaxed text-green-600">
                 Les données que vous enregistrez dans KcalApp — poids, repas,
                 objectifs — sont des données de santé. Elles sont stockées en
                 Suisse, chiffrées, et ne sont jamais revendues ni partagées avec
@@ -346,13 +346,13 @@ export default function LandingPage({ onLogin, onRegister }: Props) {
               ].map((item) => (
                 <div
                   key={item.title}
-                  className="bg-white rounded-xl p-4 border border-green-200 shadow-sm"
+                  className="rounded-xl border border-green-200 bg-white p-4 shadow-sm"
                 >
-                  <div className="w-2 h-2 rounded-full bg-green-1000 mb-3" />
-                  <h3 className="font-semibold text-green-800 text-sm mb-1">
+                  <div className="bg-green-1000 mb-3 h-2 w-2 rounded-full" />
+                  <h3 className="mb-1 text-sm font-semibold text-green-800">
                     {item.title}
                   </h3>
-                  <p className="text-xs text-green-600 leading-relaxed">
+                  <p className="text-xs leading-relaxed text-green-600">
                     {item.desc}
                   </p>
                 </div>
@@ -364,19 +364,19 @@ export default function LandingPage({ onLogin, onRegister }: Props) {
         {/* CTA final */}
         <section
           aria-labelledby="cta-title"
-          className="px-8 py-20 bg-green-1000"
+          className="bg-green-1000 px-8 py-20"
         >
-          <div className="max-w-6xl mx-auto text-center">
-            <h2 id="cta-title" className="text-4xl font-bold text-white mb-4">
+          <div className="mx-auto max-w-6xl text-center">
+            <h2 id="cta-title" className="mb-4 text-4xl font-bold text-white">
               Prêt à mieux manger ?
             </h2>
-            <p className="text-white/90 text-base mb-8 max-w-lg mx-auto leading-relaxed">
+            <p className="mx-auto mb-8 max-w-lg text-base leading-relaxed text-white/90">
               Rejoignez KcalApp et commencez à suivre votre alimentation dès
               aujourd'hui. Gratuit, sans engagement.
             </p>
             <button
               onClick={onRegister}
-              className="bg-white text-green-400 font-semibold px-8 py-3 rounded-xl hover:bg-green-100 transition-colors cursor-pointer shadow-sm"
+              className="cursor-pointer rounded-xl bg-white px-8 py-3 font-semibold text-green-400 shadow-sm transition-colors hover:bg-green-100"
             >
               Créer un compte gratuitement
             </button>
@@ -386,7 +386,7 @@ export default function LandingPage({ onLogin, onRegister }: Props) {
 
       {/* Footer légal */}
       <footer className="border-t border-green-200 bg-white px-8 py-8">
-        <div className="max-w-6xl mx-auto flex flex-col gap-4">
+        <div className="mx-auto flex max-w-6xl flex-col gap-4">
           <div className="flex flex-wrap justify-between gap-4 text-xs text-green-600">
             <div className="flex flex-col gap-1">
               <span className="font-semibold text-green-600">KcalApp</span>
@@ -395,30 +395,30 @@ export default function LandingPage({ onLogin, onRegister }: Props) {
             </div>
             <div className="flex flex-col gap-1">
               <span className="font-semibold text-green-600">Légal</span>
-              <a href="#" className="hover:text-green-300 transition-colors">
+              <a href="#" className="transition-colors hover:text-green-300">
                 Politique de confidentialité
               </a>
-              <a href="#" className="hover:text-green-300 transition-colors">
+              <a href="#" className="transition-colors hover:text-green-300">
                 Conditions d'utilisation
               </a>
-              <a href="#" className="hover:text-green-300 transition-colors">
+              <a href="#" className="transition-colors hover:text-green-300">
                 Mentions légales
               </a>
             </div>
             <div className="flex flex-col gap-1">
               <span className="font-semibold text-green-600">Vos données</span>
-              <a href="#" className="hover:text-green-300 transition-colors">
+              <a href="#" className="transition-colors hover:text-green-300">
                 Exporter mes données
               </a>
-              <a href="#" className="hover:text-green-300 transition-colors">
+              <a href="#" className="transition-colors hover:text-green-300">
                 Supprimer mon compte
               </a>
-              <a href="#" className="hover:text-green-300 transition-colors">
+              <a href="#" className="transition-colors hover:text-green-300">
                 Politique RGPD
               </a>
             </div>
           </div>
-          <p className="text-xs text-green-600 border-t border-green-200 pt-4">
+          <p className="border-t border-green-200 pt-4 text-xs text-green-600">
             © {new Date().getFullYear()} KcalApp. Vos données de santé sont
             stockées en Suisse et protégées conformément à la loi fédérale sur
             la protection des données (LPD) et au Règlement général sur la

@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { DashboardAnalyticsService } from './dashboard-analytics.service';
+
 import { DashboardAnalyticsController } from './dashboard-analytics.controller';
+import { DashboardAnalyticsService } from './dashboard-analytics.service';
 
 describe('DashboardAnalyticsController', () => {
   let controller: DashboardAnalyticsController;
