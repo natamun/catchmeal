@@ -27,10 +27,39 @@ formatCheck:
 	npm run format:check --prefix frontend
 	npm run format:check --prefix backend
 
+lint:
+	npm run lint --prefix frontend
+	npm run lint --prefix backend
+
+lintCheck:
+	npm run lint:check --prefix frontend
+	npm run lint:check --prefix backend
+
+build:
+	npm run build --prefix frontend
+	npm run build --prefix backend
+
+test:
+	npm run test --prefix backend
+
+testVerbose:
+	npm run test --prefix backend -- --verbose
+
+testE2e:
+	npm run test:e2e --prefix backend
+
+check: formatCheck lintCheck build test testE2e
+
+migrate:
+	cd backend && npx prisma migrate dev --name $(name)
+
 shellBackend:
 	$(DEV) exec backend sh
+
+shellFrontend:
+	$(DEV) exec frontend sh
 
 prismaStudio:
 	$(DEV) exec backend npx prisma studio --port 5555 --browser none
 
-.PHONY: all dev prod clean fclean re format formatCheck shellBackend prismaStudio
+.PHONY: all dev prod clean fclean re format formatCheck lint lintCheck build test testVerbose testE2e check migrate shellBackend shellFrontend prismaStudio
