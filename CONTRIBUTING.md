@@ -12,6 +12,8 @@ Before opening a PR, and again if `main` moves while your PR is still open, reba
 
 Large features get one umbrella issue, broken down into smaller sub-issues. Each sub-issue should be small enough to ship as its own PR: this is how we push code incrementally instead of one large batch at the end.
 
+Use GitHub's native sub-issue linking so the umbrella issue tracks real progress: create the sub-issues first, then link them from the umbrella issue with "Add sub-issue".
+
 ## Commits
 
 Format: `type: short description in English`
@@ -42,6 +44,8 @@ Each commit should represent one complete, logical change, not more, not less. I
 - One PR = one sub-issue = one feature or fix. Keep unrelated infrastructure/config changes in their own PR. If a config change is a direct dependency of the feature you are shipping (e.g. a new environment variable or docker-compose service the feature needs to run), include it in the same PR.
 - Splitting is not about maximizing the number of PRs either. A PR should map to one coherent, reviewable unit, not be broken down further than its natural size.
 - The description includes a short summary and `Closes #<issue-number>`, so the linked issue closes automatically on merge.
-- The CI pipeline must pass before merging. It currently checks formatting only; more checks (build, tests) will be added as the project grows.
+- Run `make check` locally before pushing. It runs the same checks as CI (format, lint, build, unit tests, e2e), so failures show up before you push, not after.
+- The CI pipeline must pass before merging. It checks formatting, linting, build, and unit tests.
 - Codeowners must approve before merging.
+- The PR author merges their own branch once approved and CI passes. If `main` has moved since, rebase first, never merge `main` into your branch.
 - PRs are merged with "Create a merge commit" (not squash), so every individual commit and its real author stay visible on `main` for the whole team's contribution history.
