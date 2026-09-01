@@ -27,6 +27,8 @@ model User {
   role              Role          @default(USER)
   createAt          DateTime      @default(now())
   meal              Meal[]
+  foodItems         FoodItem[]
+  mealFoodItems     MealFoodItem[]
   friendOf          Friend[]      @relation("FriendOf")
   userFriend        Friend[]      @relation("UserFriends")
   senderMessage     Message[]     @relation("SenderMessage")
@@ -68,26 +70,66 @@ model WeightLog {
   @@index([userId, loggedAt])
 }
 
+enum QuantityUnit {
+  GRAM
+  PIECE
+}
+
+enum MealType {
+  BREAKFAST
+  LUNCH
+  DINNER
+  SNACK
+}
+
+model FoodItem {
+  id            Int            @id @default(autoincrement())
+  userId        Int
+  user          User           @relation(fields: [userId], references: [id])
+  name          String
+  barcode       String?
+  baseQuantity  Float
+  baseUnit      QuantityUnit
+  kcal          Float
+  protein       Float
+  carbs         Float
+  fat           Float
+  archived      Boolean        @default(false)
+  mealFoodItems MealFoodItem[]
+
+  @@unique([id, userId])
+}
+
 model Meal {
-  id        Int       @id @default(autoincrement())
-  userId    Int
-  user      User      @relation(fields: [userId], references: [id])
-  typeMeal  String
-  loggedAt  DateTime  @default(now())
-  items MealItem[]
+  id           Int            @id @default(autoincrement())
+  userId       Int
+  user         User           @relation(fields: [userId], references: [id])
+  name         String?
+  typeMeal     MealType?
+  loggedAt     DateTime?
+  sourceMealId Int?
+  sourceMeal   Meal?          @relation("MealTemplate", fields: [sourceMealId], references: [id], onDelete: SetNull)
+  instances    Meal[]         @relation("MealTemplate")
+  items        MealFoodItem[]
+
+  @@unique([id, userId])
   @@index([userId, loggedAt])
 }
 
-model MealItem {
-  id       Int    @id @default(autoincrement())
-  mealId   Int
-  meal     Meal   @relation(fields: [mealId], references: [id])
-  name     String
-  quantity Float
-  kcal     Float
-  protein  Float
-  carbs    Float
-  fat      Float
+model MealFoodItem {
+  id         Int      @id @default(autoincrement())
+  userId     Int
+  user       User     @relation(fields: [userId], references: [id])
+  mealId     Int
+  foodItemId Int
+  quantity   Float
+  kcal       Float
+  protein    Float
+  carbs      Float
+  fat        Float
+
+  meal     Meal     @relation(fields: [mealId, userId], references: [id, userId], onDelete: Cascade)
+  foodItem FoodItem @relation(fields: [foodItemId, userId], references: [id, userId])
 }
 
 model GoalSetting {
