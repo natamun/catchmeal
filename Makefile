@@ -4,10 +4,16 @@ PROD = docker compose -f docker-compose.prod.yml
 all: dev
 
 dev:
-	$(DEV) up --build
+	$(DEV) up --build -d
 
 prod:
 	$(PROD) up --build -d
+
+logsBackend:
+	$(DEV) logs -f backend
+
+logsFrontend:
+	$(DEV) logs -f frontend
 
 clean:
 	$(DEV) down
@@ -62,4 +68,4 @@ shellFrontend:
 prismaStudio:
 	$(DEV) exec backend npx prisma studio --port 5555 --browser none
 
-.PHONY: all dev prod clean fclean re format formatCheck lint lintCheck build test testVerbose testE2e check migrate shellBackend shellFrontend prismaStudio
+.PHONY: all dev prod logsBackend logsFrontend clean fclean re format formatCheck lint lintCheck build test testVerbose testE2e check migrate shellBackend shellFrontend prismaStudio
