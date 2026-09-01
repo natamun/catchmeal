@@ -4,3 +4,5 @@
 
 # PDF files
 *.pdf
+
+.vscode/*
