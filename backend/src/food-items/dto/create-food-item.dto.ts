@@ -17,6 +17,10 @@ export class CreateFoodItemDto {
 
   @IsOptional()
   @IsString()
+  brand?: string;
+
+  @IsOptional()
+  @IsString()
   barcode?: string;
 
   @IsNumber()

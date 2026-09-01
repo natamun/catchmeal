@@ -87,6 +87,7 @@ model FoodItem {
   userId        Int
   user          User           @relation(fields: [userId], references: [id])
   name          String
+  brand         String?
   barcode       String?
   baseQuantity  Float
   baseUnit      QuantityUnit

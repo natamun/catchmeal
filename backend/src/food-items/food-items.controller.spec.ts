@@ -36,6 +36,7 @@ describe('FoodItemsController', () => {
   it('should create a food item', async () => {
     const dto: CreateFoodItemDto = {
       name: 'Riz blanc',
+      brand: 'Danone',
       baseQuantity: 100,
       baseUnit: QuantityUnit.GRAM,
       kcal: 130,
