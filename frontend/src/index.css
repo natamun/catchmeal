@@ -1,7 +1,21 @@
 @import 'tailwindcss';
 
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 @theme {
-  /* Couleurs */
+  /* Animations */
+  --animate-fade-in-up: fade-in-up 0.15s ease-out;
+
+  /* Colors */
   --color-green-50: #d8f3dc;
   --color-green-100: #b7e4c7;
   --color-green-200: #95d5b2;
@@ -12,7 +26,7 @@
   --color-green-700: #1b4332;
   --color-green-800: #081c15;
 
-  /* Polices */
+  /* Fonts */
   --font-sans: 'Inter', -apple-system, sans-serif;
   --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
 }
