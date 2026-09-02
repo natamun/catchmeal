@@ -9,14 +9,42 @@ const API_URL = import.meta.env.VITE_API_URL;
 
 export default function FoodPage() {
   const [foodItems, setFoodItems] = useState<FoodItem[]>([]);
+  const [editingItem, setEditingItem] = useState<FoodItem | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const dialogRef = useRef<HTMLDialogElement>(null);
 
   useEffect(() => {
-    fetch(`${API_URL}/users/${CURRENT_USER_ID}/food-items`)
-      .then((response) => response.json())
+    const controller = new AbortController();
+    fetch(`${API_URL}/users/${CURRENT_USER_ID}/food-items`, {
+      signal: controller.signal,
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+        return response.json();
+      })
       .then((data: FoodItem[]) => setFoodItems(data))
-      .catch((err: unknown) => console.error(err));
+      .catch((err: unknown) => {
+        if (controller.signal.aborted) {
+          return;
+        }
+        console.error(err);
+        setLoadError('Impossible de charger tes aliments, réessaye.');
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) {
+          setIsLoading(false);
+        }
+      });
+    return () => controller.abort();
   }, []);
+
+  const openDialog = (item: FoodItem | null) => {
+    setEditingItem(item);
+    dialogRef.current?.showModal();
+  };
 
   return (
     <div className="flex flex-col gap-6">
@@ -24,10 +52,25 @@ export default function FoodPage() {
 
       <FoodItemForm
         dialogRef={dialogRef}
+        editingItem={editingItem}
         onItemAdded={(item) => setFoodItems((prev) => [...prev, item])}
+        onItemUpdated={(updated) =>
+          setFoodItems((prev) =>
+            prev.map((item) => (item.id === updated.id ? updated : item)),
+          )
+        }
+        onItemDeleted={(id) =>
+          setFoodItems((prev) => prev.filter((item) => item.id !== id))
+        }
       />
 
-      <FoodItemList items={foodItems} dialogRef={dialogRef} />
+      <FoodItemList
+        items={foodItems}
+        isLoading={isLoading}
+        loadError={loadError}
+        onAdd={() => openDialog(null)}
+        onEdit={(item) => openDialog(item)}
+      />
     </div>
   );
 }

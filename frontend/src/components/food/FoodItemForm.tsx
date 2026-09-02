@@ -1,5 +1,11 @@
-import { useEffect, useState, type RefObject } from 'react';
-import { AlertCircle, CheckCircle2, ScanBarcode, X } from 'lucide-react';
+import { useEffect, useRef, useState, type RefObject } from 'react';
+import {
+  AlertCircle,
+  CheckCircle2,
+  ScanBarcode,
+  Trash2,
+  X,
+} from 'lucide-react';
 
 import { CURRENT_USER_ID } from '../../constants/currentUser';
 import { Toast } from '../ui/Toast';
@@ -44,6 +50,19 @@ const MACRO_FIELDS = [
   { field: 'fat', label: 'Lipides (g)' },
 ] as const;
 
+function itemToForm(item: FoodItem): FoodItemFormState {
+  return {
+    name: item.name,
+    brand: item.brand ?? '',
+    baseQuantity: String(item.baseQuantity),
+    baseUnit: item.baseUnit,
+    kcal: String(item.kcal),
+    protein: String(item.protein),
+    carbs: String(item.carbs),
+    fat: String(item.fat),
+  };
+}
+
 function validateForm(
   form: FoodItemFormState,
 ): Partial<Record<keyof FoodItemFormState, string>> {
@@ -72,13 +91,7 @@ function validateForm(
   return errors;
 }
 
-function FieldError({
-  message,
-  className = '',
-}: {
-  message?: string;
-  className?: string;
-}) {
+function FieldError({ id, message }: { id: string; message?: string }) {
   const [displayedMessage, setDisplayedMessage] = useState(message);
 
   if (message && message !== displayedMessage) {
@@ -99,7 +112,8 @@ function FieldError({
 
   return (
     <div
-      className={`absolute top-full left-0 z-10 mt-2 ${message ? 'animate-fade-in-up' : 'animate-fade-out'} ${className}`}
+      id={id}
+      className={`absolute top-full left-0 z-10 mt-2 ${message ? 'animate-fade-in-up' : 'animate-fade-out'}`}
     >
       <div className="absolute -top-1 left-4 h-2 w-2 rotate-45 border-t border-l border-red-200 bg-red-50" />
       <div className="flex items-start gap-1.5 rounded-lg border border-red-200 bg-red-50 px-3 py-1.5 text-xs whitespace-nowrap text-red-600 shadow-sm">
@@ -112,12 +126,18 @@ function FieldError({
 
 interface FoodItemFormProps {
   dialogRef: RefObject<HTMLDialogElement | null>;
+  editingItem: FoodItem | null;
   onItemAdded: (item: FoodItem) => void;
+  onItemUpdated: (item: FoodItem) => void;
+  onItemDeleted: (id: number) => void;
 }
 
 export default function FoodItemForm({
   dialogRef,
+  editingItem,
   onItemAdded,
+  onItemUpdated,
+  onItemDeleted,
 }: FoodItemFormProps) {
   const [form, setForm] = useState<FoodItemFormState>(EMPTY_FORM);
   const [touched, setTouched] = useState<
@@ -130,6 +150,18 @@ export default function FoodItemForm({
   const [submitAttempted, setSubmitAttempted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [syncedItemId, setSyncedItemId] = useState<number | null>(
+    editingItem?.id ?? null,
+  );
+  const confirmDialogRef = useRef<HTMLDialogElement>(null);
+
+  if ((editingItem?.id ?? null) !== syncedItemId) {
+    setSyncedItemId(editingItem?.id ?? null);
+    setForm(editingItem ? itemToForm(editingItem) : EMPTY_FORM);
+    setTouched({});
+    setError(null);
+    setSubmitAttempted(false);
+  }
 
   const closeDialog = () => {
     dialogRef.current?.close();
@@ -158,13 +190,13 @@ export default function FoodItemForm({
   };
 
   const handleBlur = (field: keyof FoodItemFormState) => {
-    setTouched({ ...touched, [field]: true });
+    setTouched((prev) => ({ ...prev, [field]: true }));
     setFocusedField((current) => (current === field ? null : current));
   };
 
   const handleChange = (field: keyof FoodItemFormState, value: string) => {
-    setForm({ ...form, [field]: value });
-    setTouched({ ...touched, [field]: true });
+    setForm((prev) => ({ ...prev, [field]: value }));
+    setTouched((prev) => ({ ...prev, [field]: true }));
   };
 
   const isInvalid = (field: keyof FoodItemFormState) =>
@@ -192,9 +224,11 @@ export default function FoodItemForm({
     setIsSubmitting(true);
     try {
       const response = await fetch(
-        `${API_URL}/users/${CURRENT_USER_ID}/food-items`,
+        editingItem
+          ? `${API_URL}/users/${CURRENT_USER_ID}/food-items/${editingItem.id}`
+          : `${API_URL}/users/${CURRENT_USER_ID}/food-items`,
         {
-          method: 'POST',
+          method: editingItem ? 'PATCH' : 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             name: form.name,
@@ -219,14 +253,24 @@ export default function FoodItemForm({
         return;
       }
 
-      const newItem = (await response.json()) as FoodItem;
-      onItemAdded(newItem);
+      const savedItem = (await response.json()) as FoodItem;
+      if (editingItem) {
+        onItemUpdated(savedItem);
+      } else {
+        onItemAdded(savedItem);
+      }
 
-      setForm(EMPTY_FORM);
+      if (!editingItem) {
+        setForm(EMPTY_FORM);
+      }
       setTouched({});
       setSubmitAttempted(false);
       closeDialog();
-      setSuccessMessage('Produit enregistré avec succès');
+      setSuccessMessage(
+        editingItem
+          ? 'Produit modifié avec succès'
+          : 'Produit enregistré avec succès',
+      );
     } catch (err: unknown) {
       console.error(err);
       setError('Une erreur est survenue, réessayez.');
@@ -235,11 +279,41 @@ export default function FoodItemForm({
     }
   };
 
+  const handleDelete = async () => {
+    if (!editingItem) {
+      return;
+    }
+    setError(null);
+    setIsSubmitting(true);
+    try {
+      const response = await fetch(
+        `${API_URL}/users/${CURRENT_USER_ID}/food-items/${editingItem.id}`,
+        { method: 'DELETE' },
+      );
+
+      if (!response.ok) {
+        setError('Suppression impossible, réessayez.');
+        return;
+      }
+
+      onItemDeleted(editingItem.id);
+      closeDialog();
+      setSuccessMessage('Produit supprimé');
+    } catch (err: unknown) {
+      console.error(err);
+      setError('Une erreur est survenue, réessayez.');
+    } finally {
+      setIsSubmitting(false);
+      confirmDialogRef.current?.close();
+    }
+  };
+
   return (
     <>
       {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-noninteractive-element-interactions */}
       <dialog
         ref={dialogRef}
+        aria-labelledby="food-dialog-title"
         onClick={(e) => {
           if (e.target === e.currentTarget) {
             closeDialog();
@@ -254,17 +328,32 @@ export default function FoodItemForm({
           className="flex flex-col gap-5 p-4 sm:p-6"
         >
           <div className="flex items-center justify-between">
-            <h3 className="text-lg font-bold text-green-800">
-              Ajouter un aliment
-            </h3>
-            <button
-              type="button"
-              onClick={closeDialog}
-              aria-label="Fermer"
-              className="cursor-pointer text-green-400 transition-colors hover:text-green-600"
+            <h3
+              id="food-dialog-title"
+              className="text-lg font-bold text-green-800"
             >
-              <X className="h-5 w-5" />
-            </button>
+              {editingItem ? 'Modifier un aliment' : 'Ajouter un aliment'}
+            </h3>
+            <div className="flex items-center gap-3">
+              {editingItem && (
+                <button
+                  type="button"
+                  onClick={() => confirmDialogRef.current?.showModal()}
+                  aria-label="Supprimer"
+                  className="cursor-pointer text-green-400 transition-colors hover:text-red-500"
+                >
+                  <Trash2 className="h-5 w-5" />
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={closeDialog}
+                aria-label="Fermer"
+                className="cursor-pointer text-green-400 transition-colors hover:text-green-600"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
           </div>
 
           <button
@@ -292,9 +381,10 @@ export default function FoodItemForm({
                 onFocus={() => handleFocus('name')}
                 onBlur={() => handleBlur('name')}
                 aria-invalid={isInvalid('name')}
+                aria-describedby="food-name-error"
                 className={INPUT_CLASS}
               />
-              <FieldError message={errorMessage('name')} />
+              <FieldError id="food-name-error" message={errorMessage('name')} />
             </div>
 
             <div className="relative flex flex-col gap-1.5 sm:flex-1">
@@ -333,6 +423,7 @@ export default function FoodItemForm({
                 onFocus={() => handleFocus('baseQuantity')}
                 onBlur={() => handleBlur('baseQuantity')}
                 aria-invalid={isInvalid('baseQuantity')}
+                aria-describedby="food-quantity-error"
                 className={INPUT_CLASS}
               />
               <div className="flex gap-1.5 rounded-xl border border-green-200 bg-white p-1.5">
@@ -346,7 +437,9 @@ export default function FoodItemForm({
                       name="baseUnit"
                       value={value}
                       checked={form.baseUnit === value}
-                      onChange={() => setForm({ ...form, baseUnit: value })}
+                      onChange={() =>
+                        setForm((prev) => ({ ...prev, baseUnit: value }))
+                      }
                       className="sr-only"
                     />
                     {label}
@@ -354,7 +447,10 @@ export default function FoodItemForm({
                 ))}
               </div>
             </div>
-            <FieldError message={errorMessage('baseQuantity')} />
+            <FieldError
+              id="food-quantity-error"
+              message={errorMessage('baseQuantity')}
+            />
           </div>
 
           <div className="flex flex-col gap-1.5">
@@ -380,15 +476,20 @@ export default function FoodItemForm({
                     onFocus={() => handleFocus(field)}
                     onBlur={() => handleBlur(field)}
                     aria-invalid={isInvalid(field)}
+                    aria-describedby={`food-${field}-error`}
                     className={INPUT_CLASS}
                   />
-                  <FieldError message={errorMessage(field)} />
+                  <FieldError
+                    id={`food-${field}-error`}
+                    message={errorMessage(field)}
+                  />
                 </div>
               ))}
             </div>
           </div>
 
           {error && <p className="text-sm text-red-500">{error}</p>}
+
           <button
             type="submit"
             disabled={isSubmitting}
@@ -397,6 +498,39 @@ export default function FoodItemForm({
             {isSubmitting ? 'Enregistrement...' : 'Enregistrer'}
           </button>
         </form>
+      </dialog>
+
+      <dialog
+        ref={confirmDialogRef}
+        aria-labelledby="confirm-delete-title"
+        className="dialog-fade m-auto w-[calc(100vw-2rem)] max-w-sm rounded-2xl border-none bg-white p-6 shadow-lg backdrop:backdrop-blur-sm"
+      >
+        <h3
+          id="confirm-delete-title"
+          className="text-lg font-bold text-green-800"
+        >
+          Supprimer cet aliment ?
+        </h3>
+        <p className="mt-2 text-sm text-green-500">
+          {editingItem?.name} sera retiré de ta liste.
+        </p>
+        <div className="mt-5 flex gap-3">
+          <button
+            type="button"
+            onClick={() => confirmDialogRef.current?.close()}
+            className="flex-1 cursor-pointer rounded-xl border border-green-200 px-4 py-2.5 text-sm font-medium text-green-600 transition-colors hover:bg-green-50"
+          >
+            Annuler
+          </button>
+          <button
+            type="button"
+            onClick={() => void handleDelete()}
+            disabled={isSubmitting}
+            className="flex-1 cursor-pointer rounded-xl bg-red-500 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {isSubmitting ? 'Suppression...' : 'Supprimer'}
+          </button>
+        </div>
       </dialog>
 
       <Toast message={successMessage} icon={CheckCircle2} />
