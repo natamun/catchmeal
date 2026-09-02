@@ -1,4 +1,5 @@
-import { useState, lazy, Suspense } from 'react';
+import { lazy, Suspense, useState } from 'react';
+
 import Nav, { type Tab } from './components/layout/Nav';
 
 const LandingPage = lazy(() => import('./pages/LandingPage'));
@@ -37,11 +38,11 @@ export default function App() {
     <div className="min-h-screen bg-green-50 md:pl-56">
       <main
         id="main-content"
-        className="px-6 pt-6 pb-24 md:pb-8 max-w-6xl mx-auto"
+        className="mx-auto max-w-6xl px-6 pt-6 pb-24 md:pb-8"
       >
         <Suspense
           fallback={
-            <div className="flex items-center justify-center h-40 text-green-500 text-sm">
+            <div className="flex h-40 items-center justify-center text-sm text-green-500">
               Chargement...
             </div>
           }

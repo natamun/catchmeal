@@ -7,12 +7,12 @@ export interface Meal {
 
 export default function MealList({ meals }: { meals: Meal[] }) {
   return (
-    <div className="bg-white rounded-2xl p-6 shadow-sm border border-green-200">
-      <h2 className="text-sm font-semibold text-green-500 uppercase tracking-wide mb-4">
+    <div className="rounded-2xl border border-green-200 bg-white p-6 shadow-sm">
+      <h2 className="mb-4 text-sm font-semibold tracking-wide text-green-500 uppercase">
         Repas du jour
       </h2>
       {meals.length === 0 ? (
-        <p className="text-green-500 text-sm text-center py-4">
+        <p className="py-4 text-center text-sm text-green-500">
           Aucun repas ajouté
         </p>
       ) : (
@@ -23,7 +23,7 @@ export default function MealList({ meals }: { meals: Meal[] }) {
           {meals.map((meal) => (
             <li
               key={meal.id}
-              className="flex items-center justify-between py-2 border-b border-green-200 last:border-0"
+              className="flex items-center justify-between border-b border-green-200 py-2 last:border-0"
             >
               <div>
                 <p className="font-medium text-green-800">{meal.name}</p>
@@ -32,7 +32,7 @@ export default function MealList({ meals }: { meals: Meal[] }) {
                 </p>
               </div>
               <span
-                className="text-green-300 font-semibold"
+                className="font-semibold text-green-300"
                 aria-label={`${meal.calories} kilocalories`}
               >
                 {meal.calories} kcal

@@ -21,14 +21,14 @@ function Bar({
   const pct = Math.min((value / goal) * 100, 100);
   return (
     <div>
-      <div className="flex justify-between text-sm mb-1">
-        <span className="text-green-600 font-medium">{label}</span>
+      <div className="mb-1 flex justify-between text-sm">
+        <span className="font-medium text-green-600">{label}</span>
         <span className="text-green-500">
           {value}g / {goal}g
         </span>
       </div>
       <div
-        className="h-2 bg-green-100 rounded-full overflow-hidden"
+        className="h-2 overflow-hidden rounded-full bg-green-100"
         role="progressbar"
         aria-valuenow={value}
         aria-valuemin={0}
@@ -53,8 +53,8 @@ export default function MacroBreakdown({
   fatGoal,
 }: Macros) {
   return (
-    <div className="bg-white rounded-2xl p-6 shadow-sm border border-green-200">
-      <h2 className="text-sm font-semibold text-green-500 uppercase tracking-wide mb-4">
+    <div className="rounded-2xl border border-green-200 bg-white p-6 shadow-sm">
+      <h2 className="mb-4 text-sm font-semibold tracking-wide text-green-500 uppercase">
         Macronutriments
       </h2>
       <div className="flex flex-col gap-4">

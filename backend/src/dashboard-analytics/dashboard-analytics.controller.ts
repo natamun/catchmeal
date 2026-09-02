@@ -1,12 +1,13 @@
-import { DashboardAnalyticsService } from './dashboard-analytics.service';
 import {
   Controller,
   Get,
   Param,
-  Query,
-  ParseIntPipe,
   ParseDatePipe,
+  ParseIntPipe,
+  Query,
 } from '@nestjs/common';
+
+import { DashboardAnalyticsService } from './dashboard-analytics.service';
 
 @Controller('users/:userId')
 export class DashboardAnalyticsController {

@@ -10,8 +10,8 @@ export default function CalorieSummary({ consumed, goal }: Props) {
   const dash = (pct / 100) * circumference;
 
   return (
-    <div className="bg-white rounded-2xl p-6 shadow-sm border border-green-200">
-      <h2 className="text-sm font-semibold text-green-500 uppercase tracking-wide mb-4">
+    <div className="rounded-2xl border border-green-200 bg-white p-6 shadow-sm">
+      <h2 className="mb-4 text-sm font-semibold tracking-wide text-green-500 uppercase">
         Calories du jour
       </h2>
       <div className="flex items-center gap-6">
@@ -49,7 +49,7 @@ export default function CalorieSummary({ consumed, goal }: Props) {
             {consumed}
           </p>
           <p className="text-sm text-green-500">kcal consommées</p>
-          <p className="mt-2 text-green-300 font-semibold" aria-live="polite">
+          <p className="mt-2 font-semibold text-green-300" aria-live="polite">
             {remaining} kcal restantes
           </p>
           <p className="text-xs text-green-500">Objectif : {goal} kcal</p>

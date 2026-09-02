@@ -7,7 +7,7 @@ on:
     branches: [main]
 
 jobs:
-  format-check:
+  checks:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -24,5 +24,14 @@ jobs:
         run: npm ci
         working-directory: backend
 
-      - name: Check formatting
+      - name: format-check
         run: make formatCheck
+
+      - name: lint-check
+        run: make lintCheck
+
+      - name: build-check
+        run: make build
+
+      - name: test-check
+        run: make test

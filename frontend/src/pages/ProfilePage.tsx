@@ -10,15 +10,15 @@ export default function ProfilePage() {
       <h2 className="text-xl font-bold text-green-800">Profil</h2>
 
       {/* Identité */}
-      <div className="bg-white rounded-2xl p-6 border border-green-200 shadow-sm flex items-center gap-5">
-        <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center text-green-400 font-bold text-2xl shrink-0">
+      <div className="flex items-center gap-5 rounded-2xl border border-green-200 bg-white p-6 shadow-sm">
+        <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-green-100 text-2xl font-bold text-green-400">
           M
         </div>
-        <div className="flex-1 min-w-0">
+        <div className="min-w-0 flex-1">
           <p className="text-lg font-bold text-green-800">Maxime</p>
           <p className="text-sm text-green-500">maxime@kcalapp.ch</p>
         </div>
-        <button className="text-sm font-medium text-green-300 hover:text-green-400 cursor-pointer transition-colors shrink-0">
+        <button className="shrink-0 cursor-pointer text-sm font-medium text-green-300 transition-colors hover:text-green-400">
           Modifier
         </button>
       </div>
@@ -28,17 +28,17 @@ export default function ProfilePage() {
         {STATS.map((s) => (
           <div
             key={s.label}
-            className="bg-white rounded-2xl p-4 border border-green-200 shadow-sm text-center"
+            className="rounded-2xl border border-green-200 bg-white p-4 text-center shadow-sm"
           >
             <p className="text-2xl font-bold text-green-300">{s.value}</p>
-            <p className="text-xs text-green-500 mt-1">{s.label}</p>
+            <p className="mt-1 text-xs text-green-500">{s.label}</p>
           </div>
         ))}
       </div>
 
       {/* Objectifs */}
-      <div className="bg-white rounded-2xl border border-green-200 shadow-sm overflow-hidden">
-        <p className="text-xs font-semibold text-green-500 uppercase tracking-wide px-5 pt-5 pb-3">
+      <div className="overflow-hidden rounded-2xl border border-green-200 bg-white shadow-sm">
+        <p className="px-5 pt-5 pb-3 text-xs font-semibold tracking-wide text-green-500 uppercase">
           Mes objectifs
         </p>
         {[
@@ -57,8 +57,8 @@ export default function ProfilePage() {
       </div>
 
       {/* Compte */}
-      <div className="bg-white rounded-2xl border border-green-200 shadow-sm overflow-hidden">
-        <p className="text-xs font-semibold text-green-500 uppercase tracking-wide px-5 pt-5 pb-3">
+      <div className="overflow-hidden rounded-2xl border border-green-200 bg-white shadow-sm">
+        <p className="px-5 pt-5 pb-3 text-xs font-semibold tracking-wide text-green-500 uppercase">
           Compte
         </p>
         {[
@@ -68,7 +68,7 @@ export default function ProfilePage() {
         ].map((item, i, arr) => (
           <button
             key={item.label}
-            className={`w-full flex items-center justify-between px-5 py-4 text-sm cursor-pointer transition-colors text-left ${
+            className={`flex w-full cursor-pointer items-center justify-between px-5 py-4 text-left text-sm transition-colors ${
               item.danger
                 ? 'text-red-500 hover:bg-red-50'
                 : 'text-green-600 hover:bg-white'
@@ -77,7 +77,7 @@ export default function ProfilePage() {
             {item.label}
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              className="w-4 h-4 opacity-40"
+              className="h-4 w-4 opacity-40"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"

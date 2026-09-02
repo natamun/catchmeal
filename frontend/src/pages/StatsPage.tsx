@@ -17,11 +17,11 @@ export default function StatsPage() {
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-bold text-green-800">Statistiques</h2>
-        <div className="flex gap-1 bg-green-100 rounded-xl p-1">
+        <div className="flex gap-1 rounded-xl bg-green-100 p-1">
           {PERIODS.map((p, i) => (
             <button
               key={p}
-              className={`text-xs font-medium px-3 py-1.5 rounded-lg transition-colors cursor-pointer ${
+              className={`cursor-pointer rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
                 i === 0
                   ? 'bg-white text-green-800 shadow-sm'
                   : 'text-green-500 hover:text-green-600'
@@ -34,25 +34,25 @@ export default function StatsPage() {
       </div>
 
       {/* Bar chart calories */}
-      <div className="bg-white rounded-2xl p-6 border border-green-200 shadow-sm">
-        <p className="text-sm font-semibold text-green-500 uppercase tracking-wide mb-6">
+      <div className="rounded-2xl border border-green-200 bg-white p-6 shadow-sm">
+        <p className="mb-6 text-sm font-semibold tracking-wide text-green-500 uppercase">
           Calories / jour
         </p>
-        <div className="flex items-end gap-2 h-36">
+        <div className="flex h-36 items-end gap-2">
           {WEEKLY.map((d) => {
             const pct = (d.kcal / MAX) * 100;
             return (
               <div
                 key={d.day}
-                className="flex-1 flex flex-col items-center gap-1"
+                className="flex flex-1 flex-col items-center gap-1"
               >
                 <span className="text-xs text-green-500">{d.kcal}</span>
                 <div
-                  className="w-full flex items-end bg-green-100 rounded-lg overflow-hidden"
+                  className="flex w-full items-end overflow-hidden rounded-lg bg-green-100"
                   style={{ height: '80px' }}
                 >
                   <div
-                    className="w-full bg-green-400 rounded-lg transition-all"
+                    className="w-full rounded-lg bg-green-400 transition-all"
                     style={{ height: `${pct}%` }}
                   />
                 </div>
@@ -64,8 +64,8 @@ export default function StatsPage() {
       </div>
 
       {/* Macros moyenne */}
-      <div className="bg-white rounded-2xl p-6 border border-green-200 shadow-sm">
-        <p className="text-sm font-semibold text-green-500 uppercase tracking-wide mb-4">
+      <div className="rounded-2xl border border-green-200 bg-white p-6 shadow-sm">
+        <p className="mb-4 text-sm font-semibold tracking-wide text-green-500 uppercase">
           Moyenne des macros
         </p>
         <div className="grid grid-cols-3 gap-4 text-center">
@@ -74,17 +74,17 @@ export default function StatsPage() {
             { label: 'Glucides', value: '198g', color: 'text-green-300' },
             { label: 'Lipides', value: '58g', color: 'text-green-300' },
           ].map((m) => (
-            <div key={m.label} className="bg-white rounded-xl p-4">
+            <div key={m.label} className="rounded-xl bg-white p-4">
               <p className={`text-2xl font-bold ${m.color}`}>{m.value}</p>
-              <p className="text-xs text-green-500 mt-1">{m.label}</p>
+              <p className="mt-1 text-xs text-green-500">{m.label}</p>
             </div>
           ))}
         </div>
       </div>
 
       {/* Poids */}
-      <div className="bg-white rounded-2xl p-6 border border-green-200 shadow-sm">
-        <p className="text-sm font-semibold text-green-500 uppercase tracking-wide mb-4">
+      <div className="rounded-2xl border border-green-200 bg-white p-6 shadow-sm">
+        <p className="mb-4 text-sm font-semibold tracking-wide text-green-500 uppercase">
           Évolution du poids
         </p>
         <div className="flex items-center gap-4">
@@ -93,11 +93,11 @@ export default function StatsPage() {
               74.2{' '}
               <span className="text-base font-normal text-green-500">kg</span>
             </p>
-            <p className="text-sm text-green-300 font-medium mt-1">
+            <p className="mt-1 text-sm font-medium text-green-300">
               ▼ 5.8 kg depuis le début
             </p>
           </div>
-          <div className="flex-1 h-px bg-green-100" />
+          <div className="h-px flex-1 bg-green-100" />
           <div className="text-right">
             <p className="text-sm text-green-500">Objectif</p>
             <p className="text-lg font-bold text-green-800">70 kg</p>
