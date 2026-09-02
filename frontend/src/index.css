@@ -11,9 +11,53 @@
   }
 }
 
+@keyframes fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes pill-select {
+  from {
+    transform: scale(0.92);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(-100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes toast-out {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-100%);
+  }
+}
+
 @theme {
   /* Animations */
   --animate-fade-in-up: fade-in-up 0.15s ease-out;
+  --animate-fade-out: fade-out 0.1s ease-in;
+  --animate-pill-select: pill-select 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  --animate-toast-in: toast-in 0.2s ease-out;
+  --animate-toast-out: toast-out 0.15s ease-in;
 
   /* Colors */
   --color-green-50: #d8f3dc;
@@ -44,4 +88,44 @@
 
 body {
   margin: 0;
+}
+
+.dialog-fade {
+  opacity: 0;
+  transform: translateY(-4px);
+  transition:
+    opacity 0.15s ease-in,
+    transform 0.15s ease-in,
+    overlay 0.15s allow-discrete,
+    display 0.15s allow-discrete;
+}
+
+.dialog-fade[open] {
+  opacity: 1;
+  transform: translateY(0);
+  transition-timing-function: ease-out;
+}
+
+.dialog-fade::backdrop {
+  background-color: rgb(0 0 0 / 0%);
+  transition:
+    background-color 0.15s ease-in,
+    overlay 0.15s allow-discrete,
+    display 0.15s allow-discrete;
+}
+
+.dialog-fade[open]::backdrop {
+  background-color: rgb(0 0 0 / 50%);
+  transition-timing-function: ease-out;
+}
+
+@starting-style {
+  .dialog-fade[open] {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+
+  .dialog-fade[open]::backdrop {
+    background-color: rgb(0 0 0 / 0%);
+  }
 }
