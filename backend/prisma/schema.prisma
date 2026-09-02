@@ -99,6 +99,7 @@ model FoodItem {
   mealFoodItems MealFoodItem[]
 
   @@unique([id, userId])
+  @@index([userId])
 }
 
 model Meal {
@@ -131,6 +132,9 @@ model MealFoodItem {
 
   meal     Meal     @relation(fields: [mealId, userId], references: [id, userId], onDelete: Cascade)
   foodItem FoodItem @relation(fields: [foodItemId, userId], references: [id, userId])
+
+  @@index([mealId])
+  @@index([foodItemId])
 }
 
 model GoalSetting {

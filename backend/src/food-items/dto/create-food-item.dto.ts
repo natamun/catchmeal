@@ -1,3 +1,4 @@
+import { Transform } from 'class-transformer';
 import {
   IsEnum,
   IsNotEmpty,
@@ -5,22 +6,32 @@ import {
   IsOptional,
   IsPositive,
   IsString,
+  MaxLength,
   Min,
 } from 'class-validator';
 
 import { QuantityUnit } from '../../generated/prisma/enums';
 
+const trim = ({ value }: { value: unknown }) =>
+  typeof value === 'string' ? value.trim() : value;
+
 export class CreateFoodItemDto {
+  @Transform(trim)
   @IsString()
   @IsNotEmpty()
+  @MaxLength(120)
   name: string;
 
+  @Transform(trim)
   @IsOptional()
   @IsString()
+  @MaxLength(80)
   brand?: string;
 
+  @Transform(trim)
   @IsOptional()
   @IsString()
+  @MaxLength(32)
   barcode?: string;
 
   @IsNumber()

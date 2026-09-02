@@ -17,25 +17,26 @@ export class FoodItemsService {
   findAll(userId: number) {
     return this.prisma.foodItem.findMany({
       where: { userId, archived: false },
+      orderBy: { name: 'asc' },
     });
   }
 
   findOne(userId: number, id: number) {
     return this.prisma.foodItem.findFirstOrThrow({
-      where: { id, userId },
+      where: { id, userId, archived: false },
     });
   }
 
   update(userId: number, id: number, dto: UpdateFoodItemDto) {
     return this.prisma.foodItem.update({
-      where: { id_userId: { id, userId } },
+      where: { id_userId: { id, userId }, archived: false },
       data: dto,
     });
   }
 
   archive(userId: number, id: number) {
     return this.prisma.foodItem.update({
-      where: { id_userId: { id, userId } },
+      where: { id_userId: { id, userId }, archived: false },
       data: { archived: true },
     });
   }

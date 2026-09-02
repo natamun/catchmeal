@@ -60,6 +60,7 @@ describe('FoodItemsService', () => {
 
     expect(prismaMock.foodItem.findMany).toHaveBeenCalledWith({
       where: { userId: 2, archived: false },
+      orderBy: { name: 'asc' },
     });
   });
 
@@ -69,7 +70,7 @@ describe('FoodItemsService', () => {
     await service.findOne(2, 1);
 
     expect(prismaMock.foodItem.findFirstOrThrow).toHaveBeenCalledWith({
-      where: { id: 1, userId: 2 },
+      where: { id: 1, userId: 2, archived: false },
     });
   });
 
@@ -79,7 +80,7 @@ describe('FoodItemsService', () => {
     await service.update(2, 1, { name: 'Riz complet' });
 
     expect(prismaMock.foodItem.update).toHaveBeenCalledWith({
-      where: { id_userId: { id: 1, userId: 2 } },
+      where: { id_userId: { id: 1, userId: 2 }, archived: false },
       data: { name: 'Riz complet' },
     });
   });
@@ -90,7 +91,7 @@ describe('FoodItemsService', () => {
     await service.archive(2, 1);
 
     expect(prismaMock.foodItem.update).toHaveBeenCalledWith({
-      where: { id_userId: { id: 1, userId: 2 } },
+      where: { id_userId: { id: 1, userId: 2 }, archived: false },
       data: { archived: true },
     });
   });
