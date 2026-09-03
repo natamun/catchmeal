@@ -7,6 +7,7 @@ import {
   X,
 } from 'lucide-react';
 
+import { useDelayedUnmount } from '../../hooks/useDelayedUnmount';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
 import { Input } from '../ui/Input';
 import { Toast } from '../ui/Toast';
@@ -97,19 +98,7 @@ function validateForm(
 }
 
 function FieldError({ id, message }: { id: string; message?: string }) {
-  const [displayedMessage, setDisplayedMessage] = useState(message);
-
-  if (message && message !== displayedMessage) {
-    setDisplayedMessage(message);
-  }
-
-  useEffect(() => {
-    if (message) {
-      return;
-    }
-    const timeoutId = setTimeout(() => setDisplayedMessage(undefined), 100);
-    return () => clearTimeout(timeoutId);
-  }, [message]);
+  const displayedMessage = useDelayedUnmount(message, 100);
 
   if (!displayedMessage) {
     return null;

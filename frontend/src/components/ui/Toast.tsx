@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react';
 import type { LucideIcon } from 'lucide-react';
+
+import { useDelayedUnmount } from '../../hooks/useDelayedUnmount';
 
 interface ToastProps {
   message: string | null;
@@ -7,19 +8,7 @@ interface ToastProps {
 }
 
 export function Toast({ message, icon: Icon }: ToastProps) {
-  const [displayedMessage, setDisplayedMessage] = useState(message);
-
-  if (message && message !== displayedMessage) {
-    setDisplayedMessage(message);
-  }
-
-  useEffect(() => {
-    if (message) {
-      return;
-    }
-    const timeoutId = setTimeout(() => setDisplayedMessage(null), 150);
-    return () => clearTimeout(timeoutId);
-  }, [message]);
+  const displayedMessage = useDelayedUnmount(message, 150);
 
   return (
     <div
