@@ -1,5 +1,6 @@
 import { LoaderCircle, Pencil, Plus, Search } from 'lucide-react';
 
+import { Input } from '../ui/Input';
 import type { FoodItem } from './types';
 
 interface FoodItemListProps {
@@ -22,10 +23,10 @@ export default function FoodItemList({
       <div className="flex items-center gap-3 border-b border-green-200 px-5 py-4">
         <div className="relative flex-1">
           <Search className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-green-400" />
-          <input
+          <Input
             type="text"
             placeholder="Rechercher un aliment..."
-            className="w-full rounded-xl border border-green-200 bg-white py-2 pr-3 pl-9 text-sm text-green-800 outline-none focus:border-green-400"
+            className="pl-9"
           />
         </div>
         <button

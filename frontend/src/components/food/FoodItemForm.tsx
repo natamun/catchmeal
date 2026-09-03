@@ -7,6 +7,8 @@ import {
   X,
 } from 'lucide-react';
 
+import { ConfirmDialog } from '../ui/ConfirmDialog';
+import { Input } from '../ui/Input';
 import { Toast } from '../ui/Toast';
 import {
   ApiError,
@@ -38,8 +40,8 @@ const EMPTY_FORM: FoodItemFormState = {
   fat: '',
 };
 
-const INPUT_CLASS =
-  'w-full rounded-xl border border-green-200 bg-white px-4 py-2.5 text-sm text-green-800 outline-none focus:border-green-400 aria-invalid:border-red-400';
+const LABEL_CLASS =
+  'text-xs font-semibold tracking-wide text-green-500 uppercase';
 
 const UNIT_OPTIONS = [
   { value: 'GRAM', label: 'Grammes' },
@@ -344,13 +346,10 @@ export default function FoodItemForm({
 
           <div className="flex flex-col gap-5 sm:flex-row sm:gap-3">
             <div className="relative flex flex-col gap-1.5 sm:flex-1">
-              <label
-                htmlFor="food-name"
-                className="text-xs font-semibold tracking-wide text-green-500 uppercase"
-              >
+              <label htmlFor="food-name" className={LABEL_CLASS}>
                 Nom
               </label>
-              <input
+              <Input
                 id="food-name"
                 type="text"
                 placeholder="Ex : Riz blanc"
@@ -360,38 +359,30 @@ export default function FoodItemForm({
                 onBlur={() => handleBlur('name')}
                 aria-invalid={isInvalid('name')}
                 aria-describedby="food-name-error"
-                className={INPUT_CLASS}
               />
               <FieldError id="food-name-error" message={errorMessage('name')} />
             </div>
 
             <div className="relative flex flex-col gap-1.5 sm:flex-1">
-              <label
-                htmlFor="food-brand"
-                className="text-xs font-semibold tracking-wide text-green-500 uppercase"
-              >
+              <label htmlFor="food-brand" className={LABEL_CLASS}>
                 Marque (optionnel)
               </label>
-              <input
+              <Input
                 id="food-brand"
                 type="text"
                 placeholder="Ex : Knorr"
                 value={form.brand}
                 onChange={(e) => handleChange('brand', e.target.value)}
-                className={INPUT_CLASS}
               />
             </div>
           </div>
 
           <div className="relative flex flex-col gap-1.5">
-            <label
-              htmlFor="food-quantity"
-              className="text-xs font-semibold tracking-wide text-green-500 uppercase"
-            >
+            <label htmlFor="food-quantity" className={LABEL_CLASS}>
               Quantité de référence
             </label>
             <div className="flex gap-2">
-              <input
+              <Input
                 id="food-quantity"
                 type="text"
                 inputMode="decimal"
@@ -402,7 +393,6 @@ export default function FoodItemForm({
                 onBlur={() => handleBlur('baseQuantity')}
                 aria-invalid={isInvalid('baseQuantity')}
                 aria-describedby="food-quantity-error"
-                className={INPUT_CLASS}
               />
               <div className="flex gap-1.5 rounded-xl border border-green-200 bg-white p-1.5">
                 {UNIT_OPTIONS.map(({ value, label }) => (
@@ -432,7 +422,7 @@ export default function FoodItemForm({
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <p className="text-xs font-semibold tracking-wide text-green-500 uppercase">
+            <p className={LABEL_CLASS}>
               Valeurs nutritionnelles (pour cette quantité)
             </p>
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -444,7 +434,7 @@ export default function FoodItemForm({
                   >
                     {label}
                   </label>
-                  <input
+                  <Input
                     id={`food-${field}`}
                     type="text"
                     inputMode="decimal"
@@ -455,7 +445,6 @@ export default function FoodItemForm({
                     onBlur={() => handleBlur(field)}
                     aria-invalid={isInvalid(field)}
                     aria-describedby={`food-${field}-error`}
-                    className={INPUT_CLASS}
                   />
                   <FieldError
                     id={`food-${field}-error`}
@@ -478,38 +467,15 @@ export default function FoodItemForm({
         </form>
       </dialog>
 
-      <dialog
-        ref={confirmDialogRef}
-        aria-labelledby="confirm-delete-title"
-        className="dialog-fade m-auto w-[calc(100vw-2rem)] max-w-sm rounded-2xl border-none bg-white p-6 shadow-lg backdrop:backdrop-blur-sm"
-      >
-        <h3
-          id="confirm-delete-title"
-          className="text-lg font-bold text-green-800"
-        >
-          Supprimer cet aliment ?
-        </h3>
-        <p className="mt-2 text-sm text-green-500">
-          {editingItem?.name} sera retiré de ta liste.
-        </p>
-        <div className="mt-5 flex gap-3">
-          <button
-            type="button"
-            onClick={() => confirmDialogRef.current?.close()}
-            className="flex-1 cursor-pointer rounded-xl border border-green-200 px-4 py-2.5 text-sm font-medium text-green-600 transition-colors hover:bg-green-50"
-          >
-            Annuler
-          </button>
-          <button
-            type="button"
-            onClick={() => void handleDelete()}
-            disabled={isSubmitting}
-            className="flex-1 cursor-pointer rounded-xl bg-red-500 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {isSubmitting ? 'Suppression...' : 'Supprimer'}
-          </button>
-        </div>
-      </dialog>
+      <ConfirmDialog
+        dialogRef={confirmDialogRef}
+        title="Supprimer cet aliment ?"
+        description={`${editingItem?.name ?? ''} sera retiré de ta liste.`}
+        confirmLabel="Supprimer"
+        pendingLabel="Suppression..."
+        isPending={isSubmitting}
+        onConfirm={() => void handleDelete()}
+      />
 
       <Toast message={successMessage} icon={CheckCircle2} />
     </>
