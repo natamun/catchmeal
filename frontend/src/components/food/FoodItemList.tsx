@@ -48,11 +48,11 @@ export default function FoodItemList({
         <p className="px-5 pb-5 text-sm text-red-500">{loadError}</p>
       )}
 
-      <ul>
-        {items.map((item, i) => (
+      <ul className="divide-y divide-green-200">
+        {items.map((item) => (
           <li
             key={item.id}
-            className={`flex items-center justify-between gap-4 px-5 py-4 ${i < items.length - 1 ? 'border-b border-green-200' : ''}`}
+            className="flex items-center justify-between gap-4 px-5 py-4"
           >
             <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-3 gap-y-2">
               <p className="text-sm font-semibold text-green-800">
