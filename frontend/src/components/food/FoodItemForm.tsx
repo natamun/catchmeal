@@ -7,11 +7,14 @@ import {
   X,
 } from 'lucide-react';
 
-import { CURRENT_USER_ID } from '../../constants/currentUser';
 import { Toast } from '../ui/Toast';
+import {
+  ApiError,
+  createFoodItem,
+  deleteFoodItem,
+  updateFoodItem,
+} from './api';
 import type { FoodItem, QuantityUnit } from './types';
-
-const API_URL = import.meta.env.VITE_API_URL;
 
 interface FoodItemFormState {
   name: string;
@@ -223,44 +226,24 @@ export default function FoodItemForm({
 
     setIsSubmitting(true);
     try {
-      const response = await fetch(
-        editingItem
-          ? `${API_URL}/users/${CURRENT_USER_ID}/food-items/${editingItem.id}`
-          : `${API_URL}/users/${CURRENT_USER_ID}/food-items`,
-        {
-          method: editingItem ? 'PATCH' : 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            name: form.name,
-            brand: form.brand.trim() === '' ? null : form.brand,
-            baseQuantity: Number(form.baseQuantity),
-            baseUnit: form.baseUnit,
-            kcal: Number(form.kcal),
-            protein: Number(form.protein),
-            carbs: Number(form.carbs),
-            fat: Number(form.fat),
-          }),
-        },
-      );
+      const input = {
+        name: form.name,
+        brand: form.brand.trim() === '' ? null : form.brand,
+        baseQuantity: Number(form.baseQuantity),
+        baseUnit: form.baseUnit,
+        kcal: Number(form.kcal),
+        protein: Number(form.protein),
+        carbs: Number(form.carbs),
+        fat: Number(form.fat),
+      };
+      const savedItem = editingItem
+        ? await updateFoodItem(editingItem.id, input)
+        : await createFoodItem(input);
 
-      if (!response.ok) {
-        const body = (await response.json()) as {
-          message: string | string[];
-        };
-        setError(
-          Array.isArray(body.message) ? body.message.join(', ') : body.message,
-        );
-        return;
-      }
-
-      const savedItem = (await response.json()) as FoodItem;
       if (editingItem) {
         onItemUpdated(savedItem);
       } else {
         onItemAdded(savedItem);
-      }
-
-      if (!editingItem) {
         setForm(EMPTY_FORM);
       }
       setTouched({});
@@ -273,7 +256,11 @@ export default function FoodItemForm({
       );
     } catch (err: unknown) {
       console.error(err);
-      setError('Une erreur est survenue, réessayez.');
+      setError(
+        err instanceof ApiError
+          ? err.message
+          : 'Une erreur est survenue, réessayez.',
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -286,22 +273,13 @@ export default function FoodItemForm({
     setError(null);
     setIsSubmitting(true);
     try {
-      const response = await fetch(
-        `${API_URL}/users/${CURRENT_USER_ID}/food-items/${editingItem.id}`,
-        { method: 'DELETE' },
-      );
-
-      if (!response.ok) {
-        setError('Suppression impossible, réessayez.');
-        return;
-      }
-
+      await deleteFoodItem(editingItem.id);
       onItemDeleted(editingItem.id);
       closeDialog();
       setSuccessMessage('Produit supprimé');
     } catch (err: unknown) {
       console.error(err);
-      setError('Une erreur est survenue, réessayez.');
+      setError('Suppression impossible, réessayez.');
     } finally {
       setIsSubmitting(false);
       confirmDialogRef.current?.close();

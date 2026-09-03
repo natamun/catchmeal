@@ -1,11 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 
+import { listFoodItems } from '../components/food/api';
 import FoodItemForm from '../components/food/FoodItemForm';
 import FoodItemList from '../components/food/FoodItemList';
 import type { FoodItem } from '../components/food/types';
-import { CURRENT_USER_ID } from '../constants/currentUser';
-
-const API_URL = import.meta.env.VITE_API_URL;
 
 export default function FoodPage() {
   const [foodItems, setFoodItems] = useState<FoodItem[]>([]);
@@ -16,16 +14,8 @@ export default function FoodPage() {
 
   useEffect(() => {
     const controller = new AbortController();
-    fetch(`${API_URL}/users/${CURRENT_USER_ID}/food-items`, {
-      signal: controller.signal,
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}`);
-        }
-        return response.json();
-      })
-      .then((data: FoodItem[]) => setFoodItems(data))
+    listFoodItems(controller.signal)
+      .then(setFoodItems)
       .catch((err: unknown) => {
         if (controller.signal.aborted) {
           return;

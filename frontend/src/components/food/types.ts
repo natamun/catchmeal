@@ -11,3 +11,5 @@ export interface FoodItem {
   carbs: number;
   fat: number;
 }
+
+export type FoodItemInput = Omit<FoodItem, 'id'>;
