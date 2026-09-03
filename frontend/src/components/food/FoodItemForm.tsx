@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type RefObject } from 'react';
+import { useRef, useState, type RefObject } from 'react';
 import {
   AlertCircle,
   CheckCircle2,
@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 
 import { useDelayedUnmount } from '../../hooks/useDelayedUnmount';
+import { useTimeout } from '../../hooks/useTimeout';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
 import { Input } from '../ui/Input';
 import { Toast } from '../ui/Toast';
@@ -163,21 +164,8 @@ export default function FoodItemForm({
 
   const errors = validateForm(form);
 
-  useEffect(() => {
-    if (!submitAttempted) {
-      return;
-    }
-    const timeoutId = setTimeout(() => setSubmitAttempted(false), 5000);
-    return () => clearTimeout(timeoutId);
-  }, [submitAttempted]);
-
-  useEffect(() => {
-    if (!successMessage) {
-      return;
-    }
-    const timeoutId = setTimeout(() => setSuccessMessage(null), 3000);
-    return () => clearTimeout(timeoutId);
-  }, [successMessage]);
+  useTimeout(() => setSubmitAttempted(false), submitAttempted ? 5000 : null);
+  useTimeout(() => setSuccessMessage(null), successMessage ? 3000 : null);
 
   const handleFocus = (field: keyof FoodItemFormState) => {
     setFocusedField(field);
