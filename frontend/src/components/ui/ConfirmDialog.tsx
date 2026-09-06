@@ -1,0 +1,53 @@
+import { useId, type RefObject } from 'react';
+
+interface ConfirmDialogProps {
+  dialogRef: RefObject<HTMLDialogElement | null>;
+  title: string;
+  description: string;
+  confirmLabel: string;
+  pendingLabel: string;
+  isPending: boolean;
+  onConfirm: () => void;
+}
+
+export function ConfirmDialog({
+  dialogRef,
+  title,
+  description,
+  confirmLabel,
+  pendingLabel,
+  isPending,
+  onConfirm,
+}: ConfirmDialogProps) {
+  const titleId = useId();
+
+  return (
+    <dialog
+      ref={dialogRef}
+      aria-labelledby={titleId}
+      className="dialog-fade m-auto w-[calc(100vw-2rem)] max-w-sm rounded-2xl border-none bg-white p-6 shadow-lg backdrop:backdrop-blur-sm"
+    >
+      <h3 id={titleId} className="text-lg font-bold text-green-800">
+        {title}
+      </h3>
+      <p className="mt-2 text-sm text-green-500">{description}</p>
+      <div className="mt-5 flex gap-3">
+        <button
+          type="button"
+          onClick={() => dialogRef.current?.close()}
+          className="flex-1 cursor-pointer rounded-xl border border-green-200 px-4 py-2.5 text-sm font-medium text-green-600 transition-colors hover:bg-green-50"
+        >
+          Annuler
+        </button>
+        <button
+          type="button"
+          onClick={onConfirm}
+          disabled={isPending}
+          className="flex-1 cursor-pointer rounded-xl bg-red-500 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          {isPending ? pendingLabel : confirmLabel}
+        </button>
+      </div>
+    </dialog>
+  );
+}

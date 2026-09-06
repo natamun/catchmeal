@@ -1,4 +1,6 @@
-export type Tab = 'home' | 'scan' | 'stats' | 'friends' | 'profile';
+import { Apple } from 'lucide-react';
+
+export type Tab = 'home' | 'food' | 'stats' | 'friends' | 'profile';
 
 interface Props {
   active: Tab;
@@ -34,24 +36,9 @@ const TABS: { id: Tab; label: string; icon: React.ReactNode }[] = [
     ),
   },
   {
-    id: 'scan',
-    label: 'Scanner',
-    icon: (
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        className="h-5 w-5 shrink-0"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke="currentColor"
-        strokeWidth={2}
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          d="M3 7V5a2 2 0 012-2h2M17 3h2a2 2 0 012 2v2M21 17v2a2 2 0 01-2 2h-2M7 21H5a2 2 0 01-2-2v-2M8 12h8"
-        />
-      </svg>
-    ),
+    id: 'food',
+    label: 'Aliments',
+    icon: <Apple className="h-5 w-5 shrink-0" />,
   },
   {
     id: 'stats',

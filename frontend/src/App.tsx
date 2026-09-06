@@ -6,7 +6,7 @@ const LandingPage = lazy(() => import('./pages/LandingPage'));
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 const StatsPage = lazy(() => import('./pages/StatsPage'));
 const FriendsPage = lazy(() => import('./pages/FriendsPage'));
-const ScanPage = lazy(() => import('./pages/ScanPage'));
+const FoodPage = lazy(() => import('./pages/FoodPage'));
 const ProfilePage = lazy(() => import('./pages/ProfilePage'));
 
 type Page = 'landing' | 'dashboard';
@@ -17,7 +17,7 @@ export default function App() {
 
   const pages: Record<Tab, React.ReactNode> = {
     home: <Dashboard />,
-    scan: <ScanPage />,
+    food: <FoodPage />,
     stats: <StatsPage />,
     friends: <FriendsPage />,
     profile: <ProfilePage />,

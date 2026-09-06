@@ -51,6 +51,7 @@ export class DashboardAnalyticsService {
 
     const totalsByDay: Record<string, MacroTotalsDay> = {};
     for (const meal of meals) {
+      if (!meal.loggedAt) continue;
       const day = meal.loggedAt.toISOString().split('T')[0];
       if (!totalsByDay[day]) {
         totalsByDay[day] = { kcal: 0, protein: 0, carbs: 0, fat: 0 };
