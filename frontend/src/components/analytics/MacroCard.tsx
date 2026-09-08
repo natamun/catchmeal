@@ -1,10 +1,18 @@
-export default function MacroCard({title, value, unit}: {title: string, value: number | string, unit: string}) {
+export default function MacroCard({
+  title,
+  value,
+  unit,
+}: {
+  title: string;
+  value: number | string;
+  unit: string;
+}) {
   return (
-    <div className="bg-white rounded-2xl p-2 border border-green-100 shadow-sm hover:shadow-md">
+    <div className="rounded-2xl border border-green-100 bg-white p-2 shadow-sm hover:shadow-md">
       <p className="text-xs text-green-500 uppercase">{title}</p>
-      <p className="text-xl font-bold text-green-600 mt-0.5">
+      <p className="mt-0.5 text-xl font-bold text-green-600">
         {value}
-        <span className="text-xs font-mono text-green-300 ml-1">{unit}</span>
+        <span className="ml-1 font-mono text-xs text-green-300">{unit}</span>
       </p>
     </div>
   );
