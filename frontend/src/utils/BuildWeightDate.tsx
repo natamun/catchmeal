@@ -1,6 +1,8 @@
- import type { DashboardDay, WeightPoint } from "../types/dashboard-analytics";
+import type { DashboardDay, WeightPoint } from '../types/dashboard-analytics';
 
-export default function buildWeightDate(dashboard: DashboardDay[]): WeightPoint[] {
+export default function buildWeightDate(
+  dashboard: DashboardDay[],
+): WeightPoint[] {
   let lastWeight: number | null = null;
   return dashboard.map((d) => {
     if (d.weight !== null) {
@@ -10,5 +12,5 @@ export default function buildWeightDate(dashboard: DashboardDay[]): WeightPoint[
       lastWeight = 0;
     }
     return { date: d.day.slice(5), poids: lastWeight };
-});
+  });
 }
