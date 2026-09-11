@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
+
 import { EmailService } from '../email/email.service';
+import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class GdprService {
@@ -12,6 +13,15 @@ export class GdprService {
   async exportUserData(userId: number) {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
+      include: {
+        meal: {
+          include: { items: true },
+        },
+        weightLogs: true,
+        goalSettings: true,
+        senderMessage: true,
+        receiverMessage: true,
+      },
     });
 
     if (!user) {
@@ -19,18 +29,15 @@ export class GdprService {
     }
 
     // Send confirmation email
-    // TODO: replace with user.email once schema v2 is merged
-    const userEmail = (user as any).email ?? null;
-    if (userEmail) {
-      await this.emailService.sendDataExportConfirmation(userEmail);
-    }
+    await this.emailService.sendDataExportConfirmation(user.email);
 
-    // Return all user data we currently have
-    // This will grow as more tables are added to the schema
+    // Return all personal data — passwords are excluded for security
+    const { passwordHash: _, ...safeProfile } = user;
+
     return {
       exportedAt: new Date().toISOString(),
       data: {
-        profile: user,
+        profile: safeProfile,
       },
     };
   }
@@ -44,27 +51,23 @@ export class GdprService {
       throw new NotFoundException(`User with id ${userId} not found`);
     }
 
-    const userEmail = (user as any).email ?? null;
+    // Save email before anonymizing — needed for confirmation email
+    const userEmail = user.email;
 
-    // Soft delete + anonymize personal data
-    // This preserves relational integrity (no orphaned records)
-    // while removing all personally identifiable information
+    // Soft delete + anonymize all personally identifiable information
+    // Preserves relational integrity while complying with GDPR
     await this.prisma.user.update({
       where: { id: userId },
       data: {
         username: `deleted_user_${userId}`,
         name: 'Deleted User',
-        // TODO: add these fields once schema v2 is merged
-        // email: `deleted_${userId}@deleted.invalid`,
-        // passwordHash: '',
-        // deletedAt: new Date(),
+        email: `deleted_${userId}@deleted.invalid`,
+        passwordHash: '',
       },
     });
 
-    // Send confirmation email before data is gone
-    if (userEmail) {
-      await this.emailService.sendAccountDeletionConfirmation(userEmail);
-    }
+    // Send confirmation to the original email address
+    await this.emailService.sendAccountDeletionConfirmation(userEmail);
 
     return { message: 'Account successfully deleted' };
   }
