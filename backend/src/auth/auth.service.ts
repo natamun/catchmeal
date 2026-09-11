@@ -91,10 +91,17 @@ export class AuthService {
   }
 
   async findOrCreateUser(params: FindOrCreateUserParams) {
-    const { username, name } = params;
+    const { username, name, email } = params;
 
+<<<<<<< HEAD
     const existingUser = await this.prisma.user.findUnique({
       where: { username },
+=======
+    // Try to find an existing user by username or email
+    const existingUser = await this.prisma.user.findFirst({
+      where: {
+        OR: [{ username }, { email }],
+      },
     });
 
     if (existingUser) {
@@ -102,7 +109,12 @@ export class AuthService {
     }
 
     return this.prisma.user.create({
-      data: { username, name },
+      data: {
+        username,
+        name,
+        email,
+        passwordHash: '',
+      },
     });
   }
 
