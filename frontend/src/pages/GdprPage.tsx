@@ -1,16 +1,23 @@
 import { useState } from 'react';
 
-// Matches the User model in the Prisma schema
-interface UserData {
+interface UserProfile {
   id: number;
   username: string;
   name: string;
+  email: string;
+  role: string;
+  createAt: string;
+  meal: unknown[];
+  weightLogs: unknown[];
+  goalSettings: unknown[];
+  senderMessage: unknown[];
+  receiverMessage: unknown[];
 }
 
 interface ExportResponse {
   exportedAt: string;
   data: {
-    profile: UserData;
+    profile: UserProfile;
   };
 }
 
@@ -54,7 +61,6 @@ function GdprPage() {
   function handleDownload() {
     if (!exportData) return;
 
-    // Convert data to JSON string and trigger a file download
     const blob = new Blob([JSON.stringify(exportData, null, 2)], {
       type: 'application/json',
     });
@@ -89,6 +95,8 @@ function GdprPage() {
     }
   }
 
+  const profile = exportData?.data.profile;
+
   return (
     <main>
       <h1>My Personal Data</h1>
@@ -104,25 +112,30 @@ function GdprPage() {
 
       {exportError && <p style={{ color: 'red' }}>{exportError}</p>}
 
-      {exportData && (
+      {exportData && profile && (
         <section>
           <h2>Your data</h2>
           <p>
             <strong>Exported at:</strong> {exportData.exportedAt}
           </p>
+
           <h3>Profile</h3>
           <ul>
-            <li>
-              <strong>ID:</strong> {exportData.data.profile.id}
-            </li>
-            <li>
-              <strong>Username:</strong> {exportData.data.profile.username}
-            </li>
-            <li>
-              <strong>Name:</strong> {exportData.data.profile.name}
-            </li>
+            <li><strong>ID:</strong> {profile.id}</li>
+            <li><strong>Username:</strong> {profile.username}</li>
+            <li><strong>Name:</strong> {profile.name}</li>
+            <li><strong>Email:</strong> {profile.email}</li>
+            <li><strong>Role:</strong> {profile.role}</li>
+            <li><strong>Member since:</strong> {new Date(profile.createAt).toLocaleDateString()}</li>
           </ul>
-          <button onClick={handleDownload}>Download as JSON</button>
+
+          <h3>Meals logged: {profile.meal.length}</h3>
+          <h3>Weight entries: {profile.weightLogs.length}</h3>
+          <h3>Goal settings: {profile.goalSettings.length}</h3>
+          <h3>Messages sent: {profile.senderMessage.length}</h3>
+          <h3>Messages received: {profile.receiverMessage.length}</h3>
+
+          <button onClick={handleDownload}>Download full data as JSON</button>
         </section>
       )}
 
@@ -154,10 +167,7 @@ function GdprPage() {
                   <strong>Are you sure?</strong> Your account and all associated
                   personal data will be permanently deleted.
                 </p>
-                <button
-                  onClick={handleDeleteAccount}
-                  disabled={deleteLoading}
-                >
+                <button onClick={handleDeleteAccount} disabled={deleteLoading}>
                   {deleteLoading
                     ? 'Deleting...'
                     : 'Yes, permanently delete my account'}
