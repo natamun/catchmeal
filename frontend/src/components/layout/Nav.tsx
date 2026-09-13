@@ -7,14 +7,21 @@ interface Props {
   onChange: (tab: Tab) => void;
 }
 
+interface TabDef {
+  id: Tab;
+  label: string;
+  shortLabel?: string;
+  icon: React.ReactNode;
+}
+
 interface NavButtonProps {
-  tab: { id: Tab; label: string; icon: React.ReactNode };
+  tab: TabDef;
   isActive: boolean;
   variant: 'sidebar' | 'bottom';
   onClick: () => void;
 }
 
-const TABS: { id: Tab; label: string; icon: React.ReactNode }[] = [
+const TABS: TabDef[] = [
   {
     id: 'home',
     label: 'Accueil',
@@ -37,12 +44,14 @@ const TABS: { id: Tab; label: string; icon: React.ReactNode }[] = [
   },
   {
     id: 'food',
-    label: 'Aliments',
+    label: 'Alimentation',
+    shortLabel: 'Aliments',
     icon: <Apple className="h-5 w-5 shrink-0" />,
   },
   {
     id: 'stats',
     label: 'Statistiques',
+    shortLabel: 'Stats',
     icon: (
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -133,7 +142,7 @@ function NavButton({ tab, isActive, variant, onClick }: NavButtonProps) {
       }`}
     >
       <span aria-hidden="true">{tab.icon}</span>
-      {tab.label === 'Statistiques' ? 'Stats' : tab.label}
+      {tab.shortLabel ?? tab.label}
     </button>
   );
 }
