@@ -1,4 +1,5 @@
-import { LoaderCircle, Pencil, Plus, Search } from 'lucide-react';
+import { useState } from 'react';
+import { ChevronRight, LoaderCircle, Pencil, Plus, Search } from 'lucide-react';
 
 import { Input } from '../ui/Input';
 import type { FoodItem } from './types';
@@ -11,6 +12,40 @@ interface FoodItemListProps {
   onEdit: (item: FoodItem) => void;
 }
 
+function formatBaseQuantity(item: FoodItem) {
+  return item.baseUnit === 'GRAM'
+    ? `${item.baseQuantity}g`
+    : `${item.baseQuantity}x`;
+}
+
+function macrosOf(item: FoodItem) {
+  return [
+    { label: 'Protéines', value: item.protein, color: 'bg-rose-400' },
+    { label: 'Glucides', value: item.carbs, color: 'bg-amber-400' },
+    { label: 'Lipides', value: item.fat, color: 'bg-blue-400' },
+  ];
+}
+
+function MacroBadge({
+  label,
+  value,
+  color,
+}: {
+  label: string;
+  value: number;
+  color: string;
+}) {
+  return (
+    <span
+      title={`${label} : ${value}g`}
+      className="flex items-center gap-1 text-xs font-semibold text-green-700"
+    >
+      <span aria-hidden="true" className={`h-2 w-2 rounded-full ${color}`} />
+      {value}g
+    </span>
+  );
+}
+
 export default function FoodItemList({
   items,
   isLoading,
@@ -18,8 +53,22 @@ export default function FoodItemList({
   onAdd,
   onEdit,
 }: FoodItemListProps) {
+  const [expandedIds, setExpandedIds] = useState<Set<number>>(new Set());
+
+  const toggleExpanded = (id: number) => {
+    setExpandedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  };
+
   return (
-    <div className="overflow-hidden rounded-2xl border border-green-200 bg-white shadow-sm">
+    <div className="@container overflow-hidden rounded-2xl border border-green-200 bg-white shadow-sm">
       <div className="flex items-center gap-3 border-b border-green-200 px-5 py-4">
         <div className="relative flex-1">
           <Search className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-green-400" />
@@ -50,47 +99,71 @@ export default function FoodItemList({
       )}
 
       <ul className="divide-y divide-green-200">
-        {items.map((item) => (
-          <li
-            key={item.id}
-            className="flex items-center justify-between gap-4 px-5 py-4"
-          >
-            <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-3 gap-y-2">
-              <p className="text-sm font-semibold text-green-800">
-                {item.name}
-                {item.brand && (
-                  <span className="ml-1.5 text-xs font-normal text-green-500">
-                    {item.brand}
+        {items.map((item) => {
+          const isExpanded = expandedIds.has(item.id);
+          const macros = macrosOf(item);
+          return (
+            <li key={item.id} className="px-5 py-4">
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => toggleExpanded(item.id)}
+                  aria-expanded={isExpanded}
+                  aria-label={`Afficher le détail de ${item.name}`}
+                  className="shrink-0 cursor-pointer text-green-400 transition-colors hover:text-green-600 @lg:hidden"
+                >
+                  <ChevronRight
+                    className={`h-4 w-4 transition-transform ${isExpanded ? 'rotate-90' : ''}`}
+                  />
+                </button>
+                <p className="min-w-0 flex-1 truncate text-sm font-semibold text-green-800">
+                  {item.name}
+                  {item.brand && (
+                    <span className="ml-1.5 text-xs font-normal text-green-500 @max-[400px]:hidden">
+                      {item.brand}
+                    </span>
+                  )}
+                  <span className="ml-1.5 text-xs font-normal text-green-500 @max-[400px]:hidden">
+                    ({formatBaseQuantity(item)})
                   </span>
-                )}
-              </p>
-              <div className="flex flex-wrap items-center gap-1.5">
-                {[
-                  `${item.kcal} kcal`,
-                  `${item.protein}g prot`,
-                  `${item.carbs}g gluc`,
-                  `${item.fat}g lip`,
-                  `pour ${item.baseQuantity}${item.baseUnit === 'GRAM' ? 'g' : ' pièce(s)'}`,
-                ].map((text) => (
-                  <span
-                    key={text}
-                    className="rounded-full bg-green-50 px-2.5 py-0.5 text-xs font-medium whitespace-nowrap text-green-700"
-                  >
-                    {text}
-                  </span>
-                ))}
+                </p>
+                <div className="hidden shrink-0 items-center gap-2.5 @lg:flex">
+                  {macros.map((m) => (
+                    <MacroBadge key={m.label} {...m} />
+                  ))}
+                </div>
+                <span className="shrink-0 rounded-full bg-green-50 px-2.5 py-0.5 text-sm font-semibold text-green-800">
+                  {item.kcal} kcal
+                </span>
+                <button
+                  type="button"
+                  onClick={() => onEdit(item)}
+                  aria-label={`Modifier ${item.name}`}
+                  className="shrink-0 cursor-pointer text-green-400 transition-colors hover:text-green-600"
+                >
+                  <Pencil className="h-4 w-4" />
+                </button>
               </div>
-            </div>
-            <button
-              type="button"
-              onClick={() => onEdit(item)}
-              aria-label={`Modifier ${item.name}`}
-              className="shrink-0 cursor-pointer text-green-400 transition-colors hover:text-green-600"
-            >
-              <Pencil className="h-4 w-4" />
-            </button>
-          </li>
-        ))}
+              <div
+                className={`grid pl-7 transition-[grid-template-rows] duration-200 ease-out @lg:hidden ${isExpanded ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'}`}
+              >
+                <div
+                  className={`flex flex-wrap items-center gap-1.5 overflow-hidden ${isExpanded ? 'pt-2' : ''}`}
+                >
+                  {macros.map((m) => (
+                    <MacroBadge key={m.label} {...m} />
+                  ))}
+                  <span className="hidden shrink-0 items-center gap-1.5 text-xs font-normal text-green-500 @max-[400px]:flex">
+                    <span aria-hidden="true" className="text-green-300">
+                      |
+                    </span>
+                    {formatBaseQuantity(item)}
+                  </span>
+                </div>
+              </div>
+            </li>
+          );
+        })}
       </ul>
     </div>
   );
