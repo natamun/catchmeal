@@ -45,7 +45,7 @@ export class MealsService {
         typeMeal: dto.typeMeal,
         loggedAt: dto.loggedAt ? new Date(dto.loggedAt) : undefined,
         items: {
-          create: items.map((item) => ({ ...item, userId })),
+          create: items,
         },
       },
       include: { items: true },

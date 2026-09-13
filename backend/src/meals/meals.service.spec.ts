@@ -82,7 +82,6 @@ describe('MealsService', () => {
               protein: 3.5999999999999996,
               carbs: 42,
               fat: 0.44999999999999996,
-              userId: 7,
             },
             {
               foodItemId: 3,
@@ -91,7 +90,6 @@ describe('MealsService', () => {
               protein: 26,
               carbs: 0,
               fat: 15,
-              userId: 7,
             },
             {
               foodItemId: 1,
@@ -100,7 +98,6 @@ describe('MealsService', () => {
               protein: 7.5,
               carbs: 0.3,
               fat: 9.9,
-              userId: 7,
             },
           ],
         },
