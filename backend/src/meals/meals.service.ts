@@ -3,6 +3,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { FoodItem } from '../generated/prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateMealDto } from './dto/create-meal.dto';
+import { UpdateMealDto } from './dto/update-meal.dto';
 
 @Injectable()
 export class MealsService {
@@ -48,6 +49,40 @@ export class MealsService {
         },
       },
       include: { items: true },
+    });
+  }
+
+  findAll(userId: number) {
+    return this.prisma.meal.findMany({
+      where: { userId },
+      include: { items: true },
+      orderBy: { id: 'desc' },
+    });
+  }
+
+  findOne(userId: number, id: number) {
+    return this.prisma.meal.findFirstOrThrow({
+      where: { id, userId },
+      include: { items: true },
+    });
+  }
+
+  update(userId: number, id: number, dto: UpdateMealDto) {
+    return this.prisma.meal.update({
+      where: { id_userId: { id, userId } },
+      data: {
+        name: dto.name,
+        typeMeal: dto.typeMeal,
+        loggedAt:
+          dto.loggedAt === undefined ? undefined : new Date(dto.loggedAt),
+      },
+      include: { items: true },
+    });
+  }
+
+  remove(userId: number, id: number) {
+    return this.prisma.meal.delete({
+      where: { id_userId: { id, userId } },
     });
   }
 }
