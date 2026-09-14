@@ -1,15 +1,9 @@
 import { useRef, useState, type RefObject } from 'react';
-import {
-  AlertCircle,
-  CheckCircle2,
-  ScanBarcode,
-  Trash2,
-  X,
-} from 'lucide-react';
+import { CheckCircle2, ScanBarcode, Trash2, X } from 'lucide-react';
 
-import { useDelayedUnmount } from '../../hooks/useDelayedUnmount';
 import { useTimeout } from '../../hooks/useTimeout';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
+import { FieldError } from '../ui/FieldError';
 import { Input } from '../ui/Input';
 import { Toast } from '../ui/Toast';
 import {
@@ -96,27 +90,6 @@ function validateForm(
   }
 
   return errors;
-}
-
-function FieldError({ id, message }: { id: string; message?: string }) {
-  const displayedMessage = useDelayedUnmount(message, 100);
-
-  if (!displayedMessage) {
-    return null;
-  }
-
-  return (
-    <div
-      id={id}
-      className={`absolute top-full left-0 z-10 mt-2 ${message ? 'animate-fade-in-up' : 'animate-fade-out'}`}
-    >
-      <div className="absolute -top-1 left-4 h-2 w-2 rotate-45 border-t border-l border-red-200 bg-red-50" />
-      <div className="flex items-start gap-1.5 rounded-lg border border-red-200 bg-red-50 px-3 py-1.5 text-xs whitespace-nowrap text-red-600 shadow-sm">
-        <AlertCircle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-        {displayedMessage}
-      </div>
-    </div>
-  );
 }
 
 interface FoodItemFormProps {
