@@ -1,3 +1,5 @@
+import { useAuth } from '../auth/auth-context';
+
 const STATS = [
   { label: 'Jours suivis', value: '24' },
   { label: 'Repas loggés', value: '87' },
@@ -5,6 +7,8 @@ const STATS = [
 ];
 
 export default function ProfilePage() {
+  const { logout } = useAuth();
+
   return (
     <div className="flex flex-col gap-6">
       <h2 className="text-xl font-bold text-green-800">Profil</h2>
@@ -61,13 +65,21 @@ export default function ProfilePage() {
         <p className="px-5 pt-5 pb-3 text-xs font-semibold tracking-wide text-green-500 uppercase">
           Compte
         </p>
-        {[
-          { label: 'Exporter mes données', danger: false },
-          { label: 'Politique de confidentialité', danger: false },
-          { label: 'Supprimer mon compte', danger: true },
-        ].map((item, i, arr) => (
+        {(
+          [
+            {
+              label: 'Se déconnecter',
+              danger: false,
+              onClick: () => void logout(),
+            },
+            { label: 'Exporter mes données', danger: false },
+            { label: 'Politique de confidentialité', danger: false },
+            { label: 'Supprimer mon compte', danger: true },
+          ] satisfies { label: string; danger: boolean; onClick?: () => void }[]
+        ).map((item, i, arr) => (
           <button
             key={item.label}
+            onClick={item.onClick}
             className={`flex w-full cursor-pointer items-center justify-between px-5 py-4 text-left text-sm transition-colors ${
               item.danger
                 ? 'text-red-500 hover:bg-red-50'
