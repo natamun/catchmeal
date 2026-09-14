@@ -237,9 +237,52 @@ describe('MealsService', () => {
 
     await service.update(7, 5, { name: 'Riz-steak' });
 
+    expect(prismaMock.foodItem.findMany).not.toHaveBeenCalled();
     expect(prismaMock.meal.update).toHaveBeenCalledWith({
       where: { id_userId: { id: 5, userId: 7 } },
-      data: { name: 'Riz-steak', typeMeal: undefined, loggedAt: undefined },
+      data: {
+        name: 'Riz-steak',
+        typeMeal: undefined,
+        loggedAt: undefined,
+        items: undefined,
+      },
+      include: { items: true },
+    });
+  });
+
+  it('should replace items when updating a meal with a new items array', async () => {
+    prismaMock.foodItem.findMany.mockResolvedValue([
+      { id: 1, kcal: 400, protein: 25, carbs: 1, fat: 33, baseQuantity: 100 },
+    ]);
+    prismaMock.meal.update.mockResolvedValue({ id: 5 });
+
+    await service.update(7, 5, {
+      items: [{ foodItemId: 1, quantity: 50 }],
+    });
+
+    expect(prismaMock.foodItem.findMany).toHaveBeenCalledWith({
+      where: { id: { in: [1] }, userId: 7, archived: false },
+    });
+    expect(prismaMock.meal.update).toHaveBeenCalledWith({
+      where: { id_userId: { id: 5, userId: 7 } },
+      data: {
+        name: undefined,
+        typeMeal: undefined,
+        loggedAt: undefined,
+        items: {
+          deleteMany: {},
+          create: [
+            {
+              foodItemId: 1,
+              quantity: 50,
+              kcal: 200,
+              protein: 12.5,
+              carbs: 0.5,
+              fat: 16.5,
+            },
+          ],
+        },
+      },
       include: { items: true },
     });
   });

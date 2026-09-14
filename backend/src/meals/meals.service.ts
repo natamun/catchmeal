@@ -2,17 +2,17 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 
 import { FoodItem } from '../generated/prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
-import { CreateMealDto } from './dto/create-meal.dto';
+import { CreateMealDto, CreateMealItemDto } from './dto/create-meal.dto';
 import { UpdateMealDto } from './dto/update-meal.dto';
 
 @Injectable()
 export class MealsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(userId: number, dto: CreateMealDto) {
+  private async buildItemsData(userId: number, items: CreateMealItemDto[]) {
     const ids = [
       ...new Set(
-        dto.items
+        items
           .map((item) => item.foodItemId)
           .filter((id): id is number => id !== undefined),
       ),
@@ -32,7 +32,7 @@ export class MealsService {
       foodItems.map((f) => [f.id, f]),
     );
 
-    const items = dto.items.map((item) => {
+    return items.map((item) => {
       if (item.foodItemId === undefined) {
         return {
           foodItemId: null,
@@ -56,6 +56,10 @@ export class MealsService {
         fat: foodItem.fat * scale,
       };
     });
+  }
+
+  async create(userId: number, dto: CreateMealDto) {
+    const items = await this.buildItemsData(userId, dto.items);
 
     return this.prisma.meal.create({
       data: {
@@ -86,7 +90,11 @@ export class MealsService {
     });
   }
 
-  update(userId: number, id: number, dto: UpdateMealDto) {
+  async update(userId: number, id: number, dto: UpdateMealDto) {
+    const items = dto.items
+      ? await this.buildItemsData(userId, dto.items)
+      : undefined;
+
     return this.prisma.meal.update({
       where: { id_userId: { id, userId } },
       data: {
@@ -94,6 +102,12 @@ export class MealsService {
         typeMeal: dto.typeMeal,
         loggedAt:
           dto.loggedAt === undefined ? undefined : new Date(dto.loggedAt),
+        items: items
+          ? {
+              deleteMany: {},
+              create: items,
+            }
+          : undefined,
       },
       include: { items: true },
     });
