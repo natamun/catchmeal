@@ -1,8 +1,17 @@
 import { useState } from 'react';
-import { ChevronRight, LoaderCircle, Pencil, Plus, Search } from 'lucide-react';
+import { ChevronRight, LoaderCircle, Pencil, Plus } from 'lucide-react';
 
-import { Input } from '../ui/Input';
-import type { FoodItem } from './types';
+import FoodItemSearchBar from './FoodItemSearchBar';
+import {
+  EMPTY_FILTER_CRITERIA,
+  type FoodFilterCriteria,
+  type FoodItem,
+  type MacroFilter,
+} from './types';
+
+function matchesMacro(itemValue: number, filter: MacroFilter) {
+  return itemValue >= filter.min && itemValue <= filter.max;
+}
 
 interface FoodItemListProps {
   items: FoodItem[];
@@ -54,6 +63,33 @@ export default function FoodItemList({
   onEdit,
 }: FoodItemListProps) {
   const [expandedIds, setExpandedIds] = useState<Set<number>>(new Set());
+  const [criteria, setCriteria] = useState<FoodFilterCriteria>(
+    EMPTY_FILTER_CRITERIA,
+  );
+
+  const query = criteria.query.trim().toLowerCase();
+  const visibleItems = items
+    .filter((item) => {
+      const matchesQuery =
+        !query ||
+        item.name.toLowerCase().includes(query) ||
+        item.brand?.toLowerCase().includes(query);
+
+      return (
+        matchesQuery &&
+        matchesMacro(item.kcal, criteria.kcal) &&
+        matchesMacro(item.protein, criteria.protein) &&
+        matchesMacro(item.carbs, criteria.carbs) &&
+        matchesMacro(item.fat, criteria.fat)
+      );
+    })
+    .sort((a, b) => {
+      const { field, direction } = criteria.sort;
+      const dir = direction === 'asc' ? 1 : -1;
+      return field === 'name'
+        ? a.name.localeCompare(b.name) * dir
+        : (a[field] - b[field]) * dir;
+    });
 
   const toggleExpanded = (id: number) => {
     setExpandedIds((prev) => {
@@ -70,14 +106,11 @@ export default function FoodItemList({
   return (
     <div className="@container overflow-hidden rounded-2xl border border-green-200 bg-white shadow-sm">
       <div className="flex items-center gap-3 border-b border-green-200 px-5 py-4">
-        <div className="relative flex-1">
-          <Search className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-green-400" />
-          <Input
-            type="text"
-            placeholder="Rechercher un aliment..."
-            className="pl-9"
-          />
-        </div>
+        <FoodItemSearchBar
+          items={items}
+          criteria={criteria}
+          onFilterChange={setCriteria}
+        />
         <button
           type="button"
           onClick={onAdd}
@@ -99,7 +132,7 @@ export default function FoodItemList({
       )}
 
       <ul className="divide-y divide-green-200">
-        {items.map((item) => {
+        {visibleItems.map((item) => {
           const isExpanded = expandedIds.has(item.id);
           const macros = macrosOf(item);
           return (
