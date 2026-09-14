@@ -50,7 +50,7 @@ function MacroBadge({
       className="flex items-center gap-1 text-xs font-semibold text-green-700"
     >
       <span aria-hidden="true" className={`h-2 w-2 rounded-full ${color}`} />
-      {value}g
+      {value}
     </span>
   );
 }
@@ -131,12 +131,27 @@ export default function FoodItemList({
         <p className="px-5 pb-5 text-sm text-red-500">{loadError}</p>
       )}
 
+      {!isLoading && !loadError && items.length === 0 && (
+        <p className="px-5 py-10 text-center text-sm text-green-400">
+          Aucun aliment enregistré.
+        </p>
+      )}
+
+      {!isLoading &&
+        !loadError &&
+        items.length > 0 &&
+        visibleItems.length === 0 && (
+          <p className="px-5 py-10 text-center text-sm text-green-400">
+            Aucun aliment ne correspond à cette recherche.
+          </p>
+        )}
+
       <ul className="divide-y divide-green-200">
         {visibleItems.map((item) => {
           const isExpanded = expandedIds.has(item.id);
           const macros = macrosOf(item);
           return (
-            <li key={item.id} className="px-5 py-4">
+            <li key={item.id} className="px-5 py-4 even:bg-gray-50">
               <div className="flex items-center gap-3">
                 <button
                   type="button"
@@ -165,7 +180,7 @@ export default function FoodItemList({
                     <MacroBadge key={m.label} {...m} />
                   ))}
                 </div>
-                <span className="shrink-0 rounded-full bg-green-50 px-2.5 py-0.5 text-sm font-semibold text-green-800">
+                <span className="min-w-20 shrink-0 rounded-full bg-green-50 px-2.5 py-0.5 text-center text-sm font-semibold text-green-800">
                   {item.kcal} kcal
                 </span>
                 <button
