@@ -106,6 +106,87 @@ describe('MealsService', () => {
     });
   });
 
+  it('should create a meal with quick-add items using client-supplied macros', async () => {
+    const dto: CreateMealDto = {
+      name: 'Snack rapide',
+      items: [{ quantity: 1, kcal: 200, protein: 5, carbs: 20, fat: 8 }],
+    };
+    prismaMock.meal.create.mockResolvedValue({ id: 6 });
+
+    await service.create(7, dto);
+
+    expect(prismaMock.foodItem.findMany).not.toHaveBeenCalled();
+    expect(prismaMock.meal.create).toHaveBeenCalledWith({
+      data: {
+        userId: 7,
+        name: 'Snack rapide',
+        typeMeal: undefined,
+        loggedAt: undefined,
+        items: {
+          create: [
+            {
+              foodItemId: null,
+              quantity: 1,
+              kcal: 200,
+              protein: 5,
+              carbs: 20,
+              fat: 8,
+            },
+          ],
+        },
+      },
+      include: { items: true },
+    });
+  });
+
+  it('should create a meal mixing food-item and quick-add items', async () => {
+    const dto: CreateMealDto = {
+      items: [
+        { foodItemId: 1, quantity: 30 },
+        { quantity: 1, kcal: 200, protein: 5, carbs: 20, fat: 8 },
+      ],
+    };
+    prismaMock.foodItem.findMany.mockResolvedValue([
+      { id: 1, kcal: 400, protein: 25, carbs: 1, fat: 33, baseQuantity: 100 },
+    ]);
+    prismaMock.meal.create.mockResolvedValue({ id: 7 });
+
+    await service.create(7, dto);
+
+    expect(prismaMock.foodItem.findMany).toHaveBeenCalledWith({
+      where: { id: { in: [1] }, userId: 7, archived: false },
+    });
+    expect(prismaMock.meal.create).toHaveBeenCalledWith({
+      data: {
+        userId: 7,
+        name: undefined,
+        typeMeal: undefined,
+        loggedAt: undefined,
+        items: {
+          create: [
+            {
+              foodItemId: 1,
+              quantity: 30,
+              kcal: 120,
+              protein: 7.5,
+              carbs: 0.3,
+              fat: 9.9,
+            },
+            {
+              foodItemId: null,
+              quantity: 1,
+              kcal: 200,
+              protein: 5,
+              carbs: 20,
+              fat: 8,
+            },
+          ],
+        },
+      },
+      include: { items: true },
+    });
+  });
+
   it('should reject when a referenced food item does not exist', async () => {
     const dto: CreateMealDto = {
       items: [

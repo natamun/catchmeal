@@ -2,7 +2,7 @@ export type MealType = 'BREAKFAST' | 'LUNCH' | 'DINNER' | 'SNACK';
 
 export interface MealFoodItem {
   id: number;
-  foodItemId: number;
+  foodItemId: number | null;
   quantity: number;
   kcal: number;
   protein: number;
@@ -19,8 +19,12 @@ export interface Meal {
 }
 
 export interface MealItemInput {
-  foodItemId: number;
+  foodItemId?: number;
   quantity: number;
+  kcal?: number;
+  protein?: number;
+  carbs?: number;
+  fat?: number;
 }
 
 export interface MealInput {

@@ -10,11 +10,19 @@ export class MealsService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(userId: number, dto: CreateMealDto) {
-    const ids = [...new Set(dto.items.map((item) => item.foodItemId))];
+    const ids = [
+      ...new Set(
+        dto.items
+          .map((item) => item.foodItemId)
+          .filter((id): id is number => id !== undefined),
+      ),
+    ];
 
-    const foodItems = await this.prisma.foodItem.findMany({
-      where: { id: { in: ids }, userId, archived: false },
-    });
+    const foodItems = ids.length
+      ? await this.prisma.foodItem.findMany({
+          where: { id: { in: ids }, userId, archived: false },
+        })
+      : [];
 
     if (foodItems.length !== ids.length) {
       throw new NotFoundException('One or more food items were not found');
@@ -25,6 +33,17 @@ export class MealsService {
     );
 
     const items = dto.items.map((item) => {
+      if (item.foodItemId === undefined) {
+        return {
+          foodItemId: null,
+          quantity: item.quantity,
+          kcal: item.kcal!,
+          protein: item.protein!,
+          carbs: item.carbs!,
+          fat: item.fat!,
+        };
+      }
+
       const foodItem = foodItemById.get(item.foodItemId)!;
       const scale = item.quantity / foodItem.baseQuantity;
 
