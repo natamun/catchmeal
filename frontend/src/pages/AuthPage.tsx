@@ -2,7 +2,9 @@ import { useState, type FormEvent } from 'react';
 
 import { ApiError } from '../auth/api';
 import { useAuth } from '../auth/auth-context';
+import { FieldError } from '../components/ui/FieldError';
 import { Input } from '../components/ui/Input';
+import { useTimeout } from '../hooks/useTimeout';
 
 type Mode = 'login' | 'register';
 
@@ -11,30 +13,124 @@ interface Props {
   onCancel: () => void;
 }
 
+interface AuthFormState {
+  username: string;
+  name: string;
+  email: string;
+  password: string;
+}
+
+const EMPTY_FORM: AuthFormState = {
+  username: '',
+  name: '',
+  email: '',
+  password: '',
+};
+
 const LABEL_CLASS =
   'text-xs font-semibold tracking-wide text-green-500 uppercase';
+
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+function validateAuthForm(
+  mode: Mode,
+  form: AuthFormState,
+): Partial<Record<keyof AuthFormState, string>> {
+  const errors: Partial<Record<keyof AuthFormState, string>> = {};
+
+  if (form.username.trim().length < 3) {
+    errors.username = 'Au moins 3 caractères';
+  }
+
+  if (mode === 'register') {
+    if (form.name.trim() === '') {
+      errors.name = 'Nom requis';
+    }
+    if (!EMAIL_PATTERN.test(form.email.trim())) {
+      errors.email = 'Email invalide';
+    }
+  }
+
+  if (form.password.length < 8) {
+    errors.password = 'Au moins 8 caractères';
+  }
+
+  return errors;
+}
 
 export default function AuthPage({ initialMode, onCancel }: Props) {
   const { login, register } = useAuth();
   const [mode, setMode] = useState<Mode>(initialMode);
-  const [username, setUsername] = useState('');
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [form, setForm] = useState<AuthFormState>(EMPTY_FORM);
+  const [touched, setTouched] = useState<
+    Partial<Record<keyof AuthFormState, boolean>>
+  >({});
+  const [focusedField, setFocusedField] = useState<keyof AuthFormState | null>(
+    null,
+  );
+  const [submitAttempted, setSubmitAttempted] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const errors = validateAuthForm(mode, form);
+
+  useTimeout(() => setSubmitAttempted(false), submitAttempted ? 5000 : null);
+
+  const handleFocus = (field: keyof AuthFormState) => setFocusedField(field);
+
+  const handleBlur = (field: keyof AuthFormState) => {
+    setTouched((prev) => ({ ...prev, [field]: true }));
+    setFocusedField((current) => (current === field ? null : current));
+  };
+
+  const handleChange = (field: keyof AuthFormState, value: string) => {
+    setForm((prev) => ({ ...prev, [field]: value }));
+    setTouched((prev) => ({ ...prev, [field]: true }));
+  };
+
+  const isInvalid = (field: keyof AuthFormState) =>
+    Boolean(touched[field] && errors[field]);
+
+  const errorMessage = (field: keyof AuthFormState) =>
+    touched[field] && (focusedField === field || submitAttempted)
+      ? errors[field]
+      : undefined;
+
+  const switchMode = (nextMode: Mode) => {
+    setMode(nextMode);
+    setTouched({});
+    setSubmitAttempted(false);
+    setError(null);
+  };
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setError(null);
+
+    const allTouched = Object.fromEntries(
+      Object.keys(form).map((key) => [key, true]),
+    ) as Record<keyof AuthFormState, boolean>;
+    setTouched(allTouched);
+
+    if (Object.keys(errors).length > 0) {
+      setSubmitAttempted(true);
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       if (mode === 'login') {
-        await login({ username, password });
+        await login({ username: form.username, password: form.password });
       } else {
-        await register({ username, name, email, password });
+        await register({
+          username: form.username,
+          name: form.name,
+          email: form.email,
+          password: form.password,
+        });
       }
     } catch (err: unknown) {
+      console.error(err);
       setError(
         err instanceof ApiError
           ? err.message
@@ -62,60 +158,94 @@ export default function AuthPage({ initialMode, onCancel }: Props) {
 
         <form
           onSubmit={(e) => void handleSubmit(e)}
+          noValidate
+          autoComplete="off"
           className="flex flex-col gap-4"
         >
-          <div className="flex flex-col gap-1.5">
+          <div className="relative flex flex-col gap-1.5">
             <label htmlFor="auth-username" className={LABEL_CLASS}>
               Nom d'utilisateur
             </label>
             <Input
               id="auth-username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              required
-              minLength={3}
+              type="text"
+              placeholder="Username"
+              value={form.username}
+              onChange={(e) => handleChange('username', e.target.value)}
+              onFocus={() => handleFocus('username')}
+              onBlur={() => handleBlur('username')}
+              aria-invalid={isInvalid('username')}
+              aria-describedby="auth-username-error"
+            />
+            <FieldError
+              id="auth-username-error"
+              message={errorMessage('username')}
             />
           </div>
 
           {mode === 'register' && (
             <>
-              <div className="flex flex-col gap-1.5">
+              <div className="relative flex flex-col gap-1.5">
                 <label htmlFor="auth-name" className={LABEL_CLASS}>
                   Nom complet
                 </label>
                 <Input
                   id="auth-name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  required
+                  type="text"
+                  placeholder="Nom complet"
+                  value={form.name}
+                  onChange={(e) => handleChange('name', e.target.value)}
+                  onFocus={() => handleFocus('name')}
+                  onBlur={() => handleBlur('name')}
+                  aria-invalid={isInvalid('name')}
+                  aria-describedby="auth-name-error"
+                />
+                <FieldError
+                  id="auth-name-error"
+                  message={errorMessage('name')}
                 />
               </div>
-              <div className="flex flex-col gap-1.5">
+              <div className="relative flex flex-col gap-1.5">
                 <label htmlFor="auth-email" className={LABEL_CLASS}>
                   Email
                 </label>
                 <Input
                   id="auth-email"
                   type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
+                  placeholder="Email"
+                  value={form.email}
+                  onChange={(e) => handleChange('email', e.target.value)}
+                  onFocus={() => handleFocus('email')}
+                  onBlur={() => handleBlur('email')}
+                  aria-invalid={isInvalid('email')}
+                  aria-describedby="auth-email-error"
+                />
+                <FieldError
+                  id="auth-email-error"
+                  message={errorMessage('email')}
                 />
               </div>
             </>
           )}
 
-          <div className="flex flex-col gap-1.5">
+          <div className="relative flex flex-col gap-1.5">
             <label htmlFor="auth-password" className={LABEL_CLASS}>
               Mot de passe
             </label>
             <Input
               id="auth-password"
               type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              minLength={8}
+              placeholder="8 caractères minimum"
+              value={form.password}
+              onChange={(e) => handleChange('password', e.target.value)}
+              onFocus={() => handleFocus('password')}
+              onBlur={() => handleBlur('password')}
+              aria-invalid={isInvalid('password')}
+              aria-describedby="auth-password-error"
+            />
+            <FieldError
+              id="auth-password-error"
+              message={errorMessage('password')}
             />
           </div>
 
@@ -136,7 +266,7 @@ export default function AuthPage({ initialMode, onCancel }: Props) {
 
         <button
           type="button"
-          onClick={() => setMode(mode === 'login' ? 'register' : 'login')}
+          onClick={() => switchMode(mode === 'login' ? 'register' : 'login')}
           className="mt-4 w-full cursor-pointer text-center text-sm text-green-500 hover:text-green-600"
         >
           {mode === 'login'
