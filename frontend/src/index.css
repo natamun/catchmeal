@@ -92,17 +92,14 @@ body {
 
 .dialog-fade {
   opacity: 0;
-  transform: translateY(-4px);
   transition:
     opacity 0.15s ease-in,
-    transform 0.15s ease-in,
     overlay 0.15s allow-discrete,
     display 0.15s allow-discrete;
 }
 
 .dialog-fade[open] {
   opacity: 1;
-  transform: translateY(0);
   transition-timing-function: ease-out;
 }
 
@@ -122,7 +119,6 @@ body {
 @starting-style {
   .dialog-fade[open] {
     opacity: 0;
-    transform: translateY(-4px);
   }
 
   .dialog-fade[open]::backdrop {
