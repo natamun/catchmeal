@@ -4,7 +4,10 @@ import { listFoodItems } from '../components/food/api';
 import FoodItemForm from '../components/food/FoodItemForm';
 import FoodItemList from '../components/food/FoodItemList';
 import type { FoodItem } from '../components/food/types';
+import { listMeals } from '../components/meal/api';
+import MealForm from '../components/meal/MealForm';
 import MealList from '../components/meal/MealList';
+import type { Meal } from '../components/meal/types';
 import { useDelayedUnmount } from '../hooks/useDelayedUnmount';
 
 type Tab = 'food' | 'meal';
@@ -44,7 +47,7 @@ function LegendBubble({ show }: { show: boolean }) {
 
   return (
     <div
-      className={`absolute top-full right-0 z-10 mt-2 ${show ? 'animate-fade-in-up' : 'animate-fade-out'}`}
+      className={`absolute top-full right-0 z-10 mt-1.5 ${show ? 'animate-fade-in-up' : 'animate-fade-out'}`}
     >
       <div className="absolute -top-1 right-4 h-2 w-2 rotate-45 border-t border-l border-green-200 bg-white" />
       <div className="flex items-center gap-3 rounded-lg border border-green-200 bg-white px-3 py-2 text-xs whitespace-nowrap text-green-700 shadow-sm">
@@ -54,6 +57,7 @@ function LegendBubble({ show }: { show: boolean }) {
             {label}
           </span>
         ))}
+        <span className="text-green-400">Valeurs en grammes</span>
       </div>
     </div>
   );
@@ -66,7 +70,11 @@ export default function FoodPage() {
   const [editingItem, setEditingItem] = useState<FoodItem | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [meals, setMeals] = useState<Meal[]>([]);
+  const [isMealsLoading, setIsMealsLoading] = useState(true);
+  const [mealsLoadError, setMealsLoadError] = useState<string | null>(null);
   const dialogRef = useRef<HTMLDialogElement>(null);
+  const mealDialogRef = useRef<HTMLDialogElement>(null);
   const legendRef = useRef<HTMLDivElement>(null);
   const supportsHover = useSupportsHover();
 
@@ -100,6 +108,25 @@ export default function FoodPage() {
       .finally(() => {
         if (!controller.signal.aborted) {
           setIsLoading(false);
+        }
+      });
+    return () => controller.abort();
+  }, []);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    listMeals(controller.signal)
+      .then(setMeals)
+      .catch((err: unknown) => {
+        if (controller.signal.aborted) {
+          return;
+        }
+        console.error(err);
+        setMealsLoadError('Impossible de charger tes repas, réessaye.');
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) {
+          setIsMealsLoading(false);
         }
       });
     return () => controller.abort();
@@ -164,6 +191,12 @@ export default function FoodPage() {
         }
       />
 
+      <MealForm
+        dialogRef={mealDialogRef}
+        foodItems={foodItems}
+        onMealAdded={(meal) => setMeals((prev) => [...prev, meal])}
+      />
+
       <div key={activeTab} className="animate-fade-in-up">
         {activeTab === 'food' ? (
           <FoodItemList
@@ -174,7 +207,12 @@ export default function FoodPage() {
             onEdit={(item) => openDialog(item)}
           />
         ) : (
-          <MealList onAdd={() => {}} />
+          <MealList
+            meals={meals}
+            isLoading={isMealsLoading}
+            loadError={mealsLoadError}
+            onAdd={() => mealDialogRef.current?.showModal()}
+          />
         )}
       </div>
     </div>
