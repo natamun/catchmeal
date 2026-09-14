@@ -1,8 +1,9 @@
 import { useMemo, useRef, useState } from 'react';
+import * as Popover from '@radix-ui/react-popover';
 import { ChevronRight, Filter, Search } from 'lucide-react';
 
-import { useDelayedUnmount } from '../../hooks/useDelayedUnmount';
 import { BaseDialog } from '../ui/BaseDialog';
+import { DropdownPanel } from '../ui/DropdownPanel';
 import { Input } from '../ui/Input';
 import {
   EMPTY_FILTER_CRITERIA,
@@ -116,7 +117,7 @@ export default function FoodItemSearchBar({
     EMPTY_FILTER_CRITERIA.sort,
   );
   const [isSortOpen, setIsSortOpen] = useState(false);
-  const displaySortMenu = useDelayedUnmount(isSortOpen, 100);
+  const [dialogNode, setDialogNode] = useState<HTMLDialogElement | null>(null);
   const filterDialogRef = useRef<HTMLDialogElement>(null);
 
   const macroBounds = useMemo<MacroDraft>(
@@ -198,46 +199,41 @@ export default function FoodItemSearchBar({
         title="Trier et filtrer"
         maxWidth="sm"
         onClose={() => setIsSortOpen(false)}
+        onDialogNode={setDialogNode}
       >
-        <div className="relative">
-          <button
-            type="button"
-            onClick={() => setIsSortOpen((prev) => !prev)}
-            aria-expanded={isSortOpen}
-            aria-label="Trier par"
-            className="flex w-full cursor-pointer items-center justify-between rounded-xl border border-green-200 bg-white px-4 py-2.5 text-sm text-green-800 transition-colors hover:bg-green-50"
-          >
-            {SORT_OPTIONS.find((o) => o.value === currentSortValue)?.label}
-            <ChevronRight
-              className={`h-4 w-4 text-green-400 transition-transform ${isSortOpen ? 'rotate-90' : ''}`}
-            />
-          </button>
-          {displaySortMenu && (
-            <div
-              className={`absolute top-full right-0 left-0 z-10 mt-1 overflow-hidden rounded-xl border border-green-200 bg-white shadow-md ${isSortOpen ? 'animate-fade-in-up' : 'animate-fade-out'}`}
+        <Popover.Root open={isSortOpen} onOpenChange={setIsSortOpen}>
+          <Popover.Trigger asChild>
+            <button
+              type="button"
+              aria-label="Trier par"
+              className="flex w-full cursor-pointer items-center justify-between rounded-xl border border-green-200 bg-white px-4 py-2.5 text-sm text-green-800 transition-colors hover:bg-green-50"
             >
-              <div className="flex max-h-60 flex-col overflow-y-auto">
-                {SORT_OPTIONS.map(({ value, label, option }) => (
-                  <button
-                    key={value}
-                    type="button"
-                    onClick={() => {
-                      setDraftSort(option);
-                      setIsSortOpen(false);
-                    }}
-                    className={`cursor-pointer border-t border-green-100 px-4 py-2 text-left text-sm transition-colors first:border-t-0 hover:bg-green-50 ${
-                      value === currentSortValue
-                        ? 'font-semibold text-green-800'
-                        : 'text-green-600'
-                    }`}
-                  >
-                    {label}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
+              {SORT_OPTIONS.find((o) => o.value === currentSortValue)?.label}
+              <ChevronRight
+                className={`h-4 w-4 text-green-400 transition-transform ${isSortOpen ? 'rotate-90' : ''}`}
+              />
+            </button>
+          </Popover.Trigger>
+          <DropdownPanel container={dialogNode} matchAnchorWidth>
+            {SORT_OPTIONS.map(({ value, label, option }) => (
+              <button
+                key={value}
+                type="button"
+                onClick={() => {
+                  setDraftSort(option);
+                  setIsSortOpen(false);
+                }}
+                className={`cursor-pointer border-t border-green-100 px-4 py-2 text-left text-sm transition-colors first:border-t-0 hover:bg-green-50 ${
+                  value === currentSortValue
+                    ? 'font-semibold text-green-800'
+                    : 'text-green-600'
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </DropdownPanel>
+        </Popover.Root>
 
         <div className="flex flex-col gap-3 border-t border-green-100 pt-5">
           <div className="flex flex-col gap-5">
