@@ -1,15 +1,16 @@
-import { useState, type RefObject } from 'react';
+import { useRef, useState, type RefObject } from 'react';
 import * as Popover from '@radix-ui/react-popover';
-import { AlertCircle, CheckCircle2, X } from 'lucide-react';
+import { AlertCircle, CheckCircle2, Trash2, X } from 'lucide-react';
 
 import { useDelayedUnmount } from '../../hooks/useDelayedUnmount';
 import { useTimeout } from '../../hooks/useTimeout';
 import type { FoodItem } from '../food/types';
 import { BaseDialog } from '../ui/BaseDialog';
+import { ConfirmDialog } from '../ui/ConfirmDialog';
 import { DropdownPanel } from '../ui/DropdownPanel';
 import { Input } from '../ui/Input';
 import { Toast } from '../ui/Toast';
-import { ApiError, createMeal } from './api';
+import { ApiError, createMeal, deleteMeal, updateMeal } from './api';
 import type { Meal, MealInput } from './types';
 
 const LABEL_CLASS =
@@ -99,16 +100,55 @@ type MealItemDraft =
       fat: number;
     };
 
+function mealToItems(meal: Meal, foodItems: FoodItem[]): MealItemDraft[] {
+  const drafts: MealItemDraft[] = [];
+
+  for (const item of meal.items) {
+    if (item.foodItemId === null) {
+      drafts.push({
+        id: crypto.randomUUID(),
+        kind: 'quick',
+        quantity: item.quantity,
+        kcal: item.kcal,
+        protein: item.protein,
+        carbs: item.carbs,
+        fat: item.fat,
+      });
+      continue;
+    }
+
+    const foodItem = foodItems.find((f) => f.id === item.foodItemId);
+    if (!foodItem) {
+      continue;
+    }
+
+    drafts.push({
+      id: crypto.randomUUID(),
+      kind: 'food',
+      foodItem,
+      quantity: item.quantity,
+    });
+  }
+
+  return drafts;
+}
+
 interface MealFormProps {
   dialogRef: RefObject<HTMLDialogElement | null>;
   foodItems: FoodItem[];
+  editingMeal: Meal | null;
   onMealAdded: (meal: Meal) => void;
+  onMealUpdated: (meal: Meal) => void;
+  onMealDeleted: (id: number) => void;
 }
 
 export default function MealForm({
   dialogRef,
   foodItems,
+  editingMeal,
   onMealAdded,
+  onMealUpdated,
+  onMealDeleted,
 }: MealFormProps) {
   const [name, setName] = useState('');
   const [nameTouched, setNameTouched] = useState(false);
@@ -129,6 +169,19 @@ export default function MealForm({
   const [submitAttempted, setSubmitAttempted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [syncedMealId, setSyncedMealId] = useState<number | null>(
+    editingMeal?.id ?? null,
+  );
+  const confirmDialogRef = useRef<HTMLDialogElement>(null);
+
+  if ((editingMeal?.id ?? null) !== syncedMealId) {
+    setSyncedMealId(editingMeal?.id ?? null);
+    setName(editingMeal?.name ?? '');
+    setItems(editingMeal ? mealToItems(editingMeal, foodItems) : []);
+    setNameTouched(false);
+    setSubmitAttempted(false);
+    setError(null);
+  }
 
   useTimeout(
     () => setQuickAddSubmitAttempted(false),
@@ -304,14 +357,25 @@ export default function MealForm({
               },
         ),
       };
-      const savedMeal = await createMeal(input);
-      onMealAdded(savedMeal);
-      setName('');
-      setItems([]);
+      const savedMeal = editingMeal
+        ? await updateMeal(editingMeal.id, input)
+        : await createMeal(input);
+
+      if (editingMeal) {
+        onMealUpdated(savedMeal);
+      } else {
+        onMealAdded(savedMeal);
+        setName('');
+        setItems([]);
+      }
       setNameTouched(false);
       setSubmitAttempted(false);
       closeDialog();
-      setSuccessMessage('Repas enregistré avec succès');
+      setSuccessMessage(
+        editingMeal
+          ? 'Repas modifié avec succès'
+          : 'Repas enregistré avec succès',
+      );
     } catch (err: unknown) {
       console.error(err);
       setError(
@@ -324,12 +388,44 @@ export default function MealForm({
     }
   };
 
+  const handleDelete = async () => {
+    if (!editingMeal) {
+      return;
+    }
+    setError(null);
+    setIsSubmitting(true);
+    try {
+      await deleteMeal(editingMeal.id);
+      onMealDeleted(editingMeal.id);
+      closeDialog();
+      setSuccessMessage('Repas supprimé');
+    } catch (err: unknown) {
+      console.error(err);
+      setError('Suppression impossible, réessayez.');
+    } finally {
+      setIsSubmitting(false);
+      confirmDialogRef.current?.close();
+    }
+  };
+
   return (
     <>
       <BaseDialog
         dialogRef={dialogRef}
-        title="Ajouter un repas"
+        title={editingMeal ? 'Modifier un repas' : 'Ajouter un repas'}
         onDialogNode={setDialogNode}
+        headerActions={
+          editingMeal && (
+            <button
+              type="button"
+              onClick={() => confirmDialogRef.current?.showModal()}
+              aria-label="Supprimer"
+              className="cursor-pointer text-green-400 transition-colors hover:text-red-500"
+            >
+              <Trash2 className="h-5 w-5" />
+            </button>
+          )
+        }
       >
         <form
           onSubmit={(e) => void handleSubmit(e)}
@@ -581,6 +677,16 @@ export default function MealForm({
           </div>
         </form>
       </BaseDialog>
+
+      <ConfirmDialog
+        dialogRef={confirmDialogRef}
+        title="Supprimer ce repas ?"
+        description={`${editingMeal?.name ?? 'Ce repas'} sera retiré de ta liste.`}
+        confirmLabel="Supprimer"
+        pendingLabel="Suppression..."
+        isPending={isSubmitting}
+        onConfirm={() => void handleDelete()}
+      />
 
       <Toast message={successMessage} icon={CheckCircle2} />
     </>

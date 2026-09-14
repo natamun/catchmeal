@@ -71,6 +71,7 @@ export default function FoodPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [meals, setMeals] = useState<Meal[]>([]);
+  const [editingMeal, setEditingMeal] = useState<Meal | null>(null);
   const [isMealsLoading, setIsMealsLoading] = useState(true);
   const [mealsLoadError, setMealsLoadError] = useState<string | null>(null);
   const dialogRef = useRef<HTMLDialogElement>(null);
@@ -137,6 +138,11 @@ export default function FoodPage() {
     dialogRef.current?.showModal();
   };
 
+  const openMealDialog = (meal: Meal | null) => {
+    setEditingMeal(meal);
+    mealDialogRef.current?.showModal();
+  };
+
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between gap-3">
@@ -194,7 +200,16 @@ export default function FoodPage() {
       <MealForm
         dialogRef={mealDialogRef}
         foodItems={foodItems}
+        editingMeal={editingMeal}
         onMealAdded={(meal) => setMeals((prev) => [...prev, meal])}
+        onMealUpdated={(updated) =>
+          setMeals((prev) =>
+            prev.map((meal) => (meal.id === updated.id ? updated : meal)),
+          )
+        }
+        onMealDeleted={(id) =>
+          setMeals((prev) => prev.filter((meal) => meal.id !== id))
+        }
       />
 
       <div key={activeTab} className="animate-fade-in-up">
@@ -211,7 +226,8 @@ export default function FoodPage() {
             meals={meals}
             isLoading={isMealsLoading}
             loadError={mealsLoadError}
-            onAdd={() => mealDialogRef.current?.showModal()}
+            onAdd={() => openMealDialog(null)}
+            onEdit={(meal) => openMealDialog(meal)}
           />
         )}
       </div>
