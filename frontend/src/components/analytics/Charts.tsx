@@ -55,7 +55,9 @@ export default function Charts({ dashboard }: { dashboard: DashboardDay[] }) {
   return (
     <div className="flex flex-col gap-4">
       <div className="rounded-2xl border border-green-200 bg-white shadow-sm transition-shadow hover:shadow-md">
-        <h3 className="m-2 text-lg font-semibold">Calories et objectif / {printGrain}</h3>
+        <h3 className="m-2 text-lg font-semibold">
+          Calories et objectif / {printGrain}
+        </h3>
         <ResponsiveContainer
           width="100%"
           height={250}
