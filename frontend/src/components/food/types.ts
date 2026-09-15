@@ -10,9 +10,10 @@ export interface FoodItem {
   protein: number;
   carbs: number;
   fat: number;
+  archived: boolean;
 }
 
-export type FoodItemInput = Omit<FoodItem, 'id'>;
+export type FoodItemInput = Omit<FoodItem, 'id' | 'archived'>;
 
 export interface MacroFilter {
   min: number;

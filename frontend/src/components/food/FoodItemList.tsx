@@ -67,8 +67,10 @@ export default function FoodItemList({
     EMPTY_FILTER_CRITERIA,
   );
 
+  const activeItems = items.filter((item) => !item.archived);
+
   const query = criteria.query.trim().toLowerCase();
-  const visibleItems = items
+  const visibleItems = activeItems
     .filter((item) => {
       const matchesQuery =
         !query ||
@@ -107,7 +109,7 @@ export default function FoodItemList({
     <div className="@container overflow-hidden rounded-2xl border border-green-200 bg-white shadow-sm">
       <div className="flex items-center gap-3 border-b border-green-200 px-5 py-4">
         <FoodItemSearchBar
-          items={items}
+          items={activeItems}
           criteria={criteria}
           onFilterChange={setCriteria}
         />
@@ -131,7 +133,7 @@ export default function FoodItemList({
         <p className="px-5 pb-5 text-sm text-red-500">{loadError}</p>
       )}
 
-      {!isLoading && !loadError && items.length === 0 && (
+      {!isLoading && !loadError && activeItems.length === 0 && (
         <p className="px-5 py-10 text-center text-sm text-green-400">
           Aucun aliment enregistré.
         </p>
@@ -139,7 +141,7 @@ export default function FoodItemList({
 
       {!isLoading &&
         !loadError &&
-        items.length > 0 &&
+        activeItems.length > 0 &&
         visibleItems.length === 0 && (
           <p className="px-5 py-10 text-center text-sm text-green-400">
             Aucun aliment ne correspond à cette recherche.

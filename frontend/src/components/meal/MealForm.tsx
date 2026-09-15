@@ -178,6 +178,7 @@ export default function MealForm({
   const searchResults = query
     ? foodItems.filter(
         (foodItem) =>
+          !foodItem.archived &&
           !items.some(
             (item) => item.kind === 'food' && item.foodItem.id === foodItem.id,
           ) &&
