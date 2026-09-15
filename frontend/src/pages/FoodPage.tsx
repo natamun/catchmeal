@@ -50,13 +50,15 @@ function LegendBubble({ show }: { show: boolean }) {
       className={`absolute top-full right-0 z-10 mt-1.5 ${show ? 'animate-fade-in-up' : 'animate-fade-out'}`}
     >
       <div className="absolute -top-1 right-4 h-2 w-2 rotate-45 border-t border-l border-green-200 bg-white" />
-      <div className="flex items-center gap-3 rounded-lg border border-green-200 bg-white px-3 py-2 text-xs whitespace-nowrap text-green-700 shadow-sm">
-        {LEGEND_ITEMS.map(({ label, color }) => (
-          <span key={label} className="flex items-center gap-1.5">
-            <span className={`h-1.5 w-1.5 rounded-full ${color}`} />
-            {label}
-          </span>
-        ))}
+      <div className="flex flex-col items-start gap-1.5 rounded-lg border border-green-200 bg-white px-3 py-2 text-xs whitespace-nowrap text-green-700 shadow-sm min-[420px]:flex-row min-[420px]:items-center min-[420px]:gap-3">
+        <div className="flex items-center gap-3">
+          {LEGEND_ITEMS.map(({ label, color }) => (
+            <span key={label} className="flex items-center gap-1.5">
+              <span className={`h-1.5 w-1.5 rounded-full ${color}`} />
+              {label}
+            </span>
+          ))}
+        </div>
         <span className="text-green-400">Valeurs en grammes</span>
       </div>
     </div>
