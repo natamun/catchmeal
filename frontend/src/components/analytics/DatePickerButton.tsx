@@ -36,10 +36,11 @@ export function DatePickerButton({
     <DatePicker
       selected={date}
       onChange={setValue}
+      dateFormat="dd MMM yyyy"
       minDate={min}
       maxDate={max}
       customInput={
-        <CustomInput className="transform rounded-2xl bg-[#ECF8F6] px-2 py-1 text-center font-semibold shadow-sm transition duration-300 hover:scale-110 hover:shadow-md" />
+        <CustomInput className="rounded-2xl bg-[#ECF8F6] px-2 py-1 text-center font-semibold shadow-[0_4px_0_0_#7FC8B8] transition-all duration-150 hover:brightness-95 active:translate-y-1 active:shadow-[0_1px_0_0_#7FC8B8]" />
       }
     />
   );

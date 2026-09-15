@@ -32,8 +32,8 @@ export default function ShowDataDay({
         />
       </div>
       <div className="rounded-2xl border border-green-500 bg-green-300 p-3 shadow-sm">
-        <h4 className="p-1 font-semibold">Détail du {title}</h4>
-        <div className="grid grid-cols-2 gap-1 text-sm">
+        <h4 className="p-1 font-semibold sm:text-xl">Détail du {title}</h4>
+        <div className="grid grid-cols-2 gap-x-3 text-sm sm:text-lg">
           <p>Calories : {printDay?.totalKcal ?? '—'} kcal</p>
           <p>Objectif : {printDay?.goalKcal ?? '—'} kcal</p>
           <p>Protéines : {printDay?.totalProtein ?? '—'} g</p>

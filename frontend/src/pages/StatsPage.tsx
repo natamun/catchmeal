@@ -56,7 +56,7 @@ export default function StatsPage() {
 
         <div className="p-1">
           <h3 className="p-1 text-center font-semibold">Résumé</h3>
-          <div className="grid gap-3 md:mt-1 md:grid-cols-2">
+          <div className="grid gap-3 sm:mt-1 sm:grid-cols-2">
             <StatCard
               title="Moyenne Kcal/jour"
               value={averageKcal || '┄'}
@@ -92,20 +92,11 @@ export default function StatsPage() {
       </div>
 
       <div>
-        <Charts
-          dashboard={dashboard}
-          // onSelectDay={setSelectedDay}
-          // selectedDay={selectedDay}
-        />
+        <Charts dashboard={dashboard} />
       </div>
 
       <div className="flex justify-center">
         <ShowDataDay dashboard={dashboard} to={to} from={from}></ShowDataDay>
-      </div>
-
-      <div className="flex flex-col gap-6">
-        {/* <pre> {JSON.stringify(dashboard, null, 2)}</pre> */}
-        {/* <button className='bg-green-200 rounded-2xl m-2' >Télécharger les données</button> */}
       </div>
     </div>
   );

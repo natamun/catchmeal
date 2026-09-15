@@ -17,71 +17,8 @@ import type {
   DashboardDay,
   DataGraph,
   Grain,
-  NumericKey,
-  WeightPoint,
 } from '../../types/dashboard-analytics';
-import fillWeigthDaily from '../../utils/fillWeigthDaily';
-
-const STEP: Record<Grain, number> = { day: 1, week: 7, biWeek: 14 };
-
-const averageCalculate = (
-  data: DashboardDay[],
-  key: NumericKey,
-): number | null => {
-  let sum = 0;
-  let count = 0;
-
-  for (let i = 0; i < data.length; i++) {
-    const value = data[i][key];
-    if (value !== null && value !== undefined) {
-      sum += value;
-      count++;
-    }
-  }
-  if (count === 0) return null;
-  return sum / count;
-};
-
-const averageWeigth = (data: WeightPoint[]): number | null => {
-  let sum = 0;
-  let count = 0;
-
-  for (let i = 0; i < data.length; i++) {
-    const value: number = data[i].poids;
-    if (value !== null && value !== undefined) {
-      sum += value;
-      count++;
-    }
-  }
-  if (count === 0) return null;
-  return sum / count;
-};
-
-function buildDataGraph(dashboard: DashboardDay[], grain: Grain): DataGraph[] {
-  const weigthData = fillWeigthDaily(dashboard);
-  const step = STEP[grain];
-  const result: DataGraph[] = [];
-
-  for (let i = 0; i < dashboard.length; i += step) {
-    const chunk = dashboard.slice(i, i + step);
-    const chunkWeigth = weigthData.slice(i, i + step);
-    const date = chunk[chunk.length - 1].day
-      .slice(5)
-      .split('-')
-      .reverse()
-      .join('-');
-    const kcal = averageCalculate(chunk, 'totalKcal');
-    const goal = averageCalculate(chunk, 'goalKcal');
-    const weight = averageWeigth(chunkWeigth);
-    result.push({
-      date: date,
-      kcal: Math.round(kcal ?? 0),
-      objective: Math.round(goal ?? 0),
-      weight: Math.round(weight * 10) / 10,
-    });
-  }
-  return result;
-}
+import buildDataGraph from '../../utils/buildDataGraph';
 
 const grainPrintFR = (type: Grain): string => {
   if (type === 'day') return 'Jour';
@@ -118,7 +55,7 @@ export default function Charts({ dashboard }: { dashboard: DashboardDay[] }) {
   return (
     <div className="flex flex-col gap-4">
       <div className="rounded-2xl border border-green-200 bg-white shadow-sm transition-shadow hover:shadow-md">
-        <h3 className="m-2 text-lg font-semibold">Calories / {printGrain}</h3>
+        <h3 className="m-2 text-lg font-semibold">Calories et objectif / {printGrain}</h3>
         <ResponsiveContainer
           width="100%"
           height={250}
@@ -133,6 +70,7 @@ export default function Charts({ dashboard }: { dashboard: DashboardDay[] }) {
             <Tooltip />
             <Bar
               dataKey="kcal"
+              name="Kilocalorie"
               fill="#74c69d"
               barSize={25}
               radius={[4, 4, 0, 0]}
@@ -141,6 +79,7 @@ export default function Charts({ dashboard }: { dashboard: DashboardDay[] }) {
             <Line
               type="monotone"
               dataKey="objective"
+              name="objectif"
               stroke="#081c15"
               strokeDasharray="5 3"
               dot={false}
@@ -174,6 +113,7 @@ export default function Charts({ dashboard }: { dashboard: DashboardDay[] }) {
             <Area
               type="monotone"
               dataKey="weight"
+              name="Poids"
               stroke="#40916c"
               strokeWidth={3}
               fill="url(#weightFill)"
