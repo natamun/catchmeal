@@ -56,7 +56,7 @@ export default function DatePick({
         </label>
       </div>
 
-      <div className="m-2 flex justify-center gap-3">
+      <div className="m-2 flex flex-wrap justify-center gap-3">
         <div>
           <button
             type="button"
