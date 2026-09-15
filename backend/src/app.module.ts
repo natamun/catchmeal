@@ -8,7 +8,12 @@ import { DashboardAnalyticsModule } from './dashboard-analytics/dashboard-analyt
 import { FoodItemsModule } from './food-items/food-items.module';
 
 @Module({
-  imports: [ConfigModule.forRoot(), FoodItemsModule, AuthModule, DashboardAnalyticsModule],
+  imports: [
+    ConfigModule.forRoot(),
+    FoodItemsModule,
+    AuthModule,
+    DashboardAnalyticsModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })
