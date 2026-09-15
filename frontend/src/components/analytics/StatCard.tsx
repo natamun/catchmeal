@@ -1,26 +1,26 @@
+import type { LucideIcon } from 'lucide-react';
+
 export default function StatCard({
   title,
   value,
   unit,
-  img,
+  Icon,
 }: {
   title: string;
   value: number | string;
   unit: string;
-  img?: string;
+  Icon?: LucideIcon;
 }) {
   return (
-    <div className="flex rounded-2xl border border-green-100 bg-white p-2 shadow-sm hover:shadow-md">
+    <div className="flex rounded-2xl border border-green-200 bg-white shadow-sm">
       <object className="m-2 flex items-center justify-center rounded-2xl bg-green-100 p-3">
-        {img && <img className="h-5 w-5" src={img} alt="" />}
+        {Icon && <Icon size={25} />}
       </object>
       <div className="flex flex-col justify-center">
-        <p className="ml-2 text-xs font-semibold text-green-500 uppercase">
-          {title}
-        </p>
-        <p className="mt-1 ml-2 text-3xl font-bold text-green-600">
+        <p className="ml-2 text-xs font-semibold uppercase">{title}</p>
+        <p className="mt-1 ml-2 text-3xl font-bold text-green-500">
           {value}
-          <span className="ml-1 font-mono text-lg text-green-300">{unit}</span>
+          <span className="ml-1 font-mono text-lg text-green-400">{unit}</span>
         </p>
       </div>
     </div>
