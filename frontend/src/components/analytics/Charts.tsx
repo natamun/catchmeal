@@ -54,7 +54,7 @@ export default function Charts({ dashboard }: { dashboard: DashboardDay[] }) {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="rounded-2xl border border-green-200 bg-white shadow-sm transition-shadow hover:shadow-md">
+      <div className="rounded-2xl border border-green-200 bg-white shadow-sm">
         <h3 className="m-2 text-lg font-semibold">
           Calories et objectif / {printGrain}
         </h3>
@@ -92,7 +92,7 @@ export default function Charts({ dashboard }: { dashboard: DashboardDay[] }) {
         </ResponsiveContainer>
       </div>
 
-      <div className="rounded-2xl border border-green-200 bg-white shadow-sm transition-shadow hover:shadow-md">
+      <div className="rounded-2xl border border-green-200 bg-white shadow-sm">
         <h3 className="m-2 text-lg font-semibold">
           Évolution du poids / {printGrain}
         </h3>
