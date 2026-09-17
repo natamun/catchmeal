@@ -50,14 +50,13 @@ export default function Charts({ dashboard }: { dashboard: DashboardDay[] }) {
     [dashboard, grain],
   );
 
-  const printGrain = grainPrintFR(grain);
+  const printKcalGrain = 'Kcal / ' + grainPrintFR(grain);
+  const printWeigthGrain = 'Poid / ' + grainPrintFR(grain);
 
   return (
     <div className="flex flex-col gap-4">
       <div className="rounded-2xl border border-green-200 bg-white shadow-sm">
-        <h3 className="m-2 text-lg font-semibold">
-          Calories et objectif / {printGrain}
-        </h3>
+        <h3 className="m-2 text-lg font-semibold">Calories et objectif</h3>
         <ResponsiveContainer
           width="100%"
           height={250}
@@ -72,7 +71,7 @@ export default function Charts({ dashboard }: { dashboard: DashboardDay[] }) {
             <Tooltip />
             <Bar
               dataKey="kcal"
-              name="Kilocalorie"
+              name={printKcalGrain}
               fill="#74c69d"
               barSize={25}
               radius={[4, 4, 0, 0]}
@@ -93,9 +92,7 @@ export default function Charts({ dashboard }: { dashboard: DashboardDay[] }) {
       </div>
 
       <div className="rounded-2xl border border-green-200 bg-white shadow-sm">
-        <h3 className="m-2 text-lg font-semibold">
-          Évolution du poids / {printGrain}
-        </h3>
+        <h3 className="m-2 text-lg font-semibold">Évolution du poids</h3>
         <ResponsiveContainer width="100%" height={250}>
           <AreaChart data={data} margin={{ right: 25, top: 10 }}>
             <defs>
@@ -115,7 +112,7 @@ export default function Charts({ dashboard }: { dashboard: DashboardDay[] }) {
             <Area
               type="monotone"
               dataKey="weight"
-              name="Poids"
+              name={printWeigthGrain}
               stroke="#40916c"
               strokeWidth={3}
               fill="url(#weightFill)"
