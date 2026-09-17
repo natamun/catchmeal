@@ -92,17 +92,14 @@ body {
 
 .dialog-fade {
   opacity: 0;
-  transform: translateY(-4px);
   transition:
     opacity 0.15s ease-in,
-    transform 0.15s ease-in,
     overlay 0.15s allow-discrete,
     display 0.15s allow-discrete;
 }
 
 .dialog-fade[open] {
   opacity: 1;
-  transform: translateY(0);
   transition-timing-function: ease-out;
 }
 
@@ -122,10 +119,52 @@ body {
 @starting-style {
   .dialog-fade[open] {
     opacity: 0;
-    transform: translateY(-4px);
   }
 
   .dialog-fade[open]::backdrop {
     background-color: rgb(0 0 0 / 0%);
   }
+}
+
+.range-thumb::-webkit-slider-runnable-track {
+  background: transparent;
+}
+
+.range-thumb::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  pointer-events: auto;
+  width: 16px;
+  height: 16px;
+  border-radius: 999px;
+  background: var(--color-green-500);
+  border: 2px solid white;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.2);
+  cursor: pointer;
+  transition: box-shadow 0.15s ease;
+}
+
+.range-thumb::-webkit-slider-thumb:hover,
+.range-thumb::-webkit-slider-thumb:active {
+  box-shadow: 0 0 0 8px rgb(34 197 94 / 0.15);
+}
+
+.range-thumb::-moz-range-track {
+  background: transparent;
+}
+
+.range-thumb::-moz-range-thumb {
+  pointer-events: auto;
+  width: 16px;
+  height: 16px;
+  border-radius: 999px;
+  background: var(--color-green-500);
+  border: 2px solid white;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.2);
+  cursor: pointer;
+  transition: box-shadow 0.15s ease;
+}
+
+.range-thumb::-moz-range-thumb:hover,
+.range-thumb::-moz-range-thumb:active {
+  box-shadow: 0 0 0 8px rgb(34 197 94 / 0.15);
 }

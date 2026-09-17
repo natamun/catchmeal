@@ -1,7 +1,17 @@
-import { LoaderCircle, Pencil, Plus, Search } from 'lucide-react';
+import { useState } from 'react';
+import { ChevronRight, LoaderCircle, Pencil, Plus } from 'lucide-react';
 
-import { Input } from '../ui/Input';
-import type { FoodItem } from './types';
+import FoodItemSearchBar from './FoodItemSearchBar';
+import {
+  EMPTY_FILTER_CRITERIA,
+  type FoodFilterCriteria,
+  type FoodItem,
+  type MacroFilter,
+} from './types';
+
+function matchesMacro(itemValue: number, filter: MacroFilter) {
+  return itemValue >= filter.min && itemValue <= filter.max;
+}
 
 interface FoodItemListProps {
   items: FoodItem[];
@@ -11,6 +21,40 @@ interface FoodItemListProps {
   onEdit: (item: FoodItem) => void;
 }
 
+function formatBaseQuantity(item: FoodItem) {
+  return item.baseUnit === 'GRAM'
+    ? `${item.baseQuantity}g`
+    : `${item.baseQuantity}x`;
+}
+
+function macrosOf(item: FoodItem) {
+  return [
+    { label: 'Protéines', value: item.protein, color: 'bg-rose-400' },
+    { label: 'Glucides', value: item.carbs, color: 'bg-amber-400' },
+    { label: 'Lipides', value: item.fat, color: 'bg-blue-400' },
+  ];
+}
+
+function MacroBadge({
+  label,
+  value,
+  color,
+}: {
+  label: string;
+  value: number;
+  color: string;
+}) {
+  return (
+    <span
+      title={`${label} : ${value}g`}
+      className="flex items-center gap-1 text-xs font-semibold text-green-700"
+    >
+      <span aria-hidden="true" className={`h-2 w-2 rounded-full ${color}`} />
+      {value}
+    </span>
+  );
+}
+
 export default function FoodItemList({
   items,
   isLoading,
@@ -18,17 +62,57 @@ export default function FoodItemList({
   onAdd,
   onEdit,
 }: FoodItemListProps) {
+  const [expandedIds, setExpandedIds] = useState<Set<number>>(new Set());
+  const [criteria, setCriteria] = useState<FoodFilterCriteria>(
+    EMPTY_FILTER_CRITERIA,
+  );
+
+  const activeItems = items.filter((item) => !item.archived);
+
+  const query = criteria.query.trim().toLowerCase();
+  const visibleItems = activeItems
+    .filter((item) => {
+      const matchesQuery =
+        !query ||
+        item.name.toLowerCase().includes(query) ||
+        item.brand?.toLowerCase().includes(query);
+
+      return (
+        matchesQuery &&
+        matchesMacro(item.kcal, criteria.kcal) &&
+        matchesMacro(item.protein, criteria.protein) &&
+        matchesMacro(item.carbs, criteria.carbs) &&
+        matchesMacro(item.fat, criteria.fat)
+      );
+    })
+    .sort((a, b) => {
+      const { field, direction } = criteria.sort;
+      const dir = direction === 'asc' ? 1 : -1;
+      return field === 'name'
+        ? a.name.localeCompare(b.name) * dir
+        : (a[field] - b[field]) * dir;
+    });
+
+  const toggleExpanded = (id: number) => {
+    setExpandedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  };
+
   return (
-    <div className="overflow-hidden rounded-2xl border border-green-200 bg-white shadow-sm">
+    <div className="@container overflow-hidden rounded-2xl border border-green-200 bg-white shadow-sm">
       <div className="flex items-center gap-3 border-b border-green-200 px-5 py-4">
-        <div className="relative flex-1">
-          <Search className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-green-400" />
-          <Input
-            type="text"
-            placeholder="Rechercher un aliment..."
-            className="pl-9"
-          />
-        </div>
+        <FoodItemSearchBar
+          items={activeItems}
+          criteria={criteria}
+          onFilterChange={setCriteria}
+        />
         <button
           type="button"
           onClick={onAdd}
@@ -49,48 +133,87 @@ export default function FoodItemList({
         <p className="px-5 pb-5 text-sm text-red-500">{loadError}</p>
       )}
 
+      {!isLoading && !loadError && activeItems.length === 0 && (
+        <p className="px-5 py-10 text-center text-sm text-green-400">
+          Aucun aliment enregistré.
+        </p>
+      )}
+
+      {!isLoading &&
+        !loadError &&
+        activeItems.length > 0 &&
+        visibleItems.length === 0 && (
+          <p className="px-5 py-10 text-center text-sm text-green-400">
+            Aucun aliment ne correspond à cette recherche.
+          </p>
+        )}
+
       <ul className="divide-y divide-green-200">
-        {items.map((item) => (
-          <li
-            key={item.id}
-            className="flex items-center justify-between gap-4 px-5 py-4"
-          >
-            <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-3 gap-y-2">
-              <p className="text-sm font-semibold text-green-800">
-                {item.name}
-                {item.brand && (
-                  <span className="ml-1.5 text-xs font-normal text-green-500">
-                    {item.brand}
+        {visibleItems.map((item) => {
+          const isExpanded = expandedIds.has(item.id);
+          const macros = macrosOf(item);
+          return (
+            <li key={item.id} className="px-5 py-4 even:bg-gray-50">
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => toggleExpanded(item.id)}
+                  aria-expanded={isExpanded}
+                  aria-label={`Afficher le détail de ${item.name}`}
+                  className="shrink-0 cursor-pointer text-green-400 transition-colors hover:text-green-600 @lg:hidden"
+                >
+                  <ChevronRight
+                    className={`h-4 w-4 transition-transform ${isExpanded ? 'rotate-90' : ''}`}
+                  />
+                </button>
+                <p className="min-w-0 flex-1 truncate text-sm font-semibold text-green-800">
+                  {item.name}
+                  {item.brand && (
+                    <span className="ml-1.5 text-xs font-normal text-green-500 @max-[400px]:hidden">
+                      {item.brand}
+                    </span>
+                  )}
+                  <span className="ml-1.5 text-xs font-normal text-green-500 @max-[400px]:hidden">
+                    ({formatBaseQuantity(item)})
                   </span>
-                )}
-              </p>
-              <div className="flex flex-wrap items-center gap-1.5">
-                {[
-                  `${item.kcal} kcal`,
-                  `${item.protein}g prot`,
-                  `${item.carbs}g gluc`,
-                  `${item.fat}g lip`,
-                  `pour ${item.baseQuantity}${item.baseUnit === 'GRAM' ? 'g' : ' pièce(s)'}`,
-                ].map((text) => (
-                  <span
-                    key={text}
-                    className="rounded-full bg-green-50 px-2.5 py-0.5 text-xs font-medium whitespace-nowrap text-green-700"
-                  >
-                    {text}
-                  </span>
-                ))}
+                </p>
+                <div className="hidden shrink-0 items-center gap-2.5 @lg:flex">
+                  {macros.map((m) => (
+                    <MacroBadge key={m.label} {...m} />
+                  ))}
+                </div>
+                <span className="min-w-20 shrink-0 rounded-full bg-green-50 px-2.5 py-0.5 text-center text-sm font-semibold text-green-800">
+                  {item.kcal} kcal
+                </span>
+                <button
+                  type="button"
+                  onClick={() => onEdit(item)}
+                  aria-label={`Modifier ${item.name}`}
+                  className="shrink-0 cursor-pointer text-green-400 transition-colors hover:text-green-600"
+                >
+                  <Pencil className="h-4 w-4" />
+                </button>
               </div>
-            </div>
-            <button
-              type="button"
-              onClick={() => onEdit(item)}
-              aria-label={`Modifier ${item.name}`}
-              className="shrink-0 cursor-pointer text-green-400 transition-colors hover:text-green-600"
-            >
-              <Pencil className="h-4 w-4" />
-            </button>
-          </li>
-        ))}
+              <div
+                className={`grid pl-7 transition-[grid-template-rows] duration-200 ease-out @lg:hidden ${isExpanded ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'}`}
+              >
+                <div
+                  className={`flex flex-wrap items-center gap-1.5 overflow-hidden ${isExpanded ? 'pt-2' : ''}`}
+                >
+                  {macros.map((m) => (
+                    <MacroBadge key={m.label} {...m} />
+                  ))}
+                  <span className="hidden shrink-0 items-center gap-1.5 text-xs font-normal text-green-500 @max-[400px]:flex">
+                    <span aria-hidden="true" className="text-green-300">
+                      |
+                    </span>
+                    {formatBaseQuantity(item)}
+                  </span>
+                </div>
+              </div>
+            </li>
+          );
+        })}
       </ul>
     </div>
   );

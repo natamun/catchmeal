@@ -1,7 +1,8 @@
 import { useRef, useState, type RefObject } from 'react';
-import { CheckCircle2, ScanBarcode, Trash2, X } from 'lucide-react';
+import { CheckCircle2, ScanBarcode, Trash2 } from 'lucide-react';
 
 import { useTimeout } from '../../hooks/useTimeout';
+import { BaseDialog } from '../ui/BaseDialog';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
 import { FieldError } from '../ui/FieldError';
 import { Input } from '../ui/Input';
@@ -240,52 +241,28 @@ export default function FoodItemForm({
 
   return (
     <>
-      {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-noninteractive-element-interactions */}
-      <dialog
-        ref={dialogRef}
-        aria-labelledby="food-dialog-title"
-        onClick={(e) => {
-          if (e.target === e.currentTarget) {
-            closeDialog();
-          }
-        }}
-        className="dialog-fade m-auto w-[calc(100vw-2rem)] max-w-lg rounded-2xl border-none bg-white p-0 shadow-lg backdrop:backdrop-blur-sm"
+      <BaseDialog
+        dialogRef={dialogRef}
+        title={editingItem ? 'Modifier un aliment' : 'Ajouter un aliment'}
+        headerActions={
+          editingItem && (
+            <button
+              type="button"
+              onClick={() => confirmDialogRef.current?.showModal()}
+              aria-label="Supprimer"
+              className="cursor-pointer text-green-400 transition-colors hover:text-red-500"
+            >
+              <Trash2 className="h-5 w-5" />
+            </button>
+          )
+        }
       >
         <form
           onSubmit={(e) => void handleSubmit(e)}
           noValidate
           autoComplete="off"
-          className="flex flex-col gap-5 p-4 sm:p-6"
+          className="contents"
         >
-          <div className="flex items-center justify-between">
-            <h3
-              id="food-dialog-title"
-              className="text-lg font-bold text-green-800"
-            >
-              {editingItem ? 'Modifier un aliment' : 'Ajouter un aliment'}
-            </h3>
-            <div className="flex items-center gap-3">
-              {editingItem && (
-                <button
-                  type="button"
-                  onClick={() => confirmDialogRef.current?.showModal()}
-                  aria-label="Supprimer"
-                  className="cursor-pointer text-green-400 transition-colors hover:text-red-500"
-                >
-                  <Trash2 className="h-5 w-5" />
-                </button>
-              )}
-              <button
-                type="button"
-                onClick={closeDialog}
-                aria-label="Fermer"
-                className="cursor-pointer text-green-400 transition-colors hover:text-green-600"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-          </div>
-
           <button
             type="button"
             className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-green-200 py-2.5 text-sm font-medium text-green-600 transition-colors hover:bg-green-50"
@@ -415,7 +392,7 @@ export default function FoodItemForm({
             {isSubmitting ? 'Enregistrement...' : 'Enregistrer'}
           </button>
         </form>
-      </dialog>
+      </BaseDialog>
 
       <ConfirmDialog
         dialogRef={confirmDialogRef}

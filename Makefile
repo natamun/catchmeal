@@ -4,10 +4,10 @@ PROD = docker compose -f docker-compose.prod.yml
 all: dev
 
 dev:
-	$(DEV) up --build -d
+	$(DEV) up --build -V -d
 
 prod:
-	$(PROD) up --build -d
+	$(PROD) up --build -V -d
 
 logsBackend:
 	$(DEV) logs -f backend

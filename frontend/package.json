@@ -13,6 +13,7 @@
     "format:check": "prettier --check \"src/**/*.{ts,tsx}\" \"*.ts\""
   },
   "dependencies": {
+    "@radix-ui/react-popover": "^1.1.23",
     "@tailwindcss/vite": "^4.3.3",
     "lucide-react": "^1.39.0",
     "react": "^19.2.8",
