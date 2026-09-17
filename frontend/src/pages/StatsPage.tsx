@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { Broccoli, Weight } from 'lucide-react';
+import { Broccoli } from 'lucide-react';
 
 import Charts from '../components/analytics/Charts';
 import DatePick from '../components/analytics/DatePick';
 import MacroCard from '../components/analytics/MacroCard';
 import ShowDataDay from '../components/analytics/ShowDataDay';
 import StatCard from '../components/analytics/StatCard';
+import WeightCard from '../components/analytics/WeightCard';
 import useDashboard from '../hooks/useDashboard';
 import type { DashboardDay } from '../types/dashboard-analytics';
 
@@ -48,6 +49,11 @@ export default function StatsPage() {
     : 0;
 
   const LastWeight = RecordWeight.at(-1)?.weight ?? 0;
+  const firstWeight = RecordWeight[0]?.weight ?? null;
+  const diffWeight =
+    firstWeight !== null && LastWeight !== null
+      ? Math.round((LastWeight - firstWeight) * 10) / 10
+      : null;
 
   return (
     <div className="flex flex-col gap-2">
@@ -55,19 +61,18 @@ export default function StatsPage() {
         <DatePick from={from} to={to} setFrom={setFrom} setTo={setTo} />
 
         <div className="p-1">
-          <h3 className="p-1 text-center font-semibold">Résumé</h3>
           <div className="grid gap-3 sm:mt-1 sm:grid-cols-2">
             <StatCard
-              title="Moyenne Kcal/jour"
+              title="Moyenne Kcal / jour"
               value={averageKcal || '┄'}
               unit="kcal"
               Icon={Broccoli}
             />
-            <StatCard
+            <WeightCard
               title="Poids actuel"
               value={LastWeight || '┄'}
               unit="kg"
-              Icon={Weight}
+              average={diffWeight}
             />
           </div>
 
@@ -95,7 +100,7 @@ export default function StatsPage() {
         <Charts dashboard={dashboard} />
       </div>
 
-      <div className="flex justify-center">
+      <div className="flex flex-col flex-wrap justify-between rounded-2xl border border-green-200 bg-white">
         <ShowDataDay dashboard={dashboard} to={to} from={from}></ShowDataDay>
       </div>
     </div>
