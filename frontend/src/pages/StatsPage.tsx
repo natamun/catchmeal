@@ -100,7 +100,7 @@ export default function StatsPage() {
         <Charts dashboard={dashboard} />
       </div>
 
-      <div className="flex flex-col mt-1 flex-wrap justify-between rounded-2xl border border-green-200 bg-white">
+      <div className="mt-1 flex flex-col flex-wrap justify-between rounded-2xl border border-green-200 bg-white">
         <ShowDataDay dashboard={dashboard} to={to} from={from}></ShowDataDay>
       </div>
     </div>
