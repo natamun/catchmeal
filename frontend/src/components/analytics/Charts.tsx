@@ -54,7 +54,7 @@ export default function Charts({ dashboard }: { dashboard: DashboardDay[] }) {
   const printWeigthGrain = 'Poid / ' + grainPrintFR(grain);
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-3">
       <div className="rounded-2xl border border-green-200 bg-white shadow-sm">
         <h3 className="m-2 text-lg font-semibold">Calories et objectif</h3>
         <ResponsiveContainer
