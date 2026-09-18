@@ -10,6 +10,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import type { Request as ExpressRequest, Response } from 'express';
+import { AuthGuard } from '@nestjs/passport';
 
 import { AuthService, type SignInData } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
@@ -159,6 +160,27 @@ export class PassportAuthController {
       birthDate,
       activityLevel,
     };
+  }
+
+  // OAuth 42 — Step 1: redirect to 42 login page
+  @Get('42')
+  @UseGuards(AuthGuard('42'))
+  redirectToFortyTwo() {
+    // Passport handles the redirect automatically
+  }
+
+  // OAuth 42 — Step 2: 42 redirects back here after user grants permission
+  @Get('42/callback')
+  @UseGuards(AuthGuard('42'))
+  async fortyTwoCallback(
+    @Request() request: RequestWithUser,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const { accessToken, userId, username } = await this.authService.signIn(
+      request.user,
+    );
+    this.setAuthCookie(res, accessToken);
+    return { userId, username };
   }
 
   private setAuthCookie(res: Response, token: string) {

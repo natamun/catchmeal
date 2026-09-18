@@ -3,7 +3,6 @@ import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
 
 import { Prisma } from '../generated/prisma/client';
-import { PrismaService } from '../prisma/prisma.service';
 import { UsersService } from '../users/users.service';
 import { RegisterDto } from './dto/register.dto';
 
@@ -42,9 +41,7 @@ type AuthResult = {
   activityLevel?: string | null;
 };
 
-interface FindOrCreateUserParams {
-  provider: string;
-  providerId: string;
+interface OAuthUserParams {
   username: string;
   name: string;
   email: string;
@@ -55,7 +52,6 @@ export class AuthService {
   constructor(
     private usersService: UsersService,
     private jwtService: JwtService,
-    private readonly prisma: PrismaService,
   ) {}
 
   async validateUser(input: AuthInput): Promise<SignInData | null> {
@@ -90,32 +86,37 @@ export class AuthService {
     };
   }
 
-  async findOrCreateUser(params: FindOrCreateUserParams) {
+  async findOrCreateFromOAuth(params: OAuthUserParams): Promise<SignInData> {
     const { username, name, email } = params;
 
-<<<<<<< HEAD
-    const existingUser = await this.prisma.user.findUnique({
-      where: { username },
-=======
-    // Try to find an existing user by username or email
-    const existingUser = await this.prisma.user.findFirst({
-      where: {
-        OR: [{ username }, { email }],
-      },
-    });
+    const existingUser = await this.usersService.findUserByName(username);
 
     if (existingUser) {
-      return existingUser;
+      return {
+        userId: existingUser.id,
+        username: existingUser.username,
+        name: existingUser.name,
+        avatarUrl: existingUser.avatarUrl,
+        height: existingUser.height,
+        targetWeight: existingUser.targetWeight,
+        dailyCalorieGoal: existingUser.dailyCalorieGoal,
+        dailyProteinGoal: existingUser.dailyProteinGoal,
+        dailyCarbsGoal: existingUser.dailyCarbsGoal,
+        dailyFatGoal: existingUser.dailyFatGoal,
+        gender: existingUser.gender,
+        birthDate: existingUser.birthDate,
+        activityLevel: existingUser.activityLevel,
+      };
     }
 
-    return this.prisma.user.create({
-      data: {
-        username,
-        name,
-        email,
-        passwordHash: '',
-      },
+    const newUser = await this.usersService.create({
+      username,
+      name,
+      email,
+      passwordHash: '',
     });
+
+    return { userId: newUser.id, username: newUser.username };
   }
 
   async register(dto: RegisterDto): Promise<AuthResult> {

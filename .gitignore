@@ -6,3 +6,6 @@
 *.pdf
 
 .vscode/*
+
+# Personal notes
+PROGRESS.md

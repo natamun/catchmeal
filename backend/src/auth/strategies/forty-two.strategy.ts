@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy } from 'passport-oauth2';
+
 import { AuthService } from '../auth.service';
 
 // Profile shape returned by the 42 API
@@ -45,18 +46,19 @@ export class FortyTwoStrategy extends PassportStrategy(Strategy, '42') {
     }
   }
 
-  // Called with the verified profile — finds or creates the user
+  // Called with the verified profile — finds or creates the user, then signs a JWT
   async validate(
     _accessToken: string,
     _refreshToken: string,
     profile: FortyTwoProfile,
   ) {
-    return this.authService.findOrCreateUser({
-      provider: '42',
-      providerId: profile.id,
+    const user = await this.authService.findOrCreateFromOAuth({
       username: profile.login,
       name: profile.displayname,
       email: profile.email,
     });
+
+    // Return SignInData shape expected by authService.signIn()
+    return { userId: user.id, username: user.username };
   }
 }
