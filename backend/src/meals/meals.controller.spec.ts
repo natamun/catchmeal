@@ -48,7 +48,23 @@ describe('MealsController', () => {
 
     await controller.findAll(7);
 
-    expect(mealsServiceMock.findAll).toHaveBeenCalledWith(7);
+    expect(mealsServiceMock.findAll).toHaveBeenCalledWith(7, undefined);
+  });
+
+  it('should list only logged meals when logged=true', async () => {
+    mealsServiceMock.findAll.mockResolvedValue([]);
+
+    await controller.findAll(7, true);
+
+    expect(mealsServiceMock.findAll).toHaveBeenCalledWith(7, true);
+  });
+
+  it('should list only template meals when logged=false', async () => {
+    mealsServiceMock.findAll.mockResolvedValue([]);
+
+    await controller.findAll(7, false);
+
+    expect(mealsServiceMock.findAll).toHaveBeenCalledWith(7, false);
   });
 
   it('should find one meal', async () => {

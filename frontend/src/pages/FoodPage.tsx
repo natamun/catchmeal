@@ -118,7 +118,7 @@ export default function FoodPage() {
 
   useEffect(() => {
     const controller = new AbortController();
-    listMeals(controller.signal)
+    listMeals(false, controller.signal)
       .then(setMeals)
       .catch((err: unknown) => {
         if (controller.signal.aborted) {

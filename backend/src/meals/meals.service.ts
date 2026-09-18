@@ -75,9 +75,13 @@ export class MealsService {
     });
   }
 
-  findAll(userId: number) {
+  findAll(userId: number, logged?: boolean) {
     return this.prisma.meal.findMany({
-      where: { userId },
+      where: {
+        userId,
+        loggedAt:
+          logged === undefined ? undefined : logged ? { not: null } : null,
+      },
       include: { items: true },
       orderBy: { id: 'desc' },
     });
