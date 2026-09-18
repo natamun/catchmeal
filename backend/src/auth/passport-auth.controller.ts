@@ -174,13 +174,12 @@ export class PassportAuthController {
   @UseGuards(AuthGuard('42'))
   async fortyTwoCallback(
     @Request() request: RequestWithUser,
-    @Res({ passthrough: true }) res: Response,
+    @Res() res: Response,
   ) {
-    const { accessToken, userId, username } = await this.authService.signIn(
-      request.user,
-    );
-    this.setAuthCookie(res, accessToken);
-    return { userId, username };
+    const { accessToken } = await this.authService.signIn(request.user);
+    this.setAuthCookie(res as any, accessToken);
+    // Redirect to frontend after successful OAuth login
+    (res as any).redirect(process.env.FRONTEND_URL ?? 'http://localhost:5173');
   }
 
   private setAuthCookie(res: Response, token: string) {
