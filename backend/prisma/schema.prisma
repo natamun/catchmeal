@@ -26,6 +26,7 @@ model User {
   passwordHash      String
   role              Role          @default(USER)
   createAt          DateTime      @default(now())
+  avatarUrl         String?
   meal              Meal[]
   foodItems         FoodItem[]
   mealFoodItems     MealFoodItem[]
