@@ -60,7 +60,7 @@ export default function StatsPage() {
       <div className="flex-col">
         <DatePick from={from} to={to} setFrom={setFrom} setTo={setTo} />
 
-        <div className="p-1">
+        <div className="mt-1 p-1">
           <div className="grid gap-3 sm:mt-1 sm:grid-cols-2">
             <StatCard
               title="Moyenne Kcal / jour"
@@ -69,10 +69,10 @@ export default function StatsPage() {
               Icon={Broccoli}
             />
             <WeightCard
-              title="Poids actuel"
-              value={LastWeight || '┄'}
+              title="Variation de poids"
+              value={diffWeight || '┄'}
               unit="kg"
-              average={diffWeight}
+              average={null}
             />
           </div>
 
@@ -100,7 +100,7 @@ export default function StatsPage() {
         <Charts dashboard={dashboard} />
       </div>
 
-      <div className="flex flex-col flex-wrap justify-between rounded-2xl border border-green-200 bg-white">
+      <div className="flex flex-col mt-1 flex-wrap justify-between rounded-2xl border border-green-200 bg-white">
         <ShowDataDay dashboard={dashboard} to={to} from={from}></ShowDataDay>
       </div>
     </div>

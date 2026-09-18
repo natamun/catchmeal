@@ -31,11 +31,13 @@ export default function WeightCard({
             </span>
           </p>
         </div>
-        <div className="mt-2">
-          <span className="ml-1 font-mono text-lg text-green-400">
-            {printAverage}kg
-          </span>
-        </div>
+        {average !== null && (
+          <div className="mt-2">
+            <span className="ml-1 font-mono text-lg text-green-400">
+              {printAverage}kg
+            </span>
+          </div>
+        )}
       </div>
     </div>
   );
