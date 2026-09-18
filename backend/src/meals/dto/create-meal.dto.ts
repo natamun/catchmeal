@@ -1,0 +1,76 @@
+import { Transform, Type } from 'class-transformer';
+import {
+  ArrayMinSize,
+  IsArray,
+  IsDateString,
+  IsEnum,
+  IsInt,
+  IsNumber,
+  IsOptional,
+  IsPositive,
+  IsString,
+  MaxLength,
+  Min,
+  ValidateIf,
+  ValidateNested,
+} from 'class-validator';
+
+import { MealType } from '../../generated/prisma/enums';
+
+const trim = ({ value }: { value: unknown }) =>
+  typeof value === 'string' ? value.trim() : value;
+
+const isQuickAdd = (dto: CreateMealItemDto) => dto.foodItemId === undefined;
+
+export class CreateMealItemDto {
+  @IsOptional()
+  @IsInt()
+  @IsPositive()
+  foodItemId?: number;
+
+  @IsNumber()
+  @IsPositive()
+  quantity: number;
+
+  @ValidateIf(isQuickAdd)
+  @IsNumber()
+  @Min(0)
+  kcal?: number;
+
+  @ValidateIf(isQuickAdd)
+  @IsNumber()
+  @Min(0)
+  protein?: number;
+
+  @ValidateIf(isQuickAdd)
+  @IsNumber()
+  @Min(0)
+  carbs?: number;
+
+  @ValidateIf(isQuickAdd)
+  @IsNumber()
+  @Min(0)
+  fat?: number;
+}
+
+export class CreateMealDto {
+  @Transform(trim)
+  @IsOptional()
+  @IsString()
+  @MaxLength(120)
+  name?: string;
+
+  @IsOptional()
+  @IsEnum(MealType)
+  typeMeal?: MealType;
+
+  @IsOptional()
+  @IsDateString()
+  loggedAt?: string;
+
+  @IsArray()
+  @ArrayMinSize(1)
+  @ValidateNested({ each: true })
+  @Type(() => CreateMealItemDto)
+  items: CreateMealItemDto[];
+}

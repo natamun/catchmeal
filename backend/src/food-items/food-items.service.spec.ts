@@ -53,13 +53,13 @@ describe('FoodItemsService', () => {
     });
   });
 
-  it('should list non-archived food items for a user', async () => {
+  it('should list all food items for a user, including archived ones', async () => {
     prismaMock.foodItem.findMany.mockResolvedValue([]);
 
     await service.findAll(2);
 
     expect(prismaMock.foodItem.findMany).toHaveBeenCalledWith({
-      where: { userId: 2, archived: false },
+      where: { userId: 2 },
       orderBy: { name: 'asc' },
     });
   });

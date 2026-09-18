@@ -123,15 +123,15 @@ model MealFoodItem {
   userId     Int
   user       User     @relation(fields: [userId], references: [id])
   mealId     Int
-  foodItemId Int
+  foodItemId Int?
   quantity   Float
   kcal       Float
   protein    Float
   carbs      Float
   fat        Float
 
-  meal     Meal     @relation(fields: [mealId, userId], references: [id, userId], onDelete: Cascade)
-  foodItem FoodItem @relation(fields: [foodItemId, userId], references: [id, userId])
+  meal     Meal      @relation(fields: [mealId, userId], references: [id, userId], onDelete: Cascade)
+  foodItem FoodItem? @relation(fields: [foodItemId, userId], references: [id, userId])
 
   @@index([mealId])
   @@index([foodItemId])

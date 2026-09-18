@@ -16,7 +16,7 @@ export class FoodItemsService {
 
   findAll(userId: number) {
     return this.prisma.foodItem.findMany({
-      where: { userId, archived: false },
+      where: { userId },
       orderBy: { name: 'asc' },
     });
   }
