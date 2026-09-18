@@ -5,6 +5,7 @@ import {
   Get,
   Param,
   ParseBoolPipe,
+  ParseDatePipe,
   ParseIntPipe,
   Patch,
   Post,
@@ -31,8 +32,9 @@ export class MealsController {
   findAll(
     @Param('userId', ParseIntPipe) userId: number,
     @Query('logged', new ParseBoolPipe({ optional: true })) logged?: boolean,
+    @Query('date', new ParseDatePipe({ optional: true })) date?: Date,
   ) {
-    return this.mealsService.findAll(userId, logged);
+    return this.mealsService.findAll(userId, logged, date);
   }
 
   @Get('meals/:id')

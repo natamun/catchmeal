@@ -245,6 +245,19 @@ describe('MealsService', () => {
     });
   });
 
+  it('should list meals for a specific date regardless of logged', async () => {
+    prismaMock.meal.findMany.mockResolvedValue([]);
+    const date = new Date('2026-09-18');
+
+    await service.findAll(7, undefined, date);
+
+    expect(prismaMock.meal.findMany).toHaveBeenCalledWith({
+      where: { userId: 7, loggedAt: date },
+      include: { items: true },
+      orderBy: { id: 'desc' },
+    });
+  });
+
   it('should find one meal scoped to its owner', async () => {
     prismaMock.meal.findFirstOrThrow.mockResolvedValue({ id: 5 });
 
