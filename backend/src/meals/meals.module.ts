@@ -8,5 +8,6 @@ import { MealsService } from './meals.service';
   imports: [PrismaModule],
   controllers: [MealsController],
   providers: [MealsService],
+  exports: [MealsService],
 })
 export class MealsModule {}
