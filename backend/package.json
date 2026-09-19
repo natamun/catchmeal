@@ -39,6 +39,7 @@
     "cookie-parser": "^1.4.7",
     "dotenv": "^17.4.2",
     "passport": "^0.7.0",
+    "passport-github2": "^0.1.12",
     "passport-jwt": "^4.0.1",
     "passport-local": "^1.0.0",
     "passport-oauth2": "^1.8.0",
@@ -60,13 +61,11 @@
     "@types/jest": "^30.0.0",
     "@types/multer": "^1.4.12",
     "@types/node": "^24.13.3",
-<<<<<<< HEAD
+    "@types/passport": "^1.0.17",
+    "@types/passport-github2": "^1.2.9",
     "@types/passport-jwt": "^4.0.1",
     "@types/passport-local": "^1.0.38",
-=======
-    "@types/passport": "^1.0.17",
     "@types/passport-oauth2": "^1.8.0",
->>>>>>> 289ffb9 (chore: install Passport and OAuth2 dependencies)
     "@types/pg": "^8.20.3",
     "@types/supertest": "^7.0.0",
     "cross-env": "^10.1.0",
