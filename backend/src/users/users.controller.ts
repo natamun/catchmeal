@@ -1,0 +1,73 @@
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  ForbiddenException,
+  Param,
+  ParseIntPipe,
+  Patch,
+  Request,
+  UploadedFile,
+  UseGuards,
+  UseInterceptors,
+} from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+
+import 'multer';
+
+import { PassportJwtAuthGuard } from '../auth/guards/passport-jwt.guard';
+import { UpdateProfileDto } from './dto/update-profile.dto';
+import { UsersService } from './users.service';
+
+const ALLOWED_MIME_TYPES = [
+  'image/jpeg',
+  'image/png',
+  'image/webp',
+  'image/gif',
+];
+
+interface RequestWithUser extends Express.Request {
+  user: { userId: number; username: string };
+}
+
+@Controller('users/:userId')
+@UseGuards(PassportJwtAuthGuard)
+export class UsersController {
+  constructor(private readonly usersService: UsersService) {}
+
+  @Patch()
+  updateProfile(
+    @Param('userId', ParseIntPipe) userId: number,
+    @Body() dto: UpdateProfileDto,
+    @Request() req: RequestWithUser,
+  ) {
+    if (req.user.userId !== userId) {
+      throw new ForbiddenException('You can only update your own profile');
+    }
+    return this.usersService.updateProfile(userId, dto);
+  }
+
+  @Patch('avatar')
+  @UseInterceptors(FileInterceptor('file'))
+  uploadAvatar(
+    @Param('userId', ParseIntPipe) userId: number,
+    @UploadedFile() file: Express.Multer.File | undefined,
+    @Request() req: RequestWithUser,
+  ) {
+    if (req.user.userId !== userId) {
+      throw new ForbiddenException('You can only update your own avatar');
+    }
+
+    if (!file) {
+      throw new BadRequestException('No file provided');
+    }
+
+    if (!ALLOWED_MIME_TYPES.includes(file.mimetype)) {
+      throw new BadRequestException(
+        `Invalid file type. Allowed: ${ALLOWED_MIME_TYPES.join(', ')}`,
+      );
+    }
+
+    return this.usersService.updateAvatar(userId, file);
+  }
+}

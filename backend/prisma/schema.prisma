@@ -24,6 +24,7 @@ model User {
   name              String
   email             String        @unique
   passwordHash      String
+  avatarUrl         String?
   role              Role          @default(USER)
   createAt          DateTime      @default(now())
   avatarUrl         String?
