@@ -7,14 +7,21 @@ import { AuthModule } from './auth/auth.module';
 import { DashboardAnalyticsModule } from './dashboard-analytics/dashboard-analytics.module';
 import { FoodItemsModule } from './food-items/food-items.module';
 import { MealsModule } from './meals/meals.module';
+import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [
+    
     ConfigModule.forRoot(),
+   
     FoodItemsModule,
+   
     AuthModule,
+   
     MealsModule,
     DashboardAnalyticsModule,
+  ,
+    UsersModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -20,5 +20,6 @@ import { LocalStrategy } from './strategies/local.strategy';
     }),
     PassportModule,
   ],
+  exports: [PassportModule],
 })
 export class AuthModule {}
