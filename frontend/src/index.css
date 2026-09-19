@@ -1,5 +1,17 @@
 @import 'tailwindcss';
 
+@custom-variant hover {
+  &:active {
+    @slot;
+  }
+
+  @media (hover: hover) {
+    &:hover {
+      @slot;
+    }
+  }
+}
+
 @keyframes fade-in-up {
   from {
     opacity: 0;
