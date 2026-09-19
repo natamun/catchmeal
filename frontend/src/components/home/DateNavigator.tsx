@@ -12,7 +12,7 @@ import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 
 const ARROW_CLASS =
-  'flex cursor-pointer items-center justify-center rounded-lg px-3 py-1.5 text-green-500 transition-colors hover:bg-green-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-400';
+  'flex cursor-pointer items-center justify-center rounded-lg px-3 py-1.5 text-green-500 transition-colors hover:bg-green-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-400';
 
 function shiftDay(date: Date, days: number) {
   const next = new Date(date);
@@ -78,7 +78,7 @@ function DateButton({
       aria-haspopup="dialog"
       aria-expanded={isOpen}
       aria-live="polite"
-      className={`w-36 cursor-pointer rounded-lg bg-green-500 px-3 py-1.5 text-center text-sm font-medium text-white capitalize focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-400 ${className ?? ''}`}
+      className={`w-36 cursor-pointer rounded-lg bg-green-500 px-3 py-1.5 text-center text-sm font-medium text-white capitalize transition-colors hover:bg-green-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-400 ${className ?? ''}`}
     >
       {label}
     </button>

@@ -174,16 +174,22 @@ body {
   color: var(--color-green-800);
 }
 
-.kcal-datepicker .react-datepicker__day:hover {
+.kcal-datepicker .react-datepicker__day:not([aria-disabled='true']):hover {
   background-color: var(--color-green-100);
+  color: var(--color-green-800);
 }
 
 .kcal-datepicker .react-datepicker__day--selected,
-.kcal-datepicker .react-datepicker__day--selected:hover {
+.kcal-datepicker
+  .react-datepicker__day--selected:not([aria-disabled='true']):hover {
   background-color: var(--color-green-500);
   color: white;
 }
 
 .kcal-datepicker .react-datepicker__day--today {
   font-weight: 700;
+}
+
+.kcal-datepicker .react-datepicker__navigation:hover *::before {
+  border-color: var(--color-green-500);
 }
