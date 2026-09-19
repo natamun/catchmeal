@@ -8,6 +8,7 @@ import { DashboardAnalyticsModule } from './dashboard-analytics/dashboard-analyt
 import { FoodItemsModule } from './food-items/food-items.module';
 import { MealsModule } from './meals/meals.module';
 import { UsersModule } from './users/users.module';
+import { FriendsModule } from './friends/friends.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { UsersModule } from './users/users.module';
     MealsModule,
     DashboardAnalyticsModule,
     UsersModule,
+    FriendsModule
   ],
   controllers: [AppController],
   providers: [AppService],
