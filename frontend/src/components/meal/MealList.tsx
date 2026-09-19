@@ -1,6 +1,8 @@
-import { useState } from 'react';
-import { ChevronRight, LoaderCircle, Pencil, Plus } from 'lucide-react';
+import { useState, type ReactNode } from 'react';
+import { ChevronRight, LoaderCircle } from 'lucide-react';
 
+import { MACROS } from '../../constants/macros';
+import { MacroBadge } from '../ui/MacroBadge';
 import MealSearchBar from './MealSearchBar';
 import {
   EMPTY_MEAL_FILTER_CRITERIA,
@@ -14,8 +16,8 @@ interface MealListProps {
   meals: Meal[];
   isLoading: boolean;
   loadError: string | null;
-  onAdd: () => void;
-  onEdit: (meal: Meal) => void;
+  headerAction?: ReactNode;
+  renderAction?: (meal: Meal) => ReactNode;
 }
 
 function matchesMacro(itemValue: number, filter: MealMacroFilter) {
@@ -27,52 +29,20 @@ function macrosOf(meal: Meal) {
 
   return {
     kcal: Math.round(totals.kcal),
-    macros: [
-      {
-        label: 'Protéines',
-        value: Math.round(totals.protein * 10) / 10,
-        color: 'bg-rose-400',
-      },
-      {
-        label: 'Glucides',
-        value: Math.round(totals.carbs * 10) / 10,
-        color: 'bg-amber-400',
-      },
-      {
-        label: 'Lipides',
-        value: Math.round(totals.fat * 10) / 10,
-        color: 'bg-blue-400',
-      },
-    ],
+    macros: MACROS.map(({ key, label, color }) => ({
+      label,
+      color,
+      value: Math.round(totals[key] * 10) / 10,
+    })),
   };
-}
-
-function MacroBadge({
-  label,
-  value,
-  color,
-}: {
-  label: string;
-  value: number;
-  color: string;
-}) {
-  return (
-    <span
-      title={`${label} : ${value}g`}
-      className="flex items-center gap-1 text-xs font-semibold text-green-700"
-    >
-      <span aria-hidden="true" className={`h-2 w-2 rounded-full ${color}`} />
-      {value}
-    </span>
-  );
 }
 
 export default function MealList({
   meals,
   isLoading,
   loadError,
-  onAdd,
-  onEdit,
+  headerAction,
+  renderAction,
 }: MealListProps) {
   const [expandedIds, setExpandedIds] = useState<Set<number>>(new Set());
   const [criteria, setCriteria] = useState<MealFilterCriteria>(
@@ -122,14 +92,7 @@ export default function MealList({
           criteria={criteria}
           onFilterChange={setCriteria}
         />
-        <button
-          type="button"
-          onClick={onAdd}
-          aria-label="Ajouter un repas"
-          className="flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-full bg-green-500 text-white transition-colors hover:bg-green-600"
-        >
-          <Plus className="h-4 w-4" />
-        </button>
+        {headerAction}
       </div>
 
       {isLoading && (
@@ -187,14 +150,7 @@ export default function MealList({
                 <span className="min-w-20 shrink-0 rounded-full bg-green-50 px-2.5 py-0.5 text-center text-sm font-semibold text-green-800">
                   {kcal} kcal
                 </span>
-                <button
-                  type="button"
-                  onClick={() => onEdit(meal)}
-                  aria-label={`Modifier ${meal.name ?? 'ce repas'}`}
-                  className="shrink-0 cursor-pointer text-green-400 transition-colors hover:text-green-600"
-                >
-                  <Pencil className="h-4 w-4" />
-                </button>
+                {renderAction?.(meal)}
               </div>
               <div
                 className={`grid pl-7 transition-[grid-template-rows] duration-200 ease-out @lg:hidden ${isExpanded ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'}`}

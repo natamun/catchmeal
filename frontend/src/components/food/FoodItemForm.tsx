@@ -6,6 +6,7 @@ import { BaseDialog } from '../ui/BaseDialog';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
 import { FieldError } from '../ui/FieldError';
 import { Input } from '../ui/Input';
+import { PillTabs } from '../ui/PillTabs';
 import { Toast } from '../ui/Toast';
 import {
   ApiError,
@@ -321,26 +322,14 @@ export default function FoodItemForm({
                 aria-invalid={isInvalid('baseQuantity')}
                 aria-describedby="food-quantity-error"
               />
-              <div className="flex gap-1.5 rounded-xl border border-green-200 bg-white p-1.5">
-                {UNIT_OPTIONS.map(({ value, label }) => (
-                  <label
-                    key={value}
-                    className="flex cursor-pointer items-center justify-center rounded-lg px-3 py-1.5 text-sm font-medium text-green-500 transition-colors has-checked:animate-pill-select has-checked:bg-green-500 has-checked:text-white has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-green-400"
-                  >
-                    <input
-                      type="radio"
-                      name="baseUnit"
-                      value={value}
-                      checked={form.baseUnit === value}
-                      onChange={() =>
-                        setForm((prev) => ({ ...prev, baseUnit: value }))
-                      }
-                      className="sr-only"
-                    />
-                    {label}
-                  </label>
-                ))}
-              </div>
+              <PillTabs
+                name="baseUnit"
+                options={UNIT_OPTIONS}
+                value={form.baseUnit}
+                onChange={(baseUnit) =>
+                  setForm((prev) => ({ ...prev, baseUnit }))
+                }
+              />
             </div>
             <FieldError
               id="food-quantity-error"

@@ -8,6 +8,10 @@ import { listMeals } from '../components/meal/api';
 import MealForm from '../components/meal/MealForm';
 import MealList from '../components/meal/MealList';
 import type { Meal } from '../components/meal/types';
+import { AddCircleButton } from '../components/ui/AddCircleButton';
+import { EditIconButton } from '../components/ui/EditIconButton';
+import { PillTabs } from '../components/ui/PillTabs';
+import { MACROS } from '../constants/macros';
 import { useDelayedUnmount } from '../hooks/useDelayedUnmount';
 
 type Tab = 'food' | 'meal';
@@ -15,12 +19,6 @@ type Tab = 'food' | 'meal';
 const TAB_OPTIONS: { value: Tab; label: string }[] = [
   { value: 'food', label: 'Aliments' },
   { value: 'meal', label: 'Repas' },
-];
-
-const LEGEND_ITEMS = [
-  { label: 'Protéines', color: 'bg-rose-400' },
-  { label: 'Glucides', color: 'bg-amber-400' },
-  { label: 'Lipides', color: 'bg-blue-400' },
 ];
 
 function useSupportsHover() {
@@ -52,7 +50,7 @@ function LegendBubble({ show }: { show: boolean }) {
       <div className="absolute -top-1 right-4 h-2 w-2 rotate-45 border-t border-l border-green-200 bg-white" />
       <div className="flex flex-col items-start gap-1.5 rounded-lg border border-green-200 bg-white px-3 py-2 text-xs whitespace-nowrap text-green-700 shadow-sm min-[420px]:flex-row min-[420px]:items-center min-[420px]:gap-3">
         <div className="flex items-center gap-3">
-          {LEGEND_ITEMS.map(({ label, color }) => (
+          {MACROS.map(({ label, color }) => (
             <span key={label} className="flex items-center gap-1.5">
               <span className={`h-1.5 w-1.5 rounded-full ${color}`} />
               {label}
@@ -148,24 +146,12 @@ export default function FoodPage() {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between gap-3">
-        <div className="flex gap-1.5 rounded-xl border border-green-200 bg-white p-1.5">
-          {TAB_OPTIONS.map(({ value, label }) => (
-            <label
-              key={value}
-              className="flex cursor-pointer items-center justify-center rounded-lg px-3 py-1.5 text-sm font-medium text-green-500 transition-colors has-checked:animate-pill-select has-checked:bg-green-500 has-checked:text-white has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-green-400"
-            >
-              <input
-                type="radio"
-                name="foodPageTab"
-                value={value}
-                checked={activeTab === value}
-                onChange={() => setActiveTab(value)}
-                className="sr-only"
-              />
-              {label}
-            </label>
-          ))}
-        </div>
+        <PillTabs
+          name="foodPageTab"
+          options={TAB_OPTIONS}
+          value={activeTab}
+          onChange={setActiveTab}
+        />
         <div
           ref={legendRef}
           className="relative"
@@ -220,16 +206,36 @@ export default function FoodPage() {
             items={foodItems}
             isLoading={isLoading}
             loadError={loadError}
-            onAdd={() => openDialog(null)}
-            onEdit={(item) => openDialog(item)}
+            headerAction={
+              <AddCircleButton
+                label="Ajouter un aliment"
+                onClick={() => openDialog(null)}
+              />
+            }
+            renderAction={(item) => (
+              <EditIconButton
+                label={`Modifier ${item.name}`}
+                onClick={() => openDialog(item)}
+              />
+            )}
           />
         ) : (
           <MealList
             meals={meals}
             isLoading={isMealsLoading}
             loadError={mealsLoadError}
-            onAdd={() => openMealDialog(null)}
-            onEdit={(meal) => openMealDialog(meal)}
+            headerAction={
+              <AddCircleButton
+                label="Ajouter un repas"
+                onClick={() => openMealDialog(null)}
+              />
+            }
+            renderAction={(meal) => (
+              <EditIconButton
+                label={`Modifier ${meal.name ?? 'ce repas'}`}
+                onClick={() => openMealDialog(meal)}
+              />
+            )}
           />
         )}
       </div>
