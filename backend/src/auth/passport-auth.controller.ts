@@ -16,7 +16,9 @@ import { RegisterDto } from './dto/register.dto';
 import { PassportJwtAuthGuard } from './guards/passport-jwt.guard';
 import { PassportLocalGuard } from './guards/passport-local.guard';
 
-type RequestWithUser = ExpressRequest & { user: SignInData };
+type RequestWithUser = ExpressRequest & {
+  user: SignInData & { name?: string; avatarUrl?: string | null };
+};
 
 const COOKIE_NAME = 'access_token';
 const COOKIE_MAX_AGE_MS = 24 * 60 * 60 * 1000; // same as expiresIn from JwtModule
@@ -30,10 +32,10 @@ export class PassportAuthController {
     @Body() dto: RegisterDto,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const { accessToken, userId, username } =
+    const { accessToken, userId, username, name, avatarUrl } =
       await this.authService.register(dto);
     this.setAuthCookie(res, accessToken);
-    return { userId, username };
+    return { userId, username, name, avatarUrl };
   }
 
   @HttpCode(HttpStatus.OK)
@@ -43,11 +45,10 @@ export class PassportAuthController {
     @Request() request: RequestWithUser,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const { accessToken, userId, username } = await this.authService.signIn(
-      request.user,
-    );
+    const { accessToken, userId, username, name, avatarUrl } =
+      await this.authService.signIn(request.user);
     this.setAuthCookie(res, accessToken);
-    return { userId, username };
+    return { userId, username, name, avatarUrl };
   }
 
   @Post('logout')
@@ -60,7 +61,8 @@ export class PassportAuthController {
   @Get('me')
   @UseGuards(PassportJwtAuthGuard)
   getUserInfo(@Request() request: RequestWithUser) {
-    return request.user;
+    const { userId, username, name, avatarUrl } = request.user;
+    return { userId, username, name, avatarUrl };
   }
 
   private setAuthCookie(res: Response, token: string) {
