@@ -168,3 +168,22 @@ body {
 .range-thumb::-moz-range-thumb:active {
   box-shadow: 0 0 0 8px rgb(34 197 94 / 0.15);
 }
+
+.kcal-datepicker .react-datepicker__day--keyboard-selected {
+  background-color: var(--color-green-100);
+  color: var(--color-green-800);
+}
+
+.kcal-datepicker .react-datepicker__day:hover {
+  background-color: var(--color-green-100);
+}
+
+.kcal-datepicker .react-datepicker__day--selected,
+.kcal-datepicker .react-datepicker__day--selected:hover {
+  background-color: var(--color-green-500);
+  color: white;
+}
+
+.kcal-datepicker .react-datepicker__day--today {
+  font-weight: 700;
+}
