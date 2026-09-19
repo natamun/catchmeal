@@ -1,5 +1,12 @@
 export type MealType = 'BREAKFAST' | 'LUNCH' | 'DINNER' | 'SNACK';
 
+export const MEAL_TYPE_LABELS: Record<MealType, string> = {
+  BREAKFAST: 'Petit-déjeuner',
+  LUNCH: 'Déjeuner',
+  DINNER: 'Dîner',
+  SNACK: 'Collation',
+};
+
 export interface MealFoodItem {
   id: number;
   foodItemId: number | null;

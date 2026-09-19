@@ -1,17 +1,19 @@
+import { useState } from 'react';
+import { CheckCircle2 } from 'lucide-react';
+
 import CalorieSummary from '../components/home/CalorieSummary';
+import DailyMealList from '../components/home/DailyMealList';
+import DailyMealPicker from '../components/home/DailyMealPicker';
+import DateNavigator from '../components/home/DateNavigator';
 import FriendsActivity, {
   type FriendActivity,
 } from '../components/home/FriendsActivity';
 import MacroBreakdown from '../components/home/MacroBreakdown';
-import MealList, { type Meal } from '../components/home/MealList';
 import WeightWidget from '../components/home/WeightWidget';
 import Header from '../components/layout/Header';
-
-const MOCK_MEALS: Meal[] = [
-  { id: 1, name: "Flocons d'avoine", calories: 320, time: '08:15' },
-  { id: 2, name: 'Poulet grillé + riz', calories: 610, time: '12:30' },
-  { id: 3, name: 'Yaourt grec', calories: 130, time: '16:00' },
-];
+import type { MealType } from '../components/meal/types';
+import { Toast } from '../components/ui/Toast';
+import { useTimeout } from '../hooks/useTimeout';
 
 const MOCK_FRIENDS: FriendActivity[] = [
   {
@@ -37,28 +39,54 @@ const MOCK_FRIENDS: FriendActivity[] = [
   },
 ];
 
-const consumed = MOCK_MEALS.reduce((sum, m) => sum + m.calories, 0);
+const consumed = 1060;
 
 export default function HomePage() {
+  const [selectedDate, setSelectedDate] = useState(() => new Date());
+  const [addingMealType, setAddingMealType] = useState<MealType | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+  useTimeout(() => setSuccessMessage(null), successMessage ? 3000 : null);
+
   return (
     <>
-      <Header username="Maxime" />
-      <div className="flex flex-col gap-4 md:gap-6">
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-3 md:gap-6">
-          <CalorieSummary consumed={consumed} goal={2000} />
-          <MacroBreakdown
-            protein={95}
-            proteinGoal={150}
-            carbs={180}
-            carbsGoal={250}
-            fat={42}
-            fatGoal={65}
-          />
-          <WeightWidget currentWeight={74.2} startWeight={80} goalWeight={70} />
+      {addingMealType ? (
+        <DailyMealPicker
+          mealType={addingMealType}
+          date={selectedDate}
+          onClose={() => setAddingMealType(null)}
+          onAdded={() => {
+            setAddingMealType(null);
+            setSuccessMessage('Ajouté au journal');
+          }}
+        />
+      ) : (
+        <div className="animate-fade-in-up">
+          <Header username="Maxime" />
+          <div className="flex flex-col gap-4 md:gap-6">
+            <DateNavigator value={selectedDate} onChange={setSelectedDate} />
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-3 md:gap-6">
+              <CalorieSummary consumed={consumed} goal={2000} />
+              <MacroBreakdown
+                protein={95}
+                proteinGoal={150}
+                carbs={180}
+                carbsGoal={250}
+                fat={42}
+                fatGoal={65}
+              />
+              <WeightWidget
+                currentWeight={74.2}
+                startWeight={80}
+                goalWeight={70}
+              />
+            </div>
+            <DailyMealList onAdd={setAddingMealType} />
+            <FriendsActivity activities={MOCK_FRIENDS} />
+          </div>
         </div>
-        <MealList meals={MOCK_MEALS} />
-        <FriendsActivity activities={MOCK_FRIENDS} />
-      </div>
+      )}
+      <Toast message={successMessage} icon={CheckCircle2} />
     </>
   );
 }
