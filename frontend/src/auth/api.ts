@@ -30,6 +30,8 @@ async function request<T>(url: string, init?: RequestInit): Promise<T> {
 export interface AuthUser {
   userId: number;
   username: string;
+  name?: string;
+  avatarUrl?: string | null;
 }
 
 export interface RegisterInput {

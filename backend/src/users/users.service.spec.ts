@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 
 import { PrismaService } from '../prisma/prisma.service';
+import { SupabaseService } from '../supabase/supabase.service';
 import { UsersService } from './users.service';
 
 describe('UsersService', () => {
@@ -10,7 +11,12 @@ describe('UsersService', () => {
     user: {
       create: jest.fn(),
       findUnique: jest.fn(),
+      update: jest.fn(),
     },
+  };
+
+  const supabaseMock = {
+    uploadAvatar: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -19,6 +25,7 @@ describe('UsersService', () => {
       providers: [
         UsersService,
         { provide: PrismaService, useValue: prismaMock },
+        { provide: SupabaseService, useValue: supabaseMock },
       ],
     }).compile();
 

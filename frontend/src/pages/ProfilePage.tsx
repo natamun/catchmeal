@@ -1,4 +1,5 @@
 import { useAuth } from '../auth/auth-context';
+import { ProfileIdentityCard } from '../components/profile/ProfileIdentityCard';
 
 const STATS = [
   { label: 'Jours suivis', value: '24' },
@@ -6,26 +7,22 @@ const STATS = [
   { label: 'Produits scannés', value: '43' },
 ];
 
+const GOALS = [
+  { label: 'Objectif calorique', value: '2 000 kcal / jour' },
+  { label: 'Poids cible', value: '70 kg' },
+  { label: 'Protéines', value: '150 g / jour' },
+];
+
 export default function ProfilePage() {
-  const { logout } = useAuth();
+  const { user, logout, updateUser } = useAuth();
+
+  if (!user) return null;
 
   return (
     <div className="flex flex-col gap-6">
       <h2 className="text-xl font-bold text-green-800">Profil</h2>
 
-      {/* Identité */}
-      <div className="flex items-center gap-5 rounded-2xl border border-green-200 bg-white p-6 shadow-sm">
-        <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-green-100 text-2xl font-bold text-green-400">
-          M
-        </div>
-        <div className="min-w-0 flex-1">
-          <p className="text-lg font-bold text-green-800">Maxime</p>
-          <p className="text-sm text-green-500">maxime@kcalapp.ch</p>
-        </div>
-        <button className="shrink-0 cursor-pointer text-sm font-medium text-green-300 transition-colors hover:text-green-400">
-          Modifier
-        </button>
-      </div>
+      <ProfileIdentityCard user={user} onUpdate={updateUser} />
 
       {/* Stats rapides */}
       <div className="grid grid-cols-3 gap-3">
@@ -45,11 +42,7 @@ export default function ProfilePage() {
         <p className="px-5 pt-5 pb-3 text-xs font-semibold tracking-wide text-green-500 uppercase">
           Mes objectifs
         </p>
-        {[
-          { label: 'Objectif calorique', value: '2 000 kcal / jour' },
-          { label: 'Poids cible', value: '70 kg' },
-          { label: 'Protéines', value: '150 g / jour' },
-        ].map((item, i, arr) => (
+        {GOALS.map((item, i, arr) => (
           <div
             key={item.label}
             className={`flex items-center justify-between px-5 py-4 ${i < arr.length - 1 ? 'border-b border-green-200' : ''}`}

@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react';
 import { CheckCircle2, Zap } from 'lucide-react';
 
+import { useAuth } from '../auth/auth-context';
 import CalorieSummary from '../components/home/CalorieSummary';
 import DailyMealForm from '../components/home/DailyMealForm';
 import DailyMealList from '../components/home/DailyMealList';
@@ -53,6 +54,10 @@ interface SectionEdit {
 }
 
 export default function HomePage() {
+  const { user } = useAuth();
+
+  if (!user) return null;
+
   const [selectedDate, setSelectedDate] = useState(() => new Date());
   const [addingMealType, setAddingMealType] = useState<MealType | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -97,7 +102,7 @@ export default function HomePage() {
         />
       ) : (
         <div className="animate-fade-in-up">
-          <Header username="Maxime" />
+          <Header username={user.username} avatarUrl={user.avatarUrl} />
           <div className="flex flex-col gap-4 md:gap-6">
             <div className="flex flex-wrap justify-between gap-3">
               <DateNavigator value={selectedDate} onChange={setSelectedDate} />

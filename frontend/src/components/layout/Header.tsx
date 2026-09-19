@@ -1,8 +1,11 @@
+import { Avatar } from '../ui/Avatar';
+
 interface Props {
   username: string;
+  avatarUrl?: string | null;
 }
 
-export default function Header({ username }: Props) {
+export default function Header({ username, avatarUrl }: Props) {
   const today = new Date().toLocaleDateString('fr-FR', {
     weekday: 'long',
     day: 'numeric',
@@ -22,13 +25,7 @@ export default function Header({ username }: Props) {
           {today}
         </p>
       </div>
-      <div
-        className="flex h-10 w-10 items-center justify-center rounded-full bg-green-100 text-sm font-bold text-green-400"
-        aria-label={`Avatar de ${username}`}
-        role="img"
-      >
-        {username[0].toUpperCase()}
-      </div>
+      <Avatar username={username} avatarUrl={avatarUrl} size="sm" />
     </header>
   );
 }

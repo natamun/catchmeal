@@ -9,8 +9,19 @@ import { RegisterDto } from './dto/register.dto';
 const SALT_ROUNDS = 10;
 
 type AuthInput = { username: string; password: string };
-export type SignInData = { userId: number; username: string };
-type AuthResult = { accessToken: string; userId: number; username: string };
+export type SignInData = {
+  userId: number;
+  username: string;
+  name?: string;
+  avatarUrl?: string | null;
+};
+type AuthResult = {
+  accessToken: string;
+  userId: number;
+  username: string;
+  name?: string;
+  avatarUrl?: string | null;
+};
 
 @Injectable()
 export class AuthService {
@@ -37,6 +48,8 @@ export class AuthService {
     return {
       userId: user.id,
       username: user.username,
+      name: user.name,
+      avatarUrl: user.avatarUrl,
     };
   }
 
@@ -73,6 +86,12 @@ export class AuthService {
 
     const accessToken = await this.jwtService.signAsync(tokenPayload);
 
-    return { accessToken, username: user.username, userId: user.userId };
+    return {
+      accessToken,
+      username: user.username,
+      userId: user.userId,
+      name: user.name,
+      avatarUrl: user.avatarUrl,
+    };
   }
 }
