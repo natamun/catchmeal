@@ -28,6 +28,10 @@ export function ProfileIdentityCard({ user, onUpdate }: Props) {
   const [draftDailyProteinGoal, setDraftDailyProteinGoal] = useState(
     user.dailyProteinGoal?.toString() ?? '',
   );
+  const [draftGender, setDraftGender] = useState(user.gender ?? '');
+  const [draftBirthDate, setDraftBirthDate] = useState(
+    user.birthDate ? user.birthDate.slice(0, 10) : '',
+  );
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const usernameRef = useRef<HTMLInputElement>(null);
@@ -45,6 +49,8 @@ export function ProfileIdentityCard({ user, onUpdate }: Props) {
     setDraftTargetWeight(user.targetWeight?.toString() ?? '');
     setDraftDailyCalorieGoal(user.dailyCalorieGoal?.toString() ?? '');
     setDraftDailyProteinGoal(user.dailyProteinGoal?.toString() ?? '');
+    setDraftGender(user.gender ?? '');
+    setDraftBirthDate(user.birthDate ? user.birthDate.slice(0, 10) : '');
     setSaveError(null);
     setEditing(true);
   }
@@ -76,7 +82,9 @@ export function ProfileIdentityCard({ user, onUpdate }: Props) {
       draftHeight === (user.height?.toString() ?? '') &&
       draftTargetWeight === (user.targetWeight?.toString() ?? '') &&
       draftDailyCalorieGoal === (user.dailyCalorieGoal?.toString() ?? '') &&
-      draftDailyProteinGoal === (user.dailyProteinGoal?.toString() ?? '')
+      draftDailyProteinGoal === (user.dailyProteinGoal?.toString() ?? '') &&
+      draftGender === (user.gender ?? '') &&
+      draftBirthDate === (user.birthDate ? user.birthDate.slice(0, 10) : '')
     ) {
       setEditing(false);
       return;
@@ -89,6 +97,8 @@ export function ProfileIdentityCard({ user, onUpdate }: Props) {
       targetWeight?: number;
       dailyCalorieGoal?: number;
       dailyProteinGoal?: number;
+      gender?: string;
+      birthDate?: string;
     } = {};
     if (trimmedUsername !== user.username) input.username = trimmedUsername;
     if (trimmedName !== (user.name ?? '')) input.name = trimmedName;
@@ -117,6 +127,10 @@ export function ProfileIdentityCard({ user, onUpdate }: Props) {
       : undefined;
     if (parsedDailyProteinGoal !== (user.dailyProteinGoal ?? undefined))
       input.dailyProteinGoal = parsedDailyProteinGoal;
+    if (draftGender !== (user.gender ?? ''))
+      input.gender = draftGender || undefined;
+    if (draftBirthDate !== (user.birthDate ? user.birthDate.slice(0, 10) : ''))
+      input.birthDate = draftBirthDate || undefined;
 
     setSaving(true);
     setSaveError(null);
@@ -129,6 +143,8 @@ export function ProfileIdentityCard({ user, onUpdate }: Props) {
         targetWeight: updated.targetWeight ?? undefined,
         dailyCalorieGoal: updated.dailyCalorieGoal ?? undefined,
         dailyProteinGoal: updated.dailyProteinGoal ?? undefined,
+        gender: updated.gender ?? undefined,
+        birthDate: updated.birthDate ?? undefined,
       });
       setEditing(false);
     } catch (err) {
@@ -203,6 +219,40 @@ export function ProfileIdentityCard({ user, onUpdate }: Props) {
                   onChange={(e) => setDraftName(e.target.value)}
                   onKeyDown={handleKeyDown}
                   maxLength={80}
+                />
+              </div>
+              <div>
+                <label
+                  htmlFor="draft-gender"
+                  className="mb-1 block text-xs font-medium text-green-600"
+                >
+                  Genre
+                </label>
+                <select
+                  id="draft-gender"
+                  value={draftGender}
+                  onChange={(e) => setDraftGender(e.target.value)}
+                  className="w-full rounded-lg border border-green-200 px-3 py-2 text-sm text-green-800 focus:ring-2 focus:ring-green-300 focus:outline-none"
+                >
+                  <option value="">—</option>
+                  <option value="MALE">Homme</option>
+                  <option value="FEMALE">Femme</option>
+                  <option value="OTHER">Autre</option>
+                </select>
+              </div>
+              <div>
+                <label
+                  htmlFor="draft-birth-date"
+                  className="mb-1 block text-xs font-medium text-green-600"
+                >
+                  Date de naissance
+                </label>
+                <Input
+                  id="draft-birth-date"
+                  type="date"
+                  value={draftBirthDate}
+                  onChange={(e) => setDraftBirthDate(e.target.value)}
+                  onKeyDown={handleKeyDown}
                 />
               </div>
               <div>

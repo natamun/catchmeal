@@ -24,6 +24,8 @@ type RequestWithUser = ExpressRequest & {
     targetWeight?: number | null;
     dailyCalorieGoal?: number | null;
     dailyProteinGoal?: number | null;
+    gender?: string | null;
+    birthDate?: Date | null;
   };
 };
 
@@ -49,6 +51,8 @@ export class PassportAuthController {
       targetWeight,
       dailyCalorieGoal,
       dailyProteinGoal,
+      gender,
+      birthDate,
     } = await this.authService.register(dto);
     this.setAuthCookie(res, accessToken);
     return {
@@ -60,6 +64,8 @@ export class PassportAuthController {
       targetWeight,
       dailyCalorieGoal,
       dailyProteinGoal,
+      gender,
+      birthDate,
     };
   }
 
@@ -80,6 +86,8 @@ export class PassportAuthController {
       targetWeight,
       dailyCalorieGoal,
       dailyProteinGoal,
+      gender,
+      birthDate,
     } = await this.authService.signIn(request.user);
     this.setAuthCookie(res, accessToken);
     return {
@@ -91,6 +99,8 @@ export class PassportAuthController {
       targetWeight,
       dailyCalorieGoal,
       dailyProteinGoal,
+      gender,
+      birthDate,
     };
   }
 
@@ -113,6 +123,8 @@ export class PassportAuthController {
       targetWeight,
       dailyCalorieGoal,
       dailyProteinGoal,
+      gender,
+      birthDate,
     } = request.user;
     return {
       userId,
@@ -123,6 +135,8 @@ export class PassportAuthController {
       targetWeight,
       dailyCalorieGoal,
       dailyProteinGoal,
+      gender,
+      birthDate,
     };
   }
 

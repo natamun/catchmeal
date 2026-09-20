@@ -18,6 +18,12 @@ enum Role {
   ADMIN
 }
 
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
 model User {
   id                Int           @id @default(autoincrement())
   username          String        @unique
@@ -29,6 +35,8 @@ model User {
   targetWeight      Float?
   dailyCalorieGoal  Int?
   dailyProteinGoal  Int?
+  gender            Gender?
+  birthDate         DateTime?
   role              Role          @default(USER)
   createAt          DateTime      @default(now())
   avatarUrl         String?
