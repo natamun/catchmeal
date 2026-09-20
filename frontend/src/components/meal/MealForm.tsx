@@ -19,41 +19,16 @@ import {
   type MealItemDraft,
 } from './draft';
 import DraftItemList from './DraftItemList';
+import {
+  EMPTY_QUICK_ADD_FORM,
+  QUICK_ADD_FIELDS,
+  validateQuickAddForm,
+  type QuickAddField,
+} from './quickMealAdd';
 import type { Meal, MealInput } from './types';
 
 const LABEL_CLASS =
   'text-xs font-semibold tracking-wide text-green-500 uppercase';
-
-type QuickAddField = 'kcal' | 'protein' | 'carbs' | 'fat';
-
-const QUICK_ADD_FIELDS: { field: QuickAddField; label: string }[] = [
-  { field: 'kcal', label: 'Kcal' },
-  { field: 'protein', label: 'Protéines (g)' },
-  { field: 'carbs', label: 'Glucides (g)' },
-  { field: 'fat', label: 'Lipides (g)' },
-];
-
-const EMPTY_QUICK_ADD_FORM: Record<QuickAddField, string> = {
-  kcal: '',
-  protein: '',
-  carbs: '',
-  fat: '',
-};
-
-function validateQuickAddForm(
-  form: Record<QuickAddField, string>,
-): Partial<Record<QuickAddField, string>> {
-  const errors: Partial<Record<QuickAddField, string>> = {};
-
-  for (const { field } of QUICK_ADD_FIELDS) {
-    const value = Number(form[field]);
-    if (form[field].trim() === '' || Number.isNaN(value) || value < 0) {
-      errors[field] = 'Minimum 0';
-    }
-  }
-
-  return errors;
-}
 
 interface MealFormProps {
   dialogRef: RefObject<HTMLDialogElement | null>;
