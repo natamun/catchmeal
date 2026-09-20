@@ -26,7 +26,7 @@ export function WeightCard({ userId, targetWeight, onLatestWeight }: Props) {
       })
       .catch(() => setLoadError("Impossible de charger l'historique"))
       .finally(() => setLoading(false));
-  }, [userId]);
+  }, [userId, onLatestWeight]);
 
   async function handleSave() {
     const weight = parseFloat(draft);
@@ -61,20 +61,8 @@ export function WeightCard({ userId, targetWeight, onLatestWeight }: Props) {
         <p className="text-xs font-semibold tracking-wide text-green-500 uppercase">
           Poids
         </p>
-        {!logging && (
-          <button
-            onClick={() => setLogging(true)}
-            className="flex h-6 w-6 cursor-pointer items-center justify-center rounded-full bg-green-100 text-green-500 transition-colors hover:bg-green-200"
-            aria-label="Logger le poids"
-          >
-            +
-          </button>
-        )}
-      </div>
-
-      {logging && (
-        <div className="mb-4 flex flex-col gap-2">
-          <div className="flex items-center gap-2">
+        {logging ? (
+          <div className="flex items-center gap-1.5">
             <Input
               type="number"
               min={20}
@@ -87,26 +75,34 @@ export function WeightCard({ userId, targetWeight, onLatestWeight }: Props) {
                 if (e.key === 'Enter') void handleSave();
                 if (e.key === 'Escape') handleCancel();
               }}
-              className="w-28"
+              className="w-20"
             />
             <button
               onClick={() => void handleSave()}
               disabled={saving || !draft}
-              className="rounded-lg bg-green-400 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-green-500 disabled:opacity-50"
+              className="rounded-lg bg-green-400 px-2.5 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-green-500 disabled:opacity-50"
             >
-              {saving ? '...' : 'Sauver'}
+              {saving ? '...' : 'OK'}
             </button>
             <button
               onClick={handleCancel}
               disabled={saving}
-              className="rounded-lg border border-green-200 px-3 py-1.5 text-xs font-medium text-green-500 transition-colors hover:bg-green-50"
+              className="text-xs font-medium text-green-400 transition-colors hover:text-green-500"
             >
-              Annuler
+              ✕
             </button>
           </div>
-          {error && <p className="text-xs text-red-500">{error}</p>}
-        </div>
-      )}
+        ) : (
+          <button
+            onClick={() => setLogging(true)}
+            className="flex h-6 w-6 cursor-pointer items-center justify-center rounded-full bg-green-100 text-green-500 transition-colors hover:bg-green-200"
+            aria-label="Logger le poids"
+          >
+            +
+          </button>
+        )}
+      </div>
+      {error && logging && <p className="mb-2 text-xs text-red-500">{error}</p>}
 
       {loadError && <p className="text-sm text-red-500">{loadError}</p>}
       {!loading && !loadError && !latest && (
