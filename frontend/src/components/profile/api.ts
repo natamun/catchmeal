@@ -33,6 +33,7 @@ export interface UserProfile {
   height: number | null;
   targetWeight: number | null;
   dailyCalorieGoal: number | null;
+  dailyProteinGoal: number | null;
 }
 
 export interface UpdateProfileInput {
@@ -41,6 +42,7 @@ export interface UpdateProfileInput {
   height?: number;
   targetWeight?: number;
   dailyCalorieGoal?: number;
+  dailyProteinGoal?: number;
 }
 
 export interface WeightEntry {
