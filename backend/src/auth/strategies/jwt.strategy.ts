@@ -33,6 +33,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       avatarUrl: user.avatarUrl,
       height: user.height,
       targetWeight: user.targetWeight,
+      dailyCalorieGoal: user.dailyCalorieGoal,
     };
   }
 }

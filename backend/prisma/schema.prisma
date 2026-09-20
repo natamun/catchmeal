@@ -27,6 +27,7 @@ model User {
   avatarUrl         String?
   height            Float?
   targetWeight      Float?
+  dailyCalorieGoal  Int?
   role              Role          @default(USER)
   createAt          DateTime      @default(now())
   avatarUrl         String?

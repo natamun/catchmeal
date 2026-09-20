@@ -22,6 +22,9 @@ export function ProfileIdentityCard({ user, onUpdate }: Props) {
   const [draftTargetWeight, setDraftTargetWeight] = useState(
     user.targetWeight?.toString() ?? '',
   );
+  const [draftDailyCalorieGoal, setDraftDailyCalorieGoal] = useState(
+    user.dailyCalorieGoal?.toString() ?? '',
+  );
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const usernameRef = useRef<HTMLInputElement>(null);
@@ -37,6 +40,7 @@ export function ProfileIdentityCard({ user, onUpdate }: Props) {
     setDraftName(user.name ?? '');
     setDraftHeight(user.height?.toString() ?? '');
     setDraftTargetWeight(user.targetWeight?.toString() ?? '');
+    setDraftDailyCalorieGoal(user.dailyCalorieGoal?.toString() ?? '');
     setSaveError(null);
     setEditing(true);
   }
@@ -66,7 +70,8 @@ export function ProfileIdentityCard({ user, onUpdate }: Props) {
       trimmedUsername === user.username &&
       trimmedName === (user.name ?? '') &&
       draftHeight === (user.height?.toString() ?? '') &&
-      draftTargetWeight === (user.targetWeight?.toString() ?? '')
+      draftTargetWeight === (user.targetWeight?.toString() ?? '') &&
+      draftDailyCalorieGoal === (user.dailyCalorieGoal?.toString() ?? '')
     ) {
       setEditing(false);
       return;
@@ -77,6 +82,7 @@ export function ProfileIdentityCard({ user, onUpdate }: Props) {
       name?: string;
       height?: number;
       targetWeight?: number;
+      dailyCalorieGoal?: number;
     } = {};
     if (trimmedUsername !== user.username) input.username = trimmedUsername;
     if (trimmedName !== (user.name ?? '')) input.name = trimmedName;
@@ -95,6 +101,11 @@ export function ProfileIdentityCard({ user, onUpdate }: Props) {
       : undefined;
     if (parsedTargetWeight !== (user.targetWeight ?? undefined))
       input.targetWeight = parsedTargetWeight;
+    const parsedDailyCalorieGoal = draftDailyCalorieGoal
+      ? parseInt(draftDailyCalorieGoal)
+      : undefined;
+    if (parsedDailyCalorieGoal !== (user.dailyCalorieGoal ?? undefined))
+      input.dailyCalorieGoal = parsedDailyCalorieGoal;
 
     setSaving(true);
     setSaveError(null);
@@ -105,6 +116,7 @@ export function ProfileIdentityCard({ user, onUpdate }: Props) {
         name: updated.name,
         height: updated.height ?? undefined,
         targetWeight: updated.targetWeight ?? undefined,
+        dailyCalorieGoal: updated.dailyCalorieGoal ?? undefined,
       });
       setEditing(false);
     } catch (err) {
@@ -213,6 +225,23 @@ export function ProfileIdentityCard({ user, onUpdate }: Props) {
                   step={0.1}
                   value={draftTargetWeight}
                   onChange={(e) => setDraftTargetWeight(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                />
+              </div>
+              <div>
+                <label
+                  htmlFor="draft-daily-calorie-goal"
+                  className="mb-1 block text-xs font-medium text-green-600"
+                >
+                  Objectif calorique (kcal/jour)
+                </label>
+                <Input
+                  id="draft-daily-calorie-goal"
+                  type="number"
+                  min={500}
+                  max={10000}
+                  value={draftDailyCalorieGoal}
+                  onChange={(e) => setDraftDailyCalorieGoal(e.target.value)}
                   onKeyDown={handleKeyDown}
                 />
               </div>

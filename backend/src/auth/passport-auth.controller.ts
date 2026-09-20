@@ -22,6 +22,7 @@ type RequestWithUser = ExpressRequest & {
     avatarUrl?: string | null;
     height?: number | null;
     targetWeight?: number | null;
+    dailyCalorieGoal?: number | null;
   };
 };
 
@@ -45,9 +46,18 @@ export class PassportAuthController {
       avatarUrl,
       height,
       targetWeight,
+      dailyCalorieGoal,
     } = await this.authService.register(dto);
     this.setAuthCookie(res, accessToken);
-    return { userId, username, name, avatarUrl, height, targetWeight };
+    return {
+      userId,
+      username,
+      name,
+      avatarUrl,
+      height,
+      targetWeight,
+      dailyCalorieGoal,
+    };
   }
 
   @HttpCode(HttpStatus.OK)
@@ -65,9 +75,18 @@ export class PassportAuthController {
       avatarUrl,
       height,
       targetWeight,
+      dailyCalorieGoal,
     } = await this.authService.signIn(request.user);
     this.setAuthCookie(res, accessToken);
-    return { userId, username, name, avatarUrl, height, targetWeight };
+    return {
+      userId,
+      username,
+      name,
+      avatarUrl,
+      height,
+      targetWeight,
+      dailyCalorieGoal,
+    };
   }
 
   @Post('logout')
@@ -80,9 +99,24 @@ export class PassportAuthController {
   @Get('me')
   @UseGuards(PassportJwtAuthGuard)
   getUserInfo(@Request() request: RequestWithUser) {
-    const { userId, username, name, avatarUrl, height, targetWeight } =
-      request.user;
-    return { userId, username, name, avatarUrl, height, targetWeight };
+    const {
+      userId,
+      username,
+      name,
+      avatarUrl,
+      height,
+      targetWeight,
+      dailyCalorieGoal,
+    } = request.user;
+    return {
+      userId,
+      username,
+      name,
+      avatarUrl,
+      height,
+      targetWeight,
+      dailyCalorieGoal,
+    };
   }
 
   private setAuthCookie(res: Response, token: string) {
