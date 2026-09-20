@@ -49,15 +49,21 @@ export class UsersService {
         targetWeight: true,
         dailyCalorieGoal: true,
         dailyProteinGoal: true,
+        gender: true,
+        birthDate: true,
       },
     });
   }
 
   async updateProfile(userId: number, dto: UpdateProfileDto) {
+    const { birthDate, ...rest } = dto;
     try {
       return await this.prisma.user.update({
         where: { id: userId },
-        data: dto,
+        data: {
+          ...rest,
+          ...(birthDate ? { birthDate: new Date(birthDate) } : {}),
+        },
         select: {
           id: true,
           username: true,
@@ -67,6 +73,8 @@ export class UsersService {
           targetWeight: true,
           dailyCalorieGoal: true,
           dailyProteinGoal: true,
+          gender: true,
+          birthDate: true,
         },
       });
     } catch (error) {

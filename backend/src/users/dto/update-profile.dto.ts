@@ -1,5 +1,7 @@
 import { Transform } from 'class-transformer';
 import {
+  IsDateString,
+  IsEnum,
   IsNumber,
   IsOptional,
   IsPositive,
@@ -8,6 +10,8 @@ import {
   MaxLength,
   MinLength,
 } from 'class-validator';
+
+import { Gender } from '../../generated/prisma/client';
 
 const trim = ({ value }: { value: unknown }) =>
   typeof value === 'string' ? value.trim() : value;
@@ -50,4 +54,12 @@ export class UpdateProfileDto {
   @IsPositive()
   @Max(1000)
   dailyProteinGoal?: number;
+
+  @IsOptional()
+  @IsEnum(Gender)
+  gender?: Gender;
+
+  @IsOptional()
+  @IsDateString()
+  birthDate?: string;
 }
