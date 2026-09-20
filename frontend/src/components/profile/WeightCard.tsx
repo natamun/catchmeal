@@ -6,9 +6,10 @@ import { getWeightHistory, logWeight, type WeightEntry } from './api';
 interface Props {
   userId: number;
   targetWeight?: number | null;
+  onLatestWeight?: (weight: number) => void;
 }
 
-export function WeightCard({ userId, targetWeight }: Props) {
+export function WeightCard({ userId, targetWeight, onLatestWeight }: Props) {
   const [history, setHistory] = useState<WeightEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -19,7 +20,10 @@ export function WeightCard({ userId, targetWeight }: Props) {
 
   useEffect(() => {
     getWeightHistory(userId)
-      .then(setHistory)
+      .then((entries) => {
+        setHistory(entries);
+        if (entries[0]) onLatestWeight?.(entries[0].weight);
+      })
       .catch(() => setLoadError("Impossible de charger l'historique"))
       .finally(() => setLoading(false));
   }, [userId]);
@@ -33,6 +37,7 @@ export function WeightCard({ userId, targetWeight }: Props) {
     try {
       const entry = await logWeight(userId, { weight });
       setHistory((prev) => [entry, ...prev]);
+      onLatestWeight?.(entry.weight);
       setDraft('');
       setLogging(false);
     } catch (err) {
