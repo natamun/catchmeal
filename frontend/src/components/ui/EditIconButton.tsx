@@ -11,7 +11,7 @@ export function EditIconButton({ label, onClick }: EditIconButtonProps) {
       type="button"
       onClick={onClick}
       aria-label={label}
-      className="shrink-0 cursor-pointer text-green-400 transition-colors hover:text-green-600"
+      className="flex h-6 w-6 shrink-0 cursor-pointer items-center justify-center text-green-400 transition-colors hover:text-green-600"
     >
       <Pencil className="h-4 w-4" />
     </button>
