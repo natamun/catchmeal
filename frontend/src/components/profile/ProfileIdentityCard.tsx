@@ -188,8 +188,8 @@ export function ProfileIdentityCard({ user, onUpdate }: Props) {
 
         <div className="min-w-0 flex-1">
           {editing ? (
-            <div className="flex flex-col gap-2">
-              <div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="col-span-2">
                 <label
                   htmlFor="draft-username"
                   className="mb-1 block text-xs font-medium text-green-600"
@@ -206,7 +206,7 @@ export function ProfileIdentityCard({ user, onUpdate }: Props) {
                   maxLength={30}
                 />
               </div>
-              <div>
+              <div className="col-span-2">
                 <label
                   htmlFor="draft-name"
                   className="mb-1 block text-xs font-medium text-green-600"
@@ -324,7 +324,11 @@ export function ProfileIdentityCard({ user, onUpdate }: Props) {
                   onKeyDown={handleKeyDown}
                 />
               </div>
-              {saveError && <p className="text-xs text-red-500">{saveError}</p>}
+              <div className="col-span-2">
+                {saveError && (
+                  <p className="text-xs text-red-500">{saveError}</p>
+                )}
+              </div>
             </div>
           ) : (
             <>
