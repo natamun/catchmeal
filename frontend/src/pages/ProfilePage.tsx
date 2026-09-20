@@ -1,6 +1,9 @@
+import { useState } from 'react';
+
 import { useAuth } from '../auth/auth-context';
 import { ProfileIdentityCard } from '../components/profile/ProfileIdentityCard';
 import { WeightCard } from '../components/profile/WeightCard';
+import { calculateBMR, calculateTDEE } from '../utils/bmr';
 
 const STATS = [
   { label: 'Jours suivis', value: '24' },
@@ -10,8 +13,17 @@ const STATS = [
 
 export default function ProfilePage() {
   const { user, logout, updateUser } = useAuth();
+  const [latestWeight, setLatestWeight] = useState<number | null>(null);
 
   if (!user) return null;
+
+  const bmr =
+    latestWeight && user.height && user.birthDate && user.gender
+      ? calculateBMR(latestWeight, user.height, user.birthDate, user.gender)
+      : null;
+
+  const tdee =
+    bmr && user.activityLevel ? calculateTDEE(bmr, user.activityLevel) : null;
 
   return (
     <div className="flex flex-col gap-6">
@@ -19,7 +31,11 @@ export default function ProfilePage() {
 
       <ProfileIdentityCard user={user} onUpdate={updateUser} />
 
-      <WeightCard userId={user.userId} targetWeight={user.targetWeight} />
+      <WeightCard
+        userId={user.userId}
+        targetWeight={user.targetWeight}
+        onLatestWeight={setLatestWeight}
+      />
 
       {/* Stats rapides */}
       <div className="grid grid-cols-3 gap-3">
@@ -60,6 +76,30 @@ export default function ProfilePage() {
           </p>
         </div>
       </div>
+
+      {(bmr ?? tdee) && (
+        <div className="overflow-hidden rounded-2xl border border-green-200 bg-white shadow-sm">
+          <p className="px-5 pt-5 pb-3 text-xs font-semibold tracking-wide text-green-500 uppercase">
+            Métabolisme
+          </p>
+          {bmr && (
+            <div className="flex items-center justify-between border-b border-green-200 px-5 py-4">
+              <p className="text-sm text-green-600">BMR</p>
+              <p className="text-sm font-semibold text-green-800">
+                {bmr} kcal / jour
+              </p>
+            </div>
+          )}
+          {tdee && (
+            <div className="flex items-center justify-between px-5 py-4">
+              <p className="text-sm text-green-600">TDEE</p>
+              <p className="text-sm font-semibold text-green-800">
+                {tdee} kcal / jour
+              </p>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Compte */}
       <div className="overflow-hidden rounded-2xl border border-green-200 bg-white shadow-sm">
