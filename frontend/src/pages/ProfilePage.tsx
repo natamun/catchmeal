@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 
 import { useAuth } from '../auth/auth-context';
 import { ProfileIdentityCard } from '../components/profile/ProfileIdentityCard';
@@ -14,6 +14,7 @@ const STATS = [
 export default function ProfilePage() {
   const { user, logout, updateUser } = useAuth();
   const [latestWeight, setLatestWeight] = useState<number | null>(null);
+  const handleLatestWeight = useCallback((w: number) => setLatestWeight(w), []);
 
   if (!user) return null;
 
@@ -34,7 +35,7 @@ export default function ProfilePage() {
       <WeightCard
         userId={user.userId}
         targetWeight={user.targetWeight}
-        onLatestWeight={setLatestWeight}
+        onLatestWeight={handleLatestWeight}
       />
 
       {/* Stats rapides */}
