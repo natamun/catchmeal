@@ -30,11 +30,29 @@ export interface UserProfile {
   username: string;
   name: string;
   avatarUrl: string | null;
+  height: number | null;
+  targetWeight: number | null;
 }
 
 export interface UpdateProfileInput {
   username?: string;
   name?: string;
+  height?: number;
+  targetWeight?: number;
+}
+
+export interface WeightEntry {
+  id: number;
+  weight: number;
+  bodyFat: number | null;
+  note: string | null;
+  loggedAt: string;
+}
+
+export interface LogWeightInput {
+  weight: number;
+  bodyFat?: number;
+  note?: string;
 }
 
 export function uploadAvatar(userId: number, file: File) {
@@ -52,4 +70,16 @@ export function updateProfile(userId: number, input: UpdateProfileInput) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(input),
   });
+}
+
+export function logWeight(userId: number, input: LogWeightInput) {
+  return request<WeightEntry>(`${BASE_URL}/users/${userId}/weight`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(input),
+  });
+}
+
+export function getWeightHistory(userId: number) {
+  return request<WeightEntry[]>(`${BASE_URL}/users/${userId}/weight`);
 }

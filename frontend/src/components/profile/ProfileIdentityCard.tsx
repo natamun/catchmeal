@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import type { AuthUser } from '../../auth/auth-context';
 import { Avatar } from '../ui/Avatar';
 import { Input } from '../ui/Input';
-import { updateProfile, uploadAvatar } from './api';
+import { updateProfile, uploadAvatar, type UserProfile } from './api';
 
 interface Props {
   user: AuthUser;
@@ -18,6 +18,10 @@ export function ProfileIdentityCard({ user, onUpdate }: Props) {
   const [editing, setEditing] = useState(false);
   const [draftUsername, setDraftUsername] = useState(user.username);
   const [draftName, setDraftName] = useState(user.name ?? '');
+  const [draftHeight, setDraftHeight] = useState(user.height?.toString() ?? '');
+  const [draftTargetWeight, setDraftTargetWeight] = useState(
+    user.targetWeight?.toString() ?? '',
+  );
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const usernameRef = useRef<HTMLInputElement>(null);
@@ -27,6 +31,15 @@ export function ProfileIdentityCard({ user, onUpdate }: Props) {
       setTimeout(() => usernameRef.current?.focus(), 0);
     }
   }, [editing]);
+
+  function handleEdit() {
+    setDraftUsername(user.username);
+    setDraftName(user.name ?? '');
+    setDraftHeight(user.height?.toString() ?? '');
+    setDraftTargetWeight(user.targetWeight?.toString() ?? '');
+    setSaveError(null);
+    setEditing(true);
+  }
 
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -51,21 +64,48 @@ export function ProfileIdentityCard({ user, onUpdate }: Props) {
 
     if (
       trimmedUsername === user.username &&
-      trimmedName === (user.name ?? '')
+      trimmedName === (user.name ?? '') &&
+      draftHeight === (user.height?.toString() ?? '') &&
+      draftTargetWeight === (user.targetWeight?.toString() ?? '')
     ) {
       setEditing(false);
       return;
     }
 
-    const input: { username?: string; name?: string } = {};
+    const input: {
+      username?: string;
+      name?: string;
+      height?: number;
+      targetWeight?: number;
+    } = {};
     if (trimmedUsername !== user.username) input.username = trimmedUsername;
     if (trimmedName !== (user.name ?? '')) input.name = trimmedName;
+    const parsedHeight = draftHeight ? parseFloat(draftHeight) : undefined;
+    if (
+      parsedHeight !== undefined &&
+      (parsedHeight <= 0 || parsedHeight > 300)
+    ) {
+      setSaveError('La taille doit être entre 1 et 300 cm');
+      return;
+    }
+    if (parsedHeight !== (user.height ?? undefined))
+      input.height = parsedHeight;
+    const parsedTargetWeight = draftTargetWeight
+      ? parseFloat(draftTargetWeight)
+      : undefined;
+    if (parsedTargetWeight !== (user.targetWeight ?? undefined))
+      input.targetWeight = parsedTargetWeight;
 
     setSaving(true);
     setSaveError(null);
     try {
-      const updated = await updateProfile(user.userId, input);
-      onUpdate({ username: updated.username, name: updated.name });
+      const updated: UserProfile = await updateProfile(user.userId, input);
+      onUpdate({
+        username: updated.username,
+        name: updated.name,
+        height: updated.height ?? undefined,
+        targetWeight: updated.targetWeight ?? undefined,
+      });
       setEditing(false);
     } catch (err) {
       setSaveError(
@@ -141,6 +181,41 @@ export function ProfileIdentityCard({ user, onUpdate }: Props) {
                   maxLength={80}
                 />
               </div>
+              <div>
+                <label
+                  htmlFor="draft-height"
+                  className="mb-1 block text-xs font-medium text-green-600"
+                >
+                  Taille (cm)
+                </label>
+                <Input
+                  id="draft-height"
+                  type="number"
+                  min={50}
+                  max={300}
+                  value={draftHeight}
+                  onChange={(e) => setDraftHeight(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                />
+              </div>
+              <div>
+                <label
+                  htmlFor="draft-target-weight"
+                  className="mb-1 block text-xs font-medium text-green-600"
+                >
+                  Poids cible (kg)
+                </label>
+                <Input
+                  id="draft-target-weight"
+                  type="number"
+                  min={20}
+                  max={500}
+                  step={0.1}
+                  value={draftTargetWeight}
+                  onChange={(e) => setDraftTargetWeight(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                />
+              </div>
               {saveError && <p className="text-xs text-red-500">{saveError}</p>}
             </div>
           ) : (
@@ -181,7 +256,7 @@ export function ProfileIdentityCard({ user, onUpdate }: Props) {
             </div>
           ) : (
             <button
-              onClick={() => setEditing(true)}
+              onClick={handleEdit}
               className="cursor-pointer text-sm font-medium text-green-300 transition-colors hover:text-green-400"
             >
               Modifier

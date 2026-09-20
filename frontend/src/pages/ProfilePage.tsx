@@ -1,5 +1,6 @@
 import { useAuth } from '../auth/auth-context';
 import { ProfileIdentityCard } from '../components/profile/ProfileIdentityCard';
+import { WeightCard } from '../components/profile/WeightCard';
 
 const STATS = [
   { label: 'Jours suivis', value: '24' },
@@ -7,9 +8,8 @@ const STATS = [
   { label: 'Produits scannés', value: '43' },
 ];
 
-const GOALS = [
+const HARDCODED_GOALS = [
   { label: 'Objectif calorique', value: '2 000 kcal / jour' },
-  { label: 'Poids cible', value: '70 kg' },
   { label: 'Protéines', value: '150 g / jour' },
 ];
 
@@ -23,6 +23,8 @@ export default function ProfilePage() {
       <h2 className="text-xl font-bold text-green-800">Profil</h2>
 
       <ProfileIdentityCard user={user} onUpdate={updateUser} />
+
+      <WeightCard userId={user.userId} targetWeight={user.targetWeight} />
 
       {/* Stats rapides */}
       <div className="grid grid-cols-3 gap-3">
@@ -42,15 +44,21 @@ export default function ProfilePage() {
         <p className="px-5 pt-5 pb-3 text-xs font-semibold tracking-wide text-green-500 uppercase">
           Mes objectifs
         </p>
-        {GOALS.map((item, i, arr) => (
+        {HARDCODED_GOALS.map((item) => (
           <div
             key={item.label}
-            className={`flex items-center justify-between px-5 py-4 ${i < arr.length - 1 ? 'border-b border-green-200' : ''}`}
+            className="flex items-center justify-between border-b border-green-200 px-5 py-4"
           >
             <p className="text-sm text-green-600">{item.label}</p>
             <p className="text-sm font-semibold text-green-800">{item.value}</p>
           </div>
         ))}
+        <div className="flex items-center justify-between px-5 py-4">
+          <p className="text-sm text-green-600">Poids cible</p>
+          <p className="text-sm font-semibold text-green-800">
+            {user.targetWeight ? `${user.targetWeight} kg` : '—'}
+          </p>
+        </div>
       </div>
 
       {/* Compte */}

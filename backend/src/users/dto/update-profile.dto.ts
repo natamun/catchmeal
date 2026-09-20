@@ -1,5 +1,13 @@
 import { Transform } from 'class-transformer';
-import { IsOptional, IsString, MaxLength, MinLength } from 'class-validator';
+import {
+  IsNumber,
+  IsOptional,
+  IsPositive,
+  IsString,
+  Max,
+  MaxLength,
+  MinLength,
+} from 'class-validator';
 
 const trim = ({ value }: { value: unknown }) =>
   typeof value === 'string' ? value.trim() : value;
@@ -18,4 +26,16 @@ export class UpdateProfileDto {
   @MinLength(1)
   @MaxLength(80)
   name?: string;
+
+  @IsOptional()
+  @IsNumber()
+  @IsPositive()
+  @Max(300)
+  height?: number;
+
+  @IsOptional()
+  @IsNumber()
+  @IsPositive()
+  @Max(500)
+  targetWeight?: number;
 }

@@ -25,6 +25,8 @@ model User {
   email             String        @unique
   passwordHash      String
   avatarUrl         String?
+  height            Float?
+  targetWeight      Float?
   role              Role          @default(USER)
   createAt          DateTime      @default(now())
   avatarUrl         String?

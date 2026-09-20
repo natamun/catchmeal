@@ -14,6 +14,8 @@ export type SignInData = {
   username: string;
   name?: string;
   avatarUrl?: string | null;
+  height?: number | null;
+  targetWeight?: number | null;
 };
 type AuthResult = {
   accessToken: string;
@@ -21,6 +23,8 @@ type AuthResult = {
   username: string;
   name?: string;
   avatarUrl?: string | null;
+  height?: number | null;
+  targetWeight?: number | null;
 };
 
 @Injectable()
@@ -50,6 +54,8 @@ export class AuthService {
       username: user.username,
       name: user.name,
       avatarUrl: user.avatarUrl,
+      height: user.height,
+      targetWeight: user.targetWeight,
     };
   }
 
@@ -92,6 +98,8 @@ export class AuthService {
       userId: user.userId,
       name: user.name,
       avatarUrl: user.avatarUrl,
+      height: user.height,
+      targetWeight: user.targetWeight,
     };
   }
 }

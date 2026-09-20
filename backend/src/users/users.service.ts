@@ -1,4 +1,8 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 
 import 'multer';
 
@@ -36,7 +40,14 @@ export class UsersService {
     return this.prisma.user.update({
       where: { id: userId },
       data: { avatarUrl },
-      select: { id: true, username: true, name: true, avatarUrl: true },
+      select: {
+        id: true,
+        username: true,
+        name: true,
+        avatarUrl: true,
+        height: true,
+        targetWeight: true,
+      },
     });
   }
 
@@ -45,7 +56,14 @@ export class UsersService {
       return await this.prisma.user.update({
         where: { id: userId },
         data: dto,
-        select: { id: true, username: true, name: true, avatarUrl: true },
+        select: {
+          id: true,
+          username: true,
+          name: true,
+          avatarUrl: true,
+          height: true,
+          targetWeight: true,
+        },
       });
     } catch (error) {
       if (
@@ -56,5 +74,44 @@ export class UsersService {
       }
       throw error;
     }
+  }
+
+  async logWeight(
+    userId: number,
+    weight: number,
+    bodyFat?: number,
+    note?: string,
+  ) {
+    await this.prisma.user
+      .findFirstOrThrow({ where: { id: userId } })
+      .catch(() => {
+        throw new NotFoundException('User not found');
+      });
+    return this.prisma.weightLog.create({
+      data: { userId, weight, bodyFat, note },
+      select: {
+        id: true,
+        weight: true,
+        bodyFat: true,
+        note: true,
+        loggedAt: true,
+      },
+    });
+  }
+
+  async getWeightHistory(userId: number) {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user) throw new NotFoundException('User not found');
+    return this.prisma.weightLog.findMany({
+      where: { userId },
+      orderBy: { loggedAt: 'desc' },
+      select: {
+        id: true,
+        weight: true,
+        bodyFat: true,
+        note: true,
+        loggedAt: true,
+      },
+    });
   }
 }
