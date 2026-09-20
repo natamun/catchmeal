@@ -36,6 +36,7 @@ export interface UserProfile {
   dailyProteinGoal: number | null;
   gender: string | null;
   birthDate: string | null;
+  activityLevel: string | null;
 }
 
 export interface UpdateProfileInput {
@@ -47,6 +48,7 @@ export interface UpdateProfileInput {
   dailyProteinGoal?: number;
   gender?: string;
   birthDate?: string;
+  activityLevel?: string;
 }
 
 export interface WeightEntry {

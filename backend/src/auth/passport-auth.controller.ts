@@ -26,6 +26,7 @@ type RequestWithUser = ExpressRequest & {
     dailyProteinGoal?: number | null;
     gender?: string | null;
     birthDate?: Date | null;
+    activityLevel?: string | null;
   };
 };
 
@@ -53,6 +54,7 @@ export class PassportAuthController {
       dailyProteinGoal,
       gender,
       birthDate,
+      activityLevel,
     } = await this.authService.register(dto);
     this.setAuthCookie(res, accessToken);
     return {
@@ -66,6 +68,7 @@ export class PassportAuthController {
       dailyProteinGoal,
       gender,
       birthDate,
+      activityLevel,
     };
   }
 
@@ -88,6 +91,7 @@ export class PassportAuthController {
       dailyProteinGoal,
       gender,
       birthDate,
+      activityLevel,
     } = await this.authService.signIn(request.user);
     this.setAuthCookie(res, accessToken);
     return {
@@ -101,6 +105,7 @@ export class PassportAuthController {
       dailyProteinGoal,
       gender,
       birthDate,
+      activityLevel,
     };
   }
 
@@ -125,6 +130,7 @@ export class PassportAuthController {
       dailyProteinGoal,
       gender,
       birthDate,
+      activityLevel,
     } = request.user;
     return {
       userId,
@@ -137,6 +143,7 @@ export class PassportAuthController {
       dailyProteinGoal,
       gender,
       birthDate,
+      activityLevel,
     };
   }
 

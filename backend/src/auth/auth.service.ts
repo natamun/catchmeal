@@ -20,6 +20,7 @@ export type SignInData = {
   dailyProteinGoal?: number | null;
   gender?: string | null;
   birthDate?: Date | null;
+  activityLevel?: string | null;
 };
 type AuthResult = {
   accessToken: string;
@@ -33,6 +34,7 @@ type AuthResult = {
   dailyProteinGoal?: number | null;
   gender?: string | null;
   birthDate?: Date | null;
+  activityLevel?: string | null;
 };
 
 @Injectable()
@@ -68,6 +70,7 @@ export class AuthService {
       dailyProteinGoal: user.dailyProteinGoal,
       gender: user.gender,
       birthDate: user.birthDate,
+      activityLevel: user.activityLevel,
     };
   }
 
@@ -116,6 +119,7 @@ export class AuthService {
       dailyProteinGoal: user.dailyProteinGoal,
       gender: user.gender,
       birthDate: user.birthDate,
+      activityLevel: user.activityLevel,
     };
   }
 }

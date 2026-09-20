@@ -37,6 +37,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       dailyProteinGoal: user.dailyProteinGoal,
       gender: user.gender,
       birthDate: user.birthDate,
+      activityLevel: user.activityLevel,
     };
   }
 }
