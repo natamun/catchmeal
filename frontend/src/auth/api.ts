@@ -35,6 +35,7 @@ export interface AuthUser {
   height?: number | null;
   targetWeight?: number | null;
   dailyCalorieGoal?: number | null;
+  dailyProteinGoal?: number | null;
 }
 
 export interface RegisterInput {

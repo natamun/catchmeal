@@ -8,8 +8,6 @@ const STATS = [
   { label: 'Produits scannés', value: '43' },
 ];
 
-const HARDCODED_GOALS = [{ label: 'Protéines', value: '150 g / jour' }];
-
 export default function ProfilePage() {
   const { user, logout, updateUser } = useAuth();
 
@@ -41,21 +39,18 @@ export default function ProfilePage() {
         <p className="px-5 pt-5 pb-3 text-xs font-semibold tracking-wide text-green-500 uppercase">
           Mes objectifs
         </p>
-        {HARDCODED_GOALS.map((item) => (
-          <div
-            key={item.label}
-            className="flex items-center justify-between border-b border-green-200 px-5 py-4"
-          >
-            <p className="text-sm text-green-600">{item.label}</p>
-            <p className="text-sm font-semibold text-green-800">{item.value}</p>
-          </div>
-        ))}
         <div className="flex items-center justify-between border-b border-green-200 px-5 py-4">
           <p className="text-sm text-green-600">Objectif calorique</p>
           <p className="text-sm font-semibold text-green-800">
             {user.dailyCalorieGoal
               ? `${user.dailyCalorieGoal} kcal / jour`
               : '—'}
+          </p>
+        </div>
+        <div className="flex items-center justify-between border-b border-green-200 px-5 py-4">
+          <p className="text-sm text-green-600">Protéines</p>
+          <p className="text-sm font-semibold text-green-800">
+            {user.dailyProteinGoal ? `${user.dailyProteinGoal} g / jour` : '—'}
           </p>
         </div>
         <div className="flex items-center justify-between px-5 py-4">

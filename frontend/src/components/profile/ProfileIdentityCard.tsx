@@ -25,6 +25,9 @@ export function ProfileIdentityCard({ user, onUpdate }: Props) {
   const [draftDailyCalorieGoal, setDraftDailyCalorieGoal] = useState(
     user.dailyCalorieGoal?.toString() ?? '',
   );
+  const [draftDailyProteinGoal, setDraftDailyProteinGoal] = useState(
+    user.dailyProteinGoal?.toString() ?? '',
+  );
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const usernameRef = useRef<HTMLInputElement>(null);
@@ -41,6 +44,7 @@ export function ProfileIdentityCard({ user, onUpdate }: Props) {
     setDraftHeight(user.height?.toString() ?? '');
     setDraftTargetWeight(user.targetWeight?.toString() ?? '');
     setDraftDailyCalorieGoal(user.dailyCalorieGoal?.toString() ?? '');
+    setDraftDailyProteinGoal(user.dailyProteinGoal?.toString() ?? '');
     setSaveError(null);
     setEditing(true);
   }
@@ -71,7 +75,8 @@ export function ProfileIdentityCard({ user, onUpdate }: Props) {
       trimmedName === (user.name ?? '') &&
       draftHeight === (user.height?.toString() ?? '') &&
       draftTargetWeight === (user.targetWeight?.toString() ?? '') &&
-      draftDailyCalorieGoal === (user.dailyCalorieGoal?.toString() ?? '')
+      draftDailyCalorieGoal === (user.dailyCalorieGoal?.toString() ?? '') &&
+      draftDailyProteinGoal === (user.dailyProteinGoal?.toString() ?? '')
     ) {
       setEditing(false);
       return;
@@ -83,6 +88,7 @@ export function ProfileIdentityCard({ user, onUpdate }: Props) {
       height?: number;
       targetWeight?: number;
       dailyCalorieGoal?: number;
+      dailyProteinGoal?: number;
     } = {};
     if (trimmedUsername !== user.username) input.username = trimmedUsername;
     if (trimmedName !== (user.name ?? '')) input.name = trimmedName;
@@ -106,6 +112,11 @@ export function ProfileIdentityCard({ user, onUpdate }: Props) {
       : undefined;
     if (parsedDailyCalorieGoal !== (user.dailyCalorieGoal ?? undefined))
       input.dailyCalorieGoal = parsedDailyCalorieGoal;
+    const parsedDailyProteinGoal = draftDailyProteinGoal
+      ? parseInt(draftDailyProteinGoal)
+      : undefined;
+    if (parsedDailyProteinGoal !== (user.dailyProteinGoal ?? undefined))
+      input.dailyProteinGoal = parsedDailyProteinGoal;
 
     setSaving(true);
     setSaveError(null);
@@ -117,6 +128,7 @@ export function ProfileIdentityCard({ user, onUpdate }: Props) {
         height: updated.height ?? undefined,
         targetWeight: updated.targetWeight ?? undefined,
         dailyCalorieGoal: updated.dailyCalorieGoal ?? undefined,
+        dailyProteinGoal: updated.dailyProteinGoal ?? undefined,
       });
       setEditing(false);
     } catch (err) {
@@ -242,6 +254,23 @@ export function ProfileIdentityCard({ user, onUpdate }: Props) {
                   max={10000}
                   value={draftDailyCalorieGoal}
                   onChange={(e) => setDraftDailyCalorieGoal(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                />
+              </div>
+              <div>
+                <label
+                  htmlFor="draft-daily-protein-goal"
+                  className="mb-1 block text-xs font-medium text-green-600"
+                >
+                  Objectif protéines (g/jour)
+                </label>
+                <Input
+                  id="draft-daily-protein-goal"
+                  type="number"
+                  min={10}
+                  max={500}
+                  value={draftDailyProteinGoal}
+                  onChange={(e) => setDraftDailyProteinGoal(e.target.value)}
                   onKeyDown={handleKeyDown}
                 />
               </div>

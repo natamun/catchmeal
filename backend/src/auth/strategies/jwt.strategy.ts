@@ -34,6 +34,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       height: user.height,
       targetWeight: user.targetWeight,
       dailyCalorieGoal: user.dailyCalorieGoal,
+      dailyProteinGoal: user.dailyProteinGoal,
     };
   }
 }

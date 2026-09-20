@@ -44,4 +44,10 @@ export class UpdateProfileDto {
   @IsPositive()
   @Max(10000)
   dailyCalorieGoal?: number;
+
+  @IsOptional()
+  @IsNumber()
+  @IsPositive()
+  @Max(1000)
+  dailyProteinGoal?: number;
 }
