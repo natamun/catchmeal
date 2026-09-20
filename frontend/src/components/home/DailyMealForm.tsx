@@ -1,16 +1,17 @@
 import { useState, type RefObject } from 'react';
 
-import { ApiError, createMeal } from '../meal/api';
+import {
+  ApiError,
+  createMeal,
+  deleteMeal,
+  toApiDate,
+  updateMeal,
+} from '../meal/api';
 import { draftsToInput, draftTotals, type MealItemDraft } from '../meal/draft';
 import DraftItemList from '../meal/DraftItemList';
-import { MEAL_TYPE_LABELS, type MealType } from '../meal/types';
+import { MEAL_TYPE_LABELS, type Meal, type MealType } from '../meal/types';
 import { BaseDialog } from '../ui/BaseDialog';
 import { MacroSummary } from '../ui/MacroSummary';
-
-function toDateInput(date: Date) {
-  const pad = (n: number) => String(n).padStart(2, '0');
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
-}
 
 interface DailyMealFormProps {
   dialogRef: RefObject<HTMLDialogElement | null>;
@@ -18,6 +19,7 @@ interface DailyMealFormProps {
   date: Date;
   initialItems: MealItemDraft[];
   sessionKey: number;
+  existingMeals?: Meal[];
   onSaved: () => void;
 }
 
@@ -27,6 +29,7 @@ export default function DailyMealForm({
   date,
   initialItems,
   sessionKey,
+  existingMeals = [],
   onSaved,
 }: DailyMealFormProps) {
   const [items, setItems] = useState<MealItemDraft[]>(initialItems);
@@ -39,6 +42,8 @@ export default function DailyMealForm({
     setItems(initialItems);
     setError(null);
   }
+
+  const isEdit = existingMeals.length > 0;
 
   const removeItem = (id: string) => {
     setItems((prev) => prev.filter((item) => item.id !== id));
@@ -55,17 +60,25 @@ export default function DailyMealForm({
   };
 
   const handleSubmit = async () => {
-    if (items.length === 0) {
+    if (items.length === 0 && !isEdit) {
       return;
     }
     setError(null);
     setIsSubmitting(true);
     try {
-      await createMeal({
-        typeMeal: mealType,
-        loggedAt: toDateInput(date),
-        items: draftsToInput(items),
-      });
+      if (!isEdit) {
+        await createMeal({
+          typeMeal: mealType,
+          loggedAt: toApiDate(date),
+          items: draftsToInput(items),
+        });
+      } else if (items.length === 0) {
+        await Promise.all(existingMeals.map((meal) => deleteMeal(meal.id)));
+      } else {
+        const [first, ...others] = existingMeals;
+        await updateMeal(first.id, { items: draftsToInput(items) });
+        await Promise.all(others.map((meal) => deleteMeal(meal.id)));
+      }
       dialogRef.current?.close();
       onSaved();
     } catch (err: unknown) {
@@ -85,7 +98,7 @@ export default function DailyMealForm({
   return (
     <BaseDialog
       dialogRef={dialogRef}
-      title={`Ajouter : ${MEAL_TYPE_LABELS[mealType]}`}
+      title={`${isEdit ? 'Modifier' : 'Ajouter'} : ${MEAL_TYPE_LABELS[mealType]}`}
     >
       {items.length > 0 ? (
         <DraftItemList
@@ -95,7 +108,9 @@ export default function DailyMealForm({
         />
       ) : (
         <p className="py-4 text-center text-sm text-green-400">
-          Aucun élément à ajouter.
+          {isEdit
+            ? 'Plus aucun aliment : enregistrer videra cette section.'
+            : 'Aucun élément à ajouter.'}
         </p>
       )}
 
@@ -107,10 +122,14 @@ export default function DailyMealForm({
         <button
           type="button"
           onClick={() => void handleSubmit()}
-          disabled={isSubmitting || items.length === 0}
+          disabled={isSubmitting || (!isEdit && items.length === 0)}
           className="w-full cursor-pointer rounded-xl bg-green-500 px-6 py-3 font-semibold text-white transition-colors hover:bg-green-600 disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {isSubmitting ? 'Enregistrement...' : 'Ajouter au journal'}
+          {isSubmitting
+            ? 'Enregistrement...'
+            : isEdit
+              ? 'Enregistrer'
+              : 'Ajouter au journal'}
         </button>
       </div>
     </BaseDialog>
