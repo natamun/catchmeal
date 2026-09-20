@@ -6,6 +6,7 @@ import { PrismaModule } from '../prisma/prisma.module';
 import { SupabaseModule } from '../supabase/supabase.module';
 import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
+import { UsersSearchController } from './users-search.controller';
 
 @Module({
   imports: [
@@ -14,7 +15,7 @@ import { UsersService } from './users.service';
     MulterModule.register({ limits: { fileSize: 5 * 1024 * 1024 } }),
     forwardRef(() => AuthModule),
   ],
-  controllers: [UsersController],
+  controllers: [UsersController, UsersSearchController],
   providers: [UsersService],
   exports: [UsersService],
 })
