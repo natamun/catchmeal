@@ -23,6 +23,14 @@
   }
 }
 
+@keyframes delayed-reveal {
+  from {
+    height: 0;
+    opacity: 0;
+    border-top-width: 0;
+  }
+}
+
 @keyframes fade-out {
   from {
     opacity: 1;
@@ -67,6 +75,7 @@
   /* Animations */
   --animate-fade-in-up: fade-in-up 0.15s ease-out;
   --animate-fade-out: fade-out 0.1s ease-in;
+  --animate-delayed-reveal: delayed-reveal 0.15s ease-out 0.25s backwards;
   --animate-pill-select: pill-select 0.15s cubic-bezier(0.4, 0, 0.2, 1);
   --animate-toast-in: toast-in 0.2s ease-out;
   --animate-toast-out: toast-out 0.15s ease-in;
