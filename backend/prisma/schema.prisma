@@ -24,6 +24,14 @@ enum Gender {
   OTHER
 }
 
+enum ActivityLevel {
+  SEDENTARY
+  LIGHTLY_ACTIVE
+  MODERATELY_ACTIVE
+  VERY_ACTIVE
+  EXTRA_ACTIVE
+}
+
 model User {
   id                Int           @id @default(autoincrement())
   username          String        @unique
@@ -37,6 +45,7 @@ model User {
   dailyProteinGoal  Int?
   gender            Gender?
   birthDate         DateTime?
+  activityLevel     ActivityLevel?
   role              Role          @default(USER)
   createAt          DateTime      @default(now())
   avatarUrl         String?

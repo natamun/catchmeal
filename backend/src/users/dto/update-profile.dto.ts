@@ -11,7 +11,7 @@ import {
   MinLength,
 } from 'class-validator';
 
-import { Gender } from '../../generated/prisma/client';
+import { ActivityLevel, Gender } from '../../generated/prisma/client';
 
 const trim = ({ value }: { value: unknown }) =>
   typeof value === 'string' ? value.trim() : value;
@@ -62,4 +62,8 @@ export class UpdateProfileDto {
   @IsOptional()
   @IsDateString()
   birthDate?: string;
+
+  @IsOptional()
+  @IsEnum(ActivityLevel)
+  activityLevel?: ActivityLevel;
 }

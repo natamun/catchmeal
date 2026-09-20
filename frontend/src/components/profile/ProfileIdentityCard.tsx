@@ -32,6 +32,9 @@ export function ProfileIdentityCard({ user, onUpdate }: Props) {
   const [draftBirthDate, setDraftBirthDate] = useState(
     user.birthDate ? user.birthDate.slice(0, 10) : '',
   );
+  const [draftActivityLevel, setDraftActivityLevel] = useState(
+    user.activityLevel ?? '',
+  );
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const usernameRef = useRef<HTMLInputElement>(null);
@@ -51,6 +54,7 @@ export function ProfileIdentityCard({ user, onUpdate }: Props) {
     setDraftDailyProteinGoal(user.dailyProteinGoal?.toString() ?? '');
     setDraftGender(user.gender ?? '');
     setDraftBirthDate(user.birthDate ? user.birthDate.slice(0, 10) : '');
+    setDraftActivityLevel(user.activityLevel ?? '');
     setSaveError(null);
     setEditing(true);
   }
@@ -84,7 +88,8 @@ export function ProfileIdentityCard({ user, onUpdate }: Props) {
       draftDailyCalorieGoal === (user.dailyCalorieGoal?.toString() ?? '') &&
       draftDailyProteinGoal === (user.dailyProteinGoal?.toString() ?? '') &&
       draftGender === (user.gender ?? '') &&
-      draftBirthDate === (user.birthDate ? user.birthDate.slice(0, 10) : '')
+      draftBirthDate === (user.birthDate ? user.birthDate.slice(0, 10) : '') &&
+      draftActivityLevel === (user.activityLevel ?? '')
     ) {
       setEditing(false);
       return;
@@ -99,6 +104,7 @@ export function ProfileIdentityCard({ user, onUpdate }: Props) {
       dailyProteinGoal?: number;
       gender?: string;
       birthDate?: string;
+      activityLevel?: string;
     } = {};
     if (trimmedUsername !== user.username) input.username = trimmedUsername;
     if (trimmedName !== (user.name ?? '')) input.name = trimmedName;
@@ -131,6 +137,8 @@ export function ProfileIdentityCard({ user, onUpdate }: Props) {
       input.gender = draftGender || undefined;
     if (draftBirthDate !== (user.birthDate ? user.birthDate.slice(0, 10) : ''))
       input.birthDate = draftBirthDate || undefined;
+    if (draftActivityLevel !== (user.activityLevel ?? ''))
+      input.activityLevel = draftActivityLevel || undefined;
 
     setSaving(true);
     setSaveError(null);
@@ -145,6 +153,7 @@ export function ProfileIdentityCard({ user, onUpdate }: Props) {
         dailyProteinGoal: updated.dailyProteinGoal ?? undefined,
         gender: updated.gender ?? undefined,
         birthDate: updated.birthDate ?? undefined,
+        activityLevel: updated.activityLevel ?? undefined,
       });
       setEditing(false);
     } catch (err) {
@@ -254,6 +263,27 @@ export function ProfileIdentityCard({ user, onUpdate }: Props) {
                   onChange={(e) => setDraftBirthDate(e.target.value)}
                   onKeyDown={handleKeyDown}
                 />
+              </div>
+              <div>
+                <label
+                  htmlFor="draft-activity-level"
+                  className="mb-1 block text-xs font-medium text-green-600"
+                >
+                  Niveau d'activité
+                </label>
+                <select
+                  id="draft-activity-level"
+                  value={draftActivityLevel}
+                  onChange={(e) => setDraftActivityLevel(e.target.value)}
+                  className="w-full rounded-lg border border-green-200 px-3 py-2 text-sm text-green-800 focus:ring-2 focus:ring-green-300 focus:outline-none"
+                >
+                  <option value="">—</option>
+                  <option value="SEDENTARY">Sédentaire</option>
+                  <option value="LIGHTLY_ACTIVE">Légèrement actif</option>
+                  <option value="MODERATELY_ACTIVE">Modérément actif</option>
+                  <option value="VERY_ACTIVE">Très actif</option>
+                  <option value="EXTRA_ACTIVE">Extrêmement actif</option>
+                </select>
               </div>
               <div>
                 <label

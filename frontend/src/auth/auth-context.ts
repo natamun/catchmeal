@@ -15,6 +15,7 @@ export interface AuthUser {
   dailyProteinGoal?: number | null;
   gender?: string | null;
   birthDate?: string | null;
+  activityLevel?: string | null;
 }
 
 export interface AuthContextValue {

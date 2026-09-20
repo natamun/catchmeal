@@ -51,6 +51,7 @@ export class UsersService {
         dailyProteinGoal: true,
         gender: true,
         birthDate: true,
+        activityLevel: true,
       },
     });
   }
@@ -75,6 +76,7 @@ export class UsersService {
           dailyProteinGoal: true,
           gender: true,
           birthDate: true,
+          activityLevel: true,
         },
       });
     } catch (error) {
