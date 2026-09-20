@@ -8,10 +8,7 @@ const STATS = [
   { label: 'Produits scannés', value: '43' },
 ];
 
-const HARDCODED_GOALS = [
-  { label: 'Objectif calorique', value: '2 000 kcal / jour' },
-  { label: 'Protéines', value: '150 g / jour' },
-];
+const HARDCODED_GOALS = [{ label: 'Protéines', value: '150 g / jour' }];
 
 export default function ProfilePage() {
   const { user, logout, updateUser } = useAuth();
@@ -53,6 +50,14 @@ export default function ProfilePage() {
             <p className="text-sm font-semibold text-green-800">{item.value}</p>
           </div>
         ))}
+        <div className="flex items-center justify-between border-b border-green-200 px-5 py-4">
+          <p className="text-sm text-green-600">Objectif calorique</p>
+          <p className="text-sm font-semibold text-green-800">
+            {user.dailyCalorieGoal
+              ? `${user.dailyCalorieGoal} kcal / jour`
+              : '—'}
+          </p>
+        </div>
         <div className="flex items-center justify-between px-5 py-4">
           <p className="text-sm text-green-600">Poids cible</p>
           <p className="text-sm font-semibold text-green-800">

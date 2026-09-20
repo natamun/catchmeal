@@ -16,6 +16,7 @@ export type SignInData = {
   avatarUrl?: string | null;
   height?: number | null;
   targetWeight?: number | null;
+  dailyCalorieGoal?: number | null;
 };
 type AuthResult = {
   accessToken: string;
@@ -25,6 +26,7 @@ type AuthResult = {
   avatarUrl?: string | null;
   height?: number | null;
   targetWeight?: number | null;
+  dailyCalorieGoal?: number | null;
 };
 
 @Injectable()
@@ -56,6 +58,7 @@ export class AuthService {
       avatarUrl: user.avatarUrl,
       height: user.height,
       targetWeight: user.targetWeight,
+      dailyCalorieGoal: user.dailyCalorieGoal,
     };
   }
 
@@ -100,6 +103,7 @@ export class AuthService {
       avatarUrl: user.avatarUrl,
       height: user.height,
       targetWeight: user.targetWeight,
+      dailyCalorieGoal: user.dailyCalorieGoal,
     };
   }
 }

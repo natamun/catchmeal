@@ -47,6 +47,7 @@ export class UsersService {
         avatarUrl: true,
         height: true,
         targetWeight: true,
+        dailyCalorieGoal: true,
       },
     });
   }
@@ -63,6 +64,7 @@ export class UsersService {
           avatarUrl: true,
           height: true,
           targetWeight: true,
+          dailyCalorieGoal: true,
         },
       });
     } catch (error) {

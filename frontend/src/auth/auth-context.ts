@@ -11,6 +11,7 @@ export interface AuthUser {
   avatarUrl?: string | null;
   height?: number | null;
   targetWeight?: number | null;
+  dailyCalorieGoal?: number | null;
 }
 
 export interface AuthContextValue {
