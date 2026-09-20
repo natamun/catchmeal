@@ -17,7 +17,12 @@ import { PassportJwtAuthGuard } from './guards/passport-jwt.guard';
 import { PassportLocalGuard } from './guards/passport-local.guard';
 
 type RequestWithUser = ExpressRequest & {
-  user: SignInData & { name?: string; avatarUrl?: string | null };
+  user: SignInData & {
+    name?: string;
+    avatarUrl?: string | null;
+    height?: number | null;
+    targetWeight?: number | null;
+  };
 };
 
 const COOKIE_NAME = 'access_token';
@@ -32,10 +37,17 @@ export class PassportAuthController {
     @Body() dto: RegisterDto,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const { accessToken, userId, username, name, avatarUrl } =
-      await this.authService.register(dto);
+    const {
+      accessToken,
+      userId,
+      username,
+      name,
+      avatarUrl,
+      height,
+      targetWeight,
+    } = await this.authService.register(dto);
     this.setAuthCookie(res, accessToken);
-    return { userId, username, name, avatarUrl };
+    return { userId, username, name, avatarUrl, height, targetWeight };
   }
 
   @HttpCode(HttpStatus.OK)
@@ -45,10 +57,17 @@ export class PassportAuthController {
     @Request() request: RequestWithUser,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const { accessToken, userId, username, name, avatarUrl } =
-      await this.authService.signIn(request.user);
+    const {
+      accessToken,
+      userId,
+      username,
+      name,
+      avatarUrl,
+      height,
+      targetWeight,
+    } = await this.authService.signIn(request.user);
     this.setAuthCookie(res, accessToken);
-    return { userId, username, name, avatarUrl };
+    return { userId, username, name, avatarUrl, height, targetWeight };
   }
 
   @Post('logout')
@@ -61,8 +80,9 @@ export class PassportAuthController {
   @Get('me')
   @UseGuards(PassportJwtAuthGuard)
   getUserInfo(@Request() request: RequestWithUser) {
-    const { userId, username, name, avatarUrl } = request.user;
-    return { userId, username, name, avatarUrl };
+    const { userId, username, name, avatarUrl, height, targetWeight } =
+      request.user;
+    return { userId, username, name, avatarUrl, height, targetWeight };
   }
 
   private setAuthCookie(res: Response, token: string) {

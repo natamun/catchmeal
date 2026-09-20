@@ -3,9 +3,11 @@ import {
   Body,
   Controller,
   ForbiddenException,
+  Get,
   Param,
   ParseIntPipe,
   Patch,
+  Post,
   Request,
   UploadedFile,
   UseGuards,
@@ -16,6 +18,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import 'multer';
 
 import { PassportJwtAuthGuard } from '../auth/guards/passport-jwt.guard';
+import { LogWeightDto } from './dto/log-weight.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { UsersService } from './users.service';
 
@@ -45,6 +48,34 @@ export class UsersController {
       throw new ForbiddenException('You can only update your own profile');
     }
     return this.usersService.updateProfile(userId, dto);
+  }
+
+  @Post('weight')
+  logWeight(
+    @Param('userId', ParseIntPipe) userId: number,
+    @Body() dto: LogWeightDto,
+    @Request() req: RequestWithUser,
+  ) {
+    if (req.user.userId !== userId) {
+      throw new ForbiddenException('You can only log your own weight');
+    }
+    return this.usersService.logWeight(
+      userId,
+      dto.weight,
+      dto.bodyFat,
+      dto.note,
+    );
+  }
+
+  @Get('weight')
+  getWeightHistory(
+    @Param('userId', ParseIntPipe) userId: number,
+    @Request() req: RequestWithUser,
+  ) {
+    if (req.user.userId !== userId) {
+      throw new ForbiddenException('You can only view your own weight history');
+    }
+    return this.usersService.getWeightHistory(userId);
   }
 
   @Patch('avatar')

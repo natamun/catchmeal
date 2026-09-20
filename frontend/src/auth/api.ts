@@ -32,6 +32,8 @@ export interface AuthUser {
   username: string;
   name?: string;
   avatarUrl?: string | null;
+  height?: number | null;
+  targetWeight?: number | null;
 }
 
 export interface RegisterInput {

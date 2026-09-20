@@ -11,7 +11,12 @@ describe('UsersService', () => {
     user: {
       create: jest.fn(),
       findUnique: jest.fn(),
+      findFirstOrThrow: jest.fn(),
       update: jest.fn(),
+    },
+    weightLog: {
+      create: jest.fn(),
+      findMany: jest.fn(),
     },
   };
 
@@ -68,5 +73,63 @@ describe('UsersService', () => {
     expect(prismaMock.user.findUnique).toHaveBeenCalledWith({
       where: { username: 'alice' },
     });
+  });
+
+  it('should log a weight entry', async () => {
+    const entry = {
+      id: 1,
+      weight: 75.5,
+      bodyFat: null,
+      note: null,
+      loggedAt: new Date(),
+    };
+    prismaMock.user.findFirstOrThrow.mockResolvedValue({ id: 1 });
+    prismaMock.weightLog.create.mockResolvedValue(entry);
+
+    const result = await service.logWeight(1, 75.5);
+
+    expect(prismaMock.weightLog.create).toHaveBeenCalledWith({
+      data: { userId: 1, weight: 75.5, bodyFat: undefined, note: undefined },
+      select: {
+        id: true,
+        weight: true,
+        bodyFat: true,
+        note: true,
+        loggedAt: true,
+      },
+    });
+    expect(result).toEqual(entry);
+  });
+
+  it('should return weight history for a user', async () => {
+    const entries = [
+      { id: 2, weight: 76, bodyFat: null, note: null, loggedAt: new Date() },
+      { id: 1, weight: 75.5, bodyFat: null, note: null, loggedAt: new Date() },
+    ];
+    prismaMock.user.findUnique.mockResolvedValue({ id: 1 });
+    prismaMock.weightLog.findMany.mockResolvedValue(entries);
+
+    const result = await service.getWeightHistory(1);
+
+    expect(prismaMock.weightLog.findMany).toHaveBeenCalledWith({
+      where: { userId: 1 },
+      orderBy: { loggedAt: 'desc' },
+      select: {
+        id: true,
+        weight: true,
+        bodyFat: true,
+        note: true,
+        loggedAt: true,
+      },
+    });
+    expect(result).toEqual(entries);
+  });
+
+  it('should throw NotFoundException if user not found when getting weight history', async () => {
+    prismaMock.user.findUnique.mockResolvedValue(null);
+
+    await expect(service.getWeightHistory(99)).rejects.toThrow(
+      'User not found',
+    );
   });
 });
