@@ -114,13 +114,13 @@ export function WeightCard({ userId, targetWeight, onLatestWeight }: Props) {
         <div className="mb-3">
           <p className="text-3xl font-bold text-green-800">
             {latest.weight.toFixed(1)}
-            <span className="ml-1 text-lg font-semibold text-green-600">kg</span>
+            <span className="ml-1 text-lg font-semibold text-green-600">
+              kg
+            </span>
           </p>
           <div className="mt-1 flex items-center gap-2 text-sm text-green-500">
             <span>{new Date(latest.loggedAt).toLocaleDateString('fr-FR')}</span>
-            {targetWeight && (
-              <span>· objectif {targetWeight} kg</span>
-            )}
+            {targetWeight && <span>· objectif {targetWeight} kg</span>}
           </div>
         </div>
       )}
@@ -133,9 +133,16 @@ export function WeightCard({ userId, targetWeight, onLatestWeight }: Props) {
               className="flex items-center justify-between rounded-xl bg-green-50 px-3 py-2"
             >
               <span className="text-xs text-green-500">
-                {new Date(entry.loggedAt).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' })}
+                {new Date(entry.loggedAt).toLocaleDateString('fr-FR', {
+                  day: '2-digit',
+                  month: 'short',
+                  year: 'numeric',
+                })}
               </span>
-              <span className="text-sm font-semibold text-green-800">{entry.weight.toFixed(1)} <span className="text-xs font-normal text-green-400">kg</span></span>
+              <span className="text-sm font-semibold text-green-800">
+                {entry.weight.toFixed(1)}{' '}
+                <span className="text-xs font-normal text-green-400">kg</span>
+              </span>
             </div>
           ))}
         </div>
