@@ -78,7 +78,7 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      {(bmr ?? tdee) && (
+      {(bmr ?? tdee) ? (
         <div className="overflow-hidden rounded-2xl border border-green-200 bg-white shadow-sm">
           <p className="px-5 pt-5 pb-3 text-xs font-semibold tracking-wide text-green-500 uppercase">
             Métabolisme
@@ -99,6 +99,16 @@ export default function ProfilePage() {
               </p>
             </div>
           )}
+        </div>
+      ) : (
+        <div className="overflow-hidden rounded-2xl border border-green-200 bg-white shadow-sm">
+          <p className="px-5 pt-5 pb-3 text-xs font-semibold tracking-wide text-green-500 uppercase">
+            Métabolisme
+          </p>
+          <p className="px-5 py-4 text-sm text-green-500">
+            Remplis ton poids, ta taille, ta date de naissance, ton genre et ton
+            niveau d'activité pour voir ton BMR et ton TDEE.
+          </p>
         </div>
       )}
 
