@@ -58,7 +58,9 @@ export default function ProfilePage() {
           Mes objectifs
         </p>
         <div className="flex items-center justify-between border-b border-green-200 px-5 py-4">
-          <p className="text-sm font-semibold text-green-600">Objectif calorique</p>
+          <p className="text-sm font-semibold text-green-600">
+            Objectif calorique
+          </p>
           <p className="text-sm font-semibold text-green-800">
             {user.dailyCalorieGoal
               ? `${user.dailyCalorieGoal} kcal / jour`
