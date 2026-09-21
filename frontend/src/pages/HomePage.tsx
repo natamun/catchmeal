@@ -55,9 +55,6 @@ interface SectionEdit {
 
 export default function HomePage() {
   const { user } = useAuth();
-
-  if (!user) return null;
-
   const [selectedDate, setSelectedDate] = useState(() => new Date());
   const [addingMealType, setAddingMealType] = useState<MealType | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -73,6 +70,8 @@ export default function HomePage() {
   const quickAddDialogRef = useRef<HTMLDialogElement>(null);
 
   useTimeout(() => setSuccessMessage(null), successMessage ? 3000 : null);
+
+  if (!user) return null;
 
   const openSectionEditor = (mealType: MealType) => {
     const sectionMeals = meals
@@ -102,7 +101,10 @@ export default function HomePage() {
         />
       ) : (
         <div className="animate-fade-in-up">
-          <Header username={user.username} avatarUrl={user.avatarUrl} />
+          <Header
+            username={user.username}
+            avatarUrl={user.avatarUrl ?? undefined}
+          />
           <div className="flex flex-col gap-4 md:gap-6">
             <div className="flex flex-wrap justify-between gap-3">
               <DateNavigator value={selectedDate} onChange={setSelectedDate} />

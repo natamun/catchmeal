@@ -48,7 +48,6 @@ model User {
   activityLevel     ActivityLevel?
   role              Role          @default(USER)
   createAt          DateTime      @default(now())
-  avatarUrl         String?
   meal              Meal[]
   foodItems         FoodItem[]
   mealFoodItems     MealFoodItem[]

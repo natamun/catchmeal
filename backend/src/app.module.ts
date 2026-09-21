@@ -11,16 +11,14 @@ import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [
-    
     ConfigModule.forRoot(),
-   
+
     FoodItemsModule,
-   
+
     AuthModule,
-   
+
     MealsModule,
     DashboardAnalyticsModule,
-  ,
     UsersModule,
   ],
   controllers: [AppController],
