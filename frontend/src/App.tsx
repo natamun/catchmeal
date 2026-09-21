@@ -6,7 +6,7 @@ import Nav, { type Tab } from './components/layout/Nav';
 
 const LandingPage = lazy(() => import('./pages/LandingPage'));
 const AuthPage = lazy(() => import('./pages/AuthPage'));
-const Dashboard = lazy(() => import('./pages/Dashboard'));
+const HomePage = lazy(() => import('./pages/HomePage'));
 const StatsPage = lazy(() => import('./pages/StatsPage'));
 const FriendsPage = lazy(() => import('./pages/FriendsPage'));
 const FoodPage = lazy(() => import('./pages/FoodPage'));
@@ -47,7 +47,7 @@ function AppShell() {
   }
 
   const pages: Record<Tab, React.ReactNode> = {
-    home: <Dashboard />,
+    home: <HomePage />,
     food: <FoodPage />,
     stats: <StatsPage />,
     friends: <FriendsPage />,

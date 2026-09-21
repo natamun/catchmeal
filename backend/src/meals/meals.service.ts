@@ -75,9 +75,17 @@ export class MealsService {
     });
   }
 
-  findAll(userId: number) {
+  findAll(userId: number, logged?: boolean, date?: Date) {
+    const loggedAt = date
+      ? date
+      : logged === undefined
+        ? undefined
+        : logged
+          ? { not: null }
+          : null;
+
     return this.prisma.meal.findMany({
-      where: { userId },
+      where: { userId, loggedAt },
       include: { items: true },
       orderBy: { id: 'desc' },
     });

@@ -15,6 +15,7 @@
   "dependencies": {
     "@radix-ui/react-popover": "^1.1.23",
     "@tailwindcss/vite": "^4.3.3",
+    "date-fns": "^4.4.0",
     "lucide-react": "^1.39.0",
     "react": "^19.2.8",
     "react-datepicker": "^9.1.0",

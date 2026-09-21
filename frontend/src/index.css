@@ -1,5 +1,17 @@
 @import 'tailwindcss';
 
+@custom-variant hover {
+  &:active {
+    @slot;
+  }
+
+  @media (hover: hover) {
+    &:hover {
+      @slot;
+    }
+  }
+}
+
 @keyframes fade-in-up {
   from {
     opacity: 0;
@@ -8,6 +20,14 @@
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes delayed-reveal {
+  from {
+    height: 0;
+    opacity: 0;
+    border-top-width: 0;
   }
 }
 
@@ -55,6 +75,7 @@
   /* Animations */
   --animate-fade-in-up: fade-in-up 0.15s ease-out;
   --animate-fade-out: fade-out 0.1s ease-in;
+  --animate-delayed-reveal: delayed-reveal 0.15s ease-out 0.25s backwards;
   --animate-pill-select: pill-select 0.15s cubic-bezier(0.4, 0, 0.2, 1);
   --animate-toast-in: toast-in 0.2s ease-out;
   --animate-toast-out: toast-out 0.15s ease-in;
@@ -167,4 +188,29 @@ body {
 .range-thumb::-moz-range-thumb:hover,
 .range-thumb::-moz-range-thumb:active {
   box-shadow: 0 0 0 8px rgb(34 197 94 / 0.15);
+}
+
+.kcal-datepicker .react-datepicker__day--keyboard-selected {
+  background-color: var(--color-green-100);
+  color: var(--color-green-800);
+}
+
+.kcal-datepicker .react-datepicker__day:not([aria-disabled='true']):hover {
+  background-color: var(--color-green-100);
+  color: var(--color-green-800);
+}
+
+.kcal-datepicker .react-datepicker__day--selected,
+.kcal-datepicker
+  .react-datepicker__day--selected:not([aria-disabled='true']):hover {
+  background-color: var(--color-green-500);
+  color: white;
+}
+
+.kcal-datepicker .react-datepicker__day--today {
+  font-weight: 700;
+}
+
+.kcal-datepicker .react-datepicker__navigation:hover *::before {
+  border-color: var(--color-green-500);
 }

@@ -50,9 +50,9 @@ export function BaseDialog({
           closeDialog();
         }
       }}
-      className={`dialog-fade m-auto w-[calc(100vw-2rem)] ${MAX_WIDTH_CLASS[maxWidth]} rounded-2xl border-none bg-white p-0 shadow-lg backdrop:backdrop-blur-sm`}
+      className={`dialog-fade m-auto w-[calc(100vw-2rem)] ${MAX_WIDTH_CLASS[maxWidth]} overflow-hidden rounded-2xl border-none bg-white p-0 shadow-lg backdrop:backdrop-blur-sm`}
     >
-      <div className="flex flex-col gap-5 p-4 sm:p-6">
+      <div className="flex max-h-[calc(100dvh-3rem)] flex-col gap-5 overflow-y-auto p-4 sm:p-6">
         <div className="flex items-center justify-between">
           <h3 id={titleId} className="text-lg font-bold text-green-800">
             {title}

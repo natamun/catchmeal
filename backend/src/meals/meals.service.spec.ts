@@ -209,13 +209,50 @@ describe('MealsService', () => {
     expect(prismaMock.meal.create).not.toHaveBeenCalled();
   });
 
-  it('should list meals for a user', async () => {
+  it('should list all meals for a user when logged is not specified', async () => {
     prismaMock.meal.findMany.mockResolvedValue([]);
 
     await service.findAll(7);
 
     expect(prismaMock.meal.findMany).toHaveBeenCalledWith({
-      where: { userId: 7 },
+      where: { userId: 7, loggedAt: undefined },
+      include: { items: true },
+      orderBy: { id: 'desc' },
+    });
+  });
+
+  it('should list only logged meals when logged is true', async () => {
+    prismaMock.meal.findMany.mockResolvedValue([]);
+
+    await service.findAll(7, true);
+
+    expect(prismaMock.meal.findMany).toHaveBeenCalledWith({
+      where: { userId: 7, loggedAt: { not: null } },
+      include: { items: true },
+      orderBy: { id: 'desc' },
+    });
+  });
+
+  it('should list only template meals when logged is false', async () => {
+    prismaMock.meal.findMany.mockResolvedValue([]);
+
+    await service.findAll(7, false);
+
+    expect(prismaMock.meal.findMany).toHaveBeenCalledWith({
+      where: { userId: 7, loggedAt: null },
+      include: { items: true },
+      orderBy: { id: 'desc' },
+    });
+  });
+
+  it('should list meals for a specific date regardless of logged', async () => {
+    prismaMock.meal.findMany.mockResolvedValue([]);
+    const date = new Date('2026-09-18');
+
+    await service.findAll(7, undefined, date);
+
+    expect(prismaMock.meal.findMany).toHaveBeenCalledWith({
+      where: { userId: 7, loggedAt: date },
       include: { items: true },
       orderBy: { id: 'desc' },
     });

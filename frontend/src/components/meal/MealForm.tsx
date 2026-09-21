@@ -1,6 +1,6 @@
 import { useRef, useState, type RefObject } from 'react';
 import * as Popover from '@radix-ui/react-popover';
-import { CheckCircle2, Trash2, X } from 'lucide-react';
+import { CheckCircle2, Trash2 } from 'lucide-react';
 
 import { useTimeout } from '../../hooks/useTimeout';
 import type { FoodItem } from '../food/types';
@@ -9,108 +9,26 @@ import { ConfirmDialog } from '../ui/ConfirmDialog';
 import { DropdownPanel } from '../ui/DropdownPanel';
 import { FieldError } from '../ui/FieldError';
 import { Input } from '../ui/Input';
+import { MacroSummary } from '../ui/MacroSummary';
 import { Toast } from '../ui/Toast';
 import { ApiError, createMeal, deleteMeal, updateMeal } from './api';
+import {
+  draftsToInput,
+  draftTotals,
+  mealToItems,
+  type MealItemDraft,
+} from './draft';
+import DraftItemList from './DraftItemList';
+import {
+  EMPTY_QUICK_ADD_FORM,
+  QUICK_ADD_FIELDS,
+  validateQuickAddForm,
+  type QuickAddField,
+} from './quickMealAdd';
 import type { Meal, MealInput } from './types';
 
 const LABEL_CLASS =
   'text-xs font-semibold tracking-wide text-green-500 uppercase';
-
-type QuickAddField = 'kcal' | 'protein' | 'carbs' | 'fat';
-
-const QUICK_ADD_FIELDS: { field: QuickAddField; label: string }[] = [
-  { field: 'kcal', label: 'Kcal' },
-  { field: 'protein', label: 'Protéines (g)' },
-  { field: 'carbs', label: 'Glucides (g)' },
-  { field: 'fat', label: 'Lipides (g)' },
-];
-
-const EMPTY_QUICK_ADD_FORM: Record<QuickAddField, string> = {
-  kcal: '',
-  protein: '',
-  carbs: '',
-  fat: '',
-};
-
-function MacroBadge({
-  label,
-  value,
-  color,
-}: {
-  label: string;
-  value: number;
-  color: string;
-}) {
-  return (
-    <span
-      title={`${label} : ${value}g`}
-      className="flex items-center gap-1 text-xs font-semibold text-green-700"
-    >
-      <span aria-hidden="true" className={`h-2 w-2 rounded-full ${color}`} />
-      {value}
-    </span>
-  );
-}
-
-function validateQuickAddForm(
-  form: Record<QuickAddField, string>,
-): Partial<Record<QuickAddField, string>> {
-  const errors: Partial<Record<QuickAddField, string>> = {};
-
-  for (const { field } of QUICK_ADD_FIELDS) {
-    const value = Number(form[field]);
-    if (form[field].trim() === '' || Number.isNaN(value) || value < 0) {
-      errors[field] = 'Minimum 0';
-    }
-  }
-
-  return errors;
-}
-
-type MealItemDraft =
-  | { id: string; kind: 'food'; foodItem: FoodItem; quantity: number }
-  | {
-      id: string;
-      kind: 'quick';
-      quantity: number;
-      kcal: number;
-      protein: number;
-      carbs: number;
-      fat: number;
-    };
-
-function mealToItems(meal: Meal, foodItems: FoodItem[]): MealItemDraft[] {
-  const drafts: MealItemDraft[] = [];
-
-  for (const item of meal.items) {
-    if (item.foodItemId === null) {
-      drafts.push({
-        id: crypto.randomUUID(),
-        kind: 'quick',
-        quantity: item.quantity,
-        kcal: item.kcal,
-        protein: item.protein,
-        carbs: item.carbs,
-        fat: item.fat,
-      });
-      continue;
-    }
-
-    const foodItem = foodItems.find((f) => f.id === item.foodItemId);
-    if (!foodItem) {
-      continue;
-    }
-
-    drafts.push({
-      id: crypto.randomUUID(),
-      kind: 'food',
-      foodItem,
-      quantity: item.quantity,
-    });
-  }
-
-  return drafts;
-}
 
 interface MealFormProps {
   dialogRef: RefObject<HTMLDialogElement | null>;
@@ -188,43 +106,7 @@ export default function MealForm({
     : [];
   const isSearchOpen = searchFocused && searchResults.length > 0;
 
-  const rawTotals = items.reduce(
-    (acc, item) => {
-      if (item.kind === 'food') {
-        const scale = item.quantity / item.foodItem.baseQuantity;
-        return {
-          kcal: acc.kcal + item.foodItem.kcal * scale,
-          protein: acc.protein + item.foodItem.protein * scale,
-          carbs: acc.carbs + item.foodItem.carbs * scale,
-          fat: acc.fat + item.foodItem.fat * scale,
-        };
-      }
-      return {
-        kcal: acc.kcal + item.kcal,
-        protein: acc.protein + item.protein,
-        carbs: acc.carbs + item.carbs,
-        fat: acc.fat + item.fat,
-      };
-    },
-    { kcal: 0, protein: 0, carbs: 0, fat: 0 },
-  );
-  const totalMacros = [
-    {
-      label: 'Protéines',
-      value: Math.round(rawTotals.protein * 10) / 10,
-      color: 'bg-rose-400',
-    },
-    {
-      label: 'Glucides',
-      value: Math.round(rawTotals.carbs * 10) / 10,
-      color: 'bg-amber-400',
-    },
-    {
-      label: 'Lipides',
-      value: Math.round(rawTotals.fat * 10) / 10,
-      color: 'bg-blue-400',
-    },
-  ];
+  const rawTotals = draftTotals(items);
 
   const quickAddErrors = validateQuickAddForm(quickAddForm);
 
@@ -325,17 +207,7 @@ export default function MealForm({
     try {
       const input: MealInput = {
         name,
-        items: items.map((item) =>
-          item.kind === 'food'
-            ? { foodItemId: item.foodItem.id, quantity: item.quantity }
-            : {
-                quantity: item.quantity,
-                kcal: item.kcal,
-                protein: item.protein,
-                carbs: item.carbs,
-                fat: item.fat,
-              },
-        ),
+        items: draftsToInput(items),
       };
       const savedMeal = editingMeal
         ? await updateMeal(editingMeal.id, input)
@@ -543,107 +415,16 @@ export default function MealForm({
           </Popover.Root>
 
           {items.length > 0 && (
-            <ul className="flex flex-col gap-2 border-t border-green-100 pt-5">
-              {items.map((item) => {
-                if (item.kind === 'quick') {
-                  return (
-                    <li
-                      key={item.id}
-                      className="flex animate-fade-in-up items-center gap-2 rounded-xl border border-green-200 px-3 py-1.5"
-                    >
-                      <span className="min-w-0 flex-1 truncate text-sm font-medium text-green-800">
-                        {item.kcal} kcal
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() => removeItem(item.id)}
-                        aria-label="Retirer cet ajout rapide"
-                        className="shrink-0 cursor-pointer text-green-400 transition-colors hover:text-red-500"
-                      >
-                        <X className="h-4 w-4" />
-                      </button>
-                    </li>
-                  );
-                }
-
-                const { foodItem, quantity } = item;
-                const unitLabel = foodItem.baseUnit === 'GRAM' ? 'g' : 'x';
-                const stepButtonClass =
-                  'flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-md bg-green-50 text-xs font-bold text-green-600 transition-colors hover:bg-green-100';
-
-                return (
-                  <li
-                    key={item.id}
-                    className="flex animate-fade-in-up items-center gap-2 rounded-xl border border-green-200 px-3 py-1.5"
-                  >
-                    <span className="min-w-0 flex-1 truncate text-sm font-medium text-green-800">
-                      {foodItem.name}
-                    </span>
-                    <div className="flex shrink-0 items-center gap-1.5 select-none">
-                      <button
-                        type="button"
-                        onClick={() => adjustQuantity(item.id, -10)}
-                        aria-label={`Retirer 10 ${unitLabel} à ${foodItem.name}`}
-                        className={stepButtonClass}
-                      >
-                        --
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => adjustQuantity(item.id, -1)}
-                        aria-label={`Retirer 1 ${unitLabel} à ${foodItem.name}`}
-                        className={stepButtonClass}
-                      >
-                        -
-                      </button>
-                      <span className="min-w-10 text-center text-xs font-semibold text-green-800">
-                        {quantity}
-                        {unitLabel}
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() => adjustQuantity(item.id, 1)}
-                        aria-label={`Ajouter 1 ${unitLabel} à ${foodItem.name}`}
-                        className={stepButtonClass}
-                      >
-                        +
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => adjustQuantity(item.id, 10)}
-                        aria-label={`Ajouter 10 ${unitLabel} à ${foodItem.name}`}
-                        className={stepButtonClass}
-                      >
-                        ++
-                      </button>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => removeItem(item.id)}
-                      aria-label={`Retirer ${foodItem.name}`}
-                      className="shrink-0 cursor-pointer text-green-400 transition-colors hover:text-red-500"
-                    >
-                      <X className="h-4 w-4" />
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
+            <DraftItemList
+              items={items}
+              onAdjust={adjustQuantity}
+              onRemove={removeItem}
+              className="border-t border-green-100 pt-5"
+            />
           )}
 
           <div className="flex flex-col gap-3 border-t border-green-100 pt-5">
-            {items.length > 0 && (
-              <div className="mb-2 flex items-center justify-between rounded-xl border border-green-200 px-3 py-2">
-                <div className="flex items-center gap-3">
-                  {totalMacros.map((m) => (
-                    <MacroBadge key={m.label} {...m} />
-                  ))}
-                </div>
-                <span className="shrink-0 rounded-full bg-green-50 px-2.5 py-0.5 text-sm font-semibold text-green-800">
-                  {Math.round(rawTotals.kcal)} kcal
-                </span>
-              </div>
-            )}
+            {items.length > 0 && <MacroSummary totals={rawTotals} />}
 
             {error && <p className="text-sm text-red-500">{error}</p>}
 

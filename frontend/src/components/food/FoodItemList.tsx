@@ -1,6 +1,8 @@
-import { useState } from 'react';
-import { ChevronRight, LoaderCircle, Pencil, Plus } from 'lucide-react';
+import { useState, type ReactNode } from 'react';
+import { ChevronRight, LoaderCircle } from 'lucide-react';
 
+import { MACROS } from '../../constants/macros';
+import { MacroBadge } from '../ui/MacroBadge';
 import FoodItemSearchBar from './FoodItemSearchBar';
 import {
   EMPTY_FILTER_CRITERIA,
@@ -17,8 +19,8 @@ interface FoodItemListProps {
   items: FoodItem[];
   isLoading: boolean;
   loadError: string | null;
-  onAdd: () => void;
-  onEdit: (item: FoodItem) => void;
+  headerAction?: ReactNode;
+  renderAction?: (item: FoodItem) => ReactNode;
 }
 
 function formatBaseQuantity(item: FoodItem) {
@@ -28,39 +30,19 @@ function formatBaseQuantity(item: FoodItem) {
 }
 
 function macrosOf(item: FoodItem) {
-  return [
-    { label: 'Protéines', value: item.protein, color: 'bg-rose-400' },
-    { label: 'Glucides', value: item.carbs, color: 'bg-amber-400' },
-    { label: 'Lipides', value: item.fat, color: 'bg-blue-400' },
-  ];
-}
-
-function MacroBadge({
-  label,
-  value,
-  color,
-}: {
-  label: string;
-  value: number;
-  color: string;
-}) {
-  return (
-    <span
-      title={`${label} : ${value}g`}
-      className="flex items-center gap-1 text-xs font-semibold text-green-700"
-    >
-      <span aria-hidden="true" className={`h-2 w-2 rounded-full ${color}`} />
-      {value}
-    </span>
-  );
+  return MACROS.map(({ key, label, color }) => ({
+    label,
+    color,
+    value: item[key],
+  }));
 }
 
 export default function FoodItemList({
   items,
   isLoading,
   loadError,
-  onAdd,
-  onEdit,
+  headerAction,
+  renderAction,
 }: FoodItemListProps) {
   const [expandedIds, setExpandedIds] = useState<Set<number>>(new Set());
   const [criteria, setCriteria] = useState<FoodFilterCriteria>(
@@ -113,14 +95,7 @@ export default function FoodItemList({
           criteria={criteria}
           onFilterChange={setCriteria}
         />
-        <button
-          type="button"
-          onClick={onAdd}
-          aria-label="Ajouter un aliment"
-          className="flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-full bg-green-500 text-white transition-colors hover:bg-green-600"
-        >
-          <Plus className="h-4 w-4" />
-        </button>
+        {headerAction}
       </div>
       {isLoading && (
         <div role="status" className="flex justify-center py-10">
@@ -185,14 +160,7 @@ export default function FoodItemList({
                 <span className="min-w-20 shrink-0 rounded-full bg-green-50 px-2.5 py-0.5 text-center text-sm font-semibold text-green-800">
                   {item.kcal} kcal
                 </span>
-                <button
-                  type="button"
-                  onClick={() => onEdit(item)}
-                  aria-label={`Modifier ${item.name}`}
-                  className="shrink-0 cursor-pointer text-green-400 transition-colors hover:text-green-600"
-                >
-                  <Pencil className="h-4 w-4" />
-                </button>
+                {renderAction?.(item)}
               </div>
               <div
                 className={`grid pl-7 transition-[grid-template-rows] duration-200 ease-out @lg:hidden ${isExpanded ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'}`}

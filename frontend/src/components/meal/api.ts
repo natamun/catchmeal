@@ -30,8 +30,19 @@ async function request<T>(url: string, init?: RequestInit): Promise<T> {
   return (await response.json()) as T;
 }
 
-export function listMeals(signal?: AbortSignal) {
-  return request<Meal[]>(MEALS_URL, { signal });
+export function listMeals(logged?: boolean, signal?: AbortSignal) {
+  const url =
+    logged === undefined ? MEALS_URL : `${MEALS_URL}?logged=${logged}`;
+  return request<Meal[]>(url, { signal });
+}
+
+export function toApiDate(date: Date) {
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+}
+
+export function listMealsOnDate(dateKey: string, signal?: AbortSignal) {
+  return request<Meal[]>(`${MEALS_URL}?date=${dateKey}`, { signal });
 }
 
 export function createMeal(input: MealInput) {

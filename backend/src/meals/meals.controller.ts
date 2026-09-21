@@ -4,9 +4,12 @@ import {
   Delete,
   Get,
   Param,
+  ParseBoolPipe,
+  ParseDatePipe,
   ParseIntPipe,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 
 import { CreateMealDto } from './dto/create-meal.dto';
@@ -26,8 +29,12 @@ export class MealsController {
   }
 
   @Get('meals')
-  findAll(@Param('userId', ParseIntPipe) userId: number) {
-    return this.mealsService.findAll(userId);
+  findAll(
+    @Param('userId', ParseIntPipe) userId: number,
+    @Query('logged', new ParseBoolPipe({ optional: true })) logged?: boolean,
+    @Query('date', new ParseDatePipe({ optional: true })) date?: Date,
+  ) {
+    return this.mealsService.findAll(userId, logged, date);
   }
 
   @Get('meals/:id')

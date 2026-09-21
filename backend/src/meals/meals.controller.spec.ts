@@ -48,7 +48,36 @@ describe('MealsController', () => {
 
     await controller.findAll(7);
 
-    expect(mealsServiceMock.findAll).toHaveBeenCalledWith(7);
+    expect(mealsServiceMock.findAll).toHaveBeenCalledWith(
+      7,
+      undefined,
+      undefined,
+    );
+  });
+
+  it('should list only logged meals when logged=true', async () => {
+    mealsServiceMock.findAll.mockResolvedValue([]);
+
+    await controller.findAll(7, true);
+
+    expect(mealsServiceMock.findAll).toHaveBeenCalledWith(7, true, undefined);
+  });
+
+  it('should list only template meals when logged=false', async () => {
+    mealsServiceMock.findAll.mockResolvedValue([]);
+
+    await controller.findAll(7, false);
+
+    expect(mealsServiceMock.findAll).toHaveBeenCalledWith(7, false, undefined);
+  });
+
+  it('should list meals for a specific date', async () => {
+    mealsServiceMock.findAll.mockResolvedValue([]);
+    const date = new Date('2026-09-18');
+
+    await controller.findAll(7, undefined, date);
+
+    expect(mealsServiceMock.findAll).toHaveBeenCalledWith(7, undefined, date);
   });
 
   it('should find one meal', async () => {
