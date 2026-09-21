@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Plus, X } from 'lucide-react';
 
 import { Input } from '../ui/Input';
 import { getWeightHistory, logWeight, type WeightEntry } from './api';
@@ -58,7 +59,7 @@ export function WeightCard({ userId, targetWeight, onLatestWeight }: Props) {
   return (
     <div className="rounded-2xl border border-green-200 bg-white p-5 shadow-sm">
       <div className="mb-4 flex items-center justify-between">
-        <p className="text-xs font-semibold tracking-wide text-green-500 uppercase">
+        <p className="text-sm font-semibold tracking-wide text-green-500 uppercase">
           Poids
         </p>
         {logging ? (
@@ -89,16 +90,16 @@ export function WeightCard({ userId, targetWeight, onLatestWeight }: Props) {
               disabled={saving}
               className="text-xs font-medium text-green-400 transition-colors hover:text-green-500"
             >
-              ✕
+              <X className="h-3.5 w-3.5" />
             </button>
           </div>
         ) : (
           <button
             onClick={() => setLogging(true)}
-            className="flex h-6 w-6 cursor-pointer items-center justify-center rounded-full bg-green-100 text-green-500 transition-colors hover:bg-green-200"
+            className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-green-500 text-white transition-colors hover:bg-green-600"
             aria-label="Logger le poids"
           >
-            +
+            <Plus className="h-4 w-4" />
           </button>
         )}
       </div>
@@ -129,16 +130,16 @@ export function WeightCard({ userId, targetWeight, onLatestWeight }: Props) {
       )}
 
       {history.length > 1 && (
-        <div className="flex flex-col gap-1 border-t border-green-100 pt-3">
+        <div className="flex flex-col gap-2 border-t border-green-100 pt-3">
           {history.slice(1, 5).map((entry) => (
             <div
               key={entry.id}
-              className="flex justify-between text-xs text-green-400"
+              className="flex items-center justify-between rounded-xl bg-green-50 px-3 py-2"
             >
-              <span>
-                {new Date(entry.loggedAt).toLocaleDateString('fr-FR')}
+              <span className="text-xs text-green-500">
+                {new Date(entry.loggedAt).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' })}
               </span>
-              <span>{entry.weight.toFixed(2)} kg</span>
+              <span className="text-sm font-semibold text-green-800">{entry.weight.toFixed(1)} <span className="text-xs font-normal text-green-400">kg</span></span>
             </div>
           ))}
         </div>

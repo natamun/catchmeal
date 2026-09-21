@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react';
+import { ChevronRight } from 'lucide-react';
 
 import { useAuth } from '../auth/auth-context';
 import { ProfileIdentityCard } from '../components/profile/ProfileIdentityCard';
@@ -45,7 +46,7 @@ export default function ProfilePage() {
             key={s.label}
             className="rounded-2xl border border-green-200 bg-white p-4 text-center shadow-sm"
           >
-            <p className="text-2xl font-bold text-green-300">{s.value}</p>
+            <p className="text-2xl font-bold text-green-800">{s.value}</p>
             <p className="mt-1 text-xs text-green-500">{s.label}</p>
           </div>
         ))}
@@ -53,11 +54,11 @@ export default function ProfilePage() {
 
       {/* Objectifs */}
       <div className="overflow-hidden rounded-2xl border border-green-200 bg-white shadow-sm">
-        <p className="px-5 pt-5 pb-3 text-xs font-semibold tracking-wide text-green-500 uppercase">
+        <p className="px-5 pt-5 pb-3 text-sm font-semibold tracking-wide text-green-500 uppercase">
           Mes objectifs
         </p>
         <div className="flex items-center justify-between border-b border-green-200 px-5 py-4">
-          <p className="text-sm text-green-600">Objectif calorique</p>
+          <p className="text-sm font-semibold text-green-600">Objectif calorique</p>
           <p className="text-sm font-semibold text-green-800">
             {user.dailyCalorieGoal
               ? `${user.dailyCalorieGoal} kcal / jour`
@@ -65,13 +66,13 @@ export default function ProfilePage() {
           </p>
         </div>
         <div className="flex items-center justify-between border-b border-green-200 px-5 py-4">
-          <p className="text-sm text-green-600">Protéines</p>
+          <p className="text-sm font-semibold text-green-600">Protéines</p>
           <p className="text-sm font-semibold text-green-800">
             {user.dailyProteinGoal ? `${user.dailyProteinGoal} g / jour` : '—'}
           </p>
         </div>
         <div className="flex items-center justify-between px-5 py-4">
-          <p className="text-sm text-green-600">Poids cible</p>
+          <p className="text-sm font-semibold text-green-600">Poids cible</p>
           <p className="text-sm font-semibold text-green-800">
             {user.targetWeight ? `${user.targetWeight} kg` : '—'}
           </p>
@@ -85,7 +86,7 @@ export default function ProfilePage() {
           </p>
           {bmr && (
             <div className="flex items-center justify-between border-b border-green-200 px-5 py-4">
-              <p className="text-sm text-green-600">BMR</p>
+              <p className="text-sm font-semibold text-green-600">BMR</p>
               <p className="text-sm font-semibold text-green-800">
                 {bmr} kcal / jour
               </p>
@@ -93,7 +94,7 @@ export default function ProfilePage() {
           )}
           {tdee && (
             <div className="flex items-center justify-between px-5 py-4">
-              <p className="text-sm text-green-600">TDEE</p>
+              <p className="text-sm font-semibold text-green-600">TDEE</p>
               <p className="text-sm font-semibold text-green-800">
                 {tdee} kcal / jour
               </p>
@@ -102,7 +103,7 @@ export default function ProfilePage() {
         </div>
       ) : (
         <div className="overflow-hidden rounded-2xl border border-green-200 bg-white shadow-sm">
-          <p className="px-5 pt-5 pb-3 text-xs font-semibold tracking-wide text-green-500 uppercase">
+          <p className="px-5 pt-5 pb-3 text-sm font-semibold tracking-wide text-green-500 uppercase">
             Métabolisme
           </p>
           <p className="px-5 py-4 text-sm text-green-500">
@@ -114,7 +115,7 @@ export default function ProfilePage() {
 
       {/* Compte */}
       <div className="overflow-hidden rounded-2xl border border-green-200 bg-white shadow-sm">
-        <p className="px-5 pt-5 pb-3 text-xs font-semibold tracking-wide text-green-500 uppercase">
+        <p className="px-5 pt-5 pb-3 text-sm font-semibold tracking-wide text-green-500 uppercase">
           Compte
         </p>
         {(
@@ -135,24 +136,11 @@ export default function ProfilePage() {
             className={`flex w-full cursor-pointer items-center justify-between px-5 py-4 text-left text-sm transition-colors ${
               item.danger
                 ? 'text-red-500 hover:bg-red-50'
-                : 'text-green-600 hover:bg-white'
+                : 'text-green-600 hover:bg-green-50'
             } ${i < arr.length - 1 ? 'border-b border-green-200' : ''}`}
           >
             {item.label}
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-4 w-4 opacity-40"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={2}
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M9 5l7 7-7 7"
-              />
-            </svg>
+            <ChevronRight className="h-4 w-4 opacity-40" />
           </button>
         ))}
       </div>
