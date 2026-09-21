@@ -176,236 +176,121 @@ export function ProfileIdentityCard({ user, onUpdate }: Props) {
   }
 
   return (
-    <div className="rounded-2xl border border-green-200 bg-white p-6 shadow-sm">
-      <div className="flex items-center gap-5">
-        <Avatar
-          username={user.username}
-          avatarUrl={user.avatarUrl}
-          size="lg"
-          onClick={() => fileInputRef.current?.click()}
-          disabled={uploading}
-          editable
-        />
+    <div className="flex flex-col gap-4">
+      <div className="rounded-2xl border border-green-200 bg-white p-6 shadow-sm">
+        <div className="flex items-center gap-5">
+          <Avatar
+            username={user.username}
+            avatarUrl={user.avatarUrl}
+            size="lg"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={uploading}
+            editable
+          />
 
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/*"
-          className="hidden"
-          onChange={(e) => void handleFileChange(e)}
-        />
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={(e) => void handleFileChange(e)}
+          />
 
-        <div className="min-w-0 flex-1">
-          {editing ? (
-            <div className="grid grid-cols-2 gap-3">
-              <div className="col-span-2">
-                <label
-                  htmlFor="draft-username"
-                  className="mb-1 block text-xs font-medium text-green-600"
-                >
-                  Nom d'utilisateur
-                </label>
-                <Input
-                  id="draft-username"
-                  ref={usernameRef}
-                  value={draftUsername}
-                  onChange={(e) => setDraftUsername(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                  minLength={3}
-                  maxLength={30}
-                />
-              </div>
-              <div className="col-span-2">
-                <label
-                  htmlFor="draft-name"
-                  className="mb-1 block text-xs font-medium text-green-600"
-                >
-                  Nom complet
-                </label>
-                <Input
-                  id="draft-name"
-                  value={draftName}
-                  onChange={(e) => setDraftName(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                  maxLength={80}
-                />
-              </div>
-              <div>
-                <label
-                  htmlFor="draft-gender"
-                  className="mb-1 block text-xs font-medium text-green-600"
-                >
-                  Genre
-                </label>
-                <select
-                  id="draft-gender"
-                  value={draftGender}
-                  onChange={(e) => setDraftGender(e.target.value)}
-                  className="w-full rounded-lg border border-green-200 px-3 py-2 text-sm text-green-800 focus:ring-2 focus:ring-green-300 focus:outline-none"
-                >
-                  <option value="">—</option>
-                  <option value="MALE">Homme</option>
-                  <option value="FEMALE">Femme</option>
-                  <option value="OTHER">Autre</option>
-                </select>
-              </div>
-              <div>
-                <label
-                  htmlFor="draft-birth-date"
-                  className="mb-1 block text-xs font-medium text-green-600"
-                >
-                  Date de naissance
-                </label>
-                <Input
-                  id="draft-birth-date"
-                  type="date"
-                  value={draftBirthDate}
-                  onChange={(e) => setDraftBirthDate(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                />
-              </div>
-              <div>
-                <label
-                  htmlFor="draft-activity-level"
-                  className="mb-1 block text-xs font-medium text-green-600"
-                >
-                  Niveau d'activité
-                </label>
-                <select
-                  id="draft-activity-level"
-                  value={draftActivityLevel}
-                  onChange={(e) => setDraftActivityLevel(e.target.value)}
-                  className="w-full rounded-lg border border-green-200 px-3 py-2 text-sm text-green-800 focus:ring-2 focus:ring-green-300 focus:outline-none"
-                >
-                  <option value="">—</option>
-                  <option value="SEDENTARY">Sédentaire</option>
-                  <option value="LIGHTLY_ACTIVE">Légèrement actif</option>
-                  <option value="MODERATELY_ACTIVE">Modérément actif</option>
-                  <option value="VERY_ACTIVE">Très actif</option>
-                  <option value="EXTRA_ACTIVE">Extrêmement actif</option>
-                </select>
-              </div>
-              <div>
-                <label
-                  htmlFor="draft-height"
-                  className="mb-1 block text-xs font-medium text-green-600"
-                >
-                  Taille (cm)
-                </label>
-                <Input
-                  id="draft-height"
-                  type="number"
-                  min={50}
-                  max={300}
-                  value={draftHeight}
-                  onChange={(e) => setDraftHeight(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                />
-              </div>
-              <div>
-                <label
-                  htmlFor="draft-target-weight"
-                  className="mb-1 block text-xs font-medium text-green-600"
-                >
-                  Poids cible (kg)
-                </label>
-                <Input
-                  id="draft-target-weight"
-                  type="number"
-                  min={20}
-                  max={500}
-                  step={0.1}
-                  value={draftTargetWeight}
-                  onChange={(e) => setDraftTargetWeight(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                />
-              </div>
-              <div>
-                <label
-                  htmlFor="draft-daily-calorie-goal"
-                  className="mb-1 block text-xs font-medium text-green-600"
-                >
-                  Objectif calorique (kcal/jour)
-                </label>
-                <Input
-                  id="draft-daily-calorie-goal"
-                  type="number"
-                  min={500}
-                  max={10000}
-                  value={draftDailyCalorieGoal}
-                  onChange={(e) => setDraftDailyCalorieGoal(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                />
-              </div>
-              <div>
-                <label
-                  htmlFor="draft-daily-protein-goal"
-                  className="mb-1 block text-xs font-medium text-green-600"
-                >
-                  Objectif protéines (g/jour)
-                </label>
-                <Input
-                  id="draft-daily-protein-goal"
-                  type="number"
-                  min={10}
-                  max={500}
-                  value={draftDailyProteinGoal}
-                  onChange={(e) => setDraftDailyProteinGoal(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                />
-              </div>
-              <div className="col-span-2">
-                {saveError && (
-                  <p className="text-xs text-red-500">{saveError}</p>
-                )}
-              </div>
-            </div>
-          ) : (
-            <>
-              <p className="text-lg font-bold text-green-800">
-                {user.username}
-              </p>
-              {user.name && (
-                <p className="text-sm text-green-500">{user.name}</p>
-              )}
-              {uploading && (
-                <p className="text-sm text-green-400">Upload en cours...</p>
-              )}
-              {uploadError && (
-                <p className="text-sm text-red-500">{uploadError}</p>
-              )}
-            </>
-          )}
-        </div>
+          <div className="min-w-0 flex-1">
+            <p className="text-lg font-bold text-green-800">{user.username}</p>
+            {user.name && <p className="text-sm text-green-500">{user.name}</p>}
+            {uploading && <p className="text-sm text-green-400">Upload en cours...</p>}
+            {uploadError && <p className="text-sm text-red-500">{uploadError}</p>}
+          </div>
 
-        <div className="shrink-0">
-          {editing ? (
-            <div className="flex gap-2">
+          <div className="shrink-0">
+            {editing ? (
+              <div className="flex gap-2">
+                <button
+                  onClick={() => void handleSave()}
+                  disabled={saving || draftUsername.trim().length < 3}
+                  className="rounded-lg bg-green-500 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-green-600 disabled:opacity-50"
+                >
+                  {saving ? '...' : 'Sauver'}
+                </button>
+                <button
+                  onClick={handleCancel}
+                  disabled={saving}
+                  className="rounded-lg border border-green-200 px-3 py-1.5 text-xs font-medium text-green-500 transition-colors hover:bg-green-50"
+                >
+                  Annuler
+                </button>
+              </div>
+            ) : (
               <button
-                onClick={() => void handleSave()}
-                disabled={saving || draftUsername.trim().length < 3}
-                className="rounded-lg bg-green-400 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-green-500 disabled:opacity-50"
+                onClick={handleEdit}
+                className="cursor-pointer text-sm font-medium text-green-400 transition-colors hover:text-green-500"
               >
-                {saving ? '...' : 'Sauver'}
+                Modifier
               </button>
-              <button
-                onClick={handleCancel}
-                disabled={saving}
-                className="rounded-lg border border-green-200 px-3 py-1.5 text-xs font-medium text-green-500 transition-colors hover:bg-green-50"
-              >
-                Annuler
-              </button>
-            </div>
-          ) : (
-            <button
-              onClick={handleEdit}
-              className="cursor-pointer text-sm font-medium text-green-300 transition-colors hover:text-green-400"
-            >
-              Modifier
-            </button>
-          )}
+            )}
+          </div>
         </div>
       </div>
+
+      {editing && (
+        <div className="overflow-hidden rounded-2xl border border-green-200 bg-white shadow-sm">
+          <p className="px-5 pt-5 pb-3 text-sm font-semibold tracking-wide text-green-500 uppercase">
+            Modifier le profil
+          </p>
+          <div className="grid grid-cols-2 gap-4 px-5 pb-5">
+            <div className="col-span-2">
+              <label htmlFor="draft-username" className="mb-1 block text-sm font-semibold text-green-600">Nom d'utilisateur</label>
+              <Input id="draft-username" ref={usernameRef} value={draftUsername} onChange={(e) => setDraftUsername(e.target.value)} onKeyDown={handleKeyDown} minLength={3} maxLength={30} />
+            </div>
+            <div className="col-span-2">
+              <label htmlFor="draft-name" className="mb-1 block text-sm font-semibold text-green-600">Nom complet</label>
+              <Input id="draft-name" value={draftName} onChange={(e) => setDraftName(e.target.value)} onKeyDown={handleKeyDown} maxLength={80} />
+            </div>
+            <div>
+              <label htmlFor="draft-gender" className="mb-1 block text-sm font-semibold text-green-600">Genre</label>
+              <select id="draft-gender" value={draftGender} onChange={(e) => setDraftGender(e.target.value)} className="w-full rounded-lg border border-green-200 px-3 py-2 text-sm text-green-800 focus:ring-2 focus:ring-green-300 focus:outline-none">
+                <option value="">—</option>
+                <option value="MALE">Homme</option>
+                <option value="FEMALE">Femme</option>
+                <option value="OTHER">Autre</option>
+              </select>
+            </div>
+            <div>
+              <label htmlFor="draft-birth-date" className="mb-1 block text-sm font-semibold text-green-600">Date de naissance</label>
+              <Input id="draft-birth-date" type="date" value={draftBirthDate} onChange={(e) => setDraftBirthDate(e.target.value)} onKeyDown={handleKeyDown} />
+            </div>
+            <div className="col-span-2">
+              <label htmlFor="draft-activity-level" className="mb-1 block text-sm font-semibold text-green-600">Niveau d'activité</label>
+              <select id="draft-activity-level" value={draftActivityLevel} onChange={(e) => setDraftActivityLevel(e.target.value)} className="w-full rounded-lg border border-green-200 px-3 py-2 text-sm text-green-800 focus:ring-2 focus:ring-green-300 focus:outline-none">
+                <option value="">—</option>
+                <option value="SEDENTARY">Sédentaire</option>
+                <option value="LIGHTLY_ACTIVE">Légèrement actif</option>
+                <option value="MODERATELY_ACTIVE">Modérément actif</option>
+                <option value="VERY_ACTIVE">Très actif</option>
+                <option value="EXTRA_ACTIVE">Extrêmement actif</option>
+              </select>
+            </div>
+            <div>
+              <label htmlFor="draft-height" className="mb-1 block text-sm font-semibold text-green-600">Taille (cm)</label>
+              <Input id="draft-height" type="number" min={50} max={300} value={draftHeight} onChange={(e) => setDraftHeight(e.target.value)} onKeyDown={handleKeyDown} />
+            </div>
+            <div>
+              <label htmlFor="draft-target-weight" className="mb-1 block text-sm font-semibold text-green-600">Poids cible (kg)</label>
+              <Input id="draft-target-weight" type="number" min={20} max={500} step={0.1} value={draftTargetWeight} onChange={(e) => setDraftTargetWeight(e.target.value)} onKeyDown={handleKeyDown} />
+            </div>
+            <div>
+              <label htmlFor="draft-daily-calorie-goal" className="mb-1 block text-sm font-semibold text-green-600">Objectif calorique (kcal/jour)</label>
+              <Input id="draft-daily-calorie-goal" type="number" min={500} max={10000} value={draftDailyCalorieGoal} onChange={(e) => setDraftDailyCalorieGoal(e.target.value)} onKeyDown={handleKeyDown} />
+            </div>
+            <div>
+              <label htmlFor="draft-daily-protein-goal" className="mb-1 block text-sm font-semibold text-green-600">Objectif protéines (g/jour)</label>
+              <Input id="draft-daily-protein-goal" type="number" min={10} max={500} value={draftDailyProteinGoal} onChange={(e) => setDraftDailyProteinGoal(e.target.value)} onKeyDown={handleKeyDown} />
+            </div>
+            {saveError && <div className="col-span-2"><p className="text-xs text-red-500">{saveError}</p></div>}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
