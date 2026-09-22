@@ -4,11 +4,24 @@ import { ChevronRight } from 'lucide-react';
 import { useAuth } from '../auth/auth-context';
 import { ProfileIdentityCard } from '../components/profile/ProfileIdentityCard';
 import { WeightCard } from '../components/profile/WeightCard';
+import { SelectDropdown } from '../components/ui/SelectDropdown';
 import { calculateBMR, calculateTDEE } from '../utils/bmr';
+
+const DURATION_OPTIONS = [
+  { label: '2 semaines', days: 14 },
+  { label: '1 mois', days: 30 },
+  { label: '2 mois', days: 60 },
+  { label: '3 mois', days: 90 },
+  { label: '4 mois', days: 120 },
+  { label: '5 mois', days: 150 },
+  { label: '6 mois', days: 180 },
+  { label: '1 an', days: 365 },
+];
 
 export default function ProfilePage() {
   const { user, logout, updateUser } = useAuth();
   const [latestWeight, setLatestWeight] = useState<number | null>(null);
+  const [durationDays, setDurationDays] = useState(90);
   const handleLatestWeight = useCallback((w: number) => setLatestWeight(w), []);
 
   if (!user) return null;
@@ -20,19 +33,6 @@ export default function ProfilePage() {
 
   const tdee =
     bmr && user.activityLevel ? calculateTDEE(bmr, user.activityLevel) : null;
-
-  const DURATION_OPTIONS = [
-    { label: '2 semaines', days: 14 },
-    { label: '1 mois', days: 30 },
-    { label: '2 mois', days: 60 },
-    { label: '3 mois', days: 90 },
-    { label: '4 mois', days: 120 },
-    { label: '5 mois', days: 150 },
-    { label: '6 mois', days: 180 },
-    { label: '1 an', days: 365 },
-  ];
-
-  const [durationDays, setDurationDays] = useState(90);
 
   const kcalToReachGoal = (() => {
     if (!tdee || !latestWeight || !user.targetWeight) return null;
@@ -62,16 +62,19 @@ export default function ProfilePage() {
           <div className="flex items-center justify-between border-b border-green-200 px-5 py-4">
             <p className="text-sm font-semibold text-green-600">Kcal / jour</p>
             <div className="flex items-center gap-3">
-              <select
-                value={durationDays}
-                onChange={(e) => setDurationDays(Number(e.target.value))}
-                className="rounded-lg border border-green-200 px-2 py-1 text-sm text-green-600 focus:outline-none"
-              >
-                {DURATION_OPTIONS.map((o) => (
-                  <option key={o.days} value={o.days}>{o.label}</option>
-                ))}
-              </select>
-              <p className="text-sm font-semibold text-green-800">{kcalToReachGoal} kcal</p>
+              <SelectDropdown
+                value={String(durationDays)}
+                options={DURATION_OPTIONS.map((o) => ({
+                  value: String(o.days),
+                  label: o.label,
+                }))}
+                onChange={(v) => setDurationDays(Number(v))}
+                container={document.body}
+                className="w-32 py-1.5"
+              />
+              <p className="text-sm font-semibold text-green-800">
+                {kcalToReachGoal} kcal
+              </p>
             </div>
           </div>
         ) : (
