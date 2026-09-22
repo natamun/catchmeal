@@ -18,9 +18,9 @@ export class FortyTwoStrategy extends PassportStrategy(Strategy, '42') {
     super({
       authorizationURL: 'https://api.intra.42.fr/oauth/authorize',
       tokenURL: 'https://api.intra.42.fr/oauth/token',
-      clientID: process.env.FORTY_TWO_CLIENT_ID,
-      clientSecret: process.env.FORTY_TWO_CLIENT_SECRET,
-      callbackURL: process.env.FORTY_TWO_CALLBACK_URL,
+      clientID: process.env.FORTY_TWO_CLIENT_ID!,
+      clientSecret: process.env.FORTY_TWO_CLIENT_SECRET!,
+      callbackURL: process.env.FORTY_TWO_CALLBACK_URL!,
       scope: ['public'],
     });
   }
@@ -52,13 +52,10 @@ export class FortyTwoStrategy extends PassportStrategy(Strategy, '42') {
     _refreshToken: string,
     profile: FortyTwoProfile,
   ) {
-    const user = await this.authService.findOrCreateFromOAuth({
+    return this.authService.findOrCreateFromOAuth({
       username: profile.login,
       name: profile.displayname,
       email: profile.email,
     });
-
-    // Return SignInData shape expected by authService.signIn()
-    return { userId: user.id, username: user.username };
   }
 }
