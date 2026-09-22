@@ -333,4 +333,42 @@ describe('MealsService', () => {
       where: { id_userId: { id: 5, userId: 7 } },
     });
   });
+
+  it('should find meals within a date range for a user', async () => {
+    prismaMock.meal.findMany.mockResolvedValue([]);
+    const from = new Date('2026-09-01');
+    const to = new Date('2026-09-18');
+
+    await service.findRange(7, from, to);
+
+    expect(prismaMock.meal.findMany).toHaveBeenCalledWith({
+      where: { userId: 7, loggedAt: { gte: from, lte: to } },
+      include: { items: true },
+      orderBy: { loggedAt: 'desc' },
+    });
+  });
+
+  it('should return meals found within the range', async () => {
+    const meals = [{ id: 1 }, { id: 2 }];
+    prismaMock.meal.findMany.mockResolvedValue(meals);
+    const from = new Date('2026-09-01');
+    const to = new Date('2026-09-18');
+
+    const result = await service.findRange(7, from, to);
+
+    expect(result).toEqual(meals);
+  });
+
+  it('should handle a range spanning a single day', async () => {
+    prismaMock.meal.findMany.mockResolvedValue([]);
+    const sameDay = new Date('2026-09-18');
+
+    await service.findRange(7, sameDay, sameDay);
+
+    expect(prismaMock.meal.findMany).toHaveBeenCalledWith({
+      where: { userId: 7, loggedAt: { gte: sameDay, lte: sameDay } },
+      include: { items: true },
+      orderBy: { loggedAt: 'desc' },
+    });
+  });
 });

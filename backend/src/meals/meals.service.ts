@@ -126,4 +126,12 @@ export class MealsService {
       where: { id_userId: { id, userId } },
     });
   }
+
+  async findRange(userId: number, from: Date, to: Date) {
+    return this.prisma.meal.findMany({
+      where: { userId: userId, loggedAt: { gte: from, lte: to } },
+      include: { items: true },
+      orderBy: { loggedAt: 'desc' },
+    });
+  }
 }
