@@ -32,7 +32,8 @@ export class GdprService {
     await this.emailService.sendDataExportConfirmation(user.email);
 
     // Return all personal data — passwords are excluded for security
-    const { passwordHash: _, ...safeProfile } = user;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { passwordHash: _passwordHash, ...safeProfile } = user;
 
     return {
       exportedAt: new Date().toISOString(),
