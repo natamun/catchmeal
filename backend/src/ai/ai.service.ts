@@ -57,6 +57,7 @@ export class AiService implements OnModuleInit {
     while (output.type === 'function.call') {
       if (output.name === 'add_meal') {
         const rawArgs = output.arguments;
+        // console.log('Argss: ', rawArgs);
         const args: unknown =
           typeof rawArgs === 'string' ? JSON.parse(rawArgs) : rawArgs;
         const validated = addMealArgsSchema.safeParse(args);
@@ -120,6 +121,9 @@ export class AiService implements OnModuleInit {
             });
           }
         }
+      } else if (output.name === 'get_stats') {
+        const rawArgs = output.arguments;
+        console.log('Debug: ', rawArgs);
       } else {
         const errorEntry: FunctionResultEntry = {
           toolCallId: output.toolCallId,
