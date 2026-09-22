@@ -11,7 +11,13 @@ import { JwtStrategy } from './strategies/jwt.strategy';
 import { LocalStrategy } from './strategies/local.strategy';
 
 @Module({
-  providers: [AuthService, LocalStrategy, JwtStrategy, FortyTwoStrategy, GitHubStrategy],
+  providers: [
+    AuthService,
+    LocalStrategy,
+    JwtStrategy,
+    FortyTwoStrategy,
+    GitHubStrategy,
+  ],
   controllers: [PassportAuthController],
   imports: [
     UsersModule,
