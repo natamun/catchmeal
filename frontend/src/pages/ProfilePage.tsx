@@ -21,6 +21,26 @@ export default function ProfilePage() {
   const tdee =
     bmr && user.activityLevel ? calculateTDEE(bmr, user.activityLevel) : null;
 
+  const DURATION_OPTIONS = [
+    { label: '2 semaines', days: 14 },
+    { label: '1 mois', days: 30 },
+    { label: '2 mois', days: 60 },
+    { label: '3 mois', days: 90 },
+    { label: '4 mois', days: 120 },
+    { label: '5 mois', days: 150 },
+    { label: '6 mois', days: 180 },
+    { label: '1 an', days: 365 },
+  ];
+
+  const [durationDays, setDurationDays] = useState(90);
+
+  const kcalToReachGoal = (() => {
+    if (!tdee || !latestWeight || !user.targetWeight) return null;
+    const diff = latestWeight - user.targetWeight;
+    const coefficient = diff > 0 ? 7700 : 4800;
+    return Math.round(tdee - (diff * coefficient) / durationDays);
+  })();
+
   return (
     <div className="flex flex-col gap-6">
       <h2 className="text-xl font-bold text-green-800">Profil</h2>
@@ -38,16 +58,28 @@ export default function ProfilePage() {
         <p className="px-5 pt-5 pb-3 text-sm font-semibold tracking-wide text-green-500 uppercase">
           Mes objectifs
         </p>
-        <div className="flex items-center justify-between border-b border-green-200 px-5 py-4">
-          <p className="text-sm font-semibold text-green-600">
-            Objectif calorique
-          </p>
-          <p className="text-sm font-semibold text-green-800">
-            {user.dailyCalorieGoal
-              ? `${user.dailyCalorieGoal} kcal / jour`
-              : '—'}
-          </p>
-        </div>
+        {kcalToReachGoal ? (
+          <div className="flex items-center justify-between border-b border-green-200 px-5 py-4">
+            <p className="text-sm font-semibold text-green-600">Kcal / jour</p>
+            <div className="flex items-center gap-3">
+              <select
+                value={durationDays}
+                onChange={(e) => setDurationDays(Number(e.target.value))}
+                className="rounded-lg border border-green-200 px-2 py-1 text-sm text-green-600 focus:outline-none"
+              >
+                {DURATION_OPTIONS.map((o) => (
+                  <option key={o.days} value={o.days}>{o.label}</option>
+                ))}
+              </select>
+              <p className="text-sm font-semibold text-green-800">{kcalToReachGoal} kcal</p>
+            </div>
+          </div>
+        ) : (
+          <div className="flex items-center justify-between border-b border-green-200 px-5 py-4">
+            <p className="text-sm font-semibold text-green-600">Kcal / jour</p>
+            <p className="text-sm text-green-400">Données profil incomplètes</p>
+          </div>
+        )}
         <div className="flex items-center justify-between border-b border-green-200 px-5 py-4">
           <p className="text-sm font-semibold text-green-600">Protéines</p>
           <p className="text-sm font-semibold text-green-800">
@@ -61,40 +93,6 @@ export default function ProfilePage() {
           </p>
         </div>
       </div>
-
-      {(bmr ?? tdee) ? (
-        <div className="overflow-hidden rounded-2xl border border-green-200 bg-white shadow-sm">
-          <p className="px-5 pt-5 pb-3 text-xs font-semibold tracking-wide text-green-500 uppercase">
-            Métabolisme
-          </p>
-          {bmr && (
-            <div className="flex items-center justify-between border-b border-green-200 px-5 py-4">
-              <p className="text-sm font-semibold text-green-600">BMR</p>
-              <p className="text-sm font-semibold text-green-800">
-                {bmr} kcal / jour
-              </p>
-            </div>
-          )}
-          {tdee && (
-            <div className="flex items-center justify-between px-5 py-4">
-              <p className="text-sm font-semibold text-green-600">TDEE</p>
-              <p className="text-sm font-semibold text-green-800">
-                {tdee} kcal / jour
-              </p>
-            </div>
-          )}
-        </div>
-      ) : (
-        <div className="overflow-hidden rounded-2xl border border-green-200 bg-white shadow-sm">
-          <p className="px-5 pt-5 pb-3 text-sm font-semibold tracking-wide text-green-500 uppercase">
-            Métabolisme
-          </p>
-          <p className="px-5 py-4 text-sm text-green-500">
-            Remplis ton poids, ta taille, ta date de naissance, ton genre et ton
-            niveau d'activité pour voir ton BMR et ton TDEE.
-          </p>
-        </div>
-      )}
 
       {/* Compte */}
       <div className="overflow-hidden rounded-2xl border border-green-200 bg-white shadow-sm">
