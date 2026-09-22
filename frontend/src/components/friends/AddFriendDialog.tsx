@@ -1,6 +1,5 @@
 import { useEffect, useState, type RefObject } from 'react';
 
-import { CURRENT_USER_ID } from '../../constants/currentUser';
 import { BaseDialog } from '../ui/BaseDialog';
 import { Input } from '../ui/Input';
 import { ApiError, searchUsers, sendFriendRequest } from './api';
@@ -11,12 +10,14 @@ const SEARCH_DELAYS_MS = 300;
 
 interface AddFriendDialogProps {
   dialogRef: RefObject<HTMLDialogElement | null>;
+  userId: number;
   friendIds: number[];
   onSent: (username: string) => void;
 }
 
 export default function AddFriendDialog({
   dialogRef,
+  userId,
   friendIds,
   onSent,
 }: AddFriendDialogProps) {
@@ -74,7 +75,7 @@ export default function AddFriendDialog({
     setError(null);
     setPendingId(user.id);
     try {
-      await sendFriendRequest(user.id);
+      await sendFriendRequest(userId, user.id);
       setSentIds((prev) => new Set(prev).add(user.id));
       onSent(user.username);
     } catch (err: unknown) {
@@ -90,7 +91,7 @@ export default function AddFriendDialog({
   };
 
   const visibleResults = canSearch
-    ? results.filter((user) => user.id !== CURRENT_USER_ID)
+    ? results.filter((user) => user.id !== userId)
     : [];
 
   return (

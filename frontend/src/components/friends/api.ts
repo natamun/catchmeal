@@ -1,10 +1,11 @@
-import { CURRENT_USER_ID } from '../../constants/currentUser';
 import type { Friend, FriendRequest, UserSummary } from './types';
 
-const FRIENDS_URL = `${import.meta.env.VITE_API_URL}/users/${CURRENT_USER_ID}/friends`;
 const USERS_URL = `${import.meta.env.VITE_API_URL}/users`;
 
 const JSON_HEADERS = { 'Content-Type': 'application/json' };
+
+const friendsUrl = (userId: number) =>
+  `${import.meta.env.VITE_API_URL}/users/${userId}/friends`;
 
 export class ApiError extends Error {
   constructor(message: string) {
@@ -31,12 +32,12 @@ async function request<T>(url: string, init?: RequestInit): Promise<T> {
   return (await response.json()) as T;
 }
 
-export function listFriends(signal?: AbortSignal) {
-  return request<Friend[]>(FRIENDS_URL, { signal });
+export function listFriends(userId: number, signal?: AbortSignal) {
+  return request<Friend[]>(friendsUrl(userId), { signal });
 }
 
-export function listPendingRequests(signal?: AbortSignal) {
-  return request<FriendRequest[]>(`${FRIENDS_URL}/pending`, { signal });
+export function listPendingRequests(userId: number, signal?: AbortSignal) {
+  return request<FriendRequest[]>(`${friendsUrl(userId)}/pending`, { signal });
 }
 
 export function searchUsers(query: string, signal?: AbortSignal) {
@@ -46,18 +47,20 @@ export function searchUsers(query: string, signal?: AbortSignal) {
   );
 }
 
-export function sendFriendRequest(friendId: number) {
-  return request<unknown>(FRIENDS_URL, {
+export function sendFriendRequest(userId: number, friendId: number) {
+  return request<unknown>(friendsUrl(userId), {
     method: 'POST',
     headers: JSON_HEADERS,
     body: JSON.stringify({ friendId }),
   });
 }
 
-export function acceptFriendRequest(id: number) {
-  return request<unknown>(`${FRIENDS_URL}/${id}/accept`, { method: 'PATCH' });
+export function acceptFriendRequest(userId: number, id: number) {
+  return request<unknown>(`${friendsUrl(userId)}/${id}/accept`, {
+    method: 'PATCH',
+  });
 }
 
-export function removeFriendship(id: number) {
-  return request<unknown>(`${FRIENDS_URL}/${id}`, { method: 'DELETE' });
+export function removeFriendship(userId: number, id: number) {
+  return request<unknown>(`${friendsUrl(userId)}/${id}`, { method: 'DELETE' });
 }

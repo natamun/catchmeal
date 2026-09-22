@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { listFriends, listPendingRequests } from '../components/friends/api';
 import type { Friend, FriendRequest } from '../components/friends/types';
 
-export function useFriends() {
+export function useFriends(userId: number) {
   const [friends, setFriends] = useState<Friend[]>([]);
   const [requests, setRequests] = useState<FriendRequest[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -13,8 +13,8 @@ export function useFriends() {
   useEffect(() => {
     const controller = new AbortController();
     Promise.all([
-      listFriends(controller.signal),
-      listPendingRequests(controller.signal),
+      listFriends(userId, controller.signal),
+      listPendingRequests(userId, controller.signal),
     ])
       .then(([loadedFriends, loadedRequests]) => {
         setFriends(loadedFriends);
@@ -34,7 +34,7 @@ export function useFriends() {
         }
       });
     return () => controller.abort();
-  }, [reloadCount]);
+  }, [userId, reloadCount]);
 
   return {
     friends,

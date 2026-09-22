@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react';
 import { CheckCircle2, LoaderCircle, Plus } from 'lucide-react';
 
+import { useAuth } from '../auth/auth-context.ts';
 import AddFriendDialog from '../components/friends/AddFriendDialog.tsx';
 import {
   acceptFriendRequest,
@@ -55,7 +56,10 @@ const ACTIVITY = [
 ];
 
 export default function FriendsPage() {
-  const { friends, requests, isLoading, loadError, reload } = useFriends();
+  const { user } = useAuth();
+  const userId = user!.userId;
+  const { friends, requests, isLoading, loadError, reload } =
+    useFriends(userId);
   const [activeTab, setActiveTab] = useState<Tab>('friends');
   const [busyId, setBusyId] = useState<number | null>(null);
   const [friendToRemove, setFriendToRemove] = useState<Friend | null>(null);
@@ -100,29 +104,28 @@ export default function FriendsPage() {
     <>
       <div className="flex flex-col gap-6">
         <div className="flex items-center justify-between">
-
-        <div className="flex gap-1.5 self-start rounded-xl border border-green-200 bg-white p-1.5">
-          {TAB_OPTIONS.map(({ value, label }) => (
-            <label
-              key={value}
-              className="flex cursor-pointer items-center justify-center rounded-lg px-3 py-1.5 text-sm font-medium text-green-500 transition-colors has-checked:animate-pill-select has-checked:bg-green-500 has-checked:text-white has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-green-400"
-            >
-              <input
-                type="radio"
-                name="friendsPageTab"
-                value={value}
-                checked={activeTab === value}
-                onChange={() => setActiveTab(value)}
-                className="sr-only"
-              />
-              {label}
-              {value === 'requests' && requests.length > 0 && (
-                <span className="ml-1.5 rounded-full bg-amber-100 px-1.5 text-xs font-bold text-amber-700">
-                  {requests.length}
-                </span>
-              )}
-            </label>
-          ))}
+          <div className="flex gap-1.5 self-start rounded-xl border border-green-200 bg-white p-1.5">
+            {TAB_OPTIONS.map(({ value, label }) => (
+              <label
+                key={value}
+                className="flex cursor-pointer items-center justify-center rounded-lg px-3 py-1.5 text-sm font-medium text-green-500 transition-colors has-checked:animate-pill-select has-checked:bg-green-500 has-checked:text-white has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-green-400"
+              >
+                <input
+                  type="radio"
+                  name="friendsPageTab"
+                  value={value}
+                  checked={activeTab === value}
+                  onChange={() => setActiveTab(value)}
+                  className="sr-only"
+                />
+                {label}
+                {value === 'requests' && requests.length > 0 && (
+                  <span className="ml-1.5 rounded-full bg-amber-100 px-1.5 text-xs font-bold text-amber-700">
+                    {requests.length}
+                  </span>
+                )}
+              </label>
+            ))}
           </div>
           <button
             type="button"
@@ -174,14 +177,14 @@ export default function FriendsPage() {
                     onAccept={() =>
                       void runAction(
                         r.requestId,
-                        () => acceptFriendRequest(r.requestId),
+                        () => acceptFriendRequest(userId, r.requestId),
                         'Ami ajouté',
                       )
                     }
                     onDecline={() =>
                       void runAction(
                         r.requestId,
-                        () => removeFriendship(r.requestId),
+                        () => removeFriendship(userId, r.requestId),
                         'Demande refusée',
                       )
                     }
@@ -213,6 +216,7 @@ export default function FriendsPage() {
       </div>
 
       <AddFriendDialog
+        userId={userId}
         dialogRef={addDialogRef}
         friendIds={friends.map((f) => f.friend.id)}
         onSent={(username) =>
@@ -231,7 +235,7 @@ export default function FriendsPage() {
           if (friendToRemove) {
             void runAction(
               friendToRemove.friendshipId,
-              () => removeFriendship(friendToRemove.friendshipId),
+              () => removeFriendship(userId, friendToRemove.friendshipId),
               'Ami retiré',
             );
           }
