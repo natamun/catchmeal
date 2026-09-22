@@ -6,12 +6,6 @@ import { ProfileIdentityCard } from '../components/profile/ProfileIdentityCard';
 import { WeightCard } from '../components/profile/WeightCard';
 import { calculateBMR, calculateTDEE } from '../utils/bmr';
 
-const STATS = [
-  { label: 'Jours suivis', value: '24' },
-  { label: 'Repas loggés', value: '87' },
-  { label: 'Produits scannés', value: '43' },
-];
-
 export default function ProfilePage() {
   const { user, logout, updateUser } = useAuth();
   const [latestWeight, setLatestWeight] = useState<number | null>(null);
@@ -38,19 +32,6 @@ export default function ProfilePage() {
         targetWeight={user.targetWeight}
         onLatestWeight={handleLatestWeight}
       />
-
-      {/* Stats rapides */}
-      <div className="grid grid-cols-3 gap-3">
-        {STATS.map((s) => (
-          <div
-            key={s.label}
-            className="rounded-2xl border border-green-200 bg-white p-4 text-center shadow-sm"
-          >
-            <p className="text-2xl font-bold text-green-800">{s.value}</p>
-            <p className="mt-1 text-xs text-green-500">{s.label}</p>
-          </div>
-        ))}
-      </div>
 
       {/* Objectifs */}
       <div className="overflow-hidden rounded-2xl border border-green-200 bg-white shadow-sm">
