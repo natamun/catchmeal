@@ -1,0 +1,46 @@
+import { useEffect, useState } from 'react';
+
+import { listFriends, listPendingRequests } from '../components/friends/api';
+import type { Friend, FriendRequest } from '../components/friends/types';
+
+export function useFriends() {
+  const [friends, setFriends] = useState<Friend[]>([]);
+  const [requests, setRequests] = useState<FriendRequest[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [reloadCount, setReloadCount] = useState(0);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    Promise.all([
+      listFriends(controller.signal),
+      listPendingRequests(controller.signal),
+    ])
+      .then(([loadedFriends, loadedRequests]) => {
+        setFriends(loadedFriends);
+        setRequests(loadedRequests);
+        setLoadError(null);
+      })
+      .catch((err: unknown) => {
+        if (controller.signal.aborted) {
+          return;
+        }
+        console.error(err);
+        setLoadError('Impossible de charger tes amis, réessaye.');
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) {
+          setIsLoading(false);
+        }
+      });
+    return () => controller.abort();
+  }, [reloadCount]);
+
+  return {
+    friends,
+    requests,
+    isLoading,
+    loadError,
+    reload: () => setReloadCount((count) => count + 1),
+  };
+}
