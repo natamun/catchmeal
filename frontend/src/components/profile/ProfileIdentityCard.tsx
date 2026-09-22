@@ -1,7 +1,18 @@
-import { useEffect, useRef, useState } from 'react';
+import { forwardRef, useRef, useState } from 'react';
+import DatePicker from 'react-datepicker';
+
+import { SelectDropdown } from '../ui/SelectDropdown';
+
+import 'react-datepicker/dist/react-datepicker.css';
+
+import { fr } from 'date-fns/locale/fr';
 
 import type { AuthUser } from '../../auth/auth-context';
+import { useTimeout } from '../../hooks/useTimeout';
 import { Avatar } from '../ui/Avatar';
+import { BaseDialog } from '../ui/BaseDialog';
+import { EditIconButton } from '../ui/EditIconButton';
+import { FieldError } from '../ui/FieldError';
 import { Input } from '../ui/Input';
 import { updateProfile, uploadAvatar, type UserProfile } from './api';
 
@@ -10,59 +21,144 @@ interface Props {
   onUpdate: (partial: Partial<AuthUser>) => void;
 }
 
+type Field =
+  | 'username'
+  | 'height'
+  | 'targetWeight'
+  | 'dailyCalorieGoal'
+  | 'dailyProteinGoal';
+
+interface FormState {
+  username: string;
+  name: string;
+  height: string;
+  targetWeight: string;
+  dailyCalorieGoal: string;
+  dailyProteinGoal: string;
+  gender: string;
+  birthDate: string;
+  activityLevel: string;
+}
+
+function validate(form: FormState): Partial<Record<Field, string>> {
+  const errors: Partial<Record<Field, string>> = {};
+  if (form.username.trim().length < 3) errors.username = 'Minimum 3 caractères';
+  else if (form.username.trim().length > 30)
+    errors.username = 'Maximum 30 caractères';
+  if (form.height) {
+    const h = parseFloat(form.height);
+    if (isNaN(h)) errors.height = 'Valeur invalide';
+    else if (h < 50 || h > 300) errors.height = 'Entre 50 et 300 cm';
+  }
+  if (form.targetWeight) {
+    const w = parseFloat(form.targetWeight);
+    if (isNaN(w)) errors.targetWeight = 'Valeur invalide';
+    else if (w < 20 || w > 500) errors.targetWeight = 'Entre 20 et 500 kg';
+  }
+  if (form.dailyCalorieGoal) {
+    const c = parseInt(form.dailyCalorieGoal);
+    if (isNaN(c)) errors.dailyCalorieGoal = 'Valeur invalide';
+    else if (c < 500 || c > 10000)
+      errors.dailyCalorieGoal = 'Entre 500 et 10000 kcal';
+  }
+  if (form.dailyProteinGoal) {
+    const p = parseInt(form.dailyProteinGoal);
+    if (isNaN(p)) errors.dailyProteinGoal = 'Valeur invalide';
+    else if (p < 10 || p > 500) errors.dailyProteinGoal = 'Entre 10 et 500 g';
+  }
+  return errors;
+}
+
+const GENDER_OPTIONS = [
+  { value: 'MALE', label: 'Homme' },
+  { value: 'FEMALE', label: 'Femme' },
+  { value: 'OTHER', label: 'Autre' },
+];
+
+const ACTIVITY_OPTIONS = [
+  { value: 'SEDENTARY', label: 'Sédentaire' },
+  { value: 'LIGHTLY_ACTIVE', label: 'Légèrement actif' },
+  { value: 'MODERATELY_ACTIVE', label: 'Modérément actif' },
+  { value: 'VERY_ACTIVE', label: 'Très actif' },
+  { value: 'EXTRA_ACTIVE', label: 'Extrêmement actif' },
+];
+
+const BirthDateInput = forwardRef<
+  HTMLButtonElement,
+  { id?: string; value?: string; onClick?: () => void }
+>(({ id, value, onClick }, ref) => (
+  <button
+    id={id}
+    type="button"
+    ref={ref}
+    onClick={onClick}
+    className="w-full rounded-xl border border-green-200 bg-white px-4 py-2.5 text-left text-sm text-green-800 outline-none focus:border-green-400"
+  >
+    {value || <span className="text-green-400">Sélectionner une date</span>}
+  </button>
+));
+BirthDateInput.displayName = 'BirthDateInput';
+
 export function ProfileIdentityCard({ user, onUpdate }: Props) {
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const dialogRef = useRef<HTMLDialogElement>(null);
+  const [dialogNode, setDialogNode] = useState<HTMLDialogElement | null>(null);
 
-  const [editing, setEditing] = useState(false);
-  const [draftUsername, setDraftUsername] = useState(user.username);
-  const [draftName, setDraftName] = useState(user.name ?? '');
-  const [draftHeight, setDraftHeight] = useState(user.height?.toString() ?? '');
-  const [draftTargetWeight, setDraftTargetWeight] = useState(
-    user.targetWeight?.toString() ?? '',
-  );
-  const [draftDailyCalorieGoal, setDraftDailyCalorieGoal] = useState(
-    user.dailyCalorieGoal?.toString() ?? '',
-  );
-  const [draftDailyProteinGoal, setDraftDailyProteinGoal] = useState(
-    user.dailyProteinGoal?.toString() ?? '',
-  );
-  const [draftGender, setDraftGender] = useState(user.gender ?? '');
-  const [draftBirthDate, setDraftBirthDate] = useState(
-    user.birthDate ? user.birthDate.slice(0, 10) : '',
-  );
-  const [draftActivityLevel, setDraftActivityLevel] = useState(
-    user.activityLevel ?? '',
-  );
+  const initForm = (): FormState => ({
+    username: user.username,
+    name: user.name ?? '',
+    height: user.height?.toString() ?? '',
+    targetWeight: user.targetWeight?.toString() ?? '',
+    dailyCalorieGoal: user.dailyCalorieGoal?.toString() ?? '',
+    dailyProteinGoal: user.dailyProteinGoal?.toString() ?? '',
+    gender: user.gender ?? '',
+    birthDate: user.birthDate ? user.birthDate.slice(0, 10) : '',
+    activityLevel: user.activityLevel ?? '',
+  });
+
+  const [form, setForm] = useState<FormState>(initForm);
+  const [touched, setTouched] = useState<Partial<Record<Field, boolean>>>({});
+  const [focusedField, setFocusedField] = useState<Field | null>(null);
+  const [submitAttempted, setSubmitAttempted] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
-  const usernameRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    if (editing) {
-      setTimeout(() => usernameRef.current?.focus(), 0);
-    }
-  }, [editing]);
+  useTimeout(() => setSubmitAttempted(false), submitAttempted ? 5000 : null);
+
+  const errors = validate(form);
+
+  const handleChange = (field: Field, value: string) => {
+    setForm((prev) => ({ ...prev, [field]: value }));
+    setTouched((prev) => ({ ...prev, [field]: true }));
+  };
+
+  const handleBlur = (field: Field) => {
+    setTouched((prev) => ({ ...prev, [field]: true }));
+    setFocusedField((cur) => (cur === field ? null : cur));
+  };
+
+  const isInvalid = (field: Field) => Boolean(touched[field] && errors[field]);
+
+  const errorMessage = (field: Field) =>
+    touched[field] && (focusedField === field || submitAttempted)
+      ? errors[field]
+      : undefined;
 
   function handleEdit() {
-    setDraftUsername(user.username);
-    setDraftName(user.name ?? '');
-    setDraftHeight(user.height?.toString() ?? '');
-    setDraftTargetWeight(user.targetWeight?.toString() ?? '');
-    setDraftDailyCalorieGoal(user.dailyCalorieGoal?.toString() ?? '');
-    setDraftDailyProteinGoal(user.dailyProteinGoal?.toString() ?? '');
-    setDraftGender(user.gender ?? '');
-    setDraftBirthDate(user.birthDate ? user.birthDate.slice(0, 10) : '');
-    setDraftActivityLevel(user.activityLevel ?? '');
+    setForm(initForm());
+    setTouched({});
+    setFocusedField(null);
+    setSubmitAttempted(false);
     setSaveError(null);
-    setEditing(true);
+    setDialogNode(dialogRef.current);
+    dialogRef.current?.showModal();
   }
 
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
-
     setUploading(true);
     setUploadError(null);
     try {
@@ -77,21 +173,21 @@ export function ProfileIdentityCard({ user, onUpdate }: Props) {
   }
 
   async function handleSave() {
-    const trimmedUsername = draftUsername.trim();
-    const trimmedName = draftName.trim();
+    const allTouched = Object.fromEntries(
+      (
+        [
+          'username',
+          'height',
+          'targetWeight',
+          'dailyCalorieGoal',
+          'dailyProteinGoal',
+        ] as Field[]
+      ).map((f) => [f, true]),
+    );
+    setTouched(allTouched);
 
-    if (
-      trimmedUsername === user.username &&
-      trimmedName === (user.name ?? '') &&
-      draftHeight === (user.height?.toString() ?? '') &&
-      draftTargetWeight === (user.targetWeight?.toString() ?? '') &&
-      draftDailyCalorieGoal === (user.dailyCalorieGoal?.toString() ?? '') &&
-      draftDailyProteinGoal === (user.dailyProteinGoal?.toString() ?? '') &&
-      draftGender === (user.gender ?? '') &&
-      draftBirthDate === (user.birthDate ? user.birthDate.slice(0, 10) : '') &&
-      draftActivityLevel === (user.activityLevel ?? '')
-    ) {
-      setEditing(false);
+    if (Object.keys(errors).length > 0) {
+      setSubmitAttempted(true);
       return;
     }
 
@@ -106,39 +202,40 @@ export function ProfileIdentityCard({ user, onUpdate }: Props) {
       birthDate?: string;
       activityLevel?: string;
     } = {};
+
+    const trimmedUsername = form.username.trim();
+    const trimmedName = form.name.trim();
     if (trimmedUsername !== user.username) input.username = trimmedUsername;
     if (trimmedName !== (user.name ?? '')) input.name = trimmedName;
-    const parsedHeight = draftHeight ? parseFloat(draftHeight) : undefined;
-    if (
-      parsedHeight !== undefined &&
-      (parsedHeight <= 0 || parsedHeight > 300)
-    ) {
-      setSaveError('La taille doit être entre 1 et 300 cm');
-      return;
-    }
+    const parsedHeight = form.height ? parseFloat(form.height) : undefined;
     if (parsedHeight !== (user.height ?? undefined))
       input.height = parsedHeight;
-    const parsedTargetWeight = draftTargetWeight
-      ? parseFloat(draftTargetWeight)
+    const parsedTargetWeight = form.targetWeight
+      ? parseFloat(form.targetWeight)
       : undefined;
     if (parsedTargetWeight !== (user.targetWeight ?? undefined))
       input.targetWeight = parsedTargetWeight;
-    const parsedDailyCalorieGoal = draftDailyCalorieGoal
-      ? parseInt(draftDailyCalorieGoal)
+    const parsedDailyCalorieGoal = form.dailyCalorieGoal
+      ? parseInt(form.dailyCalorieGoal)
       : undefined;
     if (parsedDailyCalorieGoal !== (user.dailyCalorieGoal ?? undefined))
       input.dailyCalorieGoal = parsedDailyCalorieGoal;
-    const parsedDailyProteinGoal = draftDailyProteinGoal
-      ? parseInt(draftDailyProteinGoal)
+    const parsedDailyProteinGoal = form.dailyProteinGoal
+      ? parseInt(form.dailyProteinGoal)
       : undefined;
     if (parsedDailyProteinGoal !== (user.dailyProteinGoal ?? undefined))
       input.dailyProteinGoal = parsedDailyProteinGoal;
-    if (draftGender !== (user.gender ?? ''))
-      input.gender = draftGender || undefined;
-    if (draftBirthDate !== (user.birthDate ? user.birthDate.slice(0, 10) : ''))
-      input.birthDate = draftBirthDate || undefined;
-    if (draftActivityLevel !== (user.activityLevel ?? ''))
-      input.activityLevel = draftActivityLevel || undefined;
+    if (form.gender !== (user.gender ?? ''))
+      input.gender = form.gender || undefined;
+    if (form.birthDate !== (user.birthDate ? user.birthDate.slice(0, 10) : ''))
+      input.birthDate = form.birthDate || undefined;
+    if (form.activityLevel !== (user.activityLevel ?? ''))
+      input.activityLevel = form.activityLevel || undefined;
+
+    if (Object.keys(input).length === 0) {
+      dialogRef.current?.close();
+      return;
+    }
 
     setSaving(true);
     setSaveError(null);
@@ -155,7 +252,7 @@ export function ProfileIdentityCard({ user, onUpdate }: Props) {
         birthDate: updated.birthDate ?? undefined,
         activityLevel: updated.activityLevel ?? undefined,
       });
-      setEditing(false);
+      dialogRef.current?.close();
     } catch (err) {
       setSaveError(
         err instanceof Error ? err.message : 'Erreur lors de la sauvegarde',
@@ -165,18 +262,8 @@ export function ProfileIdentityCard({ user, onUpdate }: Props) {
     }
   }
 
-  function handleCancel() {
-    setEditing(false);
-    setSaveError(null);
-  }
-
-  function handleKeyDown(e: React.KeyboardEvent) {
-    if (e.key === 'Enter') void handleSave();
-    if (e.key === 'Escape') handleCancel();
-  }
-
   return (
-    <div className="flex flex-col gap-4">
+    <>
       <div className="rounded-2xl border border-green-200 bg-white p-6 shadow-sm">
         <div className="flex items-center gap-5">
           <Avatar
@@ -187,7 +274,6 @@ export function ProfileIdentityCard({ user, onUpdate }: Props) {
             disabled={uploading}
             editable
           />
-
           <input
             ref={fileInputRef}
             type="file"
@@ -195,7 +281,6 @@ export function ProfileIdentityCard({ user, onUpdate }: Props) {
             className="hidden"
             onChange={(e) => void handleFileChange(e)}
           />
-
           <div className="min-w-0 flex-1">
             <p className="text-lg font-bold text-green-800">{user.username}</p>
             {user.name && <p className="text-sm text-green-500">{user.name}</p>}
@@ -206,207 +291,182 @@ export function ProfileIdentityCard({ user, onUpdate }: Props) {
               <p className="text-sm text-red-500">{uploadError}</p>
             )}
           </div>
-
-          <div className="shrink-0">
-            {editing ? (
-              <div className="flex gap-2">
-                <button
-                  onClick={() => void handleSave()}
-                  disabled={saving || draftUsername.trim().length < 3}
-                  className="rounded-lg bg-green-500 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-green-600 disabled:opacity-50"
-                >
-                  {saving ? '...' : 'Sauver'}
-                </button>
-                <button
-                  onClick={handleCancel}
-                  disabled={saving}
-                  className="rounded-lg border border-green-200 px-3 py-1.5 text-xs font-medium text-green-500 transition-colors hover:bg-green-50"
-                >
-                  Annuler
-                </button>
-              </div>
-            ) : (
-              <button
-                onClick={handleEdit}
-                className="cursor-pointer text-sm font-medium text-green-400 transition-colors hover:text-green-500"
-              >
-                Modifier
-              </button>
-            )}
-          </div>
+          <EditIconButton label="Modifier le profil" onClick={handleEdit} />
         </div>
       </div>
 
-      {editing && (
-        <div className="overflow-hidden rounded-2xl border border-green-200 bg-white shadow-sm">
-          <p className="px-5 pt-5 pb-3 text-sm font-semibold tracking-wide text-green-500 uppercase">
-            Modifier le profil
-          </p>
-          <div className="grid grid-cols-2 gap-4 px-5 pb-5">
-            <div className="col-span-2">
+      <BaseDialog
+        dialogRef={dialogRef}
+        title="Modifier le profil"
+        onClose={() => setSaveError(null)}
+      >
+        <div className="grid grid-cols-2 gap-4">
+          <div className="relative col-span-2 flex flex-col gap-1">
+            <label
+              htmlFor="pf-username"
+              className="text-sm font-semibold text-green-600"
+            >
+              Nom d'utilisateur
+            </label>
+            <Input
+              id="pf-username"
+              value={form.username}
+              onChange={(e) => handleChange('username', e.target.value)}
+              onFocus={() => setFocusedField('username')}
+              onBlur={() => handleBlur('username')}
+              aria-invalid={isInvalid('username')}
+            />
+            <FieldError
+              id="pf-username-error"
+              message={errorMessage('username')}
+            />
+          </div>
+
+          <div className="col-span-2 flex flex-col gap-1">
+            <label
+              htmlFor="pf-name"
+              className="text-sm font-semibold text-green-600"
+            >
+              Nom complet
+            </label>
+            <Input
+              id="pf-name"
+              value={form.name}
+              onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
+              maxLength={80}
+            />
+          </div>
+
+          <div className="flex flex-col gap-1">
+            <label
+              htmlFor="pf-gender"
+              className="text-sm font-semibold text-green-600"
+            >
+              Genre
+            </label>
+            <SelectDropdown
+              id="pf-gender"
+              value={form.gender}
+              options={GENDER_OPTIONS}
+              onChange={(v) => setForm((p) => ({ ...p, gender: v }))}
+              container={dialogNode}
+            />
+          </div>
+
+          <div
+            className="flex flex-col gap-1"
+            onClick={(e) => e.stopPropagation()}
+            onKeyDown={(e) => e.stopPropagation()}
+            role="presentation"
+          >
+            <label
+              htmlFor="pf-birthdate"
+              className="text-sm font-semibold text-green-600"
+            >
+              Date de naissance
+            </label>
+            <DatePicker
+              selected={
+                form.birthDate ? new Date(`${form.birthDate}T12:00:00`) : null
+              }
+              onChange={(d: Date | null) => {
+                if (!d) return;
+                const y = d.getFullYear();
+                const m = String(d.getMonth() + 1).padStart(2, '0');
+                const day = String(d.getDate()).padStart(2, '0');
+                setForm((p) => ({ ...p, birthDate: `${y}-${m}-${day}` }));
+              }}
+              locale={fr}
+              calendarStartDay={1}
+              calendarClassName="kcal-datepicker"
+              dateFormat="dd/MM/yyyy"
+              maxDate={new Date()}
+              showYearDropdown
+              scrollableYearDropdown
+              yearDropdownItemNumber={100}
+              customInput={<BirthDateInput id="pf-birthdate" />}
+            />
+          </div>
+
+          <div className="col-span-2 flex flex-col gap-1">
+            <label
+              htmlFor="pf-activity"
+              className="text-sm font-semibold text-green-600"
+            >
+              Niveau d'activité
+            </label>
+            <SelectDropdown
+              id="pf-activity"
+              value={form.activityLevel}
+              options={ACTIVITY_OPTIONS}
+              onChange={(v) => setForm((p) => ({ ...p, activityLevel: v }))}
+              container={dialogNode}
+            />
+          </div>
+
+          {[
+            { field: 'height' as Field, id: 'pf-height', label: 'Taille (cm)' },
+            {
+              field: 'targetWeight' as Field,
+              id: 'pf-target-weight',
+              label: 'Poids cible (kg)',
+            },
+            {
+              field: 'dailyCalorieGoal' as Field,
+              id: 'pf-calorie-goal',
+              label: 'Objectif calorique (kcal/jour)',
+            },
+            {
+              field: 'dailyProteinGoal' as Field,
+              id: 'pf-protein-goal',
+              label: 'Objectif protéines (g/jour)',
+            },
+          ].map(({ field, id, label }) => (
+            <div key={field} className="relative flex flex-col gap-1">
               <label
-                htmlFor="draft-username"
-                className="mb-1 block text-sm font-semibold text-green-600"
+                htmlFor={id}
+                className="text-sm font-semibold text-green-600"
               >
-                Nom d'utilisateur
+                {label}
               </label>
               <Input
-                id="draft-username"
-                ref={usernameRef}
-                value={draftUsername}
-                onChange={(e) => setDraftUsername(e.target.value)}
-                onKeyDown={handleKeyDown}
-                minLength={3}
-                maxLength={30}
+                id={id}
+                type="text"
+                inputMode="decimal"
+                value={form[field]}
+                onChange={(e) => handleChange(field, e.target.value)}
+                onFocus={() => setFocusedField(field)}
+                onBlur={() => handleBlur(field)}
+                aria-invalid={isInvalid(field)}
               />
+              <FieldError id={`${id}-error`} message={errorMessage(field)} />
             </div>
-            <div className="col-span-2">
-              <label
-                htmlFor="draft-name"
-                className="mb-1 block text-sm font-semibold text-green-600"
-              >
-                Nom complet
-              </label>
-              <Input
-                id="draft-name"
-                value={draftName}
-                onChange={(e) => setDraftName(e.target.value)}
-                onKeyDown={handleKeyDown}
-                maxLength={80}
-              />
-            </div>
-            <div>
-              <label
-                htmlFor="draft-gender"
-                className="mb-1 block text-sm font-semibold text-green-600"
-              >
-                Genre
-              </label>
-              <select
-                id="draft-gender"
-                value={draftGender}
-                onChange={(e) => setDraftGender(e.target.value)}
-                className="w-full rounded-lg border border-green-200 px-3 py-2 text-sm text-green-800 focus:ring-2 focus:ring-green-300 focus:outline-none"
-              >
-                <option value="">—</option>
-                <option value="MALE">Homme</option>
-                <option value="FEMALE">Femme</option>
-                <option value="OTHER">Autre</option>
-              </select>
-            </div>
-            <div>
-              <label
-                htmlFor="draft-birth-date"
-                className="mb-1 block text-sm font-semibold text-green-600"
-              >
-                Date de naissance
-              </label>
-              <Input
-                id="draft-birth-date"
-                type="date"
-                value={draftBirthDate}
-                onChange={(e) => setDraftBirthDate(e.target.value)}
-                onKeyDown={handleKeyDown}
-              />
-            </div>
-            <div className="col-span-2">
-              <label
-                htmlFor="draft-activity-level"
-                className="mb-1 block text-sm font-semibold text-green-600"
-              >
-                Niveau d'activité
-              </label>
-              <select
-                id="draft-activity-level"
-                value={draftActivityLevel}
-                onChange={(e) => setDraftActivityLevel(e.target.value)}
-                className="w-full rounded-lg border border-green-200 px-3 py-2 text-sm text-green-800 focus:ring-2 focus:ring-green-300 focus:outline-none"
-              >
-                <option value="">—</option>
-                <option value="SEDENTARY">Sédentaire</option>
-                <option value="LIGHTLY_ACTIVE">Légèrement actif</option>
-                <option value="MODERATELY_ACTIVE">Modérément actif</option>
-                <option value="VERY_ACTIVE">Très actif</option>
-                <option value="EXTRA_ACTIVE">Extrêmement actif</option>
-              </select>
-            </div>
-            <div>
-              <label
-                htmlFor="draft-height"
-                className="mb-1 block text-sm font-semibold text-green-600"
-              >
-                Taille (cm)
-              </label>
-              <Input
-                id="draft-height"
-                type="number"
-                min={50}
-                max={300}
-                value={draftHeight}
-                onChange={(e) => setDraftHeight(e.target.value)}
-                onKeyDown={handleKeyDown}
-              />
-            </div>
-            <div>
-              <label
-                htmlFor="draft-target-weight"
-                className="mb-1 block text-sm font-semibold text-green-600"
-              >
-                Poids cible (kg)
-              </label>
-              <Input
-                id="draft-target-weight"
-                type="number"
-                min={20}
-                max={500}
-                step={0.1}
-                value={draftTargetWeight}
-                onChange={(e) => setDraftTargetWeight(e.target.value)}
-                onKeyDown={handleKeyDown}
-              />
-            </div>
-            <div>
-              <label
-                htmlFor="draft-daily-calorie-goal"
-                className="mb-1 block text-sm font-semibold text-green-600"
-              >
-                Objectif calorique (kcal/jour)
-              </label>
-              <Input
-                id="draft-daily-calorie-goal"
-                type="number"
-                min={500}
-                max={10000}
-                value={draftDailyCalorieGoal}
-                onChange={(e) => setDraftDailyCalorieGoal(e.target.value)}
-                onKeyDown={handleKeyDown}
-              />
-            </div>
-            <div>
-              <label
-                htmlFor="draft-daily-protein-goal"
-                className="mb-1 block text-sm font-semibold text-green-600"
-              >
-                Objectif protéines (g/jour)
-              </label>
-              <Input
-                id="draft-daily-protein-goal"
-                type="number"
-                min={10}
-                max={500}
-                value={draftDailyProteinGoal}
-                onChange={(e) => setDraftDailyProteinGoal(e.target.value)}
-                onKeyDown={handleKeyDown}
-              />
-            </div>
-            {saveError && (
-              <div className="col-span-2">
-                <p className="text-xs text-red-500">{saveError}</p>
-              </div>
-            )}
+          ))}
+
+          {saveError && (
+            <p className="col-span-2 text-xs text-red-500">{saveError}</p>
+          )}
+
+          <div className="col-span-2 flex gap-3 pt-2">
+            <button
+              type="button"
+              onClick={() => dialogRef.current?.close()}
+              disabled={saving}
+              className="flex-1 cursor-pointer rounded-xl border border-green-200 px-4 py-2.5 text-sm font-medium text-green-600 transition-colors hover:bg-green-50"
+            >
+              Annuler
+            </button>
+            <button
+              type="button"
+              onClick={() => void handleSave()}
+              disabled={saving}
+              className="flex-1 cursor-pointer rounded-xl bg-green-500 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-green-600 disabled:opacity-50"
+            >
+              {saving ? '...' : 'Sauver'}
+            </button>
           </div>
         </div>
-      )}
-    </div>
+      </BaseDialog>
+    </>
   );
 }
