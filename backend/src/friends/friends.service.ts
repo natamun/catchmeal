@@ -36,7 +36,9 @@ export class FriendsService {
       if (existing.userId === userId) {
         throw new ConflictException('Demande déjà envoyée à cet utilisateur');
       }
-      throw new ConflictException('Cet utilisateur vous a déjà envoyé une demande');
+      throw new ConflictException(
+        'Cet utilisateur vous a déjà envoyé une demande',
+      );
     }
 
     try {
