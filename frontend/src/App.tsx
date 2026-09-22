@@ -95,15 +95,20 @@ function AppShell() {
           {pages[activeTab]}
         </Suspense>
       </main>
-      <Nav active={activeTab} onChange={setActiveTab} isAdmin={isAdmin} />git
-      <ChatBotPopup
-        isOpen={isOpen}
-        onToggle={setIsOpen}
-        messages={message}
-        onMessagesChange={setMessage}
-        conversationId={conversationId}
-        onConversationIdChange={setConversationId}
-      />
+      <Nav active={activeTab} onChange={setActiveTab} isAdmin={isAdmin} />
+      {(activeTab === 'stats' ||
+        activeTab === 'home' ||
+        activeTab === 'food') && (
+        <ChatBotPopup
+          isOpen={isOpen}
+          onToggle={setIsOpen}
+          messages={message}
+          onMessagesChange={setMessage}
+          conversationId={conversationId}
+          onConversationIdChange={setConversationId}
+          activePage={activeTab}
+        />
+      )}
     </div>
   );
 }
