@@ -9,8 +9,8 @@ import {
   Res,
   UseGuards,
 } from '@nestjs/common';
-import type { Request as ExpressRequest, Response } from 'express';
 import { AuthGuard } from '@nestjs/passport';
+import type { Request as ExpressRequest, Response } from 'express';
 
 import { AuthService, type SignInData } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
