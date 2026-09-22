@@ -49,7 +49,7 @@ function GdprPage() {
         throw new Error('Failed to fetch user data');
       }
 
-      const data: ExportResponse = await response.json();
+      const data = (await response.json()) as ExportResponse;
       setExportData(data);
     } catch {
       setExportError('Could not retrieve your data. Please try again.');
@@ -106,7 +106,7 @@ function GdprPage() {
       </p>
 
       {/* --- Data export section --- */}
-      <button onClick={handleExport} disabled={exportLoading}>
+      <button onClick={() => void handleExport()} disabled={exportLoading}>
         {exportLoading ? 'Loading...' : 'View my data'}
       </button>
 
@@ -121,12 +121,25 @@ function GdprPage() {
 
           <h3>Profile</h3>
           <ul>
-            <li><strong>ID:</strong> {profile.id}</li>
-            <li><strong>Username:</strong> {profile.username}</li>
-            <li><strong>Name:</strong> {profile.name}</li>
-            <li><strong>Email:</strong> {profile.email}</li>
-            <li><strong>Role:</strong> {profile.role}</li>
-            <li><strong>Member since:</strong> {new Date(profile.createAt).toLocaleDateString()}</li>
+            <li>
+              <strong>ID:</strong> {profile.id}
+            </li>
+            <li>
+              <strong>Username:</strong> {profile.username}
+            </li>
+            <li>
+              <strong>Name:</strong> {profile.name}
+            </li>
+            <li>
+              <strong>Email:</strong> {profile.email}
+            </li>
+            <li>
+              <strong>Role:</strong> {profile.role}
+            </li>
+            <li>
+              <strong>Member since:</strong>{' '}
+              {new Date(profile.createAt).toLocaleDateString()}
+            </li>
           </ul>
 
           <h3>Meals logged: {profile.meal.length}</h3>
@@ -167,7 +180,10 @@ function GdprPage() {
                   <strong>Are you sure?</strong> Your account and all associated
                   personal data will be permanently deleted.
                 </p>
-                <button onClick={handleDeleteAccount} disabled={deleteLoading}>
+                <button
+                  onClick={() => void handleDeleteAccount()}
+                  disabled={deleteLoading}
+                >
                   {deleteLoading
                     ? 'Deleting...'
                     : 'Yes, permanently delete my account'}

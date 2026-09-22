@@ -18,10 +18,34 @@ const DURATION_OPTIONS = [
   { label: '1 an', days: 365 },
 ];
 
+interface UserProfile {
+  id: number;
+  username: string;
+  name: string;
+  email: string;
+  role: string;
+  createAt: string;
+  meal: unknown[];
+  weightLogs: unknown[];
+  goalSettings: unknown[];
+  senderMessage: unknown[];
+  receiverMessage: unknown[];
+}
+
+interface ExportResponse {
+  exportedAt: string;
+  data: {
+    profile: UserProfile;
+  };
+}
+
 export default function ProfilePage() {
   const { user, logout, updateUser } = useAuth();
   const [latestWeight, setLatestWeight] = useState<number | null>(null);
   const [durationDays, setDurationDays] = useState(90);
+  const [exportLoading, setExportLoading] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
   const handleLatestWeight = useCallback((w: number) => setLatestWeight(w), []);
 
   if (!user) return null;
@@ -40,6 +64,49 @@ export default function ProfilePage() {
     const coefficient = diff > 0 ? 7700 : 4800;
     return Math.round(tdee - (diff * coefficient) / durationDays);
   })();
+
+  async function handleExport() {
+    setExportLoading(true);
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/gdpr/export/${user!.userId}`,
+        { credentials: 'include' },
+      );
+      if (!response.ok) throw new Error('Failed to fetch user data');
+      const data = (await response.json()) as ExportResponse;
+
+      const blob = new Blob([JSON.stringify(data, null, 2)], {
+        type: 'application/json',
+      });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'my-data.json';
+      link.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      alert("Erreur lors de l'export de vos données");
+    } finally {
+      setExportLoading(false);
+    }
+  }
+
+  async function handleDeleteAccount() {
+    setDeleteLoading(true);
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/gdpr/account/${user!.userId}`,
+        { method: 'DELETE', credentials: 'include' },
+      );
+      if (!response.ok) throw new Error('Failed to delete account');
+      void logout();
+    } catch {
+      alert('Erreur lors de la suppression du compte');
+    } finally {
+      setDeleteLoading(false);
+      setShowDeleteConfirm(false);
+    }
+  }
 
   return (
     <div className="flex flex-col gap-6">
@@ -130,25 +197,71 @@ export default function ProfilePage() {
               danger: false,
               onClick: () => void logout(),
             },
-            { label: 'Exporter mes données', danger: false },
+            {
+              label: exportLoading ? 'Export en cours...' : 'Exporter mes données',
+              danger: false,
+              onClick: () => void handleExport(),
+              disabled: exportLoading,
+            },
             { label: 'Politique de confidentialité', danger: false },
-            { label: 'Supprimer mon compte', danger: true },
-          ] satisfies { label: string; danger: boolean; onClick?: () => void }[]
+            {
+              label: 'Supprimer mon compte',
+              danger: true,
+              onClick: () => setShowDeleteConfirm(true),
+            },
+          ] satisfies {
+            label: string;
+            danger: boolean;
+            onClick?: () => void;
+            disabled?: boolean;
+          }[]
         ).map((item, i, arr) => (
           <button
             key={item.label}
             onClick={item.onClick}
+            disabled={item.disabled}
             className={`flex w-full cursor-pointer items-center justify-between px-5 py-4 text-left text-sm transition-colors ${
               item.danger
                 ? 'text-red-500 hover:bg-red-50'
                 : 'text-green-600 hover:bg-green-50'
-            } ${i < arr.length - 1 ? 'border-b border-green-200' : ''}`}
+            } ${i < arr.length - 1 ? 'border-b border-green-200' : ''} ${item.disabled ? 'cursor-not-allowed opacity-50' : ''}`}
           >
             {item.label}
             <ChevronRight className="h-4 w-4 opacity-40" />
           </button>
         ))}
       </div>
+
+      {/* Delete confirmation modal */}
+      {showDeleteConfirm && (
+        <div className="bg-opacity-50 fixed inset-0 z-50 flex items-center justify-center bg-black">
+          <div className="mx-4 max-w-md rounded-2xl bg-white p-6 shadow-xl">
+            <h3 className="text-lg font-bold text-red-600">
+              Supprimer mon compte
+            </h3>
+            <p className="mt-2 text-sm text-green-600">
+              Cette action est irréversible. Toutes vos données seront
+              anonymisées et vous ne pourrez plus vous reconnecter.
+            </p>
+            <div className="mt-6 flex gap-3">
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                className="flex-1 rounded-xl bg-green-100 px-4 py-3 text-sm font-medium text-green-600 transition-colors hover:bg-green-200"
+                disabled={deleteLoading}
+              >
+                Annuler
+              </button>
+              <button
+                onClick={() => void handleDeleteAccount()}
+                disabled={deleteLoading}
+                className="flex-1 rounded-xl bg-red-500 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-red-600 disabled:opacity-50"
+              >
+                {deleteLoading ? 'Suppression...' : 'Confirmer la suppression'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

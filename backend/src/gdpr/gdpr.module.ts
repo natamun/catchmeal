@@ -1,8 +1,9 @@
 import { Module } from '@nestjs/common';
+
+import { EmailModule } from '../email/email.module';
+import { PrismaService } from '../prisma/prisma.service';
 import { GdprController } from './gdpr.controller';
 import { GdprService } from './gdpr.service';
-import { PrismaService } from '../prisma/prisma.service';
-import { EmailModule } from '../email/email.module';
 
 @Module({
   imports: [EmailModule],

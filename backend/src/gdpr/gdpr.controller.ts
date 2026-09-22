@@ -1,4 +1,5 @@
-import { Controller, Get, Delete, Param, ParseIntPipe } from '@nestjs/common';
+import { Controller, Delete, Get, Param, ParseIntPipe } from '@nestjs/common';
+
 import { GdprService } from './gdpr.service';
 
 @Controller('gdpr')
