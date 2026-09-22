@@ -30,7 +30,13 @@ export class FriendsService {
       },
     });
     if (existing) {
-      throw new ConflictException('Déjà ami avec cet utilisateur');
+      if (existing.status === 'ACCEPTED') {
+        throw new ConflictException('Déjà ami avec cet utilisateur');
+      }
+      if (existing.userId === userId) {
+        throw new ConflictException('Demande déjà envoyée à cet utilisateur');
+      }
+      throw new ConflictException('Cet utilisateur vous a déjà envoyé une demande');
     }
 
     try {
