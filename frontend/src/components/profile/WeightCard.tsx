@@ -145,13 +145,17 @@ export function WeightCard({ userId, targetWeight, onLatestWeight }: Props) {
         <div className="mb-3 flex flex-col gap-0.5">
           <p className="text-3xl font-bold text-green-800">
             {latest.weight.toFixed(1)}
-            <span className="ml-1 text-lg font-semibold text-green-600">kg</span>
+            <span className="ml-1 text-lg font-semibold text-green-600">
+              kg
+            </span>
           </p>
           <span className="text-sm text-green-500">
             {new Date(latest.loggedAt).toLocaleDateString('fr-FR')}
           </span>
           {targetWeight && (
-            <span className="text-sm text-green-400">objectif {targetWeight} kg</span>
+            <span className="text-sm text-green-400">
+              objectif {targetWeight} kg
+            </span>
           )}
         </div>
       )}
