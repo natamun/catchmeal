@@ -3,8 +3,8 @@ import { ChevronRight } from 'lucide-react';
 
 import { useAuth } from '../auth/auth-context';
 import { ProfileIdentityCard } from '../components/profile/ProfileIdentityCard';
+import { DurationDropdown } from '../components/profile/DurationDropdown';
 import { WeightCard } from '../components/profile/WeightCard';
-import { SelectDropdown } from '../components/ui/SelectDropdown';
 import { calculateBMR, calculateTDEE } from '../utils/bmr';
 
 const DURATION_OPTIONS = [
@@ -65,27 +65,23 @@ export default function ProfilePage() {
           </p>
         </div>
         {kcalToReachGoal ? (
-          <div className="flex items-center justify-between border-b border-green-200 px-5 py-4">
-            <p className="text-sm font-semibold text-green-600">Kcal / jour</p>
-            <div className="flex items-center gap-3">
-              <SelectDropdown
+          <div className="flex flex-col border-b border-green-200 px-5 py-4">
+            <div className="flex items-center justify-between">
+              <p className="text-sm font-semibold text-green-600">Apport calorique recommandé</p>
+              <p className="text-sm font-bold text-green-800">{kcalToReachGoal} kcal / jour</p>
+            </div>
+            <div className="flex items-center gap-1.5 text-xs text-green-400 mt-1">
+              <span>Pour atteindre {user.targetWeight} kg en</span>
+              <DurationDropdown
                 value={String(durationDays)}
-                options={DURATION_OPTIONS.map((o) => ({
-                  value: String(o.days),
-                  label: o.label,
-                }))}
+                options={DURATION_OPTIONS.map((o) => ({ value: String(o.days), label: o.label }))}
                 onChange={(v) => setDurationDays(Number(v))}
-                container={document.body}
-                className="w-32 py-1.5"
               />
-              <p className="text-sm font-semibold text-green-800">
-                {kcalToReachGoal} kcal
-              </p>
             </div>
           </div>
         ) : (
           <div className="flex items-center justify-between border-b border-green-200 px-5 py-4">
-            <p className="text-sm font-semibold text-green-600">Kcal / jour</p>
+            <p className="text-sm font-semibold text-green-600">Apport calorique recommandé</p>
             <p className="text-sm text-green-400">Données profil incomplètes</p>
           </div>
         )}
