@@ -94,6 +94,25 @@ export class UsersService {
     }
   }
 
+  async updateWeight(userId: number, entryId: number, weight: number) {
+    const entry = await this.prisma.weightLog.findUnique({
+      where: { id: entryId },
+    });
+    if (!entry || entry.userId !== userId)
+      throw new NotFoundException('Entry not found');
+    return this.prisma.weightLog.update({
+      where: { id: entryId },
+      data: { weight },
+      select: {
+        id: true,
+        weight: true,
+        bodyFat: true,
+        note: true,
+        loggedAt: true,
+      },
+    });
+  }
+
   async logWeight(
     userId: number,
     weight: number,

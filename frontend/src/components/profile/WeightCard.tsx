@@ -1,8 +1,13 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Plus, X } from 'lucide-react';
 
 import { Input } from '../ui/Input';
-import { getWeightHistory, logWeight, type WeightEntry } from './api';
+import {
+  getWeightHistory,
+  logWeight,
+  updateWeight,
+  type WeightEntry,
+} from './api';
 
 interface Props {
   userId: number;
@@ -18,6 +23,9 @@ export function WeightCard({ userId, targetWeight, onLatestWeight }: Props) {
   const [draft, setDraft] = useState('');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editDraft, setEditDraft] = useState('');
+  const editInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     getWeightHistory(userId)
@@ -52,6 +60,29 @@ export function WeightCard({ userId, targetWeight, onLatestWeight }: Props) {
     setDraft('');
     setError(null);
     setLogging(false);
+  }
+
+  function startEdit(entry: WeightEntry) {
+    setEditingId(entry.id);
+    setEditDraft(String(entry.weight));
+    setTimeout(() => editInputRef.current?.select(), 0);
+  }
+
+  async function handleEditSave(entryId: number) {
+    const weight = parseFloat(editDraft);
+    if (!weight || weight <= 0) {
+      setEditingId(null);
+      return;
+    }
+    try {
+      const updated = await updateWeight(userId, entryId, weight);
+      setHistory((prev) => prev.map((e) => (e.id === entryId ? updated : e)));
+      if (history[0]?.id === entryId) onLatestWeight?.(updated.weight);
+    } catch {
+      // revert silently
+    } finally {
+      setEditingId(null);
+    }
   }
 
   const latest = history[0];
@@ -139,10 +170,34 @@ export function WeightCard({ userId, targetWeight, onLatestWeight }: Props) {
                   year: 'numeric',
                 })}
               </span>
-              <span className="text-sm font-semibold text-green-800">
-                {entry.weight.toFixed(1)}{' '}
-                <span className="text-xs font-normal text-green-400">kg</span>
-              </span>
+              {editingId === entry.id ? (
+                <div className="w-16">
+                  <Input
+                    ref={editInputRef}
+                    type="number"
+                    min={20}
+                    max={500}
+                    step={0.1}
+                    value={editDraft}
+                    onChange={(e) => setEditDraft(e.target.value)}
+                    onBlur={() => void handleEditSave(entry.id)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') void handleEditSave(entry.id);
+                      if (e.key === 'Escape') setEditingId(null);
+                    }}
+                    className="py-0.5 text-right [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                  />
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => startEdit(entry)}
+                  className="text-sm font-semibold text-green-800 hover:text-green-600"
+                >
+                  {entry.weight.toFixed(1)}{' '}
+                  <span className="text-xs font-normal text-green-400">kg</span>
+                </button>
+              )}
             </div>
           ))}
         </div>
