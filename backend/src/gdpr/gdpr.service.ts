@@ -64,6 +64,7 @@ export class GdprService {
         name: 'Deleted User',
         email: `deleted_${userId}@deleted.invalid`,
         passwordHash: '',
+        deletedAt: new Date(),
       },
     });
 
