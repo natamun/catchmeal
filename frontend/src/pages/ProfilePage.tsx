@@ -58,6 +58,12 @@ export default function ProfilePage() {
         <p className="px-5 pt-5 pb-3 text-sm font-semibold tracking-wide text-green-500 uppercase">
           Mes objectifs
         </p>
+        <div className="flex items-center justify-between border-b border-green-200 px-5 py-4">
+          <p className="text-sm font-semibold text-green-600">Poids cible</p>
+          <p className="text-sm font-semibold text-green-800">
+            {user.targetWeight ? `${user.targetWeight} kg` : '—'}
+          </p>
+        </div>
         {kcalToReachGoal ? (
           <div className="flex items-center justify-between border-b border-green-200 px-5 py-4">
             <p className="text-sm font-semibold text-green-600">Kcal / jour</p>
@@ -89,10 +95,16 @@ export default function ProfilePage() {
             {user.dailyProteinGoal ? `${user.dailyProteinGoal} g / jour` : '—'}
           </p>
         </div>
-        <div className="flex items-center justify-between px-5 py-4">
-          <p className="text-sm font-semibold text-green-600">Poids cible</p>
+        <div className="flex items-center justify-between border-b border-green-200 px-5 py-4">
+          <p className="text-sm font-semibold text-green-600">Glucides</p>
           <p className="text-sm font-semibold text-green-800">
-            {user.targetWeight ? `${user.targetWeight} kg` : '—'}
+            {user.dailyCarbsGoal ? `${user.dailyCarbsGoal} g / jour` : '—'}
+          </p>
+        </div>
+        <div className="flex items-center justify-between px-5 py-4">
+          <p className="text-sm font-semibold text-green-600">Lipides</p>
+          <p className="text-sm font-semibold text-green-800">
+            {user.dailyFatGoal ? `${user.dailyFatGoal} g / jour` : '—'}
           </p>
         </div>
       </div>

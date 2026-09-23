@@ -13,14 +13,16 @@ export interface AuthUser {
   targetWeight?: number | null;
   dailyCalorieGoal?: number | null;
   dailyProteinGoal?: number | null;
+  dailyCarbsGoal?: number | null;
+  dailyFatGoal?: number | null;
   gender?: string | null;
   birthDate?: string | null;
   activityLevel?: string | null;
 }
 
 export interface AuthContextValue {
-  user: AuthUser | null;
   status: AuthStatus;
+  user: AuthUser | null;
   login: (input: LoginInput) => Promise<void>;
   register: (input: RegisterInput) => Promise<void>;
   logout: () => Promise<void>;

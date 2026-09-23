@@ -18,6 +18,8 @@ export type SignInData = {
   targetWeight?: number | null;
   dailyCalorieGoal?: number | null;
   dailyProteinGoal?: number | null;
+  dailyCarbsGoal?: number | null;
+  dailyFatGoal?: number | null;
   gender?: string | null;
   birthDate?: Date | null;
   activityLevel?: string | null;
@@ -32,6 +34,8 @@ type AuthResult = {
   targetWeight?: number | null;
   dailyCalorieGoal?: number | null;
   dailyProteinGoal?: number | null;
+  dailyCarbsGoal?: number | null;
+  dailyFatGoal?: number | null;
   gender?: string | null;
   birthDate?: Date | null;
   activityLevel?: string | null;
@@ -68,6 +72,8 @@ export class AuthService {
       targetWeight: user.targetWeight,
       dailyCalorieGoal: user.dailyCalorieGoal,
       dailyProteinGoal: user.dailyProteinGoal,
+      dailyCarbsGoal: user.dailyCarbsGoal,
+      dailyFatGoal: user.dailyFatGoal,
       gender: user.gender,
       birthDate: user.birthDate,
       activityLevel: user.activityLevel,
@@ -117,6 +123,8 @@ export class AuthService {
       targetWeight: user.targetWeight,
       dailyCalorieGoal: user.dailyCalorieGoal,
       dailyProteinGoal: user.dailyProteinGoal,
+      dailyCarbsGoal: user.dailyCarbsGoal,
+      dailyFatGoal: user.dailyFatGoal,
       gender: user.gender,
       birthDate: user.birthDate,
       activityLevel: user.activityLevel,
