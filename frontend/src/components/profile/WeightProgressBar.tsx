@@ -15,7 +15,9 @@ export function WeightProgressBar({ current, target, start }: Props) {
     <div className="w-full">
       <div className="mb-1 flex justify-between text-xs text-green-400">
         <span>{current} kg</span>
-        <span>objectif {target} kg · {pct}%</span>
+        <span>
+          objectif {target} kg · {pct}%
+        </span>
       </div>
       <div className="h-1.5 w-full overflow-hidden rounded-full bg-green-100">
         <div

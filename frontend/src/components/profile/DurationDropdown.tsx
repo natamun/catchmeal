@@ -40,7 +40,10 @@ export function DurationDropdown({ value, options, onChange }: Props) {
             key={o.value}
             type="button"
             onMouseDown={(e) => e.preventDefault()}
-            onClick={() => { onChange(o.value); setOpen(false); }}
+            onClick={() => {
+              onChange(o.value);
+              setOpen(false);
+            }}
             className={`w-full cursor-pointer border-t border-green-100 px-3 py-1.5 text-left text-xs transition-colors first:border-t-0 hover:bg-green-50 ${o.value === value ? 'font-semibold text-green-700' : 'text-green-800'}`}
           >
             {o.label}

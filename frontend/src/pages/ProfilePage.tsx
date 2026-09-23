@@ -2,8 +2,8 @@ import { useCallback, useState } from 'react';
 import { ChevronRight } from 'lucide-react';
 
 import { useAuth } from '../auth/auth-context';
-import { ProfileIdentityCard } from '../components/profile/ProfileIdentityCard';
 import { DurationDropdown } from '../components/profile/DurationDropdown';
+import { ProfileIdentityCard } from '../components/profile/ProfileIdentityCard';
 import { WeightCard } from '../components/profile/WeightCard';
 import { calculateBMR, calculateTDEE } from '../utils/bmr';
 
@@ -45,7 +45,11 @@ export default function ProfilePage() {
     <div className="flex flex-col gap-6">
       <h2 className="text-xl font-bold text-green-800">Profil</h2>
 
-      <ProfileIdentityCard user={user} onUpdate={updateUser} currentWeight={latestWeight} />
+      <ProfileIdentityCard
+        user={user}
+        onUpdate={updateUser}
+        currentWeight={latestWeight}
+      />
 
       <WeightCard
         userId={user.userId}
@@ -67,21 +71,30 @@ export default function ProfilePage() {
         {kcalToReachGoal ? (
           <div className="flex flex-col border-b border-green-200 px-5 py-4">
             <div className="flex items-center justify-between">
-              <p className="text-sm font-semibold text-green-600">Apport calorique recommandé</p>
-              <p className="text-sm font-bold text-green-800">{kcalToReachGoal} kcal / jour</p>
+              <p className="text-sm font-semibold text-green-600">
+                Apport calorique recommandé
+              </p>
+              <p className="text-sm font-bold text-green-800">
+                {kcalToReachGoal} kcal / jour
+              </p>
             </div>
-            <div className="flex items-center gap-1.5 text-xs text-green-400 mt-1">
+            <div className="mt-1 flex items-center gap-1.5 text-xs text-green-400">
               <span>Pour atteindre {user.targetWeight} kg en</span>
               <DurationDropdown
                 value={String(durationDays)}
-                options={DURATION_OPTIONS.map((o) => ({ value: String(o.days), label: o.label }))}
+                options={DURATION_OPTIONS.map((o) => ({
+                  value: String(o.days),
+                  label: o.label,
+                }))}
                 onChange={(v) => setDurationDays(Number(v))}
               />
             </div>
           </div>
         ) : (
           <div className="flex items-center justify-between border-b border-green-200 px-5 py-4">
-            <p className="text-sm font-semibold text-green-600">Apport calorique recommandé</p>
+            <p className="text-sm font-semibold text-green-600">
+              Apport calorique recommandé
+            </p>
             <p className="text-sm text-green-400">Données profil incomplètes</p>
           </div>
         )}

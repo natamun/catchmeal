@@ -157,7 +157,7 @@ export function WeightCard({ userId, targetWeight, onLatestWeight }: Props) {
       )}
 
       {history.length > 1 && (
-        <div className="flex flex-col gap-2 border-t border-green-100 pt-3 max-h-48 overflow-y-auto">
+        <div className="flex max-h-48 flex-col gap-2 overflow-y-auto border-t border-green-100 pt-3">
           {history.slice(1).map((entry) => (
             <div
               key={entry.id}
@@ -185,7 +185,7 @@ export function WeightCard({ userId, targetWeight, onLatestWeight }: Props) {
                       if (e.key === 'Enter') void handleEditSave(entry.id);
                       if (e.key === 'Escape') setEditingId(null);
                     }}
-                    className="py-0.5 text-right [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                    className="[appearance:textfield] py-0.5 text-right [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                   />
                 </div>
               ) : (
