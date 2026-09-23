@@ -19,7 +19,12 @@ async function parseErrorMessage(response: Response): Promise<string> {
     : (message ?? `HTTP ${response.status}`);
 }
 
+const ALLOWED_ORIGIN: string = import.meta.env.VITE_API_URL;
+
 async function request<T>(url: string, init?: RequestInit): Promise<T> {
+  if (!url.startsWith(ALLOWED_ORIGIN)) {
+    throw new Error(`Blocked request to disallowed origin: ${url}`);
+  }
   const response = await fetch(url, { ...init, credentials: 'include' });
   if (!response.ok) {
     throw new ApiError(await parseErrorMessage(response));
