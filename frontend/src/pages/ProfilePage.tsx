@@ -45,7 +45,7 @@ export default function ProfilePage() {
     <div className="flex flex-col gap-6">
       <h2 className="text-xl font-bold text-green-800">Profil</h2>
 
-      <ProfileIdentityCard user={user} onUpdate={updateUser} />
+      <ProfileIdentityCard user={user} onUpdate={updateUser} currentWeight={latestWeight} />
 
       <WeightCard
         userId={user.userId}
