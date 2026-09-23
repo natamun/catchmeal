@@ -26,24 +26,25 @@ export class FortyTwoStrategy extends PassportStrategy(Strategy, '42') {
   }
 
   // Called after 42 grants the token — fetches the user profile
-  async userProfile(
+  userProfile(
     accessToken: string,
     done: (err: Error | null, profile?: FortyTwoProfile) => void,
-  ): Promise<void> {
-    try {
-      const response = await fetch('https://api.intra.42.fr/v2/me', {
-        headers: { Authorization: `Bearer ${accessToken}` },
+  ): void {
+    fetch('https://api.intra.42.fr/v2/me', {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    })
+      .then((response) => response.json())
+      .then((data: FortyTwoProfile) => {
+        done(null, {
+          id: String(data.id),
+          login: data.login,
+          email: data.email,
+          displayname: data.displayname,
+        });
+      })
+      .catch((err: Error) => {
+        done(err);
       });
-      const data = await response.json();
-      done(null, {
-        id: String(data.id),
-        login: data.login,
-        email: data.email,
-        displayname: data.displayname,
-      });
-    } catch (err) {
-      done(err as Error);
-    }
   }
 
   // Called with the verified profile — finds or creates the user, then signs a JWT
