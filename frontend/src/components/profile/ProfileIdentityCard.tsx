@@ -317,7 +317,9 @@ export function ProfileIdentityCard({ user, onUpdate, currentWeight }: Props) {
             onChange={(e) => void handleFileChange(e)}
           />
           <div className="min-w-0">
-            <p className="text-base font-bold text-green-800">{user.username}</p>
+            <p className="text-base font-bold text-green-800">
+              {user.username}
+            </p>
             {user.name && <p className="text-xs text-green-500">{user.name}</p>}
             {uploading && (
               <p className="text-xs text-green-400">Upload en cours...</p>
@@ -326,13 +328,17 @@ export function ProfileIdentityCard({ user, onUpdate, currentWeight }: Props) {
               <p className="text-xs text-red-500">{uploadError}</p>
             )}
           </div>
-          {(currentWeight && user.height || currentWeight && user.targetWeight) && (
-            <div className="flex flex-1 justify-center items-center gap-2">
+          {((currentWeight && user.height) ||
+            (currentWeight && user.targetWeight)) && (
+            <div className="flex flex-1 items-center justify-center gap-2">
               {currentWeight && user.height && (
                 <BmiBadge weight={currentWeight} height={user.height} />
               )}
               {currentWeight && user.targetWeight && (
-                <WeightProgressBadge current={currentWeight} target={user.targetWeight} />
+                <WeightProgressBadge
+                  current={currentWeight}
+                  target={user.targetWeight}
+                />
               )}
             </div>
           )}
