@@ -107,7 +107,7 @@ export function WeightCard({ userId, targetWeight, onLatestWeight }: Props) {
                 if (e.key === 'Enter') void handleSave();
                 if (e.key === 'Escape') handleCancel();
               }}
-              className="w-20"
+              className="w-20 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
             />
             <button
               onClick={() => void handleSave()}
@@ -157,8 +157,8 @@ export function WeightCard({ userId, targetWeight, onLatestWeight }: Props) {
       )}
 
       {history.length > 1 && (
-        <div className="flex flex-col gap-2 border-t border-green-100 pt-3">
-          {history.slice(1, 5).map((entry) => (
+        <div className="flex flex-col gap-2 border-t border-green-100 pt-3 max-h-48 overflow-y-auto">
+          {history.slice(1).map((entry) => (
             <div
               key={entry.id}
               className="flex items-center justify-between rounded-xl bg-green-50 px-3 py-2"
