@@ -162,26 +162,6 @@ export class PassportAuthController {
     };
   }
 
-  // OAuth 42 — Step 1: redirect to 42 login page
-  @Get('42')
-  @UseGuards(AuthGuard('42'))
-  redirectToFortyTwo() {
-    // Passport handles the redirect automatically
-  }
-
-  // OAuth 42 — Step 2: 42 redirects back here after user grants permission
-  @Get('42/callback')
-  @UseGuards(AuthGuard('42'))
-  async fortyTwoCallback(
-    @Request() request: RequestWithUser,
-    @Res() res: Response,
-  ) {
-    const { accessToken } = await this.authService.signIn(request.user);
-    this.setAuthCookie(res as any, accessToken);
-    // Redirect to frontend after successful OAuth login
-    (res as any).redirect(process.env.FRONTEND_URL ?? 'http://localhost:5173');
-  }
-
   // OAuth GitHub — Step 1: redirect to GitHub login page
   @Get('github')
   @UseGuards(AuthGuard('github'))
@@ -194,11 +174,11 @@ export class PassportAuthController {
   @UseGuards(AuthGuard('github'))
   async gitHubCallback(
     @Request() request: RequestWithUser,
-    @Res() res: Response,
+    @Res({ passthrough: false }) res: Response,
   ) {
     const { accessToken } = await this.authService.signIn(request.user);
-    this.setAuthCookie(res as any, accessToken);
-    (res as any).redirect(process.env.FRONTEND_URL ?? 'http://localhost:5173');
+    this.setAuthCookie(res, accessToken);
+    res.redirect(process.env.FRONTEND_URL ?? 'http://localhost:5173');
   }
 
   private setAuthCookie(res: Response, token: string) {

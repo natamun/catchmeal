@@ -283,16 +283,6 @@ export default function AuthPage({ initialMode, onCancel }: Props) {
         <button
           type="button"
           onClick={() => {
-            window.location.href = `${import.meta.env.VITE_API_URL}/auth/42`;
-          }}
-          className="mt-4 w-full cursor-pointer rounded-xl border border-green-200 bg-white px-6 py-3 font-semibold text-green-700 transition-colors hover:bg-green-50"
-        >
-          Login with 42
-        </button>
-
-        <button
-          type="button"
-          onClick={() => {
             window.location.href = `${import.meta.env.VITE_API_URL}/auth/github`;
           }}
           className="mt-2 w-full cursor-pointer rounded-xl border border-green-200 bg-white px-6 py-3 font-semibold text-green-700 transition-colors hover:bg-green-50"
