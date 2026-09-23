@@ -15,10 +15,13 @@ import { EditIconButton } from '../ui/EditIconButton';
 import { FieldError } from '../ui/FieldError';
 import { Input } from '../ui/Input';
 import { updateProfile, uploadAvatar, type UserProfile } from './api';
+import { BmiBadge } from './BmiBadge';
+import { WeightProgressBadge } from './WeightProgressBadge';
 
 interface Props {
   user: AuthUser;
   onUpdate: (partial: Partial<AuthUser>) => void;
+  currentWeight?: number | null;
 }
 
 type Field =
@@ -113,7 +116,7 @@ const BirthDateInput = forwardRef<
 ));
 BirthDateInput.displayName = 'BirthDateInput';
 
-export function ProfileIdentityCard({ user, onUpdate }: Props) {
+export function ProfileIdentityCard({ user, onUpdate, currentWeight }: Props) {
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -296,8 +299,8 @@ export function ProfileIdentityCard({ user, onUpdate }: Props) {
 
   return (
     <>
-      <div className="rounded-2xl border border-green-200 bg-white p-6 shadow-sm">
-        <div className="flex items-center gap-5">
+      <div className="rounded-2xl border border-green-200 bg-white p-4 shadow-sm">
+        <div className="flex items-center gap-3">
           <Avatar
             username={user.username}
             avatarUrl={user.avatarUrl}
@@ -313,16 +316,26 @@ export function ProfileIdentityCard({ user, onUpdate }: Props) {
             className="hidden"
             onChange={(e) => void handleFileChange(e)}
           />
-          <div className="min-w-0 flex-1">
-            <p className="text-lg font-bold text-green-800">{user.username}</p>
-            {user.name && <p className="text-sm text-green-500">{user.name}</p>}
+          <div className="min-w-0">
+            <p className="text-base font-bold text-green-800">{user.username}</p>
+            {user.name && <p className="text-xs text-green-500">{user.name}</p>}
             {uploading && (
-              <p className="text-sm text-green-400">Upload en cours...</p>
+              <p className="text-xs text-green-400">Upload en cours...</p>
             )}
             {uploadError && (
-              <p className="text-sm text-red-500">{uploadError}</p>
+              <p className="text-xs text-red-500">{uploadError}</p>
             )}
           </div>
+          {(currentWeight && user.height || currentWeight && user.targetWeight) && (
+            <div className="flex flex-1 justify-center items-center gap-2">
+              {currentWeight && user.height && (
+                <BmiBadge weight={currentWeight} height={user.height} />
+              )}
+              {currentWeight && user.targetWeight && (
+                <WeightProgressBadge current={currentWeight} target={user.targetWeight} />
+              )}
+            </div>
+          )}
           <EditIconButton label="Modifier le profil" onClick={handleEdit} />
         </div>
       </div>
