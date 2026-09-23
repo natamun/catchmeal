@@ -18,7 +18,11 @@ async function parseErrorMessage(response: Response): Promise<string> {
 }
 
 async function request<T>(url: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(url, { ...init, credentials: 'include' });
+  const response = await fetch(url, {
+    ...init,
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json', ...init?.headers },
+  });
   if (!response.ok) {
     throw new ApiError(await parseErrorMessage(response));
   }
@@ -83,6 +87,13 @@ export function updateProfile(userId: number, input: UpdateProfileInput) {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(input),
+  });
+}
+
+export function updateWeight(userId: number, entryId: number, weight: number) {
+  return request<WeightEntry>(`${BASE_URL}/users/${userId}/weight/${entryId}`, {
+    method: 'PATCH',
+    body: JSON.stringify({ weight }),
   });
 }
 

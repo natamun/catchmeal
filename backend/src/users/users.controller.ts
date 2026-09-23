@@ -67,6 +67,19 @@ export class UsersController {
     );
   }
 
+  @Patch('weight/:entryId')
+  updateWeight(
+    @Param('userId', ParseIntPipe) userId: number,
+    @Param('entryId', ParseIntPipe) entryId: number,
+    @Body() dto: LogWeightDto,
+    @Request() req: RequestWithUser,
+  ) {
+    if (req.user.userId !== userId) {
+      throw new ForbiddenException('You can only update your own weight');
+    }
+    return this.usersService.updateWeight(userId, entryId, dto.weight);
+  }
+
   @Get('weight')
   getWeightHistory(
     @Param('userId', ParseIntPipe) userId: number,
