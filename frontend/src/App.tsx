@@ -47,7 +47,7 @@ function AppShell() {
   }
 
   const pages: Record<Tab, React.ReactNode> = {
-    home: <HomePage />,
+    home: <HomePage onNavigateToProfile={() => setActiveTab('profile')} />,
     food: <FoodPage />,
     stats: <StatsPage />,
     friends: <FriendsPage />,

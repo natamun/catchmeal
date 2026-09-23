@@ -53,7 +53,11 @@ interface SectionEdit {
   meals: Meal[];
 }
 
-export default function HomePage() {
+interface HomePageProps {
+  onNavigateToProfile?: () => void;
+}
+
+export default function HomePage({ onNavigateToProfile }: HomePageProps) {
   const { user } = useAuth();
   const [selectedDate, setSelectedDate] = useState(() => new Date());
   const [addingMealType, setAddingMealType] = useState<MealType | null>(null);
@@ -104,6 +108,7 @@ export default function HomePage() {
           <Header
             username={user.username}
             avatarUrl={user.avatarUrl ?? undefined}
+            onNavigateToProfile={onNavigateToProfile}
           />
           <div className="flex flex-col gap-4 md:gap-6">
             <div className="flex flex-wrap justify-between gap-3">
