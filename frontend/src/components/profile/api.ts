@@ -34,6 +34,8 @@ export interface UserProfile {
   targetWeight: number | null;
   dailyCalorieGoal: number | null;
   dailyProteinGoal: number | null;
+  dailyCarbsGoal: number | null;
+  dailyFatGoal: number | null;
   gender: string | null;
   birthDate: string | null;
   activityLevel: string | null;
@@ -46,6 +48,8 @@ export interface UpdateProfileInput {
   targetWeight?: number;
   dailyCalorieGoal?: number;
   dailyProteinGoal?: number;
+  dailyCarbsGoal?: number;
+  dailyFatGoal?: number;
   gender?: string;
   birthDate?: string;
   activityLevel?: string;

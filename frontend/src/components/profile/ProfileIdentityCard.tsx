@@ -26,7 +26,9 @@ type Field =
   | 'height'
   | 'targetWeight'
   | 'dailyCalorieGoal'
-  | 'dailyProteinGoal';
+  | 'dailyProteinGoal'
+  | 'dailyCarbsGoal'
+  | 'dailyFatGoal';
 
 interface FormState {
   username: string;
@@ -35,6 +37,8 @@ interface FormState {
   targetWeight: string;
   dailyCalorieGoal: string;
   dailyProteinGoal: string;
+  dailyCarbsGoal: string;
+  dailyFatGoal: string;
   gender: string;
   birthDate: string;
   activityLevel: string;
@@ -65,6 +69,16 @@ function validate(form: FormState): Partial<Record<Field, string>> {
     const p = parseInt(form.dailyProteinGoal);
     if (isNaN(p)) errors.dailyProteinGoal = 'Valeur invalide';
     else if (p < 10 || p > 500) errors.dailyProteinGoal = 'Entre 10 et 500 g';
+  }
+  if (form.dailyCarbsGoal) {
+    const c = parseInt(form.dailyCarbsGoal);
+    if (isNaN(c)) errors.dailyCarbsGoal = 'Valeur invalide';
+    else if (c < 10 || c > 2000) errors.dailyCarbsGoal = 'Entre 10 et 2000 g';
+  }
+  if (form.dailyFatGoal) {
+    const f = parseInt(form.dailyFatGoal);
+    if (isNaN(f)) errors.dailyFatGoal = 'Valeur invalide';
+    else if (f < 10 || f > 1000) errors.dailyFatGoal = 'Entre 10 et 1000 g';
   }
   return errors;
 }
@@ -113,6 +127,8 @@ export function ProfileIdentityCard({ user, onUpdate }: Props) {
     targetWeight: user.targetWeight?.toString() ?? '',
     dailyCalorieGoal: user.dailyCalorieGoal?.toString() ?? '',
     dailyProteinGoal: user.dailyProteinGoal?.toString() ?? '',
+    dailyCarbsGoal: user.dailyCarbsGoal?.toString() ?? '',
+    dailyFatGoal: user.dailyFatGoal?.toString() ?? '',
     gender: user.gender ?? '',
     birthDate: user.birthDate ? user.birthDate.slice(0, 10) : '',
     activityLevel: user.activityLevel ?? '',
@@ -181,6 +197,8 @@ export function ProfileIdentityCard({ user, onUpdate }: Props) {
           'targetWeight',
           'dailyCalorieGoal',
           'dailyProteinGoal',
+          'dailyCarbsGoal',
+          'dailyFatGoal',
         ] as Field[]
       ).map((f) => [f, true]),
     );
@@ -198,6 +216,8 @@ export function ProfileIdentityCard({ user, onUpdate }: Props) {
       targetWeight?: number;
       dailyCalorieGoal?: number;
       dailyProteinGoal?: number;
+      dailyCarbsGoal?: number;
+      dailyFatGoal?: number;
       gender?: string;
       birthDate?: string;
       activityLevel?: string;
@@ -225,6 +245,16 @@ export function ProfileIdentityCard({ user, onUpdate }: Props) {
       : undefined;
     if (parsedDailyProteinGoal !== (user.dailyProteinGoal ?? undefined))
       input.dailyProteinGoal = parsedDailyProteinGoal;
+    const parsedDailyCarbsGoal = form.dailyCarbsGoal
+      ? parseInt(form.dailyCarbsGoal)
+      : undefined;
+    if (parsedDailyCarbsGoal !== (user.dailyCarbsGoal ?? undefined))
+      input.dailyCarbsGoal = parsedDailyCarbsGoal;
+    const parsedDailyFatGoal = form.dailyFatGoal
+      ? parseInt(form.dailyFatGoal)
+      : undefined;
+    if (parsedDailyFatGoal !== (user.dailyFatGoal ?? undefined))
+      input.dailyFatGoal = parsedDailyFatGoal;
     if (form.gender !== (user.gender ?? ''))
       input.gender = form.gender || undefined;
     if (form.birthDate !== (user.birthDate ? user.birthDate.slice(0, 10) : ''))
@@ -248,6 +278,8 @@ export function ProfileIdentityCard({ user, onUpdate }: Props) {
         targetWeight: updated.targetWeight ?? undefined,
         dailyCalorieGoal: updated.dailyCalorieGoal ?? undefined,
         dailyProteinGoal: updated.dailyProteinGoal ?? undefined,
+        dailyCarbsGoal: updated.dailyCarbsGoal ?? undefined,
+        dailyFatGoal: updated.dailyFatGoal ?? undefined,
         gender: updated.gender ?? undefined,
         birthDate: updated.birthDate ?? undefined,
         activityLevel: updated.activityLevel ?? undefined,
@@ -420,6 +452,16 @@ export function ProfileIdentityCard({ user, onUpdate }: Props) {
               field: 'dailyProteinGoal' as Field,
               id: 'pf-protein-goal',
               label: 'Objectif protéines (g/jour)',
+            },
+            {
+              field: 'dailyCarbsGoal' as Field,
+              id: 'pf-carbs-goal',
+              label: 'Objectif glucides (g/jour)',
+            },
+            {
+              field: 'dailyFatGoal' as Field,
+              id: 'pf-fat-goal',
+              label: 'Objectif lipides (g/jour)',
             },
           ].map(({ field, id, label }) => (
             <div key={field} className="relative flex flex-col gap-1">

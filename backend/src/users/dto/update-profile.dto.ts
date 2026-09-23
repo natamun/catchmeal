@@ -56,6 +56,18 @@ export class UpdateProfileDto {
   dailyProteinGoal?: number;
 
   @IsOptional()
+  @IsNumber()
+  @IsPositive()
+  @Max(2000)
+  dailyCarbsGoal?: number;
+
+  @IsOptional()
+  @IsNumber()
+  @IsPositive()
+  @Max(1000)
+  dailyFatGoal?: number;
+
+  @IsOptional()
   @IsEnum(Gender)
   gender?: Gender;
 

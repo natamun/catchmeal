@@ -24,6 +24,8 @@ type RequestWithUser = ExpressRequest & {
     targetWeight?: number | null;
     dailyCalorieGoal?: number | null;
     dailyProteinGoal?: number | null;
+    dailyCarbsGoal?: number | null;
+    dailyFatGoal?: number | null;
     gender?: string | null;
     birthDate?: Date | null;
     activityLevel?: string | null;
@@ -52,6 +54,8 @@ export class PassportAuthController {
       targetWeight,
       dailyCalorieGoal,
       dailyProteinGoal,
+      dailyCarbsGoal,
+      dailyFatGoal,
       gender,
       birthDate,
       activityLevel,
@@ -66,6 +70,8 @@ export class PassportAuthController {
       targetWeight,
       dailyCalorieGoal,
       dailyProteinGoal,
+      dailyCarbsGoal,
+      dailyFatGoal,
       gender,
       birthDate,
       activityLevel,
@@ -89,6 +95,8 @@ export class PassportAuthController {
       targetWeight,
       dailyCalorieGoal,
       dailyProteinGoal,
+      dailyCarbsGoal,
+      dailyFatGoal,
       gender,
       birthDate,
       activityLevel,
@@ -103,6 +111,8 @@ export class PassportAuthController {
       targetWeight,
       dailyCalorieGoal,
       dailyProteinGoal,
+      dailyCarbsGoal,
+      dailyFatGoal,
       gender,
       birthDate,
       activityLevel,
@@ -128,6 +138,8 @@ export class PassportAuthController {
       targetWeight,
       dailyCalorieGoal,
       dailyProteinGoal,
+      dailyCarbsGoal,
+      dailyFatGoal,
       gender,
       birthDate,
       activityLevel,
@@ -141,6 +153,8 @@ export class PassportAuthController {
       targetWeight,
       dailyCalorieGoal,
       dailyProteinGoal,
+      dailyCarbsGoal,
+      dailyFatGoal,
       gender,
       birthDate,
       activityLevel,

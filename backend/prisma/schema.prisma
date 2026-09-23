@@ -43,6 +43,8 @@ model User {
   targetWeight      Float?
   dailyCalorieGoal  Int?
   dailyProteinGoal  Int?
+  dailyCarbsGoal    Int?
+  dailyFatGoal      Int?
   gender            Gender?
   birthDate         DateTime?
   activityLevel     ActivityLevel?
