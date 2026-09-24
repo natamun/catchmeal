@@ -41,6 +41,12 @@ export class UsersService {
     return this.prisma.user.findUnique({ where: { username } });
   }
 
+  findUserByNameOrEmail(username: string, email: string) {
+    return this.prisma.user.findFirst({
+      where: { OR: [{ username }, { email }] },
+    });
+  }
+
   async updateAvatar(userId: number, file: Express.Multer.File) {
     const avatarUrl = await this.supabase.uploadAvatar(userId, file);
     return this.prisma.user.update({
