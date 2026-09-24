@@ -89,7 +89,7 @@ describe('AiService', () => {
     mistralMock.beta.conversations.append.mockResolvedValue({
       conversationId: 'conv_3',
       outputs: [
-        { type: 'message.output', content: "Je ne peux pas faire ça." },
+        { type: 'message.output', content: 'Je ne peux pas faire ça.' },
       ],
     });
 

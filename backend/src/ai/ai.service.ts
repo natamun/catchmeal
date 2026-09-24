@@ -2,23 +2,42 @@ import { Injectable, OnModuleInit } from '@nestjs/common';
 import type { Mistral as MistralClient } from '@mistralai/mistralai';
 import {
   ConversationResponse,
+  FunctionCallEntry,
   FunctionResultEntry,
 } from '@mistralai/mistralai/models/components';
 import { z } from 'zod';
 
-import { CreateMealDto } from '../meals/dto/create-meal.dto';
 import { MealsService } from '../meals/meals.service';
 
-const addMealArgsSchema = z.object({
-  name: z.string().min(1).max(30),
-  calories: z.number().positive().max(5000),
-  protein: z.number().positive().max(100),
-  carbs: z.number().positive().max(100),
-  fat: z.number().positive().max(100),
-  quantity: z.number().positive().max(100),
-  // baseUnit: z.enum(['GRAM', 'PIECE']),
-  // brand: z.string().min(1).max(30).optional(),
+type selectedDate = { from: Date; to: Date };
+
+const getStatsArgs = z.object({
+  period: z.enum(['day', 'week', 'month', '3month']),
 });
+
+function calculateFromDate(period: string): selectedDate {
+  let fromDate: Date;
+  const now = new Date();
+  switch (period) {
+    case 'day':
+      fromDate = new Date(now.setHours(0, 0, 0, 0));
+      break;
+    case 'week':
+      fromDate = new Date(new Date().setDate(new Date().getDate() - 7));
+      break;
+    case 'month':
+      fromDate = new Date(new Date().setDate(new Date().getDate() - 30));
+      break;
+    case '3month':
+      fromDate = new Date(new Date().setMonth(new Date().getMonth() - 3));
+      break;
+    default:
+      fromDate = new Date(new Date().setDate(new Date().getDate() - 3));
+      break;
+  }
+  const from = new Date(new Date(fromDate).setHours(0, 0, 0, 0));
+  return { from, to: now };
+}
 
 @Injectable()
 export class AiService implements OnModuleInit {
@@ -28,6 +47,7 @@ export class AiService implements OnModuleInit {
 
   async onModuleInit() {
     const { Mistral } = await import('@mistralai/mistralai');
+    // const { Mistral } = (await import('@mistralai/mistralai')) as typeof import('@mistralai/mistralai');
     const apiKey = process.env.MISTRAL_API_KEY;
 
     if (!apiKey) {
@@ -36,118 +56,113 @@ export class AiService implements OnModuleInit {
     this.mistral = new Mistral({ apiKey });
   }
 
-  async chat(userId: number, message: string, conversationId?: string) {
-    let result: ConversationResponse;
+  private async handleGetMeals(
+    userId: number,
+    output: FunctionCallEntry,
+  ): Promise<FunctionResultEntry> {
+    let functionResult: FunctionResultEntry;
+    const rawArgs = output.arguments;
+    const args: unknown =
+      typeof rawArgs === 'string' ? JSON.parse(rawArgs) : rawArgs;
+    const validated = getStatsArgs.safeParse(args);
 
-    if (!conversationId) {
-      result = await this.mistral.beta.conversations.start({
-        inputs: message,
-        agentId: process.env.MISTRAL_AGENT_ID,
-      });
+    if (!validated.success) {
+      functionResult = {
+        toolCallId: output.toolCallId,
+        result: JSON.stringify({
+          success: false,
+          error: 'Invalid arguments for add_meal',
+          details: validated.error.issues,
+        }),
+      };
     } else {
-      result = await this.mistral.beta.conversations.append({
-        conversationId: conversationId,
-        conversationAppendRequest: {
-          inputs: message,
-        },
-      });
-    }
-    let output = result.outputs[result.outputs.length - 1];
+      const period = validated.data.period;
+      const selectedDate = calculateFromDate(period);
 
-    while (output.type === 'function.call') {
-      if (output.name === 'add_meal') {
-        const rawArgs = output.arguments;
-        // console.log('Argss: ', rawArgs);
-        const args: unknown =
-          typeof rawArgs === 'string' ? JSON.parse(rawArgs) : rawArgs;
-        const validated = addMealArgsSchema.safeParse(args);
-
-        if (!validated.success) {
-          const errorEntry: FunctionResultEntry = {
-            toolCallId: output.toolCallId,
-            result: JSON.stringify({
-              success: false,
-              error: 'Invalid arguments for add_meal',
-              details: validated.error.issues,
-            }),
-          };
-
-          result = await this.mistral.beta.conversations.append({
-            conversationId: result.conversationId,
-            conversationAppendRequest: {
-              inputs: [errorEntry],
-            },
-          });
-        } else {
-          const dto: CreateMealDto = {
-            name: validated.data.name,
-            items: [
-              {
-                quantity: validated.data.quantity,
-                kcal: validated.data.calories,
-                protein: validated.data.protein,
-                carbs: validated.data.carbs,
-                fat: validated.data.fat,
-              },
-            ],
-          };
-          try {
-            const meal = await this.mealsService.create(userId, dto);
-            const succesEntry: FunctionResultEntry = {
-              toolCallId: output.toolCallId,
-              result: JSON.stringify({ success: true, meal }),
-            };
-            result = await this.mistral.beta.conversations.append({
-              conversationId: result.conversationId,
-              conversationAppendRequest: {
-                inputs: [succesEntry],
-              },
-            });
-          } catch (error) {
-            console.error('mealService.creat failed: ', error);
-            const errorEntry: FunctionResultEntry = {
-              toolCallId: output.toolCallId,
-              result: JSON.stringify({
-                success: false,
-                error: 'Failed to save meal to database.',
-              }),
-            };
-
-            result = await this.mistral.beta.conversations.append({
-              conversationId: result.conversationId,
-              conversationAppendRequest: {
-                inputs: [errorEntry],
-              },
-            });
-          }
-        }
-      } else if (output.name === 'get_stats') {
-        const rawArgs = output.arguments;
-        console.log('Debug: ', rawArgs);
-      } else {
-        const errorEntry: FunctionResultEntry = {
+      try {
+        const data = await this.mealsService.findRange(
+          userId,
+          selectedDate.from,
+          selectedDate.to,
+        );
+        functionResult = {
+          toolCallId: output.toolCallId,
+          result: JSON.stringify({ success: true, meals: data }),
+        };
+      } catch (error) {
+        console.error('mealService.findRange failed: ', error);
+        functionResult = {
           toolCallId: output.toolCallId,
           result: JSON.stringify({
             success: false,
-            error: 'Invalid function call.',
+            error: 'Failed to retrieve meals from database.',
           }),
         };
+      }
+    }
+    return functionResult;
+  }
+
+  async chat(userId: number, message: string, conversationId?: string) {
+    let result: ConversationResponse;
+
+    try {
+      if (!conversationId) {
+        result = await this.mistral.beta.conversations.start({
+          inputs: message,
+          agentId: process.env.MISTRAL_AGENT_ID,
+        });
+      } else {
         result = await this.mistral.beta.conversations.append({
-          conversationId: result.conversationId,
+          conversationId: conversationId,
           conversationAppendRequest: {
-            inputs: [errorEntry],
+            inputs: message,
           },
         });
       }
-      output = result.outputs[result.outputs.length - 1];
+
+      let output = result.outputs[result.outputs.length - 1];
+      let functionResult: FunctionResultEntry;
+
+      while (output.type === 'function.call') {
+        if (output.name === 'get_meals') {
+          functionResult = await this.handleGetMeals(userId, output);
+        } else {
+          functionResult = {
+            toolCallId: output.toolCallId,
+            result: JSON.stringify({
+              success: false,
+              error: 'Invalid function call.',
+            }),
+          };
+        }
+        result = await this.mistral.beta.conversations.append({
+          conversationId: result.conversationId,
+          conversationAppendRequest: {
+            inputs: [functionResult],
+          },
+        });
+        output = result.outputs[result.outputs.length - 1];
+      }
+
+      if (output.type !== 'message.output') {
+        throw new Error('Unexpected output type from Mistral');
+      }
+
+      const responseMistral = {
+        message: output.content,
+        conversationId: result.conversationId,
+      };
+
+      return responseMistral;
+    } catch (err) {
+      console.error('Error: ', err);
+      const responseError = {
+        message:
+          'Erreur rencontrée lors de la liaison avec Mistral, veuillez réessayer plus tard.',
+        conversationId: null,
+      };
+      return responseError;
     }
-    if (output.type !== 'message.output') {
-      throw new Error('Unexpected output type from Mistral');
-    }
-    const responseMistral = {
-      message: output.content,
-      conversationId: result.conversationId,
-    };
-    return responseMistral;
   }
 }
