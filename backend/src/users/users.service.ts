@@ -160,7 +160,10 @@ export class UsersService {
 
   search(query: string) {
     return this.prisma.user.findMany({
-      where: { username: { contains: query, mode: 'insensitive' }, deletedAt: null, },
+      where: {
+        username: { contains: query, mode: 'insensitive' },
+        deletedAt: null,
+      },
       select: SAFE_USER_SELECT,
       take: 20,
       orderBy: { username: 'asc' },

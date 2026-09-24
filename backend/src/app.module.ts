@@ -6,9 +6,9 @@ import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { DashboardAnalyticsModule } from './dashboard-analytics/dashboard-analytics.module';
 import { FoodItemsModule } from './food-items/food-items.module';
+import { FriendsModule } from './friends/friends.module';
 import { MealsModule } from './meals/meals.module';
 import { UsersModule } from './users/users.module';
-import { FriendsModule } from './friends/friends.module';
 
 @Module({
   imports: [
@@ -21,7 +21,7 @@ import { FriendsModule } from './friends/friends.module';
     MealsModule,
     DashboardAnalyticsModule,
     UsersModule,
-    FriendsModule
+    FriendsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
