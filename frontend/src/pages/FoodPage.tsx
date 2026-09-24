@@ -100,9 +100,8 @@ export default function FoodPage() {
     listFoodItems(controller.signal)
       .then(setFoodItems)
       .catch((err: unknown) => {
-        if (controller.signal.aborted) {
-          return;
-        }
+        if (controller.signal.aborted) return;
+        if (err instanceof Error && 'status' in err && (err as { status?: number }).status === 403) return;
         console.error(err);
         setLoadError('Impossible de charger tes aliments, réessaye.');
       })
@@ -119,9 +118,8 @@ export default function FoodPage() {
     listMeals(false, controller.signal)
       .then(setMeals)
       .catch((err: unknown) => {
-        if (controller.signal.aborted) {
-          return;
-        }
+        if (controller.signal.aborted) return;
+        if (err instanceof Error && 'status' in err && (err as { status?: number }).status === 403) return;
         console.error(err);
         setMealsLoadError('Impossible de charger tes repas, réessaye.');
       })

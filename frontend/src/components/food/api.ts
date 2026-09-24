@@ -6,7 +6,10 @@ const FOOD_ITEMS_URL = `${import.meta.env.VITE_API_URL}/users/${CURRENT_USER_ID}
 const JSON_HEADERS = { 'Content-Type': 'application/json' };
 
 export class ApiError extends Error {
-  constructor(message: string) {
+  constructor(
+    message: string,
+    public readonly status?: number,
+  ) {
     super(message);
     this.name = 'ApiError';
   }
@@ -25,7 +28,7 @@ async function parseErrorMessage(response: Response): Promise<string> {
 async function request<T>(url: string, init?: RequestInit): Promise<T> {
   const response = await fetch(url, init);
   if (!response.ok) {
-    throw new ApiError(await parseErrorMessage(response));
+    throw new ApiError(await parseErrorMessage(response), response.status);
   }
   return (await response.json()) as T;
 }
