@@ -4,17 +4,18 @@ import { Strategy } from 'passport-oauth2';
 
 import { AuthService } from '../auth.service';
 
-// Profile shape returned by the 42 API
 interface FortyTwoProfile {
   id: string;
   login: string;
-  email: string;
   displayname: string;
+  email: string;
 }
 
 @Injectable()
 export class FortyTwoStrategy extends PassportStrategy(Strategy, '42') {
   constructor(private readonly authService: AuthService) {
+    // passport-oauth2 is a CJS module without full TS types — super() call is safe
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
     super({
       authorizationURL: 'https://api.intra.42.fr/oauth/authorize',
       tokenURL: 'https://api.intra.42.fr/oauth/token',
@@ -25,7 +26,6 @@ export class FortyTwoStrategy extends PassportStrategy(Strategy, '42') {
     });
   }
 
-  // Called after 42 grants the token — fetches the user profile
   userProfile(
     accessToken: string,
     done: (err: Error | null, profile?: FortyTwoProfile) => void,
@@ -33,21 +33,18 @@ export class FortyTwoStrategy extends PassportStrategy(Strategy, '42') {
     fetch('https://api.intra.42.fr/v2/me', {
       headers: { Authorization: `Bearer ${accessToken}` },
     })
-      .then((response) => response.json())
+      .then((res) => res.json())
       .then((data: FortyTwoProfile) => {
         done(null, {
           id: String(data.id),
           login: data.login,
-          email: data.email,
           displayname: data.displayname,
+          email: data.email,
         });
       })
-      .catch((err: Error) => {
-        done(err);
-      });
+      .catch((err: Error) => done(err));
   }
 
-  // Called with the verified profile — finds or creates the user, then signs a JWT
   async validate(
     _accessToken: string,
     _refreshToken: string,
