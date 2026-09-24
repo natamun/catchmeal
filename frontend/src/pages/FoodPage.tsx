@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 
+import { useAuth } from '../auth/auth-context';
 import { listFoodItems } from '../components/food/api';
 import FoodItemForm from '../components/food/FoodItemForm';
 import FoodItemList from '../components/food/FoodItemList';
@@ -64,6 +65,8 @@ function LegendBubble({ show }: { show: boolean }) {
 }
 
 export default function FoodPage() {
+  const { user } = useAuth();
+  const userId = user!.userId;
   const [activeTab, setActiveTab] = useState<Tab>('food');
   const [showLegend, setShowLegend] = useState(false);
   const [foodItems, setFoodItems] = useState<FoodItem[]>([]);
@@ -97,11 +100,16 @@ export default function FoodPage() {
 
   useEffect(() => {
     const controller = new AbortController();
-    listFoodItems(controller.signal)
+    listFoodItems(userId, controller.signal)
       .then(setFoodItems)
       .catch((err: unknown) => {
         if (controller.signal.aborted) return;
-        if (err instanceof Error && 'status' in err && (err as { status?: number }).status === 403) return;
+        if (
+          err instanceof Error &&
+          'status' in err &&
+          (err as { status?: number }).status === 403
+        )
+          return;
         console.error(err);
         setLoadError('Impossible de charger tes aliments, réessaye.');
       })
@@ -111,15 +119,20 @@ export default function FoodPage() {
         }
       });
     return () => controller.abort();
-  }, []);
+  }, [userId]);
 
   useEffect(() => {
     const controller = new AbortController();
-    listMeals(false, controller.signal)
+    listMeals(userId, false, controller.signal)
       .then(setMeals)
       .catch((err: unknown) => {
         if (controller.signal.aborted) return;
-        if (err instanceof Error && 'status' in err && (err as { status?: number }).status === 403) return;
+        if (
+          err instanceof Error &&
+          'status' in err &&
+          (err as { status?: number }).status === 403
+        )
+          return;
         console.error(err);
         setMealsLoadError('Impossible de charger tes repas, réessaye.');
       })
@@ -129,7 +142,7 @@ export default function FoodPage() {
         }
       });
     return () => controller.abort();
-  }, []);
+  }, [userId]);
 
   const openDialog = (item: FoodItem | null) => {
     setEditingItem(item);

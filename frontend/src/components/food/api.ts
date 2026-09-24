@@ -1,17 +1,15 @@
-import { CURRENT_USER_ID } from '../../constants/currentUser';
 import type { FoodItem, FoodItemInput } from './types';
 
-const FOOD_ITEMS_URL = `${import.meta.env.VITE_API_URL}/users/${CURRENT_USER_ID}/food-items`;
+const BASE_URL: string = import.meta.env.VITE_API_URL;
 
 const JSON_HEADERS = { 'Content-Type': 'application/json' };
 
 export class ApiError extends Error {
-  constructor(
-    message: string,
-    public readonly status?: number,
-  ) {
+  readonly status?: number;
+  constructor(message: string, status?: number) {
     super(message);
     this.name = 'ApiError';
+    this.status = status;
   }
 }
 
@@ -26,33 +24,43 @@ async function parseErrorMessage(response: Response): Promise<string> {
 }
 
 async function request<T>(url: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(url, init);
+  const response = await fetch(url, { ...init, credentials: 'include' });
   if (!response.ok) {
     throw new ApiError(await parseErrorMessage(response), response.status);
   }
   return (await response.json()) as T;
 }
 
-export function listFoodItems(signal?: AbortSignal) {
-  return request<FoodItem[]>(FOOD_ITEMS_URL, { signal });
+function foodItemsUrl(userId: number) {
+  return `${BASE_URL}/users/${userId}/food-items`;
 }
 
-export function createFoodItem(input: FoodItemInput) {
-  return request<FoodItem>(FOOD_ITEMS_URL, {
+export function listFoodItems(userId: number, signal?: AbortSignal) {
+  return request<FoodItem[]>(foodItemsUrl(userId), { signal });
+}
+
+export function createFoodItem(userId: number, input: FoodItemInput) {
+  return request<FoodItem>(foodItemsUrl(userId), {
     method: 'POST',
     headers: JSON_HEADERS,
     body: JSON.stringify(input),
   });
 }
 
-export function updateFoodItem(id: number, input: FoodItemInput) {
-  return request<FoodItem>(`${FOOD_ITEMS_URL}/${id}`, {
+export function updateFoodItem(
+  userId: number,
+  id: number,
+  input: FoodItemInput,
+) {
+  return request<FoodItem>(`${foodItemsUrl(userId)}/${id}`, {
     method: 'PATCH',
     headers: JSON_HEADERS,
     body: JSON.stringify(input),
   });
 }
 
-export function deleteFoodItem(id: number) {
-  return request<FoodItem>(`${FOOD_ITEMS_URL}/${id}`, { method: 'DELETE' });
+export function deleteFoodItem(userId: number, id: number) {
+  return request<FoodItem>(`${foodItemsUrl(userId)}/${id}`, {
+    method: 'DELETE',
+  });
 }

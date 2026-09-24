@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 
+import { useAuth } from '../auth/auth-context';
 import { listFoodItems } from '../components/food/api';
 import type { FoodItem } from '../components/food/types';
 import { listMealsOnDate, toApiDate } from '../components/meal/api';
@@ -12,6 +13,8 @@ interface DayResult {
 }
 
 export function useDailyMeals(date: Date) {
+  const { user } = useAuth();
+  const userId = user!.userId;
   const dateKey = toApiDate(date);
   const [reloadCount, setReloadCount] = useState(0);
   const [foodItems, setFoodItems] = useState<FoodItem[]>([]);
@@ -21,26 +24,22 @@ export function useDailyMeals(date: Date) {
 
   useEffect(() => {
     const controller = new AbortController();
-    listFoodItems(controller.signal)
+    listFoodItems(userId, controller.signal)
       .then(setFoodItems)
       .catch((err: unknown) => {
-        if (controller.signal.aborted) {
-          return;
-        }
+        if (controller.signal.aborted) return;
         console.error(err);
         setFoodsError('Impossible de charger tes aliments, réessaye.');
       });
     return () => controller.abort();
-  }, []);
+  }, [userId]);
 
   useEffect(() => {
     const controller = new AbortController();
-    listMealsOnDate(dateKey, controller.signal)
+    listMealsOnDate(userId, dateKey, controller.signal)
       .then((meals) => setResult({ requestKey, meals, error: null }))
       .catch((err: unknown) => {
-        if (controller.signal.aborted) {
-          return;
-        }
+        if (controller.signal.aborted) return;
         console.error(err);
         setResult({
           requestKey,
@@ -49,7 +48,7 @@ export function useDailyMeals(date: Date) {
         });
       });
     return () => controller.abort();
-  }, [dateKey, requestKey]);
+  }, [userId, dateKey, requestKey]);
 
   const current = result && result.requestKey === requestKey ? result : null;
 

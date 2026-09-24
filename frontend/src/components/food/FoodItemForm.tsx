@@ -1,6 +1,7 @@
 import { useRef, useState, type RefObject } from 'react';
 import { CheckCircle2, ScanBarcode, Trash2 } from 'lucide-react';
 
+import { useAuth } from '../../auth/auth-context';
 import { useTimeout } from '../../hooks/useTimeout';
 import { BaseDialog } from '../ui/BaseDialog';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
@@ -109,6 +110,8 @@ export default function FoodItemForm({
   onItemUpdated,
   onItemDeleted,
 }: FoodItemFormProps) {
+  const { user } = useAuth();
+  const userId = user!.userId;
   const [form, setForm] = useState<FoodItemFormState>(EMPTY_FORM);
   const [touched, setTouched] = useState<
     Partial<Record<keyof FoodItemFormState, boolean>>
@@ -191,8 +194,8 @@ export default function FoodItemForm({
         fat: Number(form.fat),
       };
       const savedItem = editingItem
-        ? await updateFoodItem(editingItem.id, input)
-        : await createFoodItem(input);
+        ? await updateFoodItem(userId, editingItem.id, input)
+        : await createFoodItem(userId, input);
 
       if (editingItem) {
         onItemUpdated(savedItem);
@@ -227,7 +230,7 @@ export default function FoodItemForm({
     setError(null);
     setIsSubmitting(true);
     try {
-      await deleteFoodItem(editingItem.id);
+      await deleteFoodItem(userId, editingItem.id);
       onItemDeleted(editingItem.id);
       closeDialog();
       setSuccessMessage('Produit supprimé');

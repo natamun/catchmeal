@@ -2,6 +2,7 @@ import { useRef, useState, type RefObject } from 'react';
 import * as Popover from '@radix-ui/react-popover';
 import { CheckCircle2, Trash2 } from 'lucide-react';
 
+import { useAuth } from '../../auth/auth-context';
 import { useTimeout } from '../../hooks/useTimeout';
 import type { FoodItem } from '../food/types';
 import { BaseDialog } from '../ui/BaseDialog';
@@ -47,6 +48,8 @@ export default function MealForm({
   onMealUpdated,
   onMealDeleted,
 }: MealFormProps) {
+  const { user } = useAuth();
+  const userId = user!.userId;
   const [name, setName] = useState('');
   const [nameTouched, setNameTouched] = useState(false);
   const [nameFocused, setNameFocused] = useState(false);
@@ -210,8 +213,8 @@ export default function MealForm({
         items: draftsToInput(items),
       };
       const savedMeal = editingMeal
-        ? await updateMeal(editingMeal.id, input)
-        : await createMeal(input);
+        ? await updateMeal(userId, editingMeal.id, input)
+        : await createMeal(userId, input);
 
       if (editingMeal) {
         onMealUpdated(savedMeal);
@@ -247,7 +250,7 @@ export default function MealForm({
     setError(null);
     setIsSubmitting(true);
     try {
-      await deleteMeal(editingMeal.id);
+      await deleteMeal(userId, editingMeal.id);
       onMealDeleted(editingMeal.id);
       closeDialog();
       setSuccessMessage('Repas supprimé');

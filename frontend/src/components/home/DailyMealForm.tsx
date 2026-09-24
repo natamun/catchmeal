@@ -1,5 +1,6 @@
 import { useState, type RefObject } from 'react';
 
+import { useAuth } from '../../auth/auth-context';
 import {
   ApiError,
   createMeal,
@@ -32,6 +33,8 @@ export default function DailyMealForm({
   existingMeals = [],
   onSaved,
 }: DailyMealFormProps) {
+  const { user } = useAuth();
+  const userId = user!.userId;
   const [items, setItems] = useState<MealItemDraft[]>(initialItems);
   const [syncedKey, setSyncedKey] = useState(sessionKey);
   const [error, setError] = useState<string | null>(null);
@@ -67,17 +70,19 @@ export default function DailyMealForm({
     setIsSubmitting(true);
     try {
       if (!isEdit) {
-        await createMeal({
+        await createMeal(userId, {
           typeMeal: mealType,
           loggedAt: toApiDate(date),
           items: draftsToInput(items),
         });
       } else if (items.length === 0) {
-        await Promise.all(existingMeals.map((meal) => deleteMeal(meal.id)));
+        await Promise.all(
+          existingMeals.map((meal) => deleteMeal(userId, meal.id)),
+        );
       } else {
         const [first, ...others] = existingMeals;
-        await updateMeal(first.id, { items: draftsToInput(items) });
-        await Promise.all(others.map((meal) => deleteMeal(meal.id)));
+        await updateMeal(userId, first.id, { items: draftsToInput(items) });
+        await Promise.all(others.map((meal) => deleteMeal(userId, meal.id)));
       }
       dialogRef.current?.close();
       onSaved();
