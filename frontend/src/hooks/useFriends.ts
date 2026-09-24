@@ -1,6 +1,10 @@
 import { useEffect, useState } from 'react';
 
-import { listFriends, listPendingRequests, listSentRequests } from '../components/friends/api';
+import {
+  listFriends,
+  listPendingRequests,
+  listSentRequests,
+} from '../components/friends/api';
 import type { Friend, FriendRequest } from '../components/friends/types';
 
 export function useFriends(userId: number) {

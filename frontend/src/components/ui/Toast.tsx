@@ -1,7 +1,7 @@
+import { useEffect, useRef } from 'react';
 import type { LucideIcon } from 'lucide-react';
 
 import { useDelayedUnmount } from '../../hooks/useDelayedUnmount';
-import { useEffect, useRef } from 'react';
 
 interface ToastProps {
   message: string | null;
@@ -21,7 +21,7 @@ export function Toast({ message, icon: Icon }: ToastProps) {
       ref={popoverRef}
       popover="manual"
       role="status"
-      className="pointer-events-none fixed inset-x-0 top-4 bottom-auto z-50 m-0 h-auto w-auto flex justify-center border-0 bg-transparent p-0 px-4"
+      className="pointer-events-none fixed inset-x-0 top-4 bottom-auto z-50 m-0 flex h-auto w-auto justify-center border-0 bg-transparent p-0 px-4"
     >
       {displayedMessage && (
         <div
