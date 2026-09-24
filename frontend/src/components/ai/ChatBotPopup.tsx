@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import { Bot, Forward, Loader } from 'lucide-react';
+import { Bot, Forward, Loader, X } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
 
 import { CURRENT_USER_ID } from '../../constants/currentUser';
 import type { ChatMessage, ResponseMistral } from '../../types/ChatBotType';
@@ -11,7 +12,7 @@ interface ChatBotPopupProps {
   messages: ChatMessage[];
   onMessagesChange: (message: ChatMessage[]) => void;
   conversationId: string | null;
-  onConversationIdChange: (id: string) => void;
+  onConversationIdChange: (id: string | null) => void;
   activePage: Tab;
 }
 
@@ -26,8 +27,8 @@ export default function ChatBotPopup({
 }: ChatBotPopupProps) {
   const [input, setInput] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -44,6 +45,9 @@ export default function ChatBotPopup({
     onMessagesChange(updateWithUser);
     setLoading(true);
     setInput('');
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+    }
     try {
       const response = await fetch(
         `${import.meta.env.VITE_API_URL}/users/${CURRENT_USER_ID}/chat`,
@@ -56,7 +60,7 @@ export default function ChatBotPopup({
           }),
         },
       );
-      const data: ResponseMistral = await response.json();
+      const data = (await response.json()) as ResponseMistral;
       if (data) {
         onConversationIdChange(data.conversationId);
 
@@ -69,14 +73,24 @@ export default function ChatBotPopup({
       }
     } catch (err) {
       console.error('Error : ', err);
-      setError('Error during fetch data to backend, try later');
+      setInput('');
+      setLoading(false);
+      onToggle(false);
+      onMessagesChange([]);
+      onConversationIdChange(null);
     } finally {
       setLoading(false);
     }
   }
 
+  function handleInputChange(e: React.ChangeEvent<HTMLTextAreaElement>) {
+    setInput(e.target.value);
+    e.target.style.height = 'auto';
+    e.target.style.height = `${Math.min(e.target.scrollHeight, 120)}px`;
+  }
+
   return (
-    <div className="">
+    <div>
       {isOpen === false && (
         <button
           className="fixed right-1 bottom-20 h-14 w-14 rounded-full bg-green-500 text-sm font-semibold text-white ring-1 ring-green-500 hover:bg-emerald-400/80"
@@ -86,50 +100,63 @@ export default function ChatBotPopup({
         </button>
       )}
       {isOpen === true && (
-        <div className="fixed right-5 bottom-25 ml-5 h-120 max-w-100 rounded-2xl border border-green-300 bg-white md:bottom-5">
+        <div className="fixed right-5 bottom-25 ml-5 flex h-121 max-w-100 flex-col rounded-2xl border border-green-300 bg-white shadow-xl md:bottom-10">
           <div className="flex justify-between rounded-t-2xl bg-green-400">
             <p className="m-1.5 text-xl font-semibold text-white">
               Chat Assistant
             </p>
             <button
-              className="m-1.5 flex h-3 w-3 justify-end font-semibold text-white hover:text-gray-200"
+              className="m-3 flex justify-end font-semibold text-white hover:text-gray-200"
               onClick={() => onToggle(false)}
             >
-              X
+              <X height={20} width={20} />
             </button>
           </div>
-          <div className="h-97 overflow-auto">
+          <div className="flex-1 overflow-auto">
             {messages.map((msg, key) => (
               <div
                 key={key}
                 className={`m-3 flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} `}
               >
                 <p
-                  className={`max-w-[75%] rounded-2xl px-3 py-2 text-sm ${msg.role === 'user' ? 'bg-green-500 text-white' : 'bg-gray-200 text-black'}`}
+                  className={`max-w-[90%] rounded-2xl px-3 py-2 text-sm ${msg.role === 'user' ? 'bg-green-400 text-white' : 'border border-green-50 bg-gray-100 text-black'}`}
                 >
                   {' '}
-                  {msg.content}
+                  <ReactMarkdown>{msg.content}</ReactMarkdown>
                 </p>
               </div>
             ))}
             <div ref={messagesEndRef} />
           </div>
-          <div className="m-1 flex h-10 rounded-2xl bg-green-50">
-            <input
-              className="ml-2 flex-1 outline-none focus:outline-none"
+          <div className="m-1 flex items-end rounded-2xl bg-green-50">
+            <textarea
+              className="m-2 max-h-20 flex-1 resize-none overflow-y-auto outline-none focus:outline-none"
               value={input}
-
+              maxLength={250}
+              rows={1}
+              ref={textareaRef}
               onKeyDown={(e) => {
-                if (e.key === 'Enter') {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault();
                   void handleSend();
                 }
               }}
-              onChange={(e) => setInput(e.target.value)}
+              onChange={handleInputChange}
               placeholder="Écrivez un message..."
             />
-            <div className="m-2 flex min-h-5 min-w-5 shrink-0">
+            <div className="m-2 flex min-h-5 min-w-5 shrink-0 flex-col">
+              {input.length > 200 && (
+                <span
+                  className={`self-center text-xs ${input.length >= 250 ? 'text-red-500' : 'text-gray-400'}`}
+                >
+                  {input.length}/250
+                </span>
+              )}
               {loading === false && (
-                <button className="shrink-0 rounded-3xl hover:bg-green-100/80" onClick={() => void handleSend}>
+                <button
+                  className="shrink-0 rounded-3xl hover:bg-green-100/80"
+                  onClick={() => void handleSend()}
+                >
                   <Forward />
                 </button>
               )}
