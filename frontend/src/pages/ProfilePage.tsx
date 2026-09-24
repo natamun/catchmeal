@@ -1,8 +1,8 @@
 import { useCallback, useState } from 'react';
 
 import { useAuth } from '../auth/auth-context';
-import { GdprSection } from '../components/profile/GdprSection';
 import { DurationDropdown } from '../components/profile/DurationDropdown';
+import { GdprSection } from '../components/profile/GdprSection';
 import { ProfileIdentityCard } from '../components/profile/ProfileIdentityCard';
 import { WeightCard } from '../components/profile/WeightCard';
 import { calculateBMR, calculateTDEE } from '../utils/bmr';
