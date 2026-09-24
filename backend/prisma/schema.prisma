@@ -50,6 +50,7 @@ model User {
   activityLevel     ActivityLevel?
   role              Role          @default(USER)
   createAt          DateTime      @default(now())
+  deletedAt          DateTime?
   meal              Meal[]
   foodItems         FoodItem[]
   mealFoodItems     MealFoodItem[]
