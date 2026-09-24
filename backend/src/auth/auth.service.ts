@@ -84,7 +84,10 @@ export class AuthService {
   async findOrCreateFromOAuth(params: OAuthUserParams): Promise<SignInData> {
     const { username, name, email } = params;
 
-    const existingUser = await this.usersService.findUserByName(username);
+    const existingUser = await this.usersService.findUserByNameOrEmail(
+      username,
+      email,
+    );
     if (existingUser) {
       return {
         userId: existingUser.id,

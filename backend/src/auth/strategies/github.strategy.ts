@@ -15,7 +15,6 @@ export class GitHubStrategy extends PassportStrategy(Strategy, 'github') {
     });
   }
 
-  // Called with the verified profile — finds or creates the user, then signs a JWT
   async validate(
     _accessToken: string,
     _refreshToken: string,
@@ -26,7 +25,7 @@ export class GitHubStrategy extends PassportStrategy(Strategy, 'github') {
 
     return this.authService.findOrCreateFromOAuth({
       username: profile.username ?? `github_${profile.id}`,
-      name: profile.displayName ?? profile.username ?? `GitHub User`,
+      name: profile.displayName ?? profile.username ?? 'GitHub User',
       email,
     });
   }
