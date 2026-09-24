@@ -40,6 +40,10 @@ export function listPendingRequests(userId: number, signal?: AbortSignal) {
   return request<FriendRequest[]>(`${friendsUrl(userId)}/pending`, { signal });
 }
 
+export function listSentRequests(userId: number, signal?: AbortSignal) {
+  return request<number[]>(`${friendsUrl(userId)}/sent`, { signal });
+}
+
 export function searchUsers(query: string, signal?: AbortSignal) {
   return request<UserSummary[]>(
     `${USERS_URL}?search=${encodeURIComponent(query)}`,

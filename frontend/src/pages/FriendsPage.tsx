@@ -58,7 +58,7 @@ const ACTIVITY = [
 export default function FriendsPage() {
   const { user } = useAuth();
   const userId = user!.userId;
-  const { friends, requests, isLoading, loadError, reload } =
+  const { friends, requests, sentRequestIds, isLoading, loadError, reload } =
     useFriends(userId);
   const [activeTab, setActiveTab] = useState<Tab>('friends');
   const [busyId, setBusyId] = useState<number | null>(null);
@@ -219,9 +219,11 @@ export default function FriendsPage() {
         userId={userId}
         dialogRef={addDialogRef}
         friendIds={friends.map((f) => f.friend.id)}
-        onSent={(username) =>
-          setSuccessMessage(`Demande envoyée à ${username}`)
-        }
+        sentRequestIds={sentRequestIds}
+        onSent={(username) => {
+          setSuccessMessage(`Demande envoyée à ${username}`);
+          reload();
+        }}
       />
 
       <ConfirmDialog

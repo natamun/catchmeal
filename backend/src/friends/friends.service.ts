@@ -107,4 +107,12 @@ export class FriendsService {
       from: row.user,
     }));
   }
+
+  async listPendingSent(userId: number) {
+    const rows = await this.prisma.friend.findMany({
+      where: { userId, status: 'PENDING' },
+      select: { friendId: true },
+    });
+    return rows.map((row) => row.friendId);
+  }
 }

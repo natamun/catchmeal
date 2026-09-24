@@ -34,6 +34,11 @@ export class FriendsController {
     return this.friendsService.listPendingReceived(userId);
   }
 
+  @Get('friends/sent')
+  listSent(@Param('userId', ParseIntPipe) userId: number) {
+    return this.friendsService.listPendingSent(userId);
+  }
+
   @Patch('friends/:id/accept')
   accept(
     @Param('userId', ParseIntPipe) userId: number,

@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
 
-import { listFriends, listPendingRequests } from '../components/friends/api';
+import { listFriends, listPendingRequests, listSentRequests } from '../components/friends/api';
 import type { Friend, FriendRequest } from '../components/friends/types';
 
 export function useFriends(userId: number) {
   const [friends, setFriends] = useState<Friend[]>([]);
   const [requests, setRequests] = useState<FriendRequest[]>([]);
+  const [sentRequestIds, setSentRequestIds] = useState<number[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [reloadCount, setReloadCount] = useState(0);
@@ -15,10 +16,12 @@ export function useFriends(userId: number) {
     Promise.all([
       listFriends(userId, controller.signal),
       listPendingRequests(userId, controller.signal),
+      listSentRequests(userId, controller.signal),
     ])
-      .then(([loadedFriends, loadedRequests]) => {
+      .then(([loadedFriends, loadedRequests, loadedSentIds]) => {
         setFriends(loadedFriends);
         setRequests(loadedRequests);
+        setSentRequestIds(loadedSentIds);
         setLoadError(null);
       })
       .catch((err: unknown) => {
@@ -39,6 +42,7 @@ export function useFriends(userId: number) {
   return {
     friends,
     requests,
+    sentRequestIds,
     isLoading,
     loadError,
     reload: () => setReloadCount((count) => count + 1),

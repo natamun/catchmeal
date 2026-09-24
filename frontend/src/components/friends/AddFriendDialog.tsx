@@ -14,6 +14,7 @@ interface AddFriendDialogProps {
   dialogRef: RefObject<HTMLDialogElement | null>;
   userId: number;
   friendIds: number[];
+  sentRequestIds: number[];
   onSent: (username: string) => void;
 }
 
@@ -21,6 +22,7 @@ export default function AddFriendDialog({
   dialogRef,
   userId,
   friendIds,
+  sentRequestIds,
   onSent,
 }: AddFriendDialogProps) {
   const [query, setQuery] = useState('');
@@ -95,7 +97,7 @@ export default function AddFriendDialog({
   };
 
   const visibleResults = canSearch
-    ? results.filter((user) => user.id !== userId)
+    ? results.filter((user) => user.id !== userId && !friendIds.includes(user.id), )
     : [];
 
   const isSearchOpen = searchFocused && visibleResults.length > 0;
@@ -124,8 +126,7 @@ export default function AddFriendDialog({
 
       <DropdownPanel container={dialogNode} matchAnchorWidth>
         {visibleResults.map((user) => {
-          const isFriend = friendIds.includes(user.id);
-          const isSent = sentIds.has(user.id);
+          const isSent = sentIds.has(user.id) || sentRequestIds.includes(user.id);
           return(
             <div
               key={user.id}
@@ -139,10 +140,10 @@ export default function AddFriendDialog({
                 type="button"
                 onMouseDown={(e) => e.preventDefault()}
                 onClick={() => void handleSend(user)}
-                disabled={isFriend || isSent || pendingId === user.id}
+                disabled={isSent || pendingId === user.id}
                 className="shrink-0 cursor-pointer rounded-xl bg-green-500 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-green-600 disabled:cursor-not-allowed disabled:bg-green-100 disabled:text-green-500"
               >
-                {isFriend ? 'Déjà ami' : isSent ? 'Envoyée' : 'Ajouter'}
+                {isSent ? 'Envoyée' : 'Ajouter'}
               </button>
             </div>
           );
