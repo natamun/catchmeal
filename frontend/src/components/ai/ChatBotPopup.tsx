@@ -93,14 +93,14 @@ export default function ChatBotPopup({
     <div>
       {isOpen === false && (
         <button
-          className="fixed right-1 bottom-20 h-14 w-14 rounded-full bg-green-500 text-sm font-semibold text-white ring-1 ring-green-500 hover:bg-emerald-400/80"
+          className="fixed right-3 bottom-20 h-14 w-14 rounded-full bg-green-500 text-sm font-semibold text-white ring-1 ring-green-500 hover:bg-emerald-400/80"
           onClick={() => onToggle(true)}
         >
           <Bot height={30} width={30} className="ml-3.5" />
         </button>
       )}
       {isOpen === true && (
-        <div className="fixed right-5 bottom-25 ml-5 flex h-121 max-w-100 flex-col rounded-2xl border border-green-300 bg-white shadow-xl md:bottom-10">
+        <div className="fixed right-2 bottom-25 flex h-121 w-75 flex-col rounded-2xl border border-green-300 bg-white shadow-xl sm:right-5 sm:w-100 md:bottom-10">
           <div className="flex justify-between rounded-t-2xl bg-green-400">
             <p className="m-1.5 text-xl font-semibold text-white">
               Chat Assistant
@@ -119,7 +119,7 @@ export default function ChatBotPopup({
                 className={`m-3 flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} `}
               >
                 <p
-                  className={`max-w-[90%] rounded-2xl px-3 py-2 text-sm ${msg.role === 'user' ? 'bg-green-400 text-white' : 'border border-green-50 bg-gray-100 text-black'}`}
+                  className={`max-w-[85%] rounded-2xl px-3 py-2 text-sm break-words ${msg.role === 'user' ? 'bg-green-400 text-white' : 'border border-green-50 bg-gray-100 text-black'}`}
                 >
                   {' '}
                   <ReactMarkdown>{msg.content}</ReactMarkdown>
@@ -128,9 +128,9 @@ export default function ChatBotPopup({
             ))}
             <div ref={messagesEndRef} />
           </div>
-          <div className="m-1 flex items-end rounded-2xl bg-green-50">
+          <div className="m-1 flex shrink-0 items-end rounded-2xl bg-green-50">
             <textarea
-              className="m-2 max-h-20 flex-1 resize-none overflow-y-auto outline-none focus:outline-none"
+              className="m-2 max-h-20 min-w-0 flex-1 resize-none overflow-y-auto outline-none focus:outline-none"
               value={input}
               maxLength={250}
               rows={1}
@@ -147,7 +147,7 @@ export default function ChatBotPopup({
             <div className="m-2 flex min-h-5 min-w-5 shrink-0 flex-col">
               {input.length > 200 && (
                 <span
-                  className={`self-center text-xs ${input.length >= 250 ? 'text-red-500' : 'text-gray-400'}`}
+                  className={`self-center text-[9px] ${input.length >= 250 ? 'text-red-500' : 'text-gray-400'}`}
                 >
                   {input.length}/250
                 </span>
