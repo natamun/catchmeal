@@ -11,6 +11,7 @@ describe('FriendsController', () => {
     sendRequest: jest.fn(),
     listFriends: jest.fn(),
     listPendingReceived: jest.fn(),
+    listPendingSent: jest.fn(),
     acceptRequest: jest.fn(),
     removeOrDecline: jest.fn(),
   };
@@ -53,5 +54,10 @@ describe('FriendsController', () => {
   it('should remove or decline a friendship', async () => {
     await controller.remove(1, 5);
     expect(friendsServiceMock.removeOrDecline).toHaveBeenCalledWith(1, 5);
+  });
+
+  it('should list sent requests', async () => {
+    await controller.listSent(1);
+    expect(friendsServiceMock.listPendingSent).toHaveBeenCalledWith(1);
   });
 });

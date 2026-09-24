@@ -198,4 +198,21 @@ describe('FriendsService', () => {
       expect(result).toEqual([{ requestId: 1, from: { id: 3 } }]);
     });
   });
+
+  describe('listPendingSent', () => {
+    it('should list the ids of users this user has a pending request to', async () => {
+      prismaMock.friend.findMany.mockResolvedValue([
+        { friendId: 5 },
+        { friendId: 8 },
+      ]);
+
+      const result = await service.listPendingSent(2);
+
+      expect(prismaMock.friend.findMany).toHaveBeenCalledWith({
+        where: { userId: 2, status: 'PENDING' },
+        select: { friendId: true },
+      });
+      expect(result).toEqual([5, 8]);
+    });
+  });
 });
