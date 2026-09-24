@@ -11,6 +11,12 @@ import { PrismaService } from '../prisma/prisma.service';
 import { SupabaseService } from '../supabase/supabase.service';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 
+export const SAFE_USER_SELECT = {
+  id: true,
+  username: true,
+  name: true,
+} as const;
+
 @Injectable()
 export class UsersService {
   constructor(
@@ -149,6 +155,18 @@ export class UsersService {
         note: true,
         loggedAt: true,
       },
+    });
+  }
+
+  search(query: string) {
+    return this.prisma.user.findMany({
+      where: {
+        username: { contains: query, mode: 'insensitive' },
+        deletedAt: null,
+      },
+      select: SAFE_USER_SELECT,
+      take: 20,
+      orderBy: { username: 'asc' },
     });
   }
 }

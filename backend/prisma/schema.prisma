@@ -50,6 +50,7 @@ model User {
   activityLevel     ActivityLevel?
   role              Role          @default(USER)
   createAt          DateTime      @default(now())
+  deletedAt          DateTime?
   meal              Meal[]
   foodItems         FoodItem[]
   mealFoodItems     MealFoodItem[]
@@ -61,16 +62,24 @@ model User {
   goalSettings      GoalSetting[]
 }
 
+enum FriendStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+}
+
 model Friend {
   id                Int     @id @default(autoincrement())
   userId            Int
   friendId          Int
+  status            FriendStatus @default(PENDING)
   note              String? @db.VarChar(255)
-  lastTimeConnected DateTime
+  lastTimeConnected DateTime?
   user              User    @relation("UserFriends", fields: [userId], references: [id])
   friendUser        User    @relation("FriendOf", fields: [friendId], references: [id])
   @@index([userId])
   @@index([friendId])
+  @@unique([userId, friendId])
 }
 
 model Message {

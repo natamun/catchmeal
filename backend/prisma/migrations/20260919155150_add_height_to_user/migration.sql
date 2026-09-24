@@ -1,5 +1,2 @@
 -- AlterTable
-ALTER TABLE "Meal" ALTER COLUMN "loggedAt" SET DATA TYPE TIMESTAMP(3);
-
--- AlterTable
 ALTER TABLE "User" ADD COLUMN     "height" DOUBLE PRECISION;
