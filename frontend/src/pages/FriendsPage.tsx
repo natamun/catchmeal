@@ -11,7 +11,8 @@ import {
 import { Avatar } from '../components/friends/Avatar.tsx';
 import FriendRow from '../components/friends/FriendRow.tsx';
 import RequestRow from '../components/friends/RequestRow.tsx';
-import type { Friend } from '../components/friends/types.ts';
+import type { Friend, UserSummary } from '../components/friends/types.ts';
+import ChatWindow from '../components/messages/ChatWindow.tsx';
 import { ConfirmDialog } from '../components/ui/ConfirmDialog.tsx';
 import { Toast } from '../components/ui/Toast.tsx';
 import { useFriends } from '../hooks/useFriends.ts';
@@ -67,6 +68,8 @@ export default function FriendsPage() {
   const [actionError, setActionError] = useState<string | null>(null);
   const addDialogRef = useRef<HTMLDialogElement>(null);
   const confirmDialogRef = useRef<HTMLDialogElement>(null);
+  const [chatFriend, setChatFriend] = useState<UserSummary | null>(null);
+  const chatDialogRef = useRef<HTMLDialogElement>(null);
 
   useTimeout(() => setSuccessMessage(null), successMessage ? 3000 : null);
 
@@ -163,6 +166,10 @@ export default function FriendsPage() {
                   <FriendRow
                     key={f.friendshipId}
                     friend={f.friend}
+                    onMessage={() => {
+                      setChatFriend(f.friend);
+                      chatDialogRef.current?.showModal();
+                    }}
                     onRemove={() => {
                       setFriendToRemove(f);
                       confirmDialogRef.current?.showModal();
@@ -225,6 +232,9 @@ export default function FriendsPage() {
           reload();
         }}
       />
+      {chatFriend && (
+        <ChatWindow dialogRef={chatDialogRef} friend={chatFriend} />
+      )}
 
       <ConfirmDialog
         dialogRef={confirmDialogRef}
