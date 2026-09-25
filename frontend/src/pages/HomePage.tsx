@@ -39,7 +39,11 @@ export default function HomePage({ onNavigateToProfile }: HomePageProps) {
   const { meals, foodItems, isLoading, loadError, reload } =
     useDailyMeals(selectedDate);
 
-  const { friends, isLoading: friendsLoading, loadError: friendsError } = useFriends(user!.userId);
+  const {
+    friends,
+    isLoading: friendsLoading,
+    loadError: friendsError,
+  } = useFriends(user!.userId);
 
   const [weightHistory, setWeightHistory] = useState<{ weight: number }[]>([]);
 
