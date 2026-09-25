@@ -7,9 +7,7 @@ import DailyMealForm from '../components/home/DailyMealForm';
 import DailyMealList from '../components/home/DailyMealList';
 import DailyMealPicker from '../components/home/DailyMealPicker';
 import DateNavigator from '../components/home/DateNavigator';
-import FriendsActivity, {
-  type FriendActivity,
-} from '../components/home/FriendsActivity';
+import FriendsActivity from '../components/home/FriendsActivity';
 import MacroBreakdown from '../components/home/MacroBreakdown';
 import QuickAddDialog from '../components/home/QuickAddDialog';
 import WeightWidget from '../components/home/WeightWidget';
@@ -19,31 +17,8 @@ import { mealTotals, type Meal, type MealType } from '../components/meal/types';
 import { getWeightHistory } from '../components/profile/api';
 import { Toast } from '../components/ui/Toast';
 import { useDailyMeals } from '../hooks/useDailyMeals';
+import { useFriends } from '../hooks/useFriends';
 import { useTimeout } from '../hooks/useTimeout';
-
-const MOCK_FRIENDS: FriendActivity[] = [
-  {
-    id: 1,
-    username: 'alice',
-    action: 'a ajouté un repas (540 kcal)',
-    time: 'il y a 5 min',
-    online: true,
-  },
-  {
-    id: 2,
-    username: 'bob',
-    action: 'a atteint son objectif du jour 🎉',
-    time: 'il y a 23 min',
-    online: false,
-  },
-  {
-    id: 3,
-    username: 'carol',
-    action: 'a enregistré son poids (63 kg)',
-    time: 'il y a 1h',
-    online: true,
-  },
-];
 
 interface SectionEdit {
   mealType: MealType;
@@ -63,6 +38,8 @@ export default function HomePage({ onNavigateToProfile }: HomePageProps) {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const { meals, foodItems, isLoading, loadError, reload } =
     useDailyMeals(selectedDate);
+
+  const { friends, isLoading: friendsLoading, loadError: friendsError } = useFriends(user!.userId);
 
   const [weightHistory, setWeightHistory] = useState<{ weight: number }[]>([]);
 
@@ -179,7 +156,17 @@ export default function HomePage({ onNavigateToProfile }: HomePageProps) {
               onAdd={setAddingMealType}
               onEdit={openSectionEditor}
             />
-            <FriendsActivity activities={MOCK_FRIENDS} />
+            <FriendsActivity
+              activities={friends.map((f) => ({
+                id: f.friendshipId,
+                username: f.friend.username,
+                action: '',
+                time: '',
+                online: false,
+              }))}
+              isLoading={friendsLoading}
+              loadError={friendsError}
+            />
           </div>
         </div>
       )}

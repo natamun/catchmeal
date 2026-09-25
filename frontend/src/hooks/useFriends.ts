@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 
 import {
+  ApiError,
   listFriends,
   listPendingRequests,
   listSentRequests,
@@ -29,9 +30,8 @@ export function useFriends(userId: number) {
         setLoadError(null);
       })
       .catch((err: unknown) => {
-        if (controller.signal.aborted) {
-          return;
-        }
+        if (controller.signal.aborted) return;
+        if (err instanceof ApiError && err.status === 403) return;
         console.error(err);
         setLoadError('Impossible de charger tes amis, réessaye.');
       })
