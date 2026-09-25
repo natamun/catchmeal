@@ -2,6 +2,10 @@ import { useEffect, useRef, useState } from 'react';
 import { CheckCircle2, Zap } from 'lucide-react';
 
 import { useAuth } from '../auth/auth-context';
+import {
+  listFriendsActivity,
+  type FriendActivityItem,
+} from '../components/friends/api';
 import CalorieSummary from '../components/home/CalorieSummary';
 import DailyMealForm from '../components/home/DailyMealForm';
 import DailyMealList from '../components/home/DailyMealList';
@@ -17,8 +21,8 @@ import { mealTotals, type Meal, type MealType } from '../components/meal/types';
 import { getWeightHistory } from '../components/profile/api';
 import { Toast } from '../components/ui/Toast';
 import { useDailyMeals } from '../hooks/useDailyMeals';
-import { useFriends } from '../hooks/useFriends';
 import { useTimeout } from '../hooks/useTimeout';
+import { timeAgo } from '../utils/timeAgo';
 
 interface SectionEdit {
   mealType: MealType;
@@ -39,13 +43,26 @@ export default function HomePage({ onNavigateToProfile }: HomePageProps) {
   const { meals, foodItems, isLoading, loadError, reload } =
     useDailyMeals(selectedDate);
 
-  const {
-    friends,
-    isLoading: friendsLoading,
-    loadError: friendsError,
-  } = useFriends(user!.userId);
+  const [friendsActivity, setFriendsActivity] = useState<FriendActivityItem[]>(
+    [],
+  );
+  const [friendsLoading, setFriendsLoading] = useState(true);
 
   const [weightHistory, setWeightHistory] = useState<{ weight: number }[]>([]);
+
+  useEffect(() => {
+    if (!user) return;
+    const controller = new AbortController();
+    listFriendsActivity(user.userId, controller.signal)
+      .then((data) => {
+        setFriendsActivity(data);
+        setFriendsLoading(false);
+      })
+      .catch(() => {
+        setFriendsLoading(false);
+      });
+    return () => controller.abort();
+  }, [user]);
 
   useEffect(() => {
     if (!user) return;
@@ -160,17 +177,17 @@ export default function HomePage({ onNavigateToProfile }: HomePageProps) {
               onAdd={setAddingMealType}
               onEdit={openSectionEditor}
             />
-            <FriendsActivity
-              activities={friends.map((f) => ({
-                id: f.friendshipId,
-                username: f.friend.username,
-                action: '',
-                time: '',
-                online: false,
-              }))}
-              isLoading={friendsLoading}
-              loadError={friendsError}
-            />
+            {!friendsLoading && (
+              <FriendsActivity
+                activities={friendsActivity.map((a) => ({
+                  id: a.friendshipId,
+                  username: a.friend.username,
+                  action: a.lastAction ?? '',
+                  time: a.lastActionAt ? timeAgo(a.lastActionAt) : '',
+                  online: false,
+                }))}
+              />
+            )}
           </div>
         </div>
       )}
