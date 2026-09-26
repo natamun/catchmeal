@@ -9,6 +9,7 @@ import {
   Res,
   UseGuards,
 } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
 import type { Request as ExpressRequest, Response } from 'express';
 
 import { AuthService, type SignInData } from './auth.service';
@@ -159,6 +160,25 @@ export class PassportAuthController {
       birthDate,
       activityLevel,
     };
+  }
+
+  // OAuth Google — Step 1: redirect to Google login page
+  @Get('google')
+  @UseGuards(AuthGuard('google'))
+  redirectToGoogle() {
+    // Passport handles the redirect automatically
+  }
+
+  // OAuth Google — Step 2: Google redirects back here after user grants permission
+  @Get('google/callback')
+  @UseGuards(AuthGuard('google'))
+  async googleCallback(
+    @Request() request: RequestWithUser,
+    @Res({ passthrough: false }) res: Response,
+  ) {
+    const { accessToken } = await this.authService.signIn(request.user);
+    this.setAuthCookie(res, accessToken);
+    res.redirect(process.env.FRONTEND_URL ?? 'http://localhost:5173');
   }
 
   private setAuthCookie(res: Response, token: string) {
