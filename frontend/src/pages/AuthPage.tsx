@@ -273,6 +273,22 @@ export default function AuthPage({ initialMode, onCancel }: Props) {
             ? "Pas encore de compte ? S'inscrire"
             : 'Déjà un compte ? Se connecter'}
         </button>
+
+        <div className="mt-4 flex items-center gap-3">
+          <hr className="flex-1 border-green-200" />
+          <span className="text-xs text-green-400">ou</span>
+          <hr className="flex-1 border-green-200" />
+        </div>
+
+        <button
+          type="button"
+          onClick={() => {
+            window.location.href = `${import.meta.env.VITE_API_URL}/auth/google`;
+          }}
+          className="mt-2 w-full cursor-pointer rounded-xl border border-green-200 bg-white px-6 py-3 font-semibold text-green-700 transition-colors hover:bg-green-50"
+        >
+          Login with Google
+        </button>
       </div>
     </div>
   );
