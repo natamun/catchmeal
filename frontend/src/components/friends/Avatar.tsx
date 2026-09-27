@@ -11,7 +11,10 @@ export function Avatar({
         {username[0].toUpperCase()}
       </div>
       {online && (
-        <span className="absolute right-0 bottom-0 h-2.5 w-2.5 rounded-full border-2 border-white bg-green-300" />
+        <span
+          className="absolute right-0 bottom-0 h-2.5 w-2.5 rounded-full border-2 border-white bg-green-300"
+          aria-label="En ligne"
+        />
       )}
     </div>
   );
