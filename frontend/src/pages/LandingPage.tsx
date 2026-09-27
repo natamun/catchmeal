@@ -15,6 +15,7 @@ const FEATURES = [
         viewBox="0 0 24 24"
         stroke="currentColor"
         strokeWidth={1.5}
+        aria-hidden="true"
       >
         <path
           strokeLinecap="round"
@@ -35,6 +36,7 @@ const FEATURES = [
         viewBox="0 0 24 24"
         stroke="currentColor"
         strokeWidth={1.5}
+        aria-hidden="true"
       >
         <path
           strokeLinecap="round"
@@ -55,6 +57,7 @@ const FEATURES = [
         viewBox="0 0 24 24"
         stroke="currentColor"
         strokeWidth={1.5}
+        aria-hidden="true"
       >
         <path
           strokeLinecap="round"
@@ -75,6 +78,7 @@ const FEATURES = [
         viewBox="0 0 24 24"
         stroke="currentColor"
         strokeWidth={1.5}
+        aria-hidden="true"
       >
         <path
           strokeLinecap="round"
@@ -127,6 +131,7 @@ export default function LandingPage({ onLogin, onRegister }: Props) {
             className="h-3.5 w-3.5"
             viewBox="0 0 20 20"
             fill="currentColor"
+            aria-hidden="true"
           >
             <path
               fillRule="evenodd"
@@ -395,25 +400,49 @@ export default function LandingPage({ onLogin, onRegister }: Props) {
             </div>
             <div className="flex flex-col gap-1">
               <span className="font-semibold text-green-600">Légal</span>
-              <a href="#" className="transition-colors hover:text-green-300">
+              <a
+                href="#"
+                className="transition-colors hover:text-green-300"
+                aria-disabled="true"
+              >
                 Politique de confidentialité
               </a>
-              <a href="#" className="transition-colors hover:text-green-300">
+              <a
+                href="#"
+                className="transition-colors hover:text-green-300"
+                aria-disabled="true"
+              >
                 Conditions d'utilisation
               </a>
-              <a href="#" className="transition-colors hover:text-green-300">
+              <a
+                href="#"
+                className="transition-colors hover:text-green-300"
+                aria-disabled="true"
+              >
                 Mentions légales
               </a>
             </div>
             <div className="flex flex-col gap-1">
               <span className="font-semibold text-green-600">Vos données</span>
-              <a href="#" className="transition-colors hover:text-green-300">
+              <a
+                href="#"
+                className="transition-colors hover:text-green-300"
+                aria-disabled="true"
+              >
                 Exporter mes données
               </a>
-              <a href="#" className="transition-colors hover:text-green-300">
+              <a
+                href="#"
+                className="transition-colors hover:text-green-300"
+                aria-disabled="true"
+              >
                 Supprimer mon compte
               </a>
-              <a href="#" className="transition-colors hover:text-green-300">
+              <a
+                href="#"
+                className="transition-colors hover:text-green-300"
+                aria-disabled="true"
+              >
                 Politique RGPD
               </a>
             </div>
