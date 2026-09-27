@@ -109,7 +109,7 @@ const BirthDateInput = forwardRef<
     type="button"
     ref={ref}
     onClick={onClick}
-    className="w-full rounded-xl border border-green-200 bg-white px-4 py-2.5 text-left text-sm text-green-800 outline-none focus:border-green-400"
+    className="w-full rounded-xl border border-green-200 bg-white px-4 py-2.5 text-left text-sm text-green-800 outline-none focus:border-green-400 focus-visible:ring-2 focus-visible:ring-green-400 focus-visible:ring-offset-1"
   >
     {value || <span className="text-green-400">Sélectionner une date</span>}
   </button>
