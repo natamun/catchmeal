@@ -40,7 +40,7 @@ export function SelectDropdown({
             id={id}
             ref={anchorRef}
             type="button"
-            className={`flex w-full items-center justify-between rounded-xl border border-green-200 bg-white px-4 py-2.5 text-left text-sm text-green-800 outline-none focus:border-green-400 ${className}`}
+            className={`flex w-full items-center justify-between rounded-xl border border-green-200 bg-white px-4 py-2.5 text-left text-sm text-green-800 outline-none focus:border-green-400 focus-visible:ring-2 focus-visible:ring-green-400 focus-visible:ring-offset-1 ${className}`}
           >
             <span className={selected ? '' : 'text-green-400'}>
               {selected?.label ?? placeholder}
