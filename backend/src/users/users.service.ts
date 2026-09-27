@@ -146,11 +146,21 @@ export class UsersService {
     });
   }
 
-  async getWeightHistory(userId: number) {
+  async getWeightHistory(userId: number, from?: string, to?: string) {
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user) throw new NotFoundException('User not found');
     return this.prisma.weightLog.findMany({
-      where: { userId },
+      where: {
+        userId,
+        ...(from || to
+          ? {
+              loggedAt: {
+                ...(from ? { gte: new Date(from) } : {}),
+                ...(to ? { lte: new Date(to) } : {}),
+              },
+            }
+          : {}),
+      },
       orderBy: { loggedAt: 'desc' },
       select: {
         id: true,

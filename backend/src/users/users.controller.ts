@@ -8,6 +8,7 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  Query,
   Request,
   UploadedFile,
   UseGuards,
@@ -84,11 +85,13 @@ export class UsersController {
   getWeightHistory(
     @Param('userId', ParseIntPipe) userId: number,
     @Request() req: RequestWithUser,
+    @Query('from') from?: string,
+    @Query('to') to?: string,
   ) {
     if (req.user.userId !== userId) {
       throw new ForbiddenException('You can only view your own weight history');
     }
-    return this.usersService.getWeightHistory(userId);
+    return this.usersService.getWeightHistory(userId, from, to);
   }
 
   @Patch('avatar')
