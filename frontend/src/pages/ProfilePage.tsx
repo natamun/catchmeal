@@ -47,6 +47,17 @@ export default function ProfilePage() {
     return Math.round(tdee - (diff * coefficient) / durationDays);
   })();
 
+  const recommendedMacros = (() => {
+    const kcal = kcalToReachGoal ?? tdee;
+    if (!kcal || !latestWeight) return null;
+    const protein = Math.round(
+      user.muscleMass ? 2.2 * user.muscleMass : 1.8 * latestWeight,
+    );
+    const fat = Math.round((kcal * 0.3) / 9);
+    const carbs = Math.round((kcal - protein * 4 - fat * 9) / 4);
+    return carbs > 0 ? { protein, fat, carbs } : null;
+  })();
+
   return (
     <div className="flex flex-col gap-6">
       <h2 className="text-xl font-bold text-green-800">Profil</h2>
@@ -175,21 +186,44 @@ export default function ProfilePage() {
         )}
         <div className="flex items-center justify-between border-b border-green-200 px-5 py-4">
           <p className="text-sm font-semibold text-green-600">Protéines</p>
-          <p className="text-sm font-semibold text-green-800">
-            {user.dailyProteinGoal ? `${user.dailyProteinGoal} g / jour` : '—'}
-          </p>
+          <div className="text-right">
+            <p className="text-sm font-semibold text-green-800">
+              {user.dailyProteinGoal
+                ? `${user.dailyProteinGoal} g / jour`
+                : '—'}
+            </p>
+            {recommendedMacros && (
+              <p className="text-xs text-green-400">
+                Recommandé : {recommendedMacros.protein} g
+              </p>
+            )}
+          </div>
         </div>
         <div className="flex items-center justify-between border-b border-green-200 px-5 py-4">
           <p className="text-sm font-semibold text-green-600">Glucides</p>
-          <p className="text-sm font-semibold text-green-800">
-            {user.dailyCarbsGoal ? `${user.dailyCarbsGoal} g / jour` : '—'}
-          </p>
+          <div className="text-right">
+            <p className="text-sm font-semibold text-green-800">
+              {user.dailyCarbsGoal ? `${user.dailyCarbsGoal} g / jour` : '—'}
+            </p>
+            {recommendedMacros && (
+              <p className="text-xs text-green-400">
+                Recommandé : {recommendedMacros.carbs} g
+              </p>
+            )}
+          </div>
         </div>
         <div className="flex items-center justify-between px-5 py-4">
           <p className="text-sm font-semibold text-green-600">Lipides</p>
-          <p className="text-sm font-semibold text-green-800">
-            {user.dailyFatGoal ? `${user.dailyFatGoal} g / jour` : '—'}
-          </p>
+          <div className="text-right">
+            <p className="text-sm font-semibold text-green-800">
+              {user.dailyFatGoal ? `${user.dailyFatGoal} g / jour` : '—'}
+            </p>
+            {recommendedMacros && (
+              <p className="text-xs text-green-400">
+                Recommandé : {recommendedMacros.fat} g
+              </p>
+            )}
+          </div>
         </div>
       </div>
 
