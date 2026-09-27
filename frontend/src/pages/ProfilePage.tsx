@@ -28,7 +28,13 @@ export default function ProfilePage() {
 
   const bmr =
     latestWeight && user.height && user.birthDate && user.gender
-      ? calculateBMR(latestWeight, user.height, user.birthDate, user.gender)
+      ? calculateBMR(
+          latestWeight,
+          user.height,
+          user.birthDate,
+          user.gender,
+          user.muscleMass,
+        )
       : null;
 
   const tdee =
