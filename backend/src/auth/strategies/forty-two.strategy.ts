@@ -14,8 +14,6 @@ interface FortyTwoProfile {
 @Injectable()
 export class FortyTwoStrategy extends PassportStrategy(Strategy, '42') {
   constructor(private readonly authService: AuthService) {
-    // passport-oauth2 is a CJS module without full TS types — super() call is safe
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
     super({
       authorizationURL: 'https://api.intra.42.fr/oauth/authorize',
       tokenURL: 'https://api.intra.42.fr/oauth/token',

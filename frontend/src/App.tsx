@@ -16,8 +16,19 @@ type Page = 'landing' | 'login' | 'register';
 
 function AppShell() {
   const { status } = useAuth();
-  const [page, setPage] = useState<Page>('landing');
+  const [page, setPage] = useState<Page>(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('error') === 'oauth_failed' ? 'login' : 'landing';
+  });
   const [activeTab, setActiveTab] = useState<Tab>('home');
+  const [oauthError] = useState<string | null>(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('error') === 'oauth_failed') {
+      window.history.replaceState({}, '', window.location.pathname);
+      return 'La connexion avec 42 a échoué. Réessaye.';
+    }
+    return null;
+  });
 
   if (status === 'loading') {
     return (
@@ -31,7 +42,11 @@ function AppShell() {
     if (page === 'login' || page === 'register') {
       return (
         <Suspense fallback={null}>
-          <AuthPage initialMode={page} onCancel={() => setPage('landing')} />
+          <AuthPage
+            initialMode={page}
+            onCancel={() => setPage('landing')}
+            oauthError={oauthError}
+          />
         </Suspense>
       );
     }
@@ -53,17 +68,6 @@ function AppShell() {
     friends: <FriendsPage />,
     profile: <ProfilePage />,
   };
-
-  /*if (page === 'landing') {
-    return (
-      <Suspense fallback={null}>
-        <LandingPage
-          onLogin={() => setPage('dashboard')}
-          onRegister={() => setPage('dashboard')}
-        />
-      </Suspense>
-    );
-  }*/
 
   return (
     <div className="min-h-screen bg-green-50 md:pl-56">

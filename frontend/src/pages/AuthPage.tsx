@@ -11,6 +11,7 @@ type Mode = 'login' | 'register';
 interface Props {
   initialMode: Mode;
   onCancel: () => void;
+  oauthError?: string | null;
 }
 
 interface AuthFormState {
@@ -58,7 +59,7 @@ function validateAuthForm(
   return errors;
 }
 
-export default function AuthPage({ initialMode, onCancel }: Props) {
+export default function AuthPage({ initialMode, onCancel, oauthError }: Props) {
   const { login, register } = useAuth();
   const [mode, setMode] = useState<Mode>(initialMode);
   const [form, setForm] = useState<AuthFormState>(EMPTY_FORM);
@@ -279,6 +280,10 @@ export default function AuthPage({ initialMode, onCancel }: Props) {
           <span className="text-xs text-green-400">ou</span>
           <hr className="flex-1 border-green-200" />
         </div>
+
+        {oauthError && (
+          <p className="mt-2 text-sm text-red-500">{oauthError}</p>
+        )}
 
         <button
           type="button"
