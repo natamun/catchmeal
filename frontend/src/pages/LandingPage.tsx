@@ -402,21 +402,21 @@ export default function LandingPage({ onLogin, onRegister }: Props) {
               <span className="font-semibold text-green-600">Légal</span>
               <a
                 href="#"
-                className="transition-colors hover:text-green-300"
+                className="py-1 transition-colors hover:text-green-300"
                 aria-disabled="true"
               >
                 Politique de confidentialité
               </a>
               <a
                 href="#"
-                className="transition-colors hover:text-green-300"
+                className="py-1 transition-colors hover:text-green-300"
                 aria-disabled="true"
               >
                 Conditions d'utilisation
               </a>
               <a
                 href="#"
-                className="transition-colors hover:text-green-300"
+                className="py-1 transition-colors hover:text-green-300"
                 aria-disabled="true"
               >
                 Mentions légales
@@ -426,21 +426,21 @@ export default function LandingPage({ onLogin, onRegister }: Props) {
               <span className="font-semibold text-green-600">Vos données</span>
               <a
                 href="#"
-                className="transition-colors hover:text-green-300"
+                className="py-1 transition-colors hover:text-green-300"
                 aria-disabled="true"
               >
                 Exporter mes données
               </a>
               <a
                 href="#"
-                className="transition-colors hover:text-green-300"
+                className="py-1 transition-colors hover:text-green-300"
                 aria-disabled="true"
               >
                 Supprimer mon compte
               </a>
               <a
                 href="#"
-                className="transition-colors hover:text-green-300"
+                className="py-1 transition-colors hover:text-green-300"
                 aria-disabled="true"
               >
                 Politique RGPD
