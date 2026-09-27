@@ -31,7 +31,17 @@ type Field =
   | 'dailyCalorieGoal'
   | 'dailyProteinGoal'
   | 'dailyCarbsGoal'
-  | 'dailyFatGoal';
+  | 'dailyFatGoal'
+  | 'bodyFat'
+  | 'skeletalMuscle'
+  | 'fatFreeMass'
+  | 'subcutaneousFat'
+  | 'visceralFat'
+  | 'bodyWater'
+  | 'muscleMass'
+  | 'boneMass'
+  | 'protein'
+  | 'metabolicAge';
 
 interface FormState {
   username: string;
@@ -45,6 +55,16 @@ interface FormState {
   gender: string;
   birthDate: string;
   activityLevel: string;
+  bodyFat: string;
+  skeletalMuscle: string;
+  fatFreeMass: string;
+  subcutaneousFat: string;
+  visceralFat: string;
+  bodyWater: string;
+  muscleMass: string;
+  boneMass: string;
+  protein: string;
+  metabolicAge: string;
 }
 
 function validate(form: FormState): Partial<Record<Field, string>> {
@@ -135,6 +155,16 @@ export function ProfileIdentityCard({ user, onUpdate, currentWeight }: Props) {
     gender: user.gender ?? '',
     birthDate: user.birthDate ? user.birthDate.slice(0, 10) : '',
     activityLevel: user.activityLevel ?? '',
+    bodyFat: user.bodyFat?.toString() ?? '',
+    skeletalMuscle: user.skeletalMuscle?.toString() ?? '',
+    fatFreeMass: user.fatFreeMass?.toString() ?? '',
+    subcutaneousFat: user.subcutaneousFat?.toString() ?? '',
+    visceralFat: user.visceralFat?.toString() ?? '',
+    bodyWater: user.bodyWater?.toString() ?? '',
+    muscleMass: user.muscleMass?.toString() ?? '',
+    boneMass: user.boneMass?.toString() ?? '',
+    protein: user.protein?.toString() ?? '',
+    metabolicAge: user.metabolicAge?.toString() ?? '',
   });
 
   const [form, setForm] = useState<FormState>(initForm);
@@ -265,6 +295,24 @@ export function ProfileIdentityCard({ user, onUpdate, currentWeight }: Props) {
     if (form.activityLevel !== (user.activityLevel ?? ''))
       input.activityLevel = form.activityLevel || undefined;
 
+    const bodyCompFields = [
+      'bodyFat',
+      'skeletalMuscle',
+      'fatFreeMass',
+      'subcutaneousFat',
+      'visceralFat',
+      'bodyWater',
+      'muscleMass',
+      'boneMass',
+      'protein',
+      'metabolicAge',
+    ] as const;
+    for (const f of bodyCompFields) {
+      const parsed = form[f] ? parseFloat(form[f]) : undefined;
+      if (parsed !== (user[f] ?? undefined))
+        (input as Record<string, number | undefined>)[f] = parsed;
+    }
+
     if (Object.keys(input).length === 0) {
       dialogRef.current?.close();
       return;
@@ -286,6 +334,16 @@ export function ProfileIdentityCard({ user, onUpdate, currentWeight }: Props) {
         gender: updated.gender ?? undefined,
         birthDate: updated.birthDate ?? undefined,
         activityLevel: updated.activityLevel ?? undefined,
+        bodyFat: updated.bodyFat ?? undefined,
+        skeletalMuscle: updated.skeletalMuscle ?? undefined,
+        fatFreeMass: updated.fatFreeMass ?? undefined,
+        subcutaneousFat: updated.subcutaneousFat ?? undefined,
+        visceralFat: updated.visceralFat ?? undefined,
+        bodyWater: updated.bodyWater ?? undefined,
+        muscleMass: updated.muscleMass ?? undefined,
+        boneMass: updated.boneMass ?? undefined,
+        protein: updated.protein ?? undefined,
+        metabolicAge: updated.metabolicAge ?? undefined,
       });
       dialogRef.current?.close();
     } catch (err) {
@@ -454,6 +512,85 @@ export function ProfileIdentityCard({ user, onUpdate, currentWeight }: Props) {
               container={dialogNode}
             />
           </div>
+
+          <p className="col-span-2 pt-2 text-xs font-semibold tracking-wide text-green-400 uppercase">
+            Composition corporelle
+          </p>
+
+          {[
+            {
+              field: 'bodyFat' as Field,
+              id: 'pf-body-fat',
+              label: 'Masse grasse (%)',
+            },
+            {
+              field: 'skeletalMuscle' as Field,
+              id: 'pf-skeletal-muscle',
+              label: 'Muscle squelettique (%)',
+            },
+            {
+              field: 'fatFreeMass' as Field,
+              id: 'pf-fat-free-mass',
+              label: 'Masse sans graisse (kg)',
+            },
+            {
+              field: 'subcutaneousFat' as Field,
+              id: 'pf-subcutaneous-fat',
+              label: 'Graisse sous-cutanée (%)',
+            },
+            {
+              field: 'visceralFat' as Field,
+              id: 'pf-visceral-fat',
+              label: 'Graisse viscérale (niveau)',
+            },
+            {
+              field: 'bodyWater' as Field,
+              id: 'pf-body-water',
+              label: 'Eau corporelle (%)',
+            },
+            {
+              field: 'muscleMass' as Field,
+              id: 'pf-muscle-mass',
+              label: 'Masse musculaire (kg)',
+            },
+            {
+              field: 'boneMass' as Field,
+              id: 'pf-bone-mass',
+              label: 'Masse osseuse (kg)',
+            },
+            {
+              field: 'protein' as Field,
+              id: 'pf-protein',
+              label: 'Protéines (%)',
+            },
+            {
+              field: 'metabolicAge' as Field,
+              id: 'pf-metabolic-age',
+              label: 'Âge métabolique',
+            },
+          ].map(({ field, id, label }) => (
+            <div key={field} className="relative flex flex-col gap-1">
+              <label
+                htmlFor={id}
+                className="text-sm font-semibold text-green-600"
+              >
+                {label}
+              </label>
+              <Input
+                id={id}
+                type="text"
+                inputMode="decimal"
+                value={form[field]}
+                onChange={(e) =>
+                  setForm((p) => ({ ...p, [field]: e.target.value }))
+                }
+              />
+            </div>
+          ))}
+
+          <p className="col-span-2 pt-2 text-xs font-semibold tracking-wide text-green-400 uppercase">
+            Objectifs
+          </p>
 
           {[
             { field: 'height' as Field, id: 'pf-height', label: 'Taille (cm)' },
