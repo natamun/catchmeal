@@ -78,4 +78,64 @@ export class UpdateProfileDto {
   @IsOptional()
   @IsEnum(ActivityLevel)
   activityLevel?: ActivityLevel;
+
+  @IsOptional()
+  @IsNumber()
+  @IsPositive()
+  @Max(100)
+  bodyFat?: number;
+
+  @IsOptional()
+  @IsNumber()
+  @IsPositive()
+  @Max(100)
+  skeletalMuscle?: number;
+
+  @IsOptional()
+  @IsNumber()
+  @IsPositive()
+  @Max(500)
+  fatFreeMass?: number;
+
+  @IsOptional()
+  @IsNumber()
+  @IsPositive()
+  @Max(100)
+  subcutaneousFat?: number;
+
+  @IsOptional()
+  @IsNumber()
+  @IsPositive()
+  @Max(30)
+  visceralFat?: number;
+
+  @IsOptional()
+  @IsNumber()
+  @IsPositive()
+  @Max(100)
+  bodyWater?: number;
+
+  @IsOptional()
+  @IsNumber()
+  @IsPositive()
+  @Max(500)
+  muscleMass?: number;
+
+  @IsOptional()
+  @IsNumber()
+  @IsPositive()
+  @Max(20)
+  boneMass?: number;
+
+  @IsOptional()
+  @IsNumber()
+  @IsPositive()
+  @Max(100)
+  protein?: number;
+
+  @IsOptional()
+  @IsNumber()
+  @IsPositive()
+  @Max(120)
+  metabolicAge?: number;
 }

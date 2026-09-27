@@ -64,6 +64,16 @@ export class UsersService {
         gender: true,
         birthDate: true,
         activityLevel: true,
+        bodyFat: true,
+        skeletalMuscle: true,
+        fatFreeMass: true,
+        subcutaneousFat: true,
+        visceralFat: true,
+        bodyWater: true,
+        muscleMass: true,
+        boneMass: true,
+        protein: true,
+        metabolicAge: true,
       },
     });
   }
@@ -99,6 +109,16 @@ export class UsersService {
             gender: true,
             birthDate: true,
             activityLevel: true,
+            bodyFat: true,
+            skeletalMuscle: true,
+            fatFreeMass: true,
+            subcutaneousFat: true,
+            visceralFat: true,
+            bodyWater: true,
+            muscleMass: true,
+            boneMass: true,
+            protein: true,
+            metabolicAge: true,
           },
         });
 
