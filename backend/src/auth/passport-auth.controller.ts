@@ -176,9 +176,15 @@ export class PassportAuthController {
     @Request() request: RequestWithUser,
     @Res({ passthrough: false }) res: Response,
   ) {
-    const { accessToken } = await this.authService.signIn(request.user);
-    this.setAuthCookie(res, accessToken);
-    res.redirect(process.env.FRONTEND_URL ?? 'http://localhost:5173');
+    try {
+      const { accessToken } = await this.authService.signIn(request.user);
+      this.setAuthCookie(res, accessToken);
+      res.redirect(process.env.FRONTEND_URL ?? 'http://localhost:5173');
+    } catch {
+      res.redirect(
+        `${process.env.FRONTEND_URL ?? 'http://localhost:5173'}?error=oauth_failed`,
+      );
+    }
   }
 
   private setAuthCookie(res: Response, token: string) {
