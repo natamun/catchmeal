@@ -1,0 +1,48 @@
+import { Injectable } from '@nestjs/common';
+
+import { PrismaService } from '../prisma/prisma.service';
+
+@Injectable()
+export class AdminService {
+  constructor(private readonly prisma: PrismaService) {}
+
+  async getUsers() {
+    return this.prisma.user.findMany({
+      select: {
+        id: true,
+        username: true,
+        name: true,
+        email: true,
+        role: true,
+        createAt: true,
+        deletedAt: true,
+      },
+      orderBy: { createAt: 'desc' },
+    });
+  }
+
+  async getStats() {
+    const [totalUsers, totalMeals, totalFoodItems] = await Promise.all([
+      this.prisma.user.count(),
+      this.prisma.meal.count(),
+      this.prisma.foodItem.count(),
+    ]);
+
+    return { totalUsers, totalMeals, totalFoodItems };
+  }
+
+  async deleteUser(userId: number) {
+    return this.prisma.user.update({
+      where: { id: userId },
+      data: { deletedAt: new Date() },
+    });
+  }
+
+  async updateUserRole(userId: number, role: 'USER' | 'ADMIN') {
+    return this.prisma.user.update({
+      where: { id: userId },
+      data: { role },
+      select: { id: true, username: true, role: true },
+    });
+  }
+}
