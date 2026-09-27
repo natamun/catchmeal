@@ -1,45 +1,62 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { io, type Socket } from 'socket.io-client';
 
 import { getConversation } from '../components/messages/api';
 import type { Message } from '../components/messages/types';
 
-const POLL_INTERVAL_MS = 3000;
-
 export function useConversation(userId: number, otherUserId: number) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [loadError, setLoaderror] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const socketRef = useRef<Socket | null>(null);
 
   useEffect(() => {
     let cancelled = false;
 
-    async function poll() {
-      try {
-        const fetched = await getConversation(userId, otherUserId);
-        if (cancelled) return;
-        setMessages(fetched);
-        setLoaderror(null);
-      } catch (err) {
-        if (cancelled) return;
-        console.error(err);
-        setLoaderror('Impossible de charger la conversation.');
-      } finally {
+    getConversation(userId, otherUserId)
+      .then((fetched) => {
+        if (!cancelled) setMessages(fetched);
+      })
+      .catch((err) => {
+        if (!cancelled) {
+          console.error(err);
+          setLoadError('Impossible de charger la conversation.');
+        }
+      })
+      .finally(() => {
         if (!cancelled) setIsLoading(false);
-      }
-    }
+      });
 
-    void poll();
-    const intervalId = setInterval(poll, POLL_INTERVAL_MS);
+    const socket = io(import.meta.env.VITE_API_URL, { withCredentials: true });
+    socketRef.current = socket;
+
+    socket.on('message:new', (message: Message) => {
+      const isRelevant =
+        (message.senderId === userId && message.receiverId === otherUserId) ||
+        (message.senderId === otherUserId && message.receiverId === userId);
+      if (isRelevant) {
+        setMessages((prev) => [...prev, message]);
+      }
+    });
 
     return () => {
       cancelled = true;
-      clearInterval(intervalId);
+      socket.disconnect();
     };
   }, [userId, otherUserId]);
 
-  const addMessage = (message: Message) => {
-    setMessages((prev) => [...prev, message]);
+  const send = (content: string) => {
+    return new Promise<Message>((resolve, reject) => {
+      socketRef.current?.emit(
+        'message:send',
+        { toUserId: otherUserId, content },
+        (response: Message | { error: string }) => {
+          if ('error' in response) reject(new Error(response.error));
+          else resolve(response);
+        },
+      );
+    });
   };
 
-  return { messages, isLoading, loadError, addMessage };
+  return { messages, isLoading, loadError, send };
 }

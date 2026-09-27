@@ -12,7 +12,6 @@ import { useConversation } from '../../hooks/useConversation';
 import type { UserSummary } from '../friends/types';
 import { BaseDialog } from '../ui/BaseDialog';
 import { Input } from '../ui/Input';
-import { ApiError, sendMessage } from './api';
 
 interface ChatWindowProps {
   dialogRef: RefObject<HTMLDialogElement | null>;
@@ -22,17 +21,40 @@ interface ChatWindowProps {
 export default function ChatWindow({ dialogRef, friend }: ChatWindowProps) {
   const { user } = useAuth();
   const userId = user!.userId;
-  const { messages, isLoading, loadError, addMessage } = useConversation(
+  const { messages, isLoading, loadError, send } = useConversation(
     userId,
     friend.id,
   );
   const [draft, setDraft] = useState('');
   const [isSending, setIsSending] = useState(false);
+  const isAtBottomRef = useRef(true);
+  const [hasNewMessage, setHasNewMessage] = useState(false);
   const [sendError, setSendError] = useState<string | null>(null);
+  const prevCountRef = useRef(messages.length);
   const threadRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
+  const scrollToBottom = () => {
     threadRef.current?.scrollTo({ top: threadRef.current.scrollHeight });
+    setHasNewMessage(false);
+  };
+
+  const handleScroll = () => {
+    const el = threadRef.current;
+    if (!el) return;
+    const atBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 20;
+    isAtBottomRef.current = atBottom;
+    if (atBottom) setHasNewMessage(false);
+  };
+
+  useEffect(() => {
+    const hasNewIncoming = messages.length > prevCountRef.current;
+    prevCountRef.current = messages.length;
+
+    if (isAtBottomRef.current || !hasNewIncoming) {
+      scrollToBottom();
+    } else {
+      setHasNewMessage(true);
+    }
   }, [messages]);
 
   const handleSend = async (event: FormEvent) => {
@@ -43,13 +65,12 @@ export default function ChatWindow({ dialogRef, friend }: ChatWindowProps) {
     setIsSending(true);
     setSendError(null);
     try {
-      const message = await sendMessage(userId, friend.id, content);
-      addMessage(message);
+      await send(content);
       setDraft('');
     } catch (err) {
       console.error(err);
       setSendError(
-        err instanceof ApiError ? err.message : 'Message non envoyé, réessaye.',
+        err instanceof Error ? err.message : 'Message non envoyé, réessaye.',
       );
     } finally {
       setIsSending(false);
@@ -58,7 +79,7 @@ export default function ChatWindow({ dialogRef, friend }: ChatWindowProps) {
 
   return (
     <BaseDialog dialogRef={dialogRef} title={friend.name}>
-      <div className="flex h-[480px] flex-col">
+      <div className="relative flex h-[480px] flex-col">
         {isLoading && (
           <p className="p-4 text-sm text-green-400">Chargement...</p>
         )}
@@ -66,6 +87,7 @@ export default function ChatWindow({ dialogRef, friend }: ChatWindowProps) {
 
         <div
           ref={threadRef}
+          onScroll={handleScroll}
           className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto p-4"
         >
           {messages.map((m) => (
@@ -74,7 +96,7 @@ export default function ChatWindow({ dialogRef, friend }: ChatWindowProps) {
               className={`flex ${m.senderId === userId ? 'justify-end' : ''}`}
             >
               <div
-                className={`max-w-[75%] rounded-2xl px-3 py-2 text-sm ${
+                className={`max-w-[75%] rounded-2xl px-3 py-2 text-sm break-words ${
                   m.senderId === userId
                     ? 'rounded-br-sm bg-green-500 text-white'
                     : 'rounded-bl-sm border border-green-200 bg-white text-green-800'
@@ -85,6 +107,15 @@ export default function ChatWindow({ dialogRef, friend }: ChatWindowProps) {
             </div>
           ))}
         </div>
+
+        {hasNewMessage && (
+          <button
+            onClick={scrollToBottom}
+            className="absolute bottom-20 left-1/2 -translate-x-1/2 rounded-full bg-green-500 px-3 py-1 text-xs font-medium text-white shadow-md"
+          >
+            Nouveau message
+          </button>
+        )}
 
         {sendError && (
           <p className="px-4 pb-2 text-xs text-red-500">{sendError}</p>

@@ -31,11 +31,3 @@ async function request<T>(url: string, init?: RequestInit): Promise<T> {
 export function getConversation(userId: number, otherUserId: number) {
   return request<Message[]>(`${messagesUrl(userId)}/${otherUserId}`);
 }
-
-export function sendMessage(userId: number, toUserId: number, content: string) {
-  return request<Message>(messagesUrl(userId), {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ toUserId, content }),
-  });
-}
