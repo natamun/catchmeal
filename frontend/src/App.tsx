@@ -6,6 +6,7 @@ import Nav, { type Tab } from './components/layout/Nav';
 
 const LandingPage = lazy(() => import('./pages/LandingPage'));
 const AuthPage = lazy(() => import('./pages/AuthPage'));
+const AdminPage = lazy(() => import('./pages/AdminPage'));
 const HomePage = lazy(() => import('./pages/HomePage'));
 const StatsPage = lazy(() => import('./pages/StatsPage'));
 const FriendsPage = lazy(() => import('./pages/FriendsPage'));
@@ -15,7 +16,7 @@ const ProfilePage = lazy(() => import('./pages/ProfilePage'));
 type Page = 'landing' | 'login' | 'register';
 
 function AppShell() {
-  const { status } = useAuth();
+  const { status, user } = useAuth();
   const [page, setPage] = useState<Page>(() => {
     const params = new URLSearchParams(window.location.search);
     return params.get('error') === 'oauth_failed' ? 'login' : 'landing';
@@ -50,7 +51,6 @@ function AppShell() {
         </Suspense>
       );
     }
-
     return (
       <Suspense fallback={null}>
         <LandingPage
@@ -58,6 +58,25 @@ function AppShell() {
           onRegister={() => setPage('register')}
         />
       </Suspense>
+    );
+  }
+
+  // Admin board — shown directly for ADMIN users
+  if (user?.role === 'ADMIN') {
+    return (
+      <div className="min-h-screen bg-green-50">
+        <main id="main-content" className="mx-auto max-w-6xl px-6 pt-8 pb-8">
+          <Suspense
+            fallback={
+              <div className="flex h-40 items-center justify-center text-sm text-green-500">
+                Chargement...
+              </div>
+            }
+          >
+            <AdminPage />
+          </Suspense>
+        </main>
+      </div>
     );
   }
 
