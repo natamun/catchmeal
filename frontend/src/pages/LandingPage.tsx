@@ -122,7 +122,7 @@ export default function LandingPage({ onLogin, onRegister }: Props) {
     <div className="flex min-h-screen flex-col bg-white">
       {/* Nav */}
       <nav className="mx-auto flex w-full max-w-6xl items-center justify-between border-b border-green-200 px-8 py-4">
-        <span className="text-lg font-bold tracking-tight text-green-300">
+        <span className="text-lg font-bold tracking-tight text-green-700">
           KcalApp
         </span>
         <div className="flex items-center gap-2 text-xs text-green-600">
@@ -155,7 +155,7 @@ export default function LandingPage({ onLogin, onRegister }: Props) {
           aria-labelledby="hero-title"
           className="mx-auto flex w-full max-w-6xl flex-col items-center justify-center px-8 py-20 text-center"
         >
-          <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-green-100 bg-green-100 px-3 py-1 text-xs font-medium text-green-400">
+          <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-green-100 bg-green-100 px-3 py-1 text-xs font-medium text-green-700">
             <span
               className="bg-green-1000 inline-block h-1.5 w-1.5 rounded-full"
               aria-hidden="true"
@@ -168,7 +168,7 @@ export default function LandingPage({ onLogin, onRegister }: Props) {
           >
             Prenez le contrôle
             <br />
-            <span className="text-green-400">de votre alimentation.</span>
+            <span className="text-green-600">de votre alimentation.</span>
           </h1>
           <p className="mb-8 max-w-xl text-lg leading-relaxed text-green-600">
             Suivez vos calories, scannez vos produits du quotidien et progressez
@@ -196,7 +196,7 @@ export default function LandingPage({ onLogin, onRegister }: Props) {
           className="border-y border-green-200 bg-white px-8 py-16"
         >
           <div className="mx-auto max-w-6xl">
-            <p className="mb-2 text-xs font-semibold tracking-widest text-green-400 uppercase">
+            <p className="mb-2 text-xs font-semibold tracking-widest text-green-600 uppercase">
               Comment ça marche
             </p>
             <h2
@@ -231,7 +231,7 @@ export default function LandingPage({ onLogin, onRegister }: Props) {
         >
           <div className="md:grid md:grid-cols-2 md:items-start md:gap-16">
             <div>
-              <p className="mb-2 text-xs font-semibold tracking-widest text-green-400 uppercase">
+              <p className="mb-2 text-xs font-semibold tracking-widest text-green-600 uppercase">
                 Base de données
               </p>
               <h2
@@ -276,7 +276,7 @@ export default function LandingPage({ onLogin, onRegister }: Props) {
           className="border-y border-green-200 bg-white px-8 py-16"
         >
           <div className="mx-auto max-w-6xl">
-            <p className="mb-2 text-xs font-semibold tracking-widest text-green-400 uppercase">
+            <p className="mb-2 text-xs font-semibold tracking-widest text-green-600 uppercase">
               Fonctionnalités
             </p>
             <h2
@@ -313,7 +313,7 @@ export default function LandingPage({ onLogin, onRegister }: Props) {
         >
           <div className="md:grid md:grid-cols-2 md:items-start md:gap-16">
             <div>
-              <p className="mb-2 text-xs font-semibold tracking-widest text-green-400 uppercase">
+              <p className="mb-2 text-xs font-semibold tracking-widest text-green-600 uppercase">
                 Confidentialité
               </p>
               <h2
@@ -381,7 +381,7 @@ export default function LandingPage({ onLogin, onRegister }: Props) {
             </p>
             <button
               onClick={onRegister}
-              className="cursor-pointer rounded-xl bg-white px-8 py-3 font-semibold text-green-400 shadow-sm transition-colors hover:bg-green-100"
+              className="cursor-pointer rounded-xl bg-white px-8 py-3 font-semibold text-green-700 shadow-sm transition-colors hover:bg-green-100"
             >
               Créer un compte gratuitement
             </button>
