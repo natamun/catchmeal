@@ -173,6 +173,17 @@ export class PassportAuthController {
   @Get('google/callback')
   @UseGuards(AuthGuard('google'))
   async googleCallback(
+  // OAuth 42 — Step 1: redirect to 42 login page
+  @Get('42')
+  @UseGuards(AuthGuard('42'))
+  redirectToFortyTwo() {
+    // Passport handles the redirect automatically
+  }
+
+  // OAuth 42 — Step 2: 42 redirects back here after user grants permission
+  @Get('42/callback')
+  @UseGuards(AuthGuard('42'))
+  async fortyTwoCallback(
     @Request() request: RequestWithUser,
     @Res({ passthrough: false }) res: Response,
   ) {

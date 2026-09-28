@@ -25,7 +25,7 @@ function AppShell() {
     const params = new URLSearchParams(window.location.search);
     if (params.get('error') === 'oauth_failed') {
       window.history.replaceState({}, '', window.location.pathname);
-      return 'La connexion avec Google a échoué. Réessaye.';
+      return 'La connexion a échoué. Réessaye.';
     }
     return null;
   });
