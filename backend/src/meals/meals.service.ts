@@ -130,8 +130,14 @@ export class MealsService {
   async findRange(userId: number, from: Date, to: Date) {
     return this.prisma.meal.findMany({
       where: { userId: userId, loggedAt: { gte: from, lte: to } },
-      include: { items: true },
-      orderBy: { loggedAt: 'desc' },
+      include: {
+        items: {
+          include: {
+            foodItem: { select: { name: true, brand: true, baseUnit: true } },
+          },
+        },
+      },
+      orderBy: [{ loggedAt: 'asc' }, { id: 'asc' }],
     });
   }
 }
