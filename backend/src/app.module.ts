@@ -14,6 +14,7 @@ import { GdprModule } from './gdpr/gdpr.module';
 import { MealsModule } from './meals/meals.module';
 import { MessagesModule } from './messages/messages.module';
 import { UsersModule } from './users/users.module';
+import { WebsocketModule } from './websocket/websocket.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { UsersModule } from './users/users.module';
     AdminModule,
     AiModule,
     AiContextModule,
+    WebsocketModule,
   ],
   controllers: [AppController],
   providers: [AppService],
