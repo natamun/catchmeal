@@ -334,7 +334,7 @@ describe('MealsService', () => {
     });
   });
 
-  it('should find meals within a date range for a user', async () => {
+  it('should find meals within a date range for a user, with food item names', async () => {
     prismaMock.meal.findMany.mockResolvedValue([]);
     const from = new Date('2026-09-01');
     const to = new Date('2026-09-18');
@@ -343,18 +343,42 @@ describe('MealsService', () => {
 
     expect(prismaMock.meal.findMany).toHaveBeenCalledWith({
       where: { userId: 7, loggedAt: { gte: from, lte: to } },
-      include: { items: true },
-      orderBy: { loggedAt: 'desc' },
+      include: {
+        items: {
+          include: {
+            foodItem: { select: { name: true, brand: true, baseUnit: true } },
+          },
+        },
+      },
+      orderBy: [{ loggedAt: 'asc' }, { id: 'asc' }],
     });
   });
 
-  it('should return meals found within the range', async () => {
-    const meals = [{ id: 1 }, { id: 2 }];
+  it('should return the meals with their food item names unchanged', async () => {
+    const meals = [
+      {
+        id: 1,
+        loggedAt: new Date('2026-09-17'),
+        items: [
+          {
+            quantity: 150,
+            foodItem: { name: 'Riz blanc', brand: null, baseUnit: 'GRAM' },
+          },
+        ],
+      },
+      {
+        id: 2,
+        loggedAt: new Date('2026-09-16'),
+        items: [{ quantity: 1, foodItem: null }],
+      },
+    ];
     prismaMock.meal.findMany.mockResolvedValue(meals);
-    const from = new Date('2026-09-01');
-    const to = new Date('2026-09-18');
 
-    const result = await service.findRange(7, from, to);
+    const result = await service.findRange(
+      7,
+      new Date('2026-09-01'),
+      new Date('2026-09-18'),
+    );
 
     expect(result).toEqual(meals);
   });
@@ -367,8 +391,14 @@ describe('MealsService', () => {
 
     expect(prismaMock.meal.findMany).toHaveBeenCalledWith({
       where: { userId: 7, loggedAt: { gte: sameDay, lte: sameDay } },
-      include: { items: true },
-      orderBy: { loggedAt: 'desc' },
+      include: {
+        items: {
+          include: {
+            foodItem: { select: { name: true, brand: true, baseUnit: true } },
+          },
+        },
+      },
+      orderBy: [{ loggedAt: 'asc' }, { id: 'asc' }],
     });
   });
 });
