@@ -26,7 +26,7 @@ export default function ChatWindow({
 }: ChatWindowProps) {
   const { user } = useAuth();
   const userId = user!.userId;
-  const { messages, isLoading, loadError, send } = useConversation(
+  const { messages, isLoading, loadError, send, isConnected } = useConversation(
     userId,
     friend.id,
   );
@@ -128,6 +128,12 @@ export default function ChatWindow({
 
         {sendError && (
           <p className="px-4 pb-2 text-xs text-red-500">{sendError}</p>
+        )}
+
+        {!isConnected && (
+          <p className="bg-amber-50 px-4 py-1.5 text-center text-xs text-amber-700">
+            Connexion perdue, reconnexion en cours...
+          </p>
         )}
 
         <form

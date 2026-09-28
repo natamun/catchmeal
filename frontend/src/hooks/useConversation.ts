@@ -8,24 +8,29 @@ export function useConversation(userId: number, otherUserId: number) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [isConnected, setIsConnected] = useState(true);
   const socketRef = useRef<Socket | null>(null);
 
   useEffect(() => {
     let cancelled = false;
 
-    getConversation(userId, otherUserId)
-      .then((fetched) => {
-        if (!cancelled) setMessages(fetched);
-      })
-      .catch((err) => {
-        if (!cancelled) {
-          console.error(err);
-          setLoadError('Impossible de charger la conversation.');
-        }
-      })
-      .finally(() => {
-        if (!cancelled) setIsLoading(false);
-      });
+    const loadHistory = () => {
+      getConversation(userId, otherUserId)
+        .then((fetched) => {
+          if (!cancelled) setMessages(fetched);
+        })
+        .catch((err) => {
+          if (!cancelled) {
+            console.error(err);
+            setLoadError('Impossible de charger la conversation.');
+          }
+        })
+        .finally(() => {
+          if (!cancelled) setIsLoading(false);
+        });
+    };
+
+    loadHistory();
 
     const socket = io(import.meta.env.VITE_API_URL, { withCredentials: true });
     socketRef.current = socket;
@@ -37,6 +42,13 @@ export function useConversation(userId: number, otherUserId: number) {
       if (isRelevant) {
         setMessages((prev) => [...prev, message]);
       }
+    });
+
+    socket.on('disconnect', () => setIsConnected(false));
+
+    socket.io.on('reconnect', () => {
+      setIsConnected(true);
+      loadHistory();
     });
 
     return () => {
@@ -58,5 +70,5 @@ export function useConversation(userId: number, otherUserId: number) {
     });
   };
 
-  return { messages, isLoading, loadError, send };
+  return { messages, isLoading, loadError, send, isConnected };
 }
