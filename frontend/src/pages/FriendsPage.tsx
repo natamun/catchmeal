@@ -168,7 +168,6 @@ export default function FriendsPage() {
                     friend={f.friend}
                     onMessage={() => {
                       setChatFriend(f.friend);
-                      chatDialogRef.current?.showModal();
                     }}
                     onRemove={() => {
                       setFriendToRemove(f);
@@ -233,7 +232,11 @@ export default function FriendsPage() {
         }}
       />
       {chatFriend && (
-        <ChatWindow dialogRef={chatDialogRef} friend={chatFriend} />
+        <ChatWindow
+          dialogRef={chatDialogRef}
+          friend={chatFriend}
+          onClose={() => setChatFriend(null)}
+        />
       )}
 
       <ConfirmDialog

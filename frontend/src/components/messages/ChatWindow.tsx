@@ -16,9 +16,14 @@ import { Input } from '../ui/Input';
 interface ChatWindowProps {
   dialogRef: RefObject<HTMLDialogElement | null>;
   friend: UserSummary;
+  onClose?: () => void;
 }
 
-export default function ChatWindow({ dialogRef, friend }: ChatWindowProps) {
+export default function ChatWindow({
+  dialogRef,
+  friend,
+  onClose,
+}: ChatWindowProps) {
   const { user } = useAuth();
   const userId = user!.userId;
   const { messages, isLoading, loadError, send } = useConversation(
@@ -32,6 +37,10 @@ export default function ChatWindow({ dialogRef, friend }: ChatWindowProps) {
   const [sendError, setSendError] = useState<string | null>(null);
   const prevCountRef = useRef(messages.length);
   const threadRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    dialogRef.current?.showModal();
+  }, [dialogRef]);
 
   const scrollToBottom = () => {
     threadRef.current?.scrollTo({ top: threadRef.current.scrollHeight });
@@ -78,7 +87,7 @@ export default function ChatWindow({ dialogRef, friend }: ChatWindowProps) {
   };
 
   return (
-    <BaseDialog dialogRef={dialogRef} title={friend.name}>
+    <BaseDialog dialogRef={dialogRef} title={friend.name} onClose={onClose}>
       <div className="relative flex h-[480px] flex-col">
         {isLoading && (
           <p className="p-4 text-sm text-green-400">Chargement...</p>
