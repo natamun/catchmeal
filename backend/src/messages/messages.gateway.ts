@@ -36,22 +36,29 @@ export class MessagesGateway implements OnGatewayInit {
   ) {}
 
   afterInit(server: Server) {
-    server.use(async (socket: ChatSocket, next) => {
-      try {
-        const cookies = parse(socket.handshake.headers.cookie ?? '');
-        const token = cookies.access_token;
-        if (!token) throw new Error('No token');
-
-        const payload = this.jwtService.verify<{ sub: number }>(token);
-        const user = await this.usersService.findById(payload.sub);
-        if (!user) throw new Error('User not found');
-
-        socket.data.userId = user.id;
-        next();
-      } catch {
-        next(new Error('Unauthorized'));
-      }
+    server.use((socket: ChatSocket, next) => {
+      void this.authenticateSocket(socket, next);
     });
+  }
+
+  private async authenticateSocket(
+    socket: ChatSocket,
+    next: (err?: Error) => void,
+  ) {
+    try {
+      const cookies = parse(socket.handshake.headers.cookie ?? '');
+      const token = cookies.access_token;
+      if (!token) throw new Error('No token');
+
+      const payload = this.jwtService.verify<{ sub: number }>(token);
+      const user = await this.usersService.findById(payload.sub);
+      if (!user) throw new Error('User not found');
+
+      socket.data.userId = user.id;
+      next();
+    } catch {
+      next(new Error('Unauthorized'));
+    }
   }
 
   handleConnection(client: ChatSocket) {
