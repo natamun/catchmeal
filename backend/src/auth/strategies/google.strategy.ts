@@ -1,12 +1,20 @@
 import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
-import { Profile, Strategy } from 'passport-google-oauth20';
+import { Strategy } from 'passport-google-oauth20';
 
 import { AuthService } from '../auth.service';
+
+interface GoogleProfile {
+  id: string;
+  displayName: string;
+  name?: { givenName?: string; familyName?: string };
+  emails?: Array<{ value: string; verified?: boolean }>;
+}
 
 @Injectable()
 export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
   constructor(private readonly authService: AuthService) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
     super({
       clientID: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
@@ -18,15 +26,15 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
   async validate(
     _accessToken: string,
     _refreshToken: string,
-    profile: Profile,
+    profile: GoogleProfile,
   ) {
     const email =
-      profile.emails?.[0]?.value ?? `google_${profile.id}@noemail.invalid`;
+      profile.emails?.[0]?.value ?? `google${profile.id}@noemail.invalid`;
     const displayName =
-      profile.displayName ?? profile.name?.givenName ?? `google_${profile.id}`;
+      profile.displayName ?? profile.name?.givenName ?? `google${profile.id}`;
 
     return this.authService.findOrCreateFromOAuth({
-      username: email.split('@')[0],
+      username: `google_${profile.id}`,
       name: displayName,
       email,
     });

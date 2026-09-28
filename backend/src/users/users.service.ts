@@ -41,10 +41,8 @@ export class UsersService {
     return this.prisma.user.findUnique({ where: { username } });
   }
 
-  findUserByNameOrEmail(username: string, email: string) {
-    return this.prisma.user.findFirst({
-      where: { OR: [{ username }, { email }] },
-    });
+  findUserByEmail(email: string) {
+    return this.prisma.user.findUnique({ where: { email } });
   }
 
   async updateAvatar(userId: number, file: Express.Multer.File) {
