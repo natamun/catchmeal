@@ -1,4 +1,9 @@
-import type { Friend, FriendRequest, UserSummary } from './types';
+import {
+  type Friend,
+  type FriendPresence,
+  type FriendRequest,
+  type UserSummary,
+} from './types';
 
 const USERS_URL = `${import.meta.env.VITE_API_URL}/users`;
 
@@ -67,4 +72,10 @@ export function acceptFriendRequest(userId: number, id: number) {
 
 export function removeFriendship(userId: number, id: number) {
   return request<unknown>(`${friendsUrl(userId)}/${id}`, { method: 'DELETE' });
+}
+
+export function getFriendsPresence(userId: number, signal?: AbortSignal) {
+  return request<FriendPresence[]>(`${USERS_URL}/${userId}/presence`, {
+    signal,
+  });
 }
