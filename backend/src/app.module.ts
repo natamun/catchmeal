@@ -13,6 +13,7 @@ import { FriendsModule } from './friends/friends.module';
 import { GdprModule } from './gdpr/gdpr.module';
 import { MealsModule } from './meals/meals.module';
 import { MessagesModule } from './messages/messages.module';
+import { PresenceModule } from './presence/presence.module';
 import { UsersModule } from './users/users.module';
 import { WebsocketModule } from './websocket/websocket.module';
 
@@ -31,6 +32,7 @@ import { WebsocketModule } from './websocket/websocket.module';
     AiModule,
     AiContextModule,
     WebsocketModule,
+    PresenceModule,
   ],
   controllers: [AppController],
   providers: [AppService],
