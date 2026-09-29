@@ -32,9 +32,14 @@ function AppShell() {
     }
     return null;
   });
-
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const [message, setMessage] = useState<ChatMessage[]>([]);
+  const [message, setMessage] = useState<ChatMessage[]>([
+    {
+      role: 'assistant',
+      content:
+        "Salut ! Je peux t'aider à comprendre tes stats ou te conseiller sur tes repas 😊",
+    },
+  ]);
 
   if (status === 'loading') {
     return (
