@@ -5,6 +5,7 @@ import { AuthProvider } from './auth/AuthProvider';
 import ChatBotPopup from './components/ai/ChatBotPopup';
 import Nav, { type Tab } from './components/layout/Nav';
 import type { ChatMessage } from './types/ChatBotType';
+import { SocketProvider } from './socket/SocketProvider';
 
 const LandingPage = lazy(() => import('./pages/LandingPage'));
 const AuthPage = lazy(() => import('./pages/AuthPage'));
@@ -118,7 +119,9 @@ function AppShell() {
 export default function App() {
   return (
     <AuthProvider>
-      <AppShell />
+      <SocketProvider>
+        <AppShell />
+      </SocketProvider>
     </AuthProvider>
   );
 }

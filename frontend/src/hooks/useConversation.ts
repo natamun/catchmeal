@@ -1,15 +1,14 @@
-import { useEffect, useRef, useState } from 'react';
-import { io, type Socket } from 'socket.io-client';
+import { useEffect, useState } from 'react';
 
 import { getConversation } from '../components/messages/api';
 import type { Message } from '../components/messages/types';
+import { useSocket } from '../socket/socket-context';
 
 export function useConversation(userId: number, otherUserId: number) {
+  const { socket, isConnected } = useSocket();
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
-  const [isConnected, setIsConnected] = useState(true);
-  const socketRef = useRef<Socket | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -32,34 +31,34 @@ export function useConversation(userId: number, otherUserId: number) {
 
     loadHistory();
 
-    const socket = io(import.meta.env.VITE_API_URL, { withCredentials: true });
-    socketRef.current = socket;
+    if (!socket)
+      return () => {
+        cancelled = true;
+      };
 
-    socket.on('message:new', (message: Message) => {
+    const handleNewMessage = (message: Message) => {
       const isRelevant =
         (message.senderId === userId && message.receiverId === otherUserId) ||
         (message.senderId === otherUserId && message.receiverId === userId);
       if (isRelevant) {
         setMessages((prev) => [...prev, message]);
       }
-    });
+    };
+    const handleReconnect = () => loadHistory();
 
-    socket.on('disconnect', () => setIsConnected(false));
-
-    socket.io.on('reconnect', () => {
-      setIsConnected(true);
-      loadHistory();
-    });
+    socket.on('message:new', handleNewMessage);
+    socket.io.on('reconnect', handleReconnect);
 
     return () => {
       cancelled = true;
-      socket.disconnect();
+      socket.off('message:new', handleNewMessage);
+      socket.io.off('reconnect', handleReconnect);
     };
-  }, [userId, otherUserId]);
+  }, [socket, userId, otherUserId]);
 
   const send = (content: string) => {
     return new Promise<Message>((resolve, reject) => {
-      socketRef.current?.emit(
+      socket?.emit(
         'message:send',
         { toUserId: otherUserId, content },
         (response: Message | { error: string }) => {
