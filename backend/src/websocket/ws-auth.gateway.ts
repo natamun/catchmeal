@@ -8,9 +8,7 @@ import { Server } from 'socket.io';
 import { AuthenticatedSocket } from './authenticated-socket';
 import { WsAuthService } from './ws-auth.service';
 
-@WebSocketGateway({
-  cors: { origin: process.env.FRONTEND_URL, credentials: true },
-})
+@WebSocketGateway()
 export class WsAuthGateway implements OnGatewayInit {
   @WebSocketServer()
   server: Server;
