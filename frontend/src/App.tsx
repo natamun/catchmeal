@@ -34,7 +34,6 @@ function AppShell() {
 
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [message, setMessage] = useState<ChatMessage[]>([]);
-  const [conversationId, setConversationId] = useState<string | null>(null);
 
   if (status === 'loading') {
     return (
@@ -100,8 +99,6 @@ function AppShell() {
           onToggle={setIsOpen}
           messages={message}
           onMessagesChange={setMessage}
-          conversationId={conversationId}
-          onConversationIdChange={setConversationId}
           activePage={activeTab}
         />
       )}
