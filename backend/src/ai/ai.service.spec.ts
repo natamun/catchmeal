@@ -35,32 +35,37 @@ describe('AiService', () => {
 
   it('should return the text directly when Mistral does not call a function', async () => {
     mistralMock.beta.conversations.start.mockResolvedValue({
-      conversationId: 'conv_1',
       outputs: [{ type: 'message.output', content: 'Bonjour !' }],
     });
 
     const result = await service.chat(42, 'Salut');
 
     expect(result.message).toBe('Bonjour !');
-    expect(result.conversationId).toBe('conv_1');
     expect(mealsServiceMock.findRange).not.toHaveBeenCalled();
   });
 
   it('should call findRange with the correct userId and dates when get_meals is requested', async () => {
     mistralMock.beta.conversations.start.mockResolvedValue({
-      conversationId: 'conv_2',
       outputs: [
         {
           type: 'function.call',
           name: 'get_meals',
-          toolCallId: 'call_1',
-          arguments: JSON.stringify({ period: 'week' }),
+          toolCallId: 'call_3',
+          arguments: JSON.stringify({
+            period: { from: '2026-09-21', to: '2026-09-28' },
+          }),
         },
       ],
+      conversationId: 'conv_442',
     });
     mistralMock.beta.conversations.append.mockResolvedValue({
-      conversationId: 'conv_2',
-      outputs: [{ type: 'message.output', content: 'Voici tes repas.' }],
+      outputs: [
+        {
+          type: 'message.output',
+          content: 'Voici tes repas.',
+        },
+      ],
+      conversationId: 'conv_442',
     });
     mealsServiceMock.findRange.mockResolvedValue([{ id: 1, name: 'Pizza' }]);
 
@@ -76,7 +81,6 @@ describe('AiService', () => {
 
   it('should return a generic error result to Mistral when the function name is unknown', async () => {
     mistralMock.beta.conversations.start.mockResolvedValue({
-      conversationId: 'conv_3',
       outputs: [
         {
           type: 'function.call',
@@ -87,7 +91,6 @@ describe('AiService', () => {
       ],
     });
     mistralMock.beta.conversations.append.mockResolvedValue({
-      conversationId: 'conv_3',
       outputs: [
         { type: 'message.output', content: 'Je ne peux pas faire ça.' },
       ],
@@ -96,7 +99,6 @@ describe('AiService', () => {
     const result = await service.chat(42, 'Fais un truc bizarre');
 
     expect(mistralMock.beta.conversations.append).toHaveBeenCalledWith({
-      conversationId: 'conv_3',
       conversationAppendRequest: {
         inputs: [
           {
@@ -118,38 +120,35 @@ describe('AiService', () => {
       .mockImplementation(() => {});
 
     mistralMock.beta.conversations.start.mockResolvedValue({
-      conversationId: 'conv_4',
       outputs: [
         {
           type: 'function.call',
           name: 'get_meals',
           toolCallId: 'call_3',
-          arguments: JSON.stringify({ period: 'day' }),
         },
       ],
     });
     mistralMock.beta.conversations.append.mockResolvedValue({
-      conversationId: 'conv_4',
       outputs: [
         {
           type: 'message.output',
           content: "Je n'ai pas pu récupérer tes repas.",
         },
       ],
+      conversationId: undefined,
     });
     mealsServiceMock.findRange.mockRejectedValue(new Error('DB down'));
 
     const result = await service.chat(42, "Qu'est-ce que j'ai mangé ?");
 
     expect(mistralMock.beta.conversations.append).toHaveBeenCalledWith({
-      conversationId: 'conv_4',
       conversationAppendRequest: {
         inputs: [
           {
             toolCallId: 'call_3',
             result: JSON.stringify({
               success: false,
-              error: 'Failed to retrieve meals from database.',
+              error: 'Invalid arguments for get_meals',
             }),
           },
         ],

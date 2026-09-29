@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { ThrottlerGuard } from '@nestjs/throttler';
 
 import { AiController } from './ai.controller';
 import { AiService } from './ai.service';
@@ -12,10 +13,14 @@ describe('AiController', () => {
   };
 
   beforeEach(async () => {
+    jest.resetAllMocks();
     const module: TestingModule = await Test.createTestingModule({
       controllers: [AiController],
       providers: [{ provide: AiService, useValue: aiServiceMock }],
-    }).compile();
+    })
+      .overrideGuard(ThrottlerGuard)
+      .useValue({ canActivate: () => true })
+      .compile();
 
     controller = module.get<AiController>(AiController);
   });
@@ -24,34 +29,25 @@ describe('AiController', () => {
     expect(controller).toBeDefined();
   });
 
-  it('should call aiService.chat with userId, message and conversationId', async () => {
-    const dto: ChatDto = {
-      message: 'Hello from Italy',
-      conversationId: 'conv_1',
-    };
-    await controller.chat(42, dto);
-
-    expect(aiServiceMock.chat).toHaveBeenCalledWith(
-      42,
-      'Hello from Italy',
-      'conv_1',
-    );
-  });
-
-  it('should work without a conversationId (first message)', async () => {
+  it('should call aiService.chat with userId', async () => {
     const dto: ChatDto = {
       message: 'Hello from Italy',
     };
     await controller.chat(42, dto);
 
-    expect(aiServiceMock.chat).toHaveBeenCalledWith(
-      42,
-      'Hello from Italy',
-      undefined,
-    );
+    expect(aiServiceMock.chat).toHaveBeenCalledWith(42, 'Hello from Italy');
   });
 
-  it('should return an object containing the message without a conversationId', async () => {
+  it('should work (first message)', async () => {
+    const dto: ChatDto = {
+      message: 'Hello from Italy',
+    };
+    await controller.chat(42, dto);
+
+    expect(aiServiceMock.chat).toHaveBeenCalledWith(42, 'Hello from Italy');
+  });
+
+  it('should return an object containing the message', async () => {
     aiServiceMock.chat.mockResolvedValue({
       message: 'Hello from Italy',
     });
@@ -63,25 +59,21 @@ describe('AiController', () => {
 
     expect(chat).toEqual({
       message: 'Hello from Italy',
-      convertationId: undefined,
     });
   });
 
-  it('should return an object containing the message and conversationId', async () => {
+  it('should return an object containing the message', async () => {
     aiServiceMock.chat.mockResolvedValue({
       message: 'Hello from Italy',
-      conversationId: 'conv_11223424323',
     });
 
     const dto: ChatDto = {
       message: 'Hello from Italy',
-      conversationId: 'conv_11223424323',
     };
     const chat = await controller.chat(42, dto);
 
     expect(chat).toEqual({
       message: 'Hello from Italy',
-      conversationId: 'conv_11223424323',
     });
   });
 });
