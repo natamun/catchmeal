@@ -8,6 +8,7 @@ export function SocketProvider({ children }: { children: ReactNode }) {
   const { status } = useAuth();
   const [socket, setSocket] = useState<Socket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
+  const [hasConnectedOnce, setHasConnectedOnce] = useState(false);
 
   useEffect(() => {
     if (status !== 'authenticated') return;
@@ -15,7 +16,10 @@ export function SocketProvider({ children }: { children: ReactNode }) {
     const instance = io(import.meta.env.VITE_API_URL, {
       withCredentials: true,
     });
-    instance.on('connect', () => setIsConnected(true));
+    instance.on('connect', () => {
+      setIsConnected(true);
+      setHasConnectedOnce(true);
+    });
     instance.on('disconnect', () => setIsConnected(false));
     // One-time setState to expose the newly created socket handle to consumers —
     // not a cascading update, this effect only re-runs when `status` changes.
@@ -26,11 +30,12 @@ export function SocketProvider({ children }: { children: ReactNode }) {
       instance.disconnect();
       setSocket(null);
       setIsConnected(false);
+      setHasConnectedOnce(false);
     };
   }, [status]);
 
   return (
-    <SocketContext.Provider value={{ socket, isConnected }}>
+    <SocketContext.Provider value={{ socket, isConnected, hasConnectedOnce }}>
       {children}
     </SocketContext.Provider>
   );

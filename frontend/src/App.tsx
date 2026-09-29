@@ -3,6 +3,7 @@ import { lazy, Suspense, useState } from 'react';
 import { useAuth } from './auth/auth-context';
 import { AuthProvider } from './auth/AuthProvider';
 import ChatBotPopup from './components/ai/ChatBotPopup';
+import { ConnectionBanner } from './components/layout/ConnectionBanner';
 import Nav, { type Tab } from './components/layout/Nav';
 import type { ChatMessage } from './types/ChatBotType';
 import { SocketProvider } from './socket/SocketProvider';
@@ -86,6 +87,7 @@ function AppShell() {
 
   return (
     <div className="min-h-screen bg-green-50 md:pl-56">
+      <ConnectionBanner />
       <main
         id="main-content"
         className="mx-auto max-w-6xl px-6 pt-6 pb-24 md:pb-8"
