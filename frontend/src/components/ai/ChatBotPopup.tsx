@@ -11,8 +11,6 @@ interface ChatBotPopupProps {
   onToggle: (v: boolean) => void;
   messages: ChatMessage[];
   onMessagesChange: (message: ChatMessage[]) => void;
-  conversationId: string | null;
-  onConversationIdChange: (id: string | null) => void;
   activePage: Tab;
 }
 
@@ -21,17 +19,28 @@ export default function ChatBotPopup({
   onToggle,
   messages,
   onMessagesChange,
-  conversationId,
-  onConversationIdChange,
   activePage,
 }: ChatBotPopupProps) {
   const [input, setInput] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const lastAssistantRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [isOpen]);
+
+  useEffect(() => {
+    const lastMessage = messages[messages.length - 1];
+    if (lastMessage?.role === 'assistant') {
+      lastAssistantRef.current?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      });
+    } else {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
   }, [messages]);
 
   useEffect(() => {
@@ -39,7 +48,7 @@ export default function ChatBotPopup({
   }, [activePage, onToggle]);
 
   async function handleSend() {
-    if (!input) return;
+    if (!input.trim() || loading) return;
     const addMessage: ChatMessage = { role: 'user', content: input };
     const updateWithUser = [...messages, addMessage];
     onMessagesChange(updateWithUser);
@@ -56,14 +65,11 @@ export default function ChatBotPopup({
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             message: addMessage.content,
-            conversationId: conversationId,
           }),
         },
       );
       const data = (await response.json()) as ResponseMistral;
       if (data) {
-        onConversationIdChange(data.conversationId);
-
         const addResponse: ChatMessage = {
           role: 'assistant',
           content: data.message,
@@ -77,7 +83,6 @@ export default function ChatBotPopup({
       setLoading(false);
       onToggle(false);
       onMessagesChange([]);
-      onConversationIdChange(null);
     } finally {
       setLoading(false);
     }
@@ -116,14 +121,19 @@ export default function ChatBotPopup({
             {messages.map((msg, key) => (
               <div
                 key={key}
+                ref={
+                  key === messages.length - 1 && msg.role === 'assistant'
+                    ? lastAssistantRef
+                    : null
+                }
                 className={`m-3 flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} `}
               >
-                <p
-                  className={`max-w-[85%] rounded-2xl px-3 py-2 text-sm break-words ${msg.role === 'user' ? 'bg-green-400 text-white' : 'border border-green-50 bg-gray-100 text-black'}`}
+                <div
+                  className={`max-w-[85%] rounded-2xl px-3 py-2 text-sm wrap-break-word ${msg.role === 'user' ? 'bg-green-400 text-white' : 'border border-green-50 bg-gray-100 text-black'}`}
                 >
                   {' '}
                   <ReactMarkdown>{msg.content}</ReactMarkdown>
-                </p>
+                </div>
               </div>
             ))}
             <div ref={messagesEndRef} />
@@ -133,10 +143,11 @@ export default function ChatBotPopup({
               className="m-2 max-h-20 min-w-0 flex-1 resize-none overflow-y-auto outline-none focus:outline-none"
               value={input}
               maxLength={250}
+              minLength={1}
               rows={1}
               ref={textareaRef}
               onKeyDown={(e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
+                if (e.key === 'Enter' && !e.shiftKey && loading === false) {
                   e.preventDefault();
                   void handleSend();
                 }
@@ -160,7 +171,9 @@ export default function ChatBotPopup({
                   <Forward />
                 </button>
               )}
-              {loading === true && <Loader height={20} width={20} />}
+              {loading === true && (
+                <Loader height={20} width={20} className="animate-spin" />
+              )}
             </div>
           </div>
         </div>
