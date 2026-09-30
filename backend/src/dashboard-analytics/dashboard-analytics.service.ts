@@ -28,7 +28,14 @@ export class DashboardAnalyticsService {
     const [meals, weightLogs, goals] = await Promise.all([
       this.prisma.meal.findMany({
         where: { userId: userId, loggedAt: { gte: from, lte: to } },
-        include: { items: true },
+        include: {
+          items: {
+            include: {
+              foodItem: { select: { name: true, brand: true, baseUnit: true } },
+            },
+          },
+        },
+        orderBy: { loggedAt: 'asc' },
       }),
 
       this.prisma.weightLog.findMany({
@@ -88,16 +95,17 @@ export class DashboardAnalyticsService {
         ),
       ]),
     ).sort();
+
     const dashboard = allDays.map((day) => {
       const goal = getGoalDate(new Date(day));
       return {
         day,
-        totalKcal: totalsByDay[day]?.kcal ?? null,
-        goalKcal: goal?.dailyCalories ?? null,
+        totalKcal: Math.round(totalsByDay[day]?.kcal) ?? null,
+        goalKcal: Math.round(goal?.dailyCalories) ?? null,
         weight: weightLogsDay[day]?.weight ?? null,
-        totalProtein: totalsByDay[day]?.protein ?? null,
-        totalCarbs: totalsByDay[day]?.carbs ?? null,
-        totalFat: totalsByDay[day]?.fat ?? null,
+        totalProtein: Math.round(totalsByDay[day]?.protein) ?? null,
+        totalCarbs: Math.round(totalsByDay[day]?.carbs) ?? null,
+        totalFat: Math.round(totalsByDay[day]?.fat) ?? null,
         objective: goal?.objective ?? null,
         bodyFat: weightLogsDay[day]?.bodyFat ?? null,
         noteWeight: weightLogsDay[day]?.note ?? null,
