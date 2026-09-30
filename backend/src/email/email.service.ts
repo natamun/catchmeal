@@ -80,9 +80,13 @@ export class EmailService {
     });
   }
 
+  private get fromAddress(): string {
+    return process.env.EMAIL_FROM ?? '"KcalApp" <noreply@kcalapp.dev>';
+  }
+
   async sendDataExportConfirmation(userEmail: string): Promise<void> {
     await this.transporter.sendMail({
-      from: '"KcalApp" <noreply@kcalapp.dev>',
+      from: this.fromAddress,
       to: userEmail,
       subject: 'Vos données ont été exportées',
       html: `<!DOCTYPE html>
@@ -117,7 +121,7 @@ export class EmailService {
 
   async sendAccountDeletionConfirmation(userEmail: string): Promise<void> {
     await this.transporter.sendMail({
-      from: '"KcalApp" <noreply@kcalapp.dev>',
+      from: this.fromAddress,
       to: userEmail,
       subject: 'Votre compte a été supprimé',
       html: `<!DOCTYPE html>
