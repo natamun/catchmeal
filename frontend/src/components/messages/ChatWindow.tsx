@@ -37,13 +37,14 @@ export default function ChatWindow({
   const [sendError, setSendError] = useState<string | null>(null);
   const prevCountRef = useRef(messages.length);
   const threadRef = useRef<HTMLDivElement>(null);
+  const lastMessageRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     dialogRef.current?.showModal();
   }, [dialogRef]);
 
   const scrollToBottom = () => {
-    threadRef.current?.scrollTo({ top: threadRef.current.scrollHeight });
+    lastMessageRef.current?.scrollIntoView({ block: 'start' });
     setHasNewMessage(false);
   };
 
@@ -99,9 +100,10 @@ export default function ChatWindow({
           onScroll={handleScroll}
           className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto p-4"
         >
-          {messages.map((m) => (
+          {messages.map((m, index) => (
             <div
               key={m.id}
+              ref={index === messages.length - 1 ? lastMessageRef : undefined}
               className={`flex ${m.senderId === userId ? 'justify-end' : ''}`}
             >
               <div
@@ -145,6 +147,7 @@ export default function ChatWindow({
             placeholder="Écrire un message..."
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
+            maxLength={2000}
             disabled={isSending}
           />
           <button

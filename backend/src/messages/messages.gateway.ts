@@ -1,4 +1,3 @@
-import { UsePipes, ValidationPipe } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import {
   ConnectedSocket,
@@ -8,6 +7,8 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
+import { plainToInstance } from 'class-transformer';
+import { validate } from 'class-validator';
 import { parse } from 'cookie';
 import { DefaultEventsMap, Server, Socket } from 'socket.io';
 
@@ -65,12 +66,17 @@ export class MessagesGateway implements OnGatewayInit {
     void client.join(`user:${client.data.userId}`);
   }
 
-  @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
   @SubscribeMessage('message:send')
   async handleSend(
     @ConnectedSocket() client: ChatSocket,
-    @MessageBody() dto: SendMessageDto,
+    @MessageBody() rawDto: unknown,
   ) {
+    const dto = plainToInstance(SendMessageDto, rawDto);
+    const errors = await validate(dto);
+    if (errors.length > 0) {
+      return { error: 'Message invalide.' };
+    }
+
     const userId = client.data.userId;
     try {
       const message = await this.messagesService.send(
