@@ -187,6 +187,31 @@ export class PassportAuthController {
     }
   }
 
+  // OAuth GitHub — Step 1: redirect to GitHub login page
+  @Get('github')
+  @UseGuards(AuthGuard('github'))
+  redirectToGitHub() {
+    // Passport handles the redirect automatically
+  }
+
+  // OAuth GitHub — Step 2: GitHub redirects back here after user grants permission
+  @Get('github/callback')
+  @UseGuards(AuthGuard('github'))
+  async githubCallback(
+    @Request() request: RequestWithUser,
+    @Res({ passthrough: false }) res: Response,
+  ) {
+    try {
+      const { accessToken } = await this.authService.signIn(request.user);
+      this.setAuthCookie(res, accessToken);
+      res.redirect(process.env.FRONTEND_URL ?? 'http://localhost:5173');
+    } catch {
+      res.redirect(
+        `${process.env.FRONTEND_URL ?? 'http://localhost:5173'}?error=oauth_failed`,
+      );
+    }
+  }
+
   // OAuth 42 — Step 1: redirect to 42 login page
   @Get('42')
   @UseGuards(AuthGuard('42'))

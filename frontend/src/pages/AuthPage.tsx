@@ -298,6 +298,16 @@ export default function AuthPage({ initialMode, onCancel, oauthError }: Props) {
         <button
           type="button"
           onClick={() => {
+            window.location.href = `${import.meta.env.VITE_API_URL}/auth/github`;
+          }}
+          className="mt-3 w-full cursor-pointer rounded-xl border border-green-200 bg-white px-6 py-3 font-semibold text-green-700 transition-colors hover:bg-green-50"
+        >
+          Login with GitHub
+        </button>
+
+        <button
+          type="button"
+          onClick={() => {
             window.location.href = `${import.meta.env.VITE_API_URL}/auth/42`;
           }}
           className="mt-3 w-full cursor-pointer rounded-xl border border-green-200 bg-white px-6 py-3 font-semibold text-green-700 transition-colors hover:bg-green-50"
