@@ -25,6 +25,15 @@ interface ExportResponse {
   data: { profile: UserProfile };
 }
 
+function escapeHtml(value: unknown): string {
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
 function buildExportHtml(data: ExportResponse): string {
   const p = data.data.profile;
   return `<!DOCTYPE html>
@@ -48,11 +57,11 @@ function buildExportHtml(data: ExportResponse): string {
   <p class="meta">Exporté le ${new Date(data.exportedAt).toLocaleString('fr-FR')}</p>
   <h2>Profil</h2>
   <table>
-    <tr><td>Identifiant</td><td>${p.id}</td></tr>
-    <tr><td>Nom d'utilisateur</td><td>${p.username}</td></tr>
-    <tr><td>Nom</td><td>${p.name}</td></tr>
-    <tr><td>Email</td><td>${p.email}</td></tr>
-    <tr><td>Rôle</td><td>${p.role}</td></tr>
+    <tr><td>Identifiant</td><td>${escapeHtml(p.id)}</td></tr>
+    <tr><td>Nom d'utilisateur</td><td>${escapeHtml(p.username)}</td></tr>
+    <tr><td>Nom</td><td>${escapeHtml(p.name)}</td></tr>
+    <tr><td>Email</td><td>${escapeHtml(p.email)}</td></tr>
+    <tr><td>Rôle</td><td>${escapeHtml(p.role)}</td></tr>
     <tr><td>Membre depuis</td><td>${new Date(p.createAt).toLocaleDateString('fr-FR')}</td></tr>
   </table>
   <h2>Résumé de l'activité</h2>
