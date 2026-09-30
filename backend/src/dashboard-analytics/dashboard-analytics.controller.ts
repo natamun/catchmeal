@@ -22,7 +22,11 @@ export class DashboardAnalyticsController {
     const fromDate = from
       ? from
       : new Date(new Date().setDate(new Date().getDate() - 7));
-    const toDate = to ? to : new Date();
+    const toDate = to
+      ? to
+      : new Date(new Date().setDate(new Date().getDate() + 1));
+    fromDate.setHours(0, 0, 0, 0);
+    toDate.setHours(0, 0, 0, 0);
     return this.analyticsService.getDashboard(userId, fromDate, toDate);
   }
 }
