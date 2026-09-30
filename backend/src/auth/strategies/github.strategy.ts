@@ -14,7 +14,6 @@ interface GitHubProfile {
 @Injectable()
 export class GitHubStrategy extends PassportStrategy(Strategy, 'github') {
   constructor(private readonly authService: AuthService) {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
     super({
       clientID: process.env.GITHUB_CLIENT_ID!,
       clientSecret: process.env.GITHUB_CLIENT_SECRET!,
