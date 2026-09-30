@@ -11,6 +11,7 @@ describe('UsersService', () => {
     user: {
       create: jest.fn(),
       findUnique: jest.fn(),
+      findFirst: jest.fn(),
       findFirstOrThrow: jest.fn(),
       update: jest.fn(),
     },
@@ -56,22 +57,22 @@ describe('UsersService', () => {
   });
 
   it('should find a user by id', async () => {
-    prismaMock.user.findUnique.mockResolvedValue({ id: 1 });
+    prismaMock.user.findFirst.mockResolvedValue({ id: 1 });
 
     await service.findById(1);
 
-    expect(prismaMock.user.findUnique).toHaveBeenCalledWith({
-      where: { id: 1 },
+    expect(prismaMock.user.findFirst).toHaveBeenCalledWith({
+      where: { id: 1, deletedAt: null },
     });
   });
 
   it('should find a user by username', async () => {
-    prismaMock.user.findUnique.mockResolvedValue({ id: 1, username: 'alice' });
+    prismaMock.user.findFirst.mockResolvedValue({ id: 1, username: 'alice' });
 
     await service.findUserByName('alice');
 
-    expect(prismaMock.user.findUnique).toHaveBeenCalledWith({
-      where: { username: 'alice' },
+    expect(prismaMock.user.findFirst).toHaveBeenCalledWith({
+      where: { username: 'alice', deletedAt: null },
     });
   });
 
