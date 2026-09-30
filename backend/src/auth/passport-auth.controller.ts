@@ -162,6 +162,31 @@ export class PassportAuthController {
     };
   }
 
+  // OAuth Google — Step 1: redirect to Google login page
+  @Get('google')
+  @UseGuards(AuthGuard('google'))
+  redirectToGoogle() {
+    // Passport handles the redirect automatically
+  }
+
+  // OAuth Google — Step 2: Google redirects back here after user grants permission
+  @Get('google/callback')
+  @UseGuards(AuthGuard('google'))
+  async googleCallback(
+    @Request() request: RequestWithUser,
+    @Res({ passthrough: false }) res: Response,
+  ) {
+    try {
+      const { accessToken } = await this.authService.signIn(request.user);
+      this.setAuthCookie(res, accessToken);
+      res.redirect(process.env.FRONTEND_URL ?? 'http://localhost:5173');
+    } catch {
+      res.redirect(
+        `${process.env.FRONTEND_URL ?? 'http://localhost:5173'}?error=oauth_failed`,
+      );
+    }
+  }
+
   // OAuth 42 — Step 1: redirect to 42 login page
   @Get('42')
   @UseGuards(AuthGuard('42'))
