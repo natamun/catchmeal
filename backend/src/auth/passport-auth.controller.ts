@@ -17,24 +17,32 @@ import { RegisterDto } from './dto/register.dto';
 import { PassportJwtAuthGuard } from './guards/passport-jwt.guard';
 import { PassportLocalGuard } from './guards/passport-local.guard';
 
-type RequestWithUser = ExpressRequest & {
-  user: SignInData & {
-    name?: string;
-    avatarUrl?: string | null;
-    height?: number | null;
-    targetWeight?: number | null;
-    dailyCalorieGoal?: number | null;
-    dailyProteinGoal?: number | null;
-    dailyCarbsGoal?: number | null;
-    dailyFatGoal?: number | null;
-    gender?: string | null;
-    birthDate?: Date | null;
-    activityLevel?: string | null;
+type RequestWithUser = ExpressRequest & { user: SignInData };
+
+type UserResponse = Omit<SignInData, 'userId'> & { userId: number };
+
+function toUserResponse(data: SignInData): UserResponse {
+  return {
+    userId: data.userId,
+    username: data.username,
+    name: data.name,
+    avatarUrl: data.avatarUrl,
+    height: data.height,
+    targetWeight: data.targetWeight,
+    dailyCalorieGoal: data.dailyCalorieGoal,
+    dailyProteinGoal: data.dailyProteinGoal,
+    dailyCarbsGoal: data.dailyCarbsGoal,
+    dailyFatGoal: data.dailyFatGoal,
+    gender: data.gender,
+    birthDate: data.birthDate,
+    activityLevel: data.activityLevel,
   };
-};
+}
 
 const COOKIE_NAME = 'access_token';
 const COOKIE_MAX_AGE_MS = 24 * 60 * 60 * 1000; // same as expiresIn from JwtModule
+
+const FRONTEND_URL = process.env.FRONTEND_URL ?? 'http://localhost:5173';
 
 @Controller('auth')
 export class PassportAuthController {
@@ -45,38 +53,9 @@ export class PassportAuthController {
     @Body() dto: RegisterDto,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const {
-      accessToken,
-      userId,
-      username,
-      name,
-      avatarUrl,
-      height,
-      targetWeight,
-      dailyCalorieGoal,
-      dailyProteinGoal,
-      dailyCarbsGoal,
-      dailyFatGoal,
-      gender,
-      birthDate,
-      activityLevel,
-    } = await this.authService.register(dto);
-    this.setAuthCookie(res, accessToken);
-    return {
-      userId,
-      username,
-      name,
-      avatarUrl,
-      height,
-      targetWeight,
-      dailyCalorieGoal,
-      dailyProteinGoal,
-      dailyCarbsGoal,
-      dailyFatGoal,
-      gender,
-      birthDate,
-      activityLevel,
-    };
+    const result = await this.authService.register(dto);
+    this.setAuthCookie(res, result.accessToken);
+    return toUserResponse(result);
   }
 
   @HttpCode(HttpStatus.OK)
@@ -86,38 +65,9 @@ export class PassportAuthController {
     @Request() request: RequestWithUser,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const {
-      accessToken,
-      userId,
-      username,
-      name,
-      avatarUrl,
-      height,
-      targetWeight,
-      dailyCalorieGoal,
-      dailyProteinGoal,
-      dailyCarbsGoal,
-      dailyFatGoal,
-      gender,
-      birthDate,
-      activityLevel,
-    } = await this.authService.signIn(request.user);
-    this.setAuthCookie(res, accessToken);
-    return {
-      userId,
-      username,
-      name,
-      avatarUrl,
-      height,
-      targetWeight,
-      dailyCalorieGoal,
-      dailyProteinGoal,
-      dailyCarbsGoal,
-      dailyFatGoal,
-      gender,
-      birthDate,
-      activityLevel,
-    };
+    const result = await this.authService.signIn(request.user);
+    this.setAuthCookie(res, result.accessToken);
+    return toUserResponse(result);
   }
 
   @Post('logout')
@@ -130,36 +80,7 @@ export class PassportAuthController {
   @Get('me')
   @UseGuards(PassportJwtAuthGuard)
   getUserInfo(@Request() request: RequestWithUser) {
-    const {
-      userId,
-      username,
-      name,
-      avatarUrl,
-      height,
-      targetWeight,
-      dailyCalorieGoal,
-      dailyProteinGoal,
-      dailyCarbsGoal,
-      dailyFatGoal,
-      gender,
-      birthDate,
-      activityLevel,
-    } = request.user;
-    return {
-      userId,
-      username,
-      name,
-      avatarUrl,
-      height,
-      targetWeight,
-      dailyCalorieGoal,
-      dailyProteinGoal,
-      dailyCarbsGoal,
-      dailyFatGoal,
-      gender,
-      birthDate,
-      activityLevel,
-    };
+    return toUserResponse(request.user);
   }
 
   // OAuth Google — Step 1: redirect to Google login page
@@ -179,11 +100,10 @@ export class PassportAuthController {
     try {
       const { accessToken } = await this.authService.signIn(request.user);
       this.setAuthCookie(res, accessToken);
-      res.redirect(process.env.FRONTEND_URL ?? 'http://localhost:5173');
-    } catch {
-      res.redirect(
-        `${process.env.FRONTEND_URL ?? 'http://localhost:5173'}?error=oauth_failed`,
-      );
+      res.redirect(FRONTEND_URL);
+    } catch (err) {
+      console.error('[OAuth Google] signIn failed:', err);
+      res.redirect(`${FRONTEND_URL}?error=oauth_failed`);
     }
   }
 
@@ -204,11 +124,10 @@ export class PassportAuthController {
     try {
       const { accessToken } = await this.authService.signIn(request.user);
       this.setAuthCookie(res, accessToken);
-      res.redirect(process.env.FRONTEND_URL ?? 'http://localhost:5173');
-    } catch {
-      res.redirect(
-        `${process.env.FRONTEND_URL ?? 'http://localhost:5173'}?error=oauth_failed`,
-      );
+      res.redirect(FRONTEND_URL);
+    } catch (err) {
+      console.error('[OAuth GitHub] signIn failed:', err);
+      res.redirect(`${FRONTEND_URL}?error=oauth_failed`);
     }
   }
 
@@ -229,11 +148,10 @@ export class PassportAuthController {
     try {
       const { accessToken } = await this.authService.signIn(request.user);
       this.setAuthCookie(res, accessToken);
-      res.redirect(process.env.FRONTEND_URL ?? 'http://localhost:5173');
-    } catch {
-      res.redirect(
-        `${process.env.FRONTEND_URL ?? 'http://localhost:5173'}?error=oauth_failed`,
-      );
+      res.redirect(FRONTEND_URL);
+    } catch (err) {
+      console.error('[OAuth 42] signIn failed:', err);
+      res.redirect(`${FRONTEND_URL}?error=oauth_failed`);
     }
   }
 
