@@ -1,13 +1,13 @@
 import { Module } from '@nestjs/common';
 
 import { EmailModule } from '../email/email.module';
-import { PrismaService } from '../prisma/prisma.service';
+import { PrismaModule } from '../prisma/prisma.module';
 import { GdprController } from './gdpr.controller';
 import { GdprService } from './gdpr.service';
 
 @Module({
-  imports: [EmailModule],
+  imports: [EmailModule, PrismaModule],
   controllers: [GdprController],
-  providers: [GdprService, PrismaService],
+  providers: [GdprService],
 })
 export class GdprModule {}
