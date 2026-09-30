@@ -111,6 +111,12 @@ export function GdprSection() {
       if (!response.ok) throw new Error('Failed to delete account');
       deleteDialogRef.current?.close();
       deleteSuccessDialogRef.current?.showModal();
+      // Logout regardless of how the success dialog is closed
+      deleteSuccessDialogRef.current?.addEventListener(
+        'close',
+        () => void logout(),
+        { once: true },
+      );
     } catch {
       deleteDialogRef.current?.close();
       setDeleteErrorToast('Erreur lors de la suppression du compte');
