@@ -100,12 +100,12 @@ export class DashboardAnalyticsService {
       const goal = getGoalDate(new Date(day));
       return {
         day,
-        totalKcal: Math.round(totalsByDay[day]?.kcal) ?? null,
-        goalKcal: Math.round(goal?.dailyCalories) ?? null,
+        totalKcal: totalsByDay[day]?.kcal ?? null,
+        goalKcal: goal?.dailyCalories ?? null,
         weight: weightLogsDay[day]?.weight ?? null,
-        totalProtein: Math.round(totalsByDay[day]?.protein) ?? null,
-        totalCarbs: Math.round(totalsByDay[day]?.carbs) ?? null,
-        totalFat: Math.round(totalsByDay[day]?.fat) ?? null,
+        totalProtein: totalsByDay[day]?.protein ?? null,
+        totalCarbs: totalsByDay[day]?.carbs ?? null,
+        totalFat: totalsByDay[day]?.fat ?? null,
         objective: goal?.objective ?? null,
         bodyFat: weightLogsDay[day]?.bodyFat ?? null,
         noteWeight: weightLogsDay[day]?.note ?? null,

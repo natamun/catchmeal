@@ -54,13 +54,15 @@ describe('DashboardAnalyticsController', () => {
 
   it('should be call with userId: 1 and last 7 days', async () => {
     const now = new Date('2026-01-15T12:00:00.000Z');
+    const checkFrom = new Date('2026-01-08T00:00:00.000Z');
+    const checkTo = new Date('2026-01-16T00:00:00.000Z');
     jest.useFakeTimers().setSystemTime(now);
     analysticsMock.getDashboard.mockResolvedValue([]);
     await controller.getDashboard(1);
     expect(analysticsMock.getDashboard).toHaveBeenCalledWith(
       1,
-      new Date(new Date(now).setDate(now.getDate() - 7)),
-      now,
+      checkFrom,
+      checkTo,
     );
     jest.useRealTimers();
   });
