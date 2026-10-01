@@ -1,4 +1,8 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import {
+  ConflictException,
+  ForbiddenException,
+  Injectable,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
 
@@ -9,9 +13,11 @@ import { RegisterDto } from './dto/register.dto';
 const SALT_ROUNDS = 10;
 
 type AuthInput = { username: string; password: string };
+
 export type SignInData = {
   userId: number;
   username: string;
+  role?: string;
   name?: string;
   avatarUrl?: string | null;
   height?: number | null;
@@ -24,10 +30,12 @@ export type SignInData = {
   birthDate?: Date | null;
   activityLevel?: string | null;
 };
+
 type AuthResult = {
   accessToken: string;
   userId: number;
   username: string;
+  role?: string;
   name?: string;
   avatarUrl?: string | null;
   height?: number | null;
@@ -72,6 +80,7 @@ export class AuthService {
     return {
       userId: user.id,
       username: user.username,
+      role: user.role,
       name: user.name,
       avatarUrl: user.avatarUrl,
       height: user.height,
@@ -168,6 +177,7 @@ export class AuthService {
       accessToken,
       username: user.username,
       userId: user.userId,
+      role: user.role,
       name: user.name,
       avatarUrl: user.avatarUrl,
       height: user.height,
@@ -179,6 +189,29 @@ export class AuthService {
       gender: user.gender,
       birthDate: user.birthDate,
       activityLevel: user.activityLevel,
+    };
+  }
+
+  async adminSignIn(input: AuthInput): Promise<AuthResult> {
+    const adminUsername = process.env.ADMIN_USERNAME;
+    const adminPassword = process.env.ADMIN_PASSWORD;
+
+    if (!adminUsername || !adminPassword) {
+      throw new ForbiddenException('Admin access is not configured');
+    }
+
+    if (input.username !== adminUsername || input.password !== adminPassword) {
+      throw new ForbiddenException('Invalid admin credentials');
+    }
+
+    const tokenPayload = { sub: 0, username: adminUsername, role: 'ADMIN' };
+    const accessToken = await this.jwtService.signAsync(tokenPayload);
+
+    return {
+      accessToken,
+      userId: 0,
+      username: adminUsername,
+      role: 'ADMIN',
     };
   }
 }
