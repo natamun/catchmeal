@@ -6,6 +6,7 @@ import Nav, { type Tab } from './components/layout/Nav';
 
 const LandingPage = lazy(() => import('./pages/LandingPage'));
 const AuthPage = lazy(() => import('./pages/AuthPage'));
+const AdminLoginPage = lazy(() => import('./pages/AdminLoginPage'));
 const AdminPage = lazy(() => import('./pages/AdminPage'));
 const HomePage = lazy(() => import('./pages/HomePage'));
 const StatsPage = lazy(() => import('./pages/StatsPage'));
@@ -13,11 +14,12 @@ const FriendsPage = lazy(() => import('./pages/FriendsPage'));
 const FoodPage = lazy(() => import('./pages/FoodPage'));
 const ProfilePage = lazy(() => import('./pages/ProfilePage'));
 
-type Page = 'landing' | 'login' | 'register';
+type Page = 'landing' | 'login' | 'register' | 'admin-login';
 
 function AppShell() {
   const { status, user } = useAuth();
   const [page, setPage] = useState<Page>(() => {
+    if (window.location.pathname === '/admin') return 'admin-login';
     const params = new URLSearchParams(window.location.search);
     return params.get('error') === 'oauth_failed' ? 'login' : 'landing';
   });
@@ -40,6 +42,14 @@ function AppShell() {
   }
 
   if (status === 'unauthenticated') {
+    if (page === 'admin-login') {
+      return (
+        <Suspense fallback={null}>
+          <AdminLoginPage onCancel={() => setPage('landing')} />
+        </Suspense>
+      );
+    }
+
     if (page === 'login' || page === 'register') {
       return (
         <Suspense fallback={null}>
@@ -51,6 +61,7 @@ function AppShell() {
         </Suspense>
       );
     }
+
     return (
       <Suspense fallback={null}>
         <LandingPage
