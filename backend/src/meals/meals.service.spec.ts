@@ -1,6 +1,7 @@
 import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 
+import { ActivityService } from '../activity/activity.service';
 import { MealType } from '../generated/prisma/enums';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateMealDto } from './dto/create-meal.dto';
@@ -22,12 +23,17 @@ describe('MealsService', () => {
     },
   };
 
+  const activityServiceMock = {
+    record: jest.fn(),
+  };
+
   beforeEach(async () => {
     jest.resetAllMocks();
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         MealsService,
         { provide: PrismaService, useValue: prismaMock },
+        { provide: ActivityService, useValue: activityServiceMock },
       ],
     }).compile();
 

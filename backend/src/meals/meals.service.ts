@@ -1,13 +1,17 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 
-import { FoodItem } from '../generated/prisma/client';
+import { ActivityService } from '../activity/activity.service';
+import { ActivityType, FoodItem } from '../generated/prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateMealDto, CreateMealItemDto } from './dto/create-meal.dto';
 import { UpdateMealDto } from './dto/update-meal.dto';
 
 @Injectable()
 export class MealsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly activityService: ActivityService,
+  ) {}
 
   private async buildItemsData(userId: number, items: CreateMealItemDto[]) {
     const ids = [
@@ -60,8 +64,9 @@ export class MealsService {
 
   async create(userId: number, dto: CreateMealDto) {
     const items = await this.buildItemsData(userId, dto.items);
+    const kcal = items.reduce((sum, item) => sum + item.kcal, 0);
 
-    return this.prisma.meal.create({
+    const meal = await this.prisma.meal.create({
       data: {
         userId,
         name: dto.name,
@@ -73,6 +78,51 @@ export class MealsService {
       },
       include: { items: true },
     });
+
+    if (meal.loggedAt) {
+      await this.activityService.record(userId, ActivityType.MEAL_LOGGED, {
+        name: meal.name,
+        kcal: Math.round(kcal),
+      });
+      await this.checkGoalReached(userId, meal.loggedAt);
+    }
+
+    return meal;
+  }
+
+  private async checkGoalReached(userId: number, day: Date) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { dailyCalorieGoal: true },
+    });
+    if (!user?.dailyCalorieGoal) return;
+
+    const dayMeals = await this.prisma.meal.findMany({
+      where: { userId, loggedAt: day },
+      include: { items: true },
+    });
+    const total = dayMeals.reduce(
+      (sum, meal) => sum + meal.items.reduce((s, item) => s + item.kcal, 0),
+      0,
+    );
+    const ratio = total / user.dailyCalorieGoal;
+    if (ratio < 0.9 || ratio > 1) return;
+
+    const dayStart = new Date(day);
+    dayStart.setHours(0, 0, 0, 0);
+    const dayEnd = new Date(day);
+    dayEnd.setHours(23, 59, 59, 999);
+
+    const alreadyRecorded = await this.prisma.activity.findFirst({
+      where: {
+        userId,
+        type: ActivityType.GOAL_REACHED,
+        createdAt: { gte: dayStart, lte: dayEnd },
+      },
+    });
+    if (alreadyRecorded) return;
+
+    await this.activityService.record(userId, ActivityType.GOAL_REACHED);
   }
 
   findAll(userId: number, logged?: boolean, date?: Date) {

@@ -1,5 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 
+import { ActivityService } from '../activity/activity.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { SupabaseService } from '../supabase/supabase.service';
 import { UsersService } from './users.service';
@@ -25,6 +26,10 @@ describe('UsersService', () => {
     uploadAvatar: jest.fn(),
   };
 
+  const activityServiceMock = {
+    record: jest.fn(),
+  };
+
   beforeEach(async () => {
     jest.resetAllMocks();
     const module: TestingModule = await Test.createTestingModule({
@@ -32,6 +37,7 @@ describe('UsersService', () => {
         UsersService,
         { provide: PrismaService, useValue: prismaMock },
         { provide: SupabaseService, useValue: supabaseMock },
+        { provide: ActivityService, useValue: activityServiceMock },
       ],
     }).compile();
 
