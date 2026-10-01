@@ -1,5 +1,6 @@
 import { MessageCircle, X } from 'lucide-react';
 
+import { formatRelativeTime } from '../../utils/formatRelativeTime';
 import { Avatar } from './Avatar';
 import type { UserSummary } from './types';
 
@@ -29,7 +30,7 @@ export default function FriendRow({
           {online
             ? 'En ligne'
             : lastSeenAt
-              ? formatLastSeen(lastSeenAt)
+              ? formatRelativeTime(lastSeenAt)
               : `@${friend.username}`}
         </p>
       </div>
@@ -51,15 +52,4 @@ export default function FriendRow({
       </button>
     </li>
   );
-}
-
-function formatLastSeen(lastSeenAt: string): string {
-  const diffMs = Date.now() - new Date(lastSeenAt).getTime();
-  const minutes = Math.floor(diffMs / 60000);
-  if (minutes < 1) return "à l'instant";
-  if (minutes < 60) return `il y a ${minutes} min`;
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `il y a ${hours}h`;
-  const days = Math.floor(hours / 24);
-  return `il y a ${days}j`;
 }

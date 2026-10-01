@@ -77,7 +77,12 @@ function AppShell() {
   const isAdmin = user?.role === 'ADMIN';
 
   const pages: Record<Tab, React.ReactNode> = {
-    home: <HomePage onNavigateToProfile={() => setActiveTab('profile')} />,
+    home: (
+      <HomePage
+        onNavigateToProfile={() => setActiveTab('profile')}
+        onNavigateToFriends={() => setActiveTab('friends')}
+      />
+    ),
     food: <FoodPage />,
     stats: <StatsPage />,
     friends: <FriendsPage />,

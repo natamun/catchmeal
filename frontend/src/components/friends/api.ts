@@ -1,4 +1,5 @@
 import {
+  type ActivityItem,
   type Friend,
   type FriendPresence,
   type FriendRequest,
@@ -96,6 +97,12 @@ export function removeFriendship(userId: number, id: number) {
 
 export function getFriendsPresence(signal?: AbortSignal) {
   return request<FriendPresence[]>(`${import.meta.env.VITE_API_URL}/presence`, {
+    signal,
+  });
+}
+
+export function getFriendsActivity(userId: number, signal?: AbortSignal) {
+  return request<ActivityItem[]>(`${USERS_URL}/${userId}/activities`, {
     signal,
   });
 }

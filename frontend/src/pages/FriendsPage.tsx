@@ -11,9 +11,11 @@ import {
 import FriendRow from '../components/friends/FriendRow.tsx';
 import RequestRow from '../components/friends/RequestRow.tsx';
 import type { Friend, UserSummary } from '../components/friends/types.ts';
+import FriendsActivity from '../components/home/FriendsActivity.tsx';
 import ChatWindow from '../components/messages/ChatWindow.tsx';
 import { ConfirmDialog } from '../components/ui/ConfirmDialog.tsx';
 import { Toast } from '../components/ui/Toast.tsx';
+import { useActivityFeed } from '../hooks/useActivityFeed.ts';
 import { useFriends } from '../hooks/useFriends.ts';
 import { usePresence } from '../hooks/usePresence.ts';
 import { useTimeout } from '../hooks/useTimeout.ts';
@@ -30,6 +32,7 @@ export default function FriendsPage() {
   const userId = user!.userId;
   const { friends, requests, sentRequestIds, isLoading, loadError, reload } =
     useFriends(userId);
+  const activities = useActivityFeed(userId);
   const [activeTab, setActiveTab] = useState<Tab>('friends');
   const [busyId, setBusyId] = useState<number | null>(null);
   const [friendToRemove, setFriendToRemove] = useState<Friend | null>(null);
@@ -37,6 +40,7 @@ export default function FriendsPage() {
   const [actionError, setActionError] = useState<string | null>(null);
   const addDialogRef = useRef<HTMLDialogElement>(null);
   const confirmDialogRef = useRef<HTMLDialogElement>(null);
+  const [chatDraft, setChatDraft] = useState('');
   const [chatFriend, setChatFriend] = useState<UserSummary | null>(null);
   const chatDialogRef = useRef<HTMLDialogElement>(null);
   const presence = usePresence(userId);
@@ -170,6 +174,15 @@ export default function FriendsPage() {
                 ))}
           </ul>
         </div>
+
+        <FriendsActivity
+          activities={activities}
+          presence={presence}
+          onReply={(activity) => {
+            setChatFriend(activity.user);
+            setChatDraft(`A propos de : "${activity.message}"`);
+          }}
+        />
       </div>
 
       <AddFriendDialog
@@ -186,7 +199,11 @@ export default function FriendsPage() {
         <ChatWindow
           dialogRef={chatDialogRef}
           friend={chatFriend}
-          onClose={() => setChatFriend(null)}
+          initialDraft={chatDraft}
+          onClose={() => {
+            setChatFriend(null);
+            setChatDraft('');
+          }}
         />
       )}
 

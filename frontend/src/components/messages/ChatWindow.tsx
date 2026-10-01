@@ -16,12 +16,14 @@ import { Input } from '../ui/Input';
 interface ChatWindowProps {
   dialogRef: RefObject<HTMLDialogElement | null>;
   friend: UserSummary;
+  initialDraft?: string;
   onClose?: () => void;
 }
 
 export default function ChatWindow({
   dialogRef,
   friend,
+  initialDraft,
   onClose,
 }: ChatWindowProps) {
   const { user } = useAuth();
@@ -30,7 +32,7 @@ export default function ChatWindow({
     userId,
     friend.id,
   );
-  const [draft, setDraft] = useState('');
+  const [draft, setDraft] = useState(initialDraft ?? '');
   const [isSending, setIsSending] = useState(false);
   const isAtBottomRef = useRef(true);
   const [hasNewMessage, setHasNewMessage] = useState(false);
