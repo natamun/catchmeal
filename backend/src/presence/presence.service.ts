@@ -1,21 +1,16 @@
 import { Injectable } from '@nestjs/common';
 
+import { FriendsService } from '../friends/friends.service';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class PresenceService {
   private readonly onlineUsers = new Map<number, Set<string>>();
 
-  constructor(private readonly prisma: PrismaService) {}
-
-  async getFriendIds(userId: number): Promise<number[]> {
-    const rows = await this.prisma.friend.findMany({
-      where: { status: 'ACCEPTED', OR: [{ userId }, { friendId: userId }] },
-    });
-    return rows.map((row) =>
-      row.userId === userId ? row.friendId : row.userId,
-    );
-  }
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly friendsService: FriendsService,
+  ) {}
 
   isOnline(userId: number): boolean {
     return this.onlineUsers.has(userId);
@@ -50,7 +45,7 @@ export class PresenceService {
   }
 
   async getFriendsPresence(userId: number) {
-    const friendIds = await this.getFriendIds(userId);
+    const friendIds = await this.friendsService.getFriendIds(userId);
     const offlineIds = friendIds.filter((id) => !this.isOnline(id));
     const users = offlineIds.length
       ? await this.prisma.user.findMany({

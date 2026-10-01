@@ -183,4 +183,13 @@ export class FriendsService {
     });
     return rows.map((row) => row.friendId);
   }
+
+  async getFriendIds(userId: number): Promise<number[]> {
+    const rows = await this.prisma.friend.findMany({
+      where: { status: 'ACCEPTED', OR: [{ userId }, { friendId: userId }] },
+    });
+    return rows.map((row) =>
+      row.userId === userId ? row.friendId : row.userId,
+    );
+  }
 }
