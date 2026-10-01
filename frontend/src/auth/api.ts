@@ -35,6 +35,7 @@ async function request<T>(url: string, init?: RequestInit): Promise<T> {
 export interface AuthUser {
   userId: number;
   username: string;
+  role?: string;
   name?: string;
   avatarUrl?: string | null;
   height?: number | null;
@@ -74,6 +75,17 @@ export function login(input: LoginInput) {
     headers: JSON_HEADERS,
     body: JSON.stringify(input),
   });
+}
+
+export function adminLogin(input: LoginInput) {
+  return request<{ userId: number; username: string; role: string }>(
+    `${AUTH_URL}/admin/login`,
+    {
+      method: 'POST',
+      headers: JSON_HEADERS,
+      body: JSON.stringify(input),
+    },
+  );
 }
 
 export function logout() {
