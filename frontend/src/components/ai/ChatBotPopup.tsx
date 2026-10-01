@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Bot, Forward, Loader, X } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 
-import { CURRENT_USER_ID } from '../../constants/currentUser';
+import { useAuth } from '../../auth/auth-context';
 import type { ChatMessage, ResponseMistral } from '../../types/ChatBotType';
 import type { Tab } from '../layout/Nav';
 
@@ -26,6 +26,9 @@ export default function ChatBotPopup({
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const lastAssistantRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const { user } = useAuth();
+  const CURRENT_USER_ID = user?.userId;
+  const API_URL = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -58,16 +61,20 @@ export default function ChatBotPopup({
       textareaRef.current.style.height = 'auto';
     }
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/users/${CURRENT_USER_ID}/chat`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            message: addMessage.content,
-          }),
-        },
-      );
+      if (!CURRENT_USER_ID) {
+        throw new Error('UID is not defined');
+      }
+      const response = await fetch(`${API_URL}/users/${CURRENT_USER_ID}/chat`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          message: addMessage.content,
+        }),
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
       const data = (await response.json()) as ResponseMistral;
       if (data) {
         const addResponse: ChatMessage = {

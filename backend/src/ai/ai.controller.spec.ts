@@ -1,6 +1,8 @@
+import { ForbiddenException } from '@nestjs/common/exceptions/forbidden.exception';
 import { Test, TestingModule } from '@nestjs/testing';
 import { ThrottlerGuard } from '@nestjs/throttler';
 
+import { PassportJwtAuthGuard } from '../auth/guards/passport-jwt.guard';
 import { AiController } from './ai.controller';
 import { AiService } from './ai.service';
 import { ChatDto } from './dto/chat.dto';
@@ -20,6 +22,8 @@ describe('AiController', () => {
     })
       .overrideGuard(ThrottlerGuard)
       .useValue({ canActivate: () => true })
+      .overrideGuard(PassportJwtAuthGuard)
+      .useValue({ canActivate: () => true })
       .compile();
 
     controller = module.get<AiController>(AiController);
@@ -33,7 +37,11 @@ describe('AiController', () => {
     const dto: ChatDto = {
       message: 'Hello from Italy',
     };
-    await controller.chat(42, dto);
+
+    const req = {
+      user: { userId: 42, username: 'testuser' },
+    } as unknown as Parameters<AiController['chat']>[2];
+    await controller.chat(42, dto, req);
 
     expect(aiServiceMock.chat).toHaveBeenCalledWith(42, 'Hello from Italy');
   });
@@ -42,7 +50,10 @@ describe('AiController', () => {
     const dto: ChatDto = {
       message: 'Hello from Italy',
     };
-    await controller.chat(42, dto);
+    const req = {
+      user: { userId: 42, username: 'testuser' },
+    } as unknown as Parameters<AiController['chat']>[2];
+    await controller.chat(42, dto, req);
 
     expect(aiServiceMock.chat).toHaveBeenCalledWith(42, 'Hello from Italy');
   });
@@ -55,7 +66,10 @@ describe('AiController', () => {
     const dto: ChatDto = {
       message: 'Hello from Italy',
     };
-    const chat = await controller.chat(42, dto);
+    const req = {
+      user: { userId: 42, username: 'testuser' },
+    } as unknown as Parameters<AiController['chat']>[2];
+    const chat = await controller.chat(42, dto, req);
 
     expect(chat).toEqual({
       message: 'Hello from Italy',
@@ -70,10 +84,23 @@ describe('AiController', () => {
     const dto: ChatDto = {
       message: 'Hello from Italy',
     };
-    const chat = await controller.chat(42, dto);
+    const req = {
+      user: { userId: 42, username: 'testuser' },
+    } as unknown as Parameters<AiController['chat']>[2];
+    const chat = await controller.chat(42, dto, req);
 
     expect(chat).toEqual({
       message: 'Hello from Italy',
     });
+  });
+
+  it('should throw ForbiddenException for another userId', () => {
+    const req = {
+      user: { userId: 2, username: 'testuser' },
+    } as unknown as Parameters<AiController['chat']>[2];
+    expect(() => controller.chat(3, { message: 'hello' }, req)).toThrow(
+      ForbiddenException,
+    );
+    expect(aiServiceMock.chat).not.toHaveBeenCalled();
   });
 });
