@@ -104,4 +104,30 @@ export class AiContextService {
       },
     });
   }
+
+  async getGoalSettings(userId: number, from?: string, to?: string) {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user) throw new NotFoundException('User not found');
+
+    return this.prisma.goalSetting.findMany({
+      where: {
+        userId,
+        ...(from || to
+          ? {
+              startDate: {
+                ...(from ? { gte: new Date(from) } : {}),
+                ...(to ? { lte: new Date(to) } : {}),
+              },
+            }
+          : {}),
+      },
+      orderBy: { startDate: 'desc' },
+      select: {
+        id: true,
+        dailyCalories: true,
+        objective: true,
+        startDate: true,
+      },
+    });
+  }
 }
