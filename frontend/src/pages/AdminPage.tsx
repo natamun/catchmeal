@@ -1,6 +1,7 @@
 // Skeleton — real data will be wired up by a teammate
 import { useRef, useState } from 'react';
 
+import { useAuth } from '../auth/auth-context';
 import { BaseDialog } from '../components/ui/BaseDialog';
 import { ConfirmDialog } from '../components/ui/ConfirmDialog';
 
@@ -346,6 +347,7 @@ function EditUserDialog({
 type FilterStatus = 'all' | 'online' | 'active' | 'deleted';
 
 export default function AdminPage() {
+  const { logout } = useAuth();
   const [search, setSearch] = useState('');
   const [filterStatus, setFilterStatus] = useState<FilterStatus>('all');
   const [selectedUser, setSelectedUser] = useState<SkeletonUser | null>(null);
@@ -409,9 +411,18 @@ export default function AdminPage() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold text-green-800">Admin Board</h1>
-          <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-700">
-            Admin
-          </span>
+          <div className="flex items-center gap-3">
+            <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-700">
+              Admin
+            </span>
+            <button
+              type="button"
+              onClick={() => void logout()}
+              className="cursor-pointer rounded-xl border border-green-200 px-3 py-1 text-xs font-semibold text-green-600 transition-colors hover:bg-green-50"
+            >
+              Sign out
+            </button>
+          </div>
         </div>
 
         {/* Stats */}
