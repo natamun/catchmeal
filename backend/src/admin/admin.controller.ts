@@ -23,6 +23,12 @@ export class AdminController {
     return this.adminService.getUsers();
   }
 
+  // GET /admin/users/:id — get user detail
+  @Get('users/:id')
+  getUserById(@Param('id', ParseIntPipe) id: number) {
+    return this.adminService.getUserById(id);
+  }
+
   // GET /admin/stats — general statistics
   @Get('stats')
   getStats() {
