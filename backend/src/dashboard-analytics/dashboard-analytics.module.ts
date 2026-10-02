@@ -8,5 +8,6 @@ import { DashboardAnalyticsService } from './dashboard-analytics.service';
   imports: [PrismaModule],
   controllers: [DashboardAnalyticsController],
   providers: [DashboardAnalyticsService],
+  exports: [DashboardAnalyticsService],
 })
 export class DashboardAnalyticsModule {}
