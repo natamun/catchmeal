@@ -74,9 +74,10 @@ export class AiContextService {
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user) throw new NotFoundException('User not found');
 
-    return this.prisma.meal.findMany({
+    const meals = await this.prisma.meal.findMany({
       where: {
         userId,
+        loggedAt: { not: null },
         ...(from || to
           ? {
               loggedAt: {
@@ -86,23 +87,40 @@ export class AiContextService {
             }
           : {}),
       },
-      orderBy: { loggedAt: 'desc' },
       select: {
-        id: true,
-        name: true,
-        typeMeal: true,
         loggedAt: true,
         items: {
-          select: {
-            quantity: true,
-            kcal: true,
-            protein: true,
-            carbs: true,
-            fat: true,
-          },
+          select: { kcal: true, protein: true, carbs: true, fat: true },
         },
       },
     });
+
+    const byDay = new Map<
+      string,
+      { kcal: number; protein: number; carbs: number; fat: number }
+    >();
+
+    for (const meal of meals) {
+      const day = meal.loggedAt!.toISOString().slice(0, 10);
+      const totals = byDay.get(day) ?? { kcal: 0, protein: 0, carbs: 0, fat: 0 };
+      for (const item of meal.items) {
+        totals.kcal += item.kcal;
+        totals.protein += item.protein;
+        totals.carbs += item.carbs;
+        totals.fat += item.fat;
+      }
+      byDay.set(day, totals);
+    }
+
+    return Array.from(byDay.entries())
+      .sort(([a], [b]) => b.localeCompare(a))
+      .map(([date, totals]) => ({
+        date,
+        kcal: Math.round(totals.kcal),
+        protein: Math.round(totals.protein),
+        carbs: Math.round(totals.carbs),
+        fat: Math.round(totals.fat),
+      }));
   }
 
   async getGoalSettings(userId: number, from?: string, to?: string) {
