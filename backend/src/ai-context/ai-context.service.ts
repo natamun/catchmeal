@@ -102,7 +102,12 @@ export class AiContextService {
 
     for (const meal of meals) {
       const day = meal.loggedAt!.toISOString().slice(0, 10);
-      const totals = byDay.get(day) ?? { kcal: 0, protein: 0, carbs: 0, fat: 0 };
+      const totals = byDay.get(day) ?? {
+        kcal: 0,
+        protein: 0,
+        carbs: 0,
+        fat: 0,
+      };
       for (const item of meal.items) {
         totals.kcal += item.kcal;
         totals.protein += item.protein;
@@ -147,5 +152,45 @@ export class AiContextService {
         startDate: true,
       },
     });
+  }
+
+  async getFrequentFoodItems(userId: number) {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user) throw new NotFoundException('User not found');
+
+    const grouped = await this.prisma.mealFoodItem.groupBy({
+      by: ['foodItemId'],
+      where: { userId, foodItemId: { not: null } },
+      _count: { foodItemId: true },
+      orderBy: { _count: { foodItemId: 'desc' } },
+      take: 20,
+    });
+
+    const ids = grouped
+      .map((g) => g.foodItemId)
+      .filter((id): id is number => id !== null);
+
+    const foodItems = await this.prisma.foodItem.findMany({
+      where: { id: { in: ids }, userId, archived: false },
+      select: {
+        id: true,
+        name: true,
+        brand: true,
+        kcal: true,
+        protein: true,
+        carbs: true,
+        fat: true,
+        baseQuantity: true,
+        baseUnit: true,
+      },
+    });
+
+    const countById = new Map(
+      grouped.map((g) => [g.foodItemId, g._count.foodItemId]),
+    );
+
+    return foodItems
+      .map((item) => ({ ...item, usageCount: countById.get(item.id) ?? 0 }))
+      .sort((a, b) => b.usageCount - a.usageCount);
   }
 }

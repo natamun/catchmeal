@@ -70,4 +70,15 @@ export class AiContextController {
     }
     return this.aiContextService.getGoalSettings(userId, from, to);
   }
+
+  @Get('food-items')
+  getFrequentFoodItems(
+    @Param('userId', ParseIntPipe) userId: number,
+    @Request() req?: RequestWithUser,
+  ) {
+    if (req!.user.userId !== userId) {
+      throw new ForbiddenException('You can only access your own AI context');
+    }
+    return this.aiContextService.getFrequentFoodItems(userId);
+  }
 }
