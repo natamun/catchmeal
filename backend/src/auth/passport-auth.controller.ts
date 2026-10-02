@@ -42,7 +42,22 @@ function toUserResponse(data: SignInData): UserResponse {
 const COOKIE_NAME = 'access_token';
 const COOKIE_MAX_AGE_MS = 24 * 60 * 60 * 1000; // same as expiresIn from JwtModule
 
-const FRONTEND_URL = process.env.FRONTEND_URL ?? 'http://localhost:5173';
+const ALLOWED_FRONTEND_URL =
+  process.env.FRONTEND_URL ?? 'http://localhost:5173';
+
+/**
+ * Validates that the redirect target is exactly the configured FRONTEND_URL origin.
+ * Prevents open redirect / SSRF if FRONTEND_URL is misconfigured or injected.
+ */
+function safeRedirectUrl(path: string = ''): string {
+  try {
+    const base = new URL(ALLOWED_FRONTEND_URL);
+    // Only allow redirects to the same origin
+    return `${base.origin}${path}`;
+  } catch {
+    return `http://localhost:5173${path}`;
+  }
+}
 
 @Controller('auth')
 export class PassportAuthController {
@@ -100,10 +115,10 @@ export class PassportAuthController {
     try {
       const { accessToken } = await this.authService.signIn(request.user);
       this.setAuthCookie(res, accessToken);
-      res.redirect(FRONTEND_URL);
+      res.redirect(safeRedirectUrl());
     } catch (err) {
       console.error('[OAuth Google] signIn failed:', err);
-      res.redirect(`${FRONTEND_URL}?error=oauth_failed`);
+      res.redirect(safeRedirectUrl('?error=oauth_failed'));
     }
   }
 
@@ -124,10 +139,10 @@ export class PassportAuthController {
     try {
       const { accessToken } = await this.authService.signIn(request.user);
       this.setAuthCookie(res, accessToken);
-      res.redirect(FRONTEND_URL);
+      res.redirect(safeRedirectUrl());
     } catch (err) {
       console.error('[OAuth GitHub] signIn failed:', err);
-      res.redirect(`${FRONTEND_URL}?error=oauth_failed`);
+      res.redirect(safeRedirectUrl('?error=oauth_failed'));
     }
   }
 
@@ -148,10 +163,10 @@ export class PassportAuthController {
     try {
       const { accessToken } = await this.authService.signIn(request.user);
       this.setAuthCookie(res, accessToken);
-      res.redirect(FRONTEND_URL);
+      res.redirect(safeRedirectUrl());
     } catch (err) {
       console.error('[OAuth 42] signIn failed:', err);
-      res.redirect(`${FRONTEND_URL}?error=oauth_failed`);
+      res.redirect(safeRedirectUrl('?error=oauth_failed'));
     }
   }
 
