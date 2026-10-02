@@ -60,6 +60,22 @@ export class AiService implements OnModuleInit {
     };
   }
 
+  private chooseFunctionCall(
+    userId: number,
+    output: FunctionCallEntry,
+  ): Promise<FunctionResultEntry> {
+    switch (output.name) {
+      case 'get_meals':
+        return this.handleGetMeals(userId, output);
+      case 'get_analytics':
+        return this.handleGetAnalytics(userId, output);
+      default:
+        return Promise.resolve(
+          this.errorResult(output, 'Invalid function call.'),
+        );
+    }
+  }
+
   private async handleGetMeals(
     userId: number,
     output: FunctionCallEntry,
@@ -82,7 +98,7 @@ export class AiService implements OnModuleInit {
 
     try {
       const meals = await this.mealsService.findRange(userId, from, to);
-      console.log('mealsService.findRange result: ', meals);
+      console.log('#### DEBUG - Tool call ID: ', output.toolCallId);
       return {
         toolCallId: output.toolCallId,
         result: JSON.stringify({
@@ -92,7 +108,7 @@ export class AiService implements OnModuleInit {
         }),
       };
     } catch (error) {
-      console.error('mealsService.findRange failed: ', error);
+      console.error('mealsService.findRange failed: ', error, 'Tool call ID: ', output.toolCallId);
       return this.errorResult(
         output,
         'Failed to retrieve meals from database.',
@@ -115,7 +131,7 @@ export class AiService implements OnModuleInit {
 
     const validated = getArgs.safeParse(args);
     if (!validated.success) {
-      console.log('Invalid arguments for get_analytics: ', args);
+      // console.log('Invalid arguments for get_analytics: ', args);
       return this.errorResult(output, 'Invalid arguments for get_analytics');
     }
 
@@ -127,7 +143,7 @@ export class AiService implements OnModuleInit {
         from,
         to,
       );
-      console.log('analyticsService.getDashboard result: ', analytics);
+      console.log('#### DEBUG - Tool call ID: ', output.toolCallId);
       return {
         toolCallId: output.toolCallId,
         result: JSON.stringify({
@@ -165,30 +181,27 @@ export class AiService implements OnModuleInit {
         });
       }
 
-      let functionResult: FunctionResultEntry;
       let output = result.outputs[result.outputs.length - 1];
       let rounds = 0;
 
-      while (output.type === 'function.call' && rounds < MAX_TOOL_ROUNDS) {
-        console.log(
-          'Function call detected: ',
-          output.name,
-          output.arguments,
-          rounds,
-        );
-        rounds++;
+      while (output.type === 'function.call') {
+        const calls = result.outputs.filter(
+          (o) => o.type === 'function.call',
+        ) as FunctionCallEntry[];
 
-        if (output.name === 'get_meals') {
-          functionResult = await this.handleGetMeals(userId, output);
-        } else if (output.name === 'get_analytics') {
-          functionResult = await this.handleGetAnalytics(userId, output);
-        } else {
-          functionResult = this.errorResult(output, 'Invalid function call.');
+        if (calls.length === 0) break;
+
+        if (++rounds > MAX_TOOL_ROUNDS) {
+          throw new Error('Exceeded maximum tool call rounds.');
         }
+
+        const functionResult: FunctionResultEntry[] = await Promise.all(
+          calls.map((call) => this.chooseFunctionCall(userId, call)),
+        );
 
         result = await this.mistral.beta.conversations.append({
           conversationId: result.conversationId,
-          conversationAppendRequest: { inputs: [functionResult] },
+          conversationAppendRequest: { inputs: functionResult },
         });
         output = result.outputs[result.outputs.length - 1];
       }
