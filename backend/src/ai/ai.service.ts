@@ -6,8 +6,9 @@ import type {
   FunctionResultEntry,
 } from '@mistralai/mistralai/models/components';
 
+import { DashboardAnalyticsService } from '../dashboard-analytics/dashboard-analytics.service';
 import { MealsService } from '../meals/meals.service';
-import { getMealsArgs, todayInZurich } from './utils/date-range';
+import { getArgs, todayInZurich } from './utils/date-range';
 import { sumMeals } from './utils/sum-meals';
 
 const MAX_TOOL_ROUNDS = 6;
@@ -34,7 +35,10 @@ export class AiService implements OnModuleInit {
   private mistral!: MistralClient;
   private conversationByUser = new Map<number, string>();
 
-  constructor(private mealsService: MealsService) {}
+  constructor(
+    private readonly mealsService: MealsService,
+    private readonly analyticsService: DashboardAnalyticsService,
+  ) {}
 
   async onModuleInit() {
     const { Mistral } = await import('@mistralai/mistralai');
@@ -69,7 +73,7 @@ export class AiService implements OnModuleInit {
       return this.errorResult(output, 'Arguments are not valid JSON.');
     }
 
-    const validated = getMealsArgs.safeParse(args);
+    const validated = getArgs.safeParse(args);
     if (!validated.success) {
       return this.errorResult(output, 'Invalid arguments for get_meals');
     }
@@ -78,6 +82,7 @@ export class AiService implements OnModuleInit {
 
     try {
       const meals = await this.mealsService.findRange(userId, from, to);
+      console.log('mealsService.findRange result: ', meals);
       return {
         toolCallId: output.toolCallId,
         result: JSON.stringify({
@@ -91,6 +96,51 @@ export class AiService implements OnModuleInit {
       return this.errorResult(
         output,
         'Failed to retrieve meals from database.',
+      );
+    }
+  }
+
+  private async handleGetAnalytics(
+    userId: number,
+    output: FunctionCallEntry,
+  ): Promise<FunctionResultEntry> {
+    const rawArgs = output.arguments;
+
+    let args: unknown;
+    try {
+      args = typeof rawArgs === 'string' ? JSON.parse(rawArgs) : rawArgs;
+    } catch {
+      return this.errorResult(output, 'Arguments are not valid JSON.');
+    }
+
+    const validated = getArgs.safeParse(args);
+    if (!validated.success) {
+      console.log('Invalid arguments for get_analytics: ', args);
+      return this.errorResult(output, 'Invalid arguments for get_analytics');
+    }
+
+    const { from, to, fromDay, toDay } = validated.data.period;
+
+    try {
+      const analytics = await this.analyticsService.getDashboard(
+        userId,
+        from,
+        to,
+      );
+      console.log('analyticsService.getDashboard result: ', analytics);
+      return {
+        toolCallId: output.toolCallId,
+        result: JSON.stringify({
+          success: true,
+          range: { from: fromDay, to: toDay },
+          analytics,
+        }),
+      };
+    } catch (error) {
+      console.error('analyticsService.getDashboard failed: ', error);
+      return this.errorResult(
+        output,
+        'Failed to retrieve analytics from database.',
       );
     }
   }
@@ -120,10 +170,18 @@ export class AiService implements OnModuleInit {
       let rounds = 0;
 
       while (output.type === 'function.call' && rounds < MAX_TOOL_ROUNDS) {
+        console.log(
+          'Function call detected: ',
+          output.name,
+          output.arguments,
+          rounds,
+        );
         rounds++;
 
         if (output.name === 'get_meals') {
           functionResult = await this.handleGetMeals(userId, output);
+        } else if (output.name === 'get_analytics') {
+          functionResult = await this.handleGetAnalytics(userId, output);
         } else {
           functionResult = this.errorResult(output, 'Invalid function call.');
         }

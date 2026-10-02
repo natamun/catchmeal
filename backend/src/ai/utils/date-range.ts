@@ -42,4 +42,4 @@ const dateRangeSchema = z
     };
   });
 
-export const getMealsArgs = z.object({ period: dateRangeSchema });
+export const getArgs = z.object({ period: dateRangeSchema });
