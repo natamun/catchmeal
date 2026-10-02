@@ -44,4 +44,17 @@ export class AiContextController {
     }
     return this.aiContextService.getWeightHistory(userId, from, to);
   }
+
+  @Get('meals')
+  getMeals(
+    @Param('userId', ParseIntPipe) userId: number,
+    @Query('from') from?: string,
+    @Query('to') to?: string,
+    @Request() req?: RequestWithUser,
+  ) {
+    if (req!.user.userId !== userId) {
+      throw new ForbiddenException('You can only access your own AI context');
+    }
+    return this.aiContextService.getMeals(userId, from, to);
+  }
 }

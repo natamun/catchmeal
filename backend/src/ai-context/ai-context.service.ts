@@ -69,4 +69,39 @@ export class AiContextService {
       select: { weight: true, bodyFat: true, loggedAt: true },
     });
   }
+
+  async getMeals(userId: number, from?: string, to?: string) {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user) throw new NotFoundException('User not found');
+
+    return this.prisma.meal.findMany({
+      where: {
+        userId,
+        ...(from || to
+          ? {
+              loggedAt: {
+                ...(from ? { gte: new Date(from) } : {}),
+                ...(to ? { lte: new Date(to) } : {}),
+              },
+            }
+          : {}),
+      },
+      orderBy: { loggedAt: 'desc' },
+      select: {
+        id: true,
+        name: true,
+        typeMeal: true,
+        loggedAt: true,
+        items: {
+          select: {
+            quantity: true,
+            kcal: true,
+            protein: true,
+            carbs: true,
+            fat: true,
+          },
+        },
+      },
+    });
+  }
 }
