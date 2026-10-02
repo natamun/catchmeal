@@ -114,7 +114,7 @@ export default function ChatBotPopup({
       {isOpen === true && (
         <div className="fixed right-2 bottom-25 flex h-121 w-75 flex-col rounded-2xl border border-green-400 bg-white shadow-xl sm:right-5 sm:w-100 md:bottom-10">
           <div className="flex justify-between rounded-t-2xl bg-green-400 shadow-sm">
-            <p className="m-1.5 text-xl font-semibold text-white">
+            <p className="m-1.5 ml-5 p-1 text-xl font-semibold text-white">
               Chat Assistant
             </p>
             <button
