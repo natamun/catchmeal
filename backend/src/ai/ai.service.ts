@@ -6,12 +6,13 @@ import type {
   FunctionResultEntry,
 } from '@mistralai/mistralai/models/components';
 
+import { AiContextService } from '../ai-context/ai-context.service';
 import { DashboardAnalyticsService } from '../dashboard-analytics/dashboard-analytics.service';
 import { MealsService } from '../meals/meals.service';
 import { getArgs, todayInZurich } from './utils/date-range';
 import { sumMeals } from './utils/sum-meals';
 
-const MAX_TOOL_ROUNDS = 6;
+const MAX_TOOL_ROUNDS = 8;
 
 const ERROR_MESSAGE =
   "Erreur rencontrée lors de la liaison avec l'assistant, veuillez réessayer plus tard.";
@@ -38,6 +39,7 @@ export class AiService implements OnModuleInit {
   constructor(
     private readonly mealsService: MealsService,
     private readonly analyticsService: DashboardAnalyticsService,
+    private readonly aiContextService: AiContextService,
   ) {}
 
   async onModuleInit() {
@@ -69,6 +71,14 @@ export class AiService implements OnModuleInit {
         return this.handleGetMeals(userId, output);
       case 'get_analytics':
         return this.handleGetAnalytics(userId, output);
+      case 'get_weight_history':
+        return this.handleGetWeightHistory(userId, output);
+      case 'get_user_profile':
+        return this.handleGetUserProfile(userId, output);
+      case 'get_goal_settings':
+        return this.handleGetGoalSettings(userId, output);
+      case 'get_frequent_food_items':
+        return this.handleGetFrequentFoodItems(userId, output);
       default:
         return Promise.resolve(
           this.errorResult(output, 'Invalid function call.'),
@@ -98,7 +108,6 @@ export class AiService implements OnModuleInit {
 
     try {
       const meals = await this.mealsService.findRange(userId, from, to);
-      console.log('#### DEBUG - Tool call ID: ', output.toolCallId);
       return {
         toolCallId: output.toolCallId,
         result: JSON.stringify({
@@ -108,7 +117,12 @@ export class AiService implements OnModuleInit {
         }),
       };
     } catch (error) {
-      console.error('mealsService.findRange failed: ', error, 'Tool call ID: ', output.toolCallId);
+      console.error(
+        'mealsService.findRange failed: ',
+        error,
+        'Tool call ID: ',
+        output.toolCallId,
+      );
       return this.errorResult(
         output,
         'Failed to retrieve meals from database.',
@@ -131,7 +145,6 @@ export class AiService implements OnModuleInit {
 
     const validated = getArgs.safeParse(args);
     if (!validated.success) {
-      // console.log('Invalid arguments for get_analytics: ', args);
       return this.errorResult(output, 'Invalid arguments for get_analytics');
     }
 
@@ -143,7 +156,6 @@ export class AiService implements OnModuleInit {
         from,
         to,
       );
-      console.log('#### DEBUG - Tool call ID: ', output.toolCallId);
       return {
         toolCallId: output.toolCallId,
         result: JSON.stringify({
@@ -157,6 +169,173 @@ export class AiService implements OnModuleInit {
       return this.errorResult(
         output,
         'Failed to retrieve analytics from database.',
+      );
+    }
+  }
+
+  private async handleGetWeightHistory(
+    userId: number,
+    output: FunctionCallEntry,
+  ): Promise<FunctionResultEntry> {
+    const rawArgs = output.arguments;
+
+    let args: unknown;
+    try {
+      args = typeof rawArgs === 'string' ? JSON.parse(rawArgs) : rawArgs;
+    } catch {
+      return this.errorResult(output, 'Arguments are not valid JSON.');
+    }
+
+    const validated = getArgs.safeParse(args);
+    if (!validated.success) {
+      return this.errorResult(
+        output,
+        'Invalid arguments for get_weight_history',
+      );
+    }
+
+    const { fromDay, toDay } = validated.data.period;
+
+    try {
+      const weightHistory = await this.aiContextService.getWeightHistory(
+        userId,
+        fromDay,
+        toDay,
+      );
+      return {
+        toolCallId: output.toolCallId,
+        result: JSON.stringify({
+          success: true,
+          range: { from: fromDay, to: toDay },
+          weightHistory,
+        }),
+      };
+    } catch (error) {
+      console.error('aiContextService.getWeightHistory failed: ', error);
+      return this.errorResult(
+        output,
+        'Failed to retrieve weight history from database.',
+      );
+    }
+  }
+
+  private async handleGetUserProfile(
+    userId: number,
+    output: FunctionCallEntry,
+  ): Promise<FunctionResultEntry> {
+    const rawArgs = output.arguments;
+
+    let args: unknown;
+    try {
+      args = typeof rawArgs === 'string' ? JSON.parse(rawArgs) : rawArgs;
+    } catch {
+      return this.errorResult(output, 'Arguments are not valid JSON.');
+    }
+
+    const validated = getArgs.safeParse(args);
+    if (!validated.success) {
+      return this.errorResult(output, 'Invalid arguments for get_user_profile');
+    }
+
+    try {
+      const profile = await this.aiContextService.getProfile(userId);
+      return {
+        toolCallId: output.toolCallId,
+        result: JSON.stringify({
+          success: true,
+          profile,
+        }),
+      };
+    } catch (error) {
+      console.error('aiContextService.getProfile failed: ', error);
+      return this.errorResult(
+        output,
+        'Failed to retrieve profile from database.',
+      );
+    }
+  }
+
+  private async handleGetGoalSettings(
+    userId: number,
+    output: FunctionCallEntry,
+  ): Promise<FunctionResultEntry> {
+    const rawArgs = output.arguments;
+
+    let args: unknown;
+    try {
+      args = typeof rawArgs === 'string' ? JSON.parse(rawArgs) : rawArgs;
+    } catch {
+      return this.errorResult(output, 'Arguments are not valid JSON.');
+    }
+
+    const validated = getArgs.safeParse(args);
+    if (!validated.success) {
+      return this.errorResult(
+        output,
+        'Invalid arguments for get_goal_settings',
+      );
+    }
+
+    const { fromDay, toDay } = validated.data.period;
+
+    try {
+      const goalSettings = await this.aiContextService.getGoalSettings(
+        userId,
+        fromDay,
+        toDay,
+      );
+      return {
+        toolCallId: output.toolCallId,
+        result: JSON.stringify({
+          success: true,
+          range: { from: fromDay, to: toDay },
+          goalSettings,
+        }),
+      };
+    } catch (error) {
+      console.error('aiContextService.getGoalSettings failed: ', error);
+      return this.errorResult(
+        output,
+        'Failed to retrieve goal settings from database.',
+      );
+    }
+  }
+
+  private async handleGetFrequentFoodItems(
+    userId: number,
+    output: FunctionCallEntry,
+  ): Promise<FunctionResultEntry> {
+    const rawArgs = output.arguments;
+
+    let args: unknown;
+    try {
+      args = typeof rawArgs === 'string' ? JSON.parse(rawArgs) : rawArgs;
+    } catch {
+      return this.errorResult(output, 'Arguments are not valid JSON.');
+    }
+
+    const validated = getArgs.safeParse(args);
+    if (!validated.success) {
+      return this.errorResult(
+        output,
+        'Invalid arguments for get_frequent_food_items',
+      );
+    }
+
+    try {
+      const profile = await this.aiContextService.getFrequentFoodItems(userId);
+      return {
+        toolCallId: output.toolCallId,
+        result: JSON.stringify({
+          success: true,
+          profile,
+        }),
+      };
+    } catch (error) {
+      console.error('aiContextService.getFrequentFoodItems failed: ', error);
+      return this.errorResult(
+        output,
+        'Failed to retrieve frequent food items from database.',
       );
     }
   }
