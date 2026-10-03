@@ -1,10 +1,11 @@
 import { Apple } from 'lucide-react';
 
-export type Tab = 'home' | 'food' | 'stats' | 'friends' | 'profile';
+export type Tab = 'home' | 'food' | 'stats' | 'friends' | 'profile' | 'admin';
 
 interface Props {
   active: Tab;
   onChange: (tab: Tab) => void;
+  isAdmin?: boolean;
 }
 
 interface TabDef {
@@ -111,6 +112,27 @@ const TABS: TabDef[] = [
   },
 ];
 
+const ADMIN_TAB: TabDef = {
+  id: 'admin',
+  label: 'Admin',
+  icon: (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      className="h-5 w-5 shrink-0"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth={2}
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+      />
+    </svg>
+  ),
+};
+
 function NavButton({ tab, isActive, variant, onClick }: NavButtonProps) {
   const baseClass =
     'cursor-pointer transition-colors focus-visible:outline-2 focus-visible:outline-green-400 focus-visible:outline-offset-2';
@@ -147,7 +169,9 @@ function NavButton({ tab, isActive, variant, onClick }: NavButtonProps) {
   );
 }
 
-export default function Nav({ active, onChange }: Props) {
+export default function Nav({ active, onChange, isAdmin = false }: Props) {
+  const tabs = isAdmin ? [...TABS, ADMIN_TAB] : TABS;
+
   return (
     <>
       {/* Sidebar — desktop */}
@@ -160,7 +184,7 @@ export default function Nav({ active, onChange }: Props) {
         </span>
         <nav>
           <ul className="flex flex-col gap-1 px-3">
-            {TABS.map((tab) => (
+            {tabs.map((tab) => (
               <li key={tab.id}>
                 <NavButton
                   tab={tab}
@@ -178,7 +202,7 @@ export default function Nav({ active, onChange }: Props) {
       <footer className="fixed right-0 bottom-0 left-0 z-10 border-t border-green-200 bg-white md:hidden">
         <nav aria-label="Navigation principale">
           <ul className="flex">
-            {TABS.map((tab) => (
+            {tabs.map((tab) => (
               <li key={tab.id} className="flex-1">
                 <NavButton
                   tab={tab}
