@@ -26,16 +26,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setStatus('authenticated');
   }, []);
 
-  const loginAsAdmin = useCallback(async (input: authApi.LoginInput) => {
-    const result = await authApi.adminLogin(input);
-    setUser({
-      userId: result.userId,
-      username: result.username,
-      role: result.role,
-    });
-    setStatus('authenticated');
-  }, []);
-
   const register = useCallback(async (input: authApi.RegisterInput) => {
     const me = await authApi.register(input);
     setUser(me);
@@ -54,15 +44,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{
-        user,
-        status,
-        login,
-        loginAsAdmin,
-        register,
-        logout,
-        updateUser,
-      }}
+      value={{ user, status, login, register, logout, updateUser }}
     >
       {children}
     </AuthContext.Provider>

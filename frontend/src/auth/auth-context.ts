@@ -25,7 +25,6 @@ export interface AuthContextValue {
   status: AuthStatus;
   user: AuthUser | null;
   login: (input: LoginInput) => Promise<void>;
-  loginAsAdmin: (input: LoginInput) => Promise<void>;
   register: (input: RegisterInput) => Promise<void>;
   logout: () => Promise<void>;
   updateUser: (partial: Partial<AuthUser>) => void;

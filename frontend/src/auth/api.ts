@@ -77,17 +77,6 @@ export function login(input: LoginInput) {
   });
 }
 
-export function adminLogin(input: LoginInput) {
-  return request<{ userId: number; username: string; role: string }>(
-    `${AUTH_URL}/admin/login`,
-    {
-      method: 'POST',
-      headers: JSON_HEADERS,
-      body: JSON.stringify(input),
-    },
-  );
-}
-
 export function logout() {
   return request<{ success: boolean }>(`${AUTH_URL}/logout`, {
     method: 'POST',
