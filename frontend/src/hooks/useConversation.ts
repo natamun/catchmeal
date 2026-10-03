@@ -21,7 +21,7 @@ export function useConversation(userId: number, otherUserId: number) {
         })
         .catch((err) => {
           if (!cancelled) {
-            console.error(err);
+            console.error('Failed to load conversation', err);
             setLoadError('Impossible de charger la conversation.');
           }
         })

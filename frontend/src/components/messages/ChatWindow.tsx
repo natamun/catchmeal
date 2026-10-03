@@ -89,7 +89,7 @@ export default function ChatWindow({
 
   return (
     <BaseDialog dialogRef={dialogRef} title={friend.name} onClose={onClose}>
-      <div className="relative flex h-[480px] flex-col">
+      <div className="relative -mb-4 flex h-[480px] flex-col sm:-mb-6">
         {isLoading && (
           <p className="p-4 text-sm text-green-400">Chargement...</p>
         )}
@@ -148,7 +148,7 @@ export default function ChatWindow({
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
             maxLength={2000}
-            disabled={isSending}
+            readOnly={isSending}
           />
           <button
             type="submit"
