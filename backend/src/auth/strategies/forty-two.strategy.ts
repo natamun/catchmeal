@@ -31,7 +31,10 @@ export class FortyTwoStrategy extends PassportStrategy(Strategy, '42') {
     fetch('https://api.intra.42.fr/v2/me', {
       headers: { Authorization: `Bearer ${accessToken}` },
     })
-      .then((res) => res.json())
+      .then((res) => {
+        if (!res.ok) throw new Error(`42 API returned ${res.status}`);
+        return res.json();
+      })
       .then((data: FortyTwoProfile) => {
         done(null, {
           id: String(data.id),
@@ -49,7 +52,7 @@ export class FortyTwoStrategy extends PassportStrategy(Strategy, '42') {
     profile: FortyTwoProfile,
   ) {
     return this.authService.findOrCreateFromOAuth({
-      username: profile.login,
+      username: `42_${profile.login}`,
       name: profile.displayname,
       email: profile.email,
     });

@@ -34,17 +34,15 @@ export class UsersService {
   }
 
   findById(id: number) {
-    return this.prisma.user.findUnique({ where: { id } });
+    return this.prisma.user.findFirst({ where: { id, deletedAt: null } });
   }
 
   findUserByName(username: string) {
-    return this.prisma.user.findUnique({ where: { username } });
+    return this.prisma.user.findFirst({ where: { username, deletedAt: null } });
   }
 
-  findUserByNameOrEmail(username: string, email: string) {
-    return this.prisma.user.findFirst({
-      where: { OR: [{ username }, { email }] },
-    });
+  findUserByEmail(email: string) {
+    return this.prisma.user.findFirst({ where: { email, deletedAt: null } });
   }
 
   async updateAvatar(userId: number, file: Express.Multer.File) {

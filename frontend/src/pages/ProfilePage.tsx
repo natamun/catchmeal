@@ -1,8 +1,8 @@
 import { useCallback, useState } from 'react';
-import { ChevronRight } from 'lucide-react';
 
 import { useAuth } from '../auth/auth-context';
 import { DurationDropdown } from '../components/profile/DurationDropdown';
+import { GdprSection } from '../components/profile/GdprSection';
 import { ProfileIdentityCard } from '../components/profile/ProfileIdentityCard';
 import { WeightCard } from '../components/profile/WeightCard';
 import { calculateBMR, calculateTDEE } from '../utils/bmr';
@@ -19,7 +19,7 @@ const DURATION_OPTIONS = [
 ];
 
 export default function ProfilePage() {
-  const { user, logout, updateUser } = useAuth();
+  const { user, updateUser } = useAuth();
   const [latestWeight, setLatestWeight] = useState<number | null>(null);
   const [durationDays, setDurationDays] = useState(90);
   const handleLatestWeight = useCallback((w: number) => setLatestWeight(w), []);
@@ -119,36 +119,7 @@ export default function ProfilePage() {
       </div>
 
       {/* Compte */}
-      <div className="overflow-hidden rounded-2xl border border-green-200 bg-white shadow-sm">
-        <p className="px-5 pt-5 pb-3 text-sm font-semibold tracking-wide text-green-500 uppercase">
-          Compte
-        </p>
-        {(
-          [
-            {
-              label: 'Se déconnecter',
-              danger: false,
-              onClick: () => void logout(),
-            },
-            { label: 'Exporter mes données', danger: false },
-            { label: 'Politique de confidentialité', danger: false },
-            { label: 'Supprimer mon compte', danger: true },
-          ] satisfies { label: string; danger: boolean; onClick?: () => void }[]
-        ).map((item, i, arr) => (
-          <button
-            key={item.label}
-            onClick={item.onClick}
-            className={`flex w-full cursor-pointer items-center justify-between px-5 py-4 text-left text-sm transition-colors ${
-              item.danger
-                ? 'text-red-500 hover:bg-red-50'
-                : 'text-green-600 hover:bg-green-50'
-            } ${i < arr.length - 1 ? 'border-b border-green-200' : ''}`}
-          >
-            {item.label}
-            <ChevronRight className="h-4 w-4 opacity-40" />
-          </button>
-        ))}
-      </div>
+      <GdprSection />
     </div>
   );
 }

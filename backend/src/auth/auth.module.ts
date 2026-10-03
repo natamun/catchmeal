@@ -6,11 +6,20 @@ import { UsersModule } from '../users/users.module';
 import { AuthService } from './auth.service';
 import { PassportAuthController } from './passport-auth.controller';
 import { FortyTwoStrategy } from './strategies/forty-two.strategy';
+import { GitHubStrategy } from './strategies/github.strategy';
+import { GoogleStrategy } from './strategies/google.strategy';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { LocalStrategy } from './strategies/local.strategy';
 
 @Module({
-  providers: [AuthService, LocalStrategy, JwtStrategy, FortyTwoStrategy],
+  providers: [
+    AuthService,
+    LocalStrategy,
+    JwtStrategy,
+    FortyTwoStrategy,
+    GoogleStrategy,
+    GitHubStrategy,
+  ],
   controllers: [PassportAuthController],
   imports: [
     UsersModule,
