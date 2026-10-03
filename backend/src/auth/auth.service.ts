@@ -89,10 +89,7 @@ export class AuthService {
   async findOrCreateFromOAuth(params: OAuthUserParams): Promise<SignInData> {
     const { username, name, email } = params;
 
-    const existingUser = await this.usersService.findUserByNameOrEmail(
-      username,
-      email,
-    );
+    const existingUser = await this.usersService.findUserByEmail(email);
 
     if (existingUser) {
       return {
@@ -112,14 +109,26 @@ export class AuthService {
       };
     }
 
-    const newUser = await this.usersService.create({
-      username,
-      name,
-      email,
-      passwordHash: '',
-    });
+    try {
+      const newUser = await this.usersService.create({
+        username,
+        name,
+        email,
+        passwordHash: '',
+      });
 
-    return { userId: newUser.id, username: newUser.username };
+      return { userId: newUser.id, username: newUser.username };
+    } catch (error) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2002'
+      ) {
+        // Race condition: user was created between our check and insert
+        const retried = await this.usersService.findUserByEmail(email);
+        if (retried) return { userId: retried.id, username: retried.username };
+      }
+      throw error;
+    }
   }
 
   async register(dto: RegisterDto): Promise<AuthResult> {
