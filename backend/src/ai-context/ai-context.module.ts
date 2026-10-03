@@ -8,5 +8,6 @@ import { AiContextService } from './ai-context.service';
   imports: [PrismaModule],
   controllers: [AiContextController],
   providers: [AiContextService],
+  exports: [AiContextService],
 })
 export class AiContextModule {}
