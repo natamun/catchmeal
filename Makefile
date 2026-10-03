@@ -25,39 +25,40 @@ fclean: clean
 
 re: fclean all
 
+BACK = $(DEV) exec -T backend
+FRONT = $(DEV) exec -T frontend
+
 format:
-	npm run format --prefix frontend
-	npm run format --prefix backend
+	$(FRONT) npm run format
+	$(BACK) npm run format
 
 formatCheck:
-	npm run format:check --prefix frontend
-	npm run format:check --prefix backend
+	$(FRONT) npm run format:check
+	$(BACK) npm run format:check
 
 lint:
-	npm run lint --prefix frontend
-	npm run lint --prefix backend
+	$(FRONT) npm run lint
+	$(BACK) npm run lint
 
 lintCheck:
-	npm run lint:check --prefix frontend
-	npm run lint:check --prefix backend
+	$(FRONT) npm run lint:check
+	$(BACK) npm run lint:check
 
 build:
-	npm run build --prefix frontend
-	npm run build --prefix backend
+	$(FRONT) npm run build
+	$(BACK) npm run build
 
 test:
-	npm run test --prefix backend
+	$(BACK) npm run test
 
 testVerbose:
-	npm run test --prefix backend -- --verbose
+	$(BACK) npm run test -- --verbose
 
 testE2e:
-	npm run test:e2e --prefix backend
-
-check: formatCheck lintCheck build test testE2e
+	$(BACK) npm run test:e2e
 
 migrate:
-	cd backend && npx prisma migrate dev --name $(name)
+	$(BACK) npx prisma migrate dev --name $(name)
 
 shellBackend:
 	$(DEV) exec backend sh

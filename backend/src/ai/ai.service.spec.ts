@@ -246,9 +246,152 @@ describe('AiService', () => {
       42,
       '2026-09-21',
       '2026-09-28',
-      // new Date('2026-09-21T00:00:00.000Z'),
-      // new Date('2026-09-28T00:00:00.000Z'),
     );
     expect(result.message).toBe('Voici ton historique de poids.');
+  });
+
+  it('should call getUserProfile with the correct userId and dates when get_user_profile is requested', async () => {
+    mistralMock.beta.conversations.start.mockResolvedValue({
+      outputs: [
+        {
+          type: 'function.call',
+          name: 'get_user_profile',
+          toolCallId: 'call_3',
+          arguments: '{}',
+        },
+      ],
+      conversationId: 'conv_442',
+    });
+    mistralMock.beta.conversations.append.mockResolvedValue({
+      outputs: [
+        {
+          type: 'message.output',
+          content: 'Voici ton profil utilisateur.',
+        },
+      ],
+      conversationId: 'conv_442',
+    });
+    aiContextServiceMock.getProfile.mockResolvedValue({
+      name: 'John Doe',
+      age: 30,
+      weight: 70,
+    });
+
+    const result = await service.chat(42, 'Montre-moi mon profil utilisateur');
+
+    expect(aiContextServiceMock.getProfile).toHaveBeenCalledWith(42);
+    expect(result.message).toBe('Voici ton profil utilisateur.');
+  });
+
+  it('should call getGoalSettings with the correct userId and dates when get_goal_settings is requested', async () => {
+    mistralMock.beta.conversations.start.mockResolvedValue({
+      outputs: [
+        {
+          type: 'function.call',
+          name: 'get_goal_settings',
+          toolCallId: 'call_3',
+          arguments: JSON.stringify({
+            period: { from: '2026-09-21', to: '2026-09-28' },
+          }),
+        },
+      ],
+      conversationId: 'conv_442',
+    });
+    mistralMock.beta.conversations.append.mockResolvedValue({
+      outputs: [
+        {
+          type: 'message.output',
+          content: 'Voici tes paramètres de but.',
+        },
+      ],
+      conversationId: 'conv_442',
+    });
+    aiContextServiceMock.getGoalSettings.mockResolvedValue([
+      { date: '2026-09-21', goal: 'Perdre 10 kg' },
+    ]);
+
+    const result = await service.chat(42, 'Montre-moi mes paramètres de but');
+
+    expect(aiContextServiceMock.getGoalSettings).toHaveBeenCalledWith(
+      42,
+      '2026-09-21',
+      '2026-09-28',
+    );
+    expect(result.message).toBe('Voici tes paramètres de but.');
+  });
+
+  it('should call getFrequentFoodItems with the correct userId when get_frequent_food_items is requested', async () => {
+    mistralMock.beta.conversations.start.mockResolvedValue({
+      outputs: [
+        {
+          type: 'function.call',
+          name: 'get_frequent_food_items',
+          toolCallId: 'call_3',
+          arguments: '{}',
+        },
+      ],
+      conversationId: 'conv_442',
+    });
+    mistralMock.beta.conversations.append.mockResolvedValue({
+      outputs: [
+        {
+          type: 'message.output',
+          content: 'Voici tes items alimentaires fréquents.',
+        },
+      ],
+      conversationId: 'conv_442',
+    });
+    aiContextServiceMock.getFrequentFoodItems.mockResolvedValue({});
+
+    const result = await service.chat(
+      42,
+      'Montre-moi mes items alimentaires fréquents',
+    );
+
+    expect(aiContextServiceMock.getFrequentFoodItems).toHaveBeenCalledWith(42);
+    expect(result.message).toBe('Voici tes items alimentaires fréquents.');
+  });
+
+  it('should hit the MAX_TOOL_ROUNDS limit', async () => {
+    mistralMock.beta.conversations.start.mockResolvedValue({
+      outputs: [
+        {
+          type: 'function.call',
+          name: 'get_frequent_food_items',
+          toolCallId: 'call_3',
+          arguments: '{}',
+        },
+      ],
+      conversationId: 'conv_442',
+    });
+    mistralMock.beta.conversations.append.mockResolvedValue({
+      outputs: [
+        {
+          type: 'function.call',
+          name: 'get_frequent_food_items',
+          toolCallId: 'call_3',
+          arguments: '{}',
+        },
+      ],
+      conversationId: 'conv_442',
+    });
+    aiContextServiceMock.getFrequentFoodItems.mockResolvedValue({});
+
+    const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+    const result = await service.chat(42, 'Bug');
+
+    expect(result.message).toBe(
+      "Erreur rencontrée lors de la liaison avec l'assistant, veuillez réessayer plus tard.",
+    );
+    expect(result.conversationId).toBeNull();
+    expect(errorSpy).toHaveBeenCalledWith(
+      'Error: ',
+      expect.objectContaining({
+        message: 'Exceeded maximum tool call rounds.',
+      }),
+    );
+
+    errorSpy.mockRestore();
   });
 });
