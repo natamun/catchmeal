@@ -1,8 +1,4 @@
-import {
-  ConflictException,
-  ForbiddenException,
-  Injectable,
-} from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
 
@@ -169,6 +165,7 @@ export class AuthService {
     const tokenPayload = {
       sub: user.userId,
       username: user.username,
+      role: user.role,
     };
 
     const accessToken = await this.jwtService.signAsync(tokenPayload);
@@ -189,29 +186,6 @@ export class AuthService {
       gender: user.gender,
       birthDate: user.birthDate,
       activityLevel: user.activityLevel,
-    };
-  }
-
-  async adminSignIn(input: AuthInput): Promise<AuthResult> {
-    const adminUsername = process.env.ADMIN_USERNAME;
-    const adminPassword = process.env.ADMIN_PASSWORD;
-
-    if (!adminUsername || !adminPassword) {
-      throw new ForbiddenException('Admin access is not configured');
-    }
-
-    if (input.username !== adminUsername || input.password !== adminPassword) {
-      throw new ForbiddenException('Invalid admin credentials');
-    }
-
-    const tokenPayload = { sub: 0, username: adminUsername, role: 'ADMIN' };
-    const accessToken = await this.jwtService.signAsync(tokenPayload);
-
-    return {
-      accessToken,
-      userId: 0,
-      username: adminUsername,
-      role: 'ADMIN',
     };
   }
 }
