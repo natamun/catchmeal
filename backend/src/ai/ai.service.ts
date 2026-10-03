@@ -223,20 +223,6 @@ export class AiService implements OnModuleInit {
     userId: number,
     output: FunctionCallEntry,
   ): Promise<FunctionResultEntry> {
-    const rawArgs = output.arguments;
-
-    let args: unknown;
-    try {
-      args = typeof rawArgs === 'string' ? JSON.parse(rawArgs) : rawArgs;
-    } catch {
-      return this.errorResult(output, 'Arguments are not valid JSON.');
-    }
-
-    const validated = getArgs.safeParse(args);
-    if (!validated.success) {
-      return this.errorResult(output, 'Invalid arguments for get_user_profile');
-    }
-
     try {
       const profile = await this.aiContextService.getProfile(userId);
       return {
@@ -305,23 +291,6 @@ export class AiService implements OnModuleInit {
     userId: number,
     output: FunctionCallEntry,
   ): Promise<FunctionResultEntry> {
-    const rawArgs = output.arguments;
-
-    let args: unknown;
-    try {
-      args = typeof rawArgs === 'string' ? JSON.parse(rawArgs) : rawArgs;
-    } catch {
-      return this.errorResult(output, 'Arguments are not valid JSON.');
-    }
-
-    const validated = getArgs.safeParse(args);
-    if (!validated.success) {
-      return this.errorResult(
-        output,
-        'Invalid arguments for get_frequent_food_items',
-      );
-    }
-
     try {
       const profile = await this.aiContextService.getFrequentFoodItems(userId);
       return {
