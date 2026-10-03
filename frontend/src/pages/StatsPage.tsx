@@ -8,10 +8,8 @@ import ShowDataDay from '../components/analytics/ShowDataDay';
 import StatCard from '../components/analytics/StatCard';
 import WeightCard from '../components/analytics/WeightCard';
 import useDashboard from '../hooks/useDashboard';
-import type { DashboardDay } from '../types/dashboard-analytics';
 
 export default function StatsPage() {
-  const [dashboard, setDashboard] = useState<DashboardDay[]>([]);
   const [from, setFrom] = useState(
     new Date(new Date().setDate(new Date().getDate() - 6))
       .toISOString()
@@ -19,7 +17,7 @@ export default function StatsPage() {
   );
   const [to, setTo] = useState(new Date().toISOString().split('T')[0]);
 
-  useDashboard({ setDashboard, fromStr: from, toStr: to });
+  const { dashboard } = useDashboard({ fromStr: from, toStr: to });
 
   const DayKcal = dashboard.filter((d) => d.totalKcal !== null);
   const RecordWeight = dashboard.filter((d) => d.weight !== null);
