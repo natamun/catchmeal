@@ -1,18 +1,24 @@
-import { Controller, Delete, Get, Param, ParseIntPipe } from '@nestjs/common';
+import { Controller, Delete, Get, Request, UseGuards } from '@nestjs/common';
 
+import { PassportJwtAuthGuard } from '../auth/guards/passport-jwt.guard';
 import { GdprService } from './gdpr.service';
 
+interface RequestWithUser extends Express.Request {
+  user: { userId: number };
+}
+
 @Controller('gdpr')
+@UseGuards(PassportJwtAuthGuard)
 export class GdprController {
   constructor(private readonly gdprService: GdprService) {}
 
-  @Get('export/:userId')
-  exportUserData(@Param('userId', ParseIntPipe) userId: number) {
-    return this.gdprService.exportUserData(userId);
+  @Get('export')
+  exportUserData(@Request() req: RequestWithUser) {
+    return this.gdprService.exportUserData(req.user.userId);
   }
 
-  @Delete('account/:userId')
-  deleteAccount(@Param('userId', ParseIntPipe) userId: number) {
-    return this.gdprService.deleteAccount(userId);
+  @Delete('account')
+  deleteAccount(@Request() req: RequestWithUser) {
+    return this.gdprService.deleteAccount(req.user.userId);
   }
 }

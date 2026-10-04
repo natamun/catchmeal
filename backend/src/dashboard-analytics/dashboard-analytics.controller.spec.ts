@@ -29,8 +29,6 @@ describe('DashboardAnalyticsController', () => {
     );
   });
 
-  const mockReq = { user: { userId: 1 } };
-
   it('should be defined', () => {
     expect(controller).toBeDefined();
   });
