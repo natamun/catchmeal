@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { CheckCircle2, Zap } from 'lucide-react';
 
 import { useAuth } from '../auth/auth-context';
+import type { ActivityItem } from '../components/friends/types';
 import CalorieSummary from '../components/home/CalorieSummary';
 import DailyMealForm from '../components/home/DailyMealForm';
 import DailyMealList from '../components/home/DailyMealList';
@@ -31,13 +32,13 @@ interface SectionEdit {
 
 interface HomePageProps {
   onNavigateToProfile?: () => void;
-  onNavigateToFriends?: () => void;
+  onReplyToActivity?: (activity: ActivityItem) => void;
 }
 
 export default function HomePage({
   onNavigateToProfile,
-  onNavigateToFriends,
-  }: HomePageProps) {
+  onReplyToActivity,
+}: HomePageProps) {
   const { user } = useAuth();
   const [selectedDate, setSelectedDate] = useState(() => new Date());
   const [addingMealType, setAddingMealType] = useState<MealType | null>(null);
@@ -164,7 +165,7 @@ export default function HomePage({
             <FriendsActivity
               activities={activities}
               presence={presence}
-              onReply={() => onNavigateToFriends?.()}
+              onReply={(activity) => onReplyToActivity?.(activity)}
             />
           </div>
         </div>

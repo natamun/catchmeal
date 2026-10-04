@@ -10,7 +10,11 @@ import {
 } from '../components/friends/api.ts';
 import FriendRow from '../components/friends/FriendRow.tsx';
 import RequestRow from '../components/friends/RequestRow.tsx';
-import type { Friend, UserSummary } from '../components/friends/types.ts';
+import type {
+  ActivityItem,
+  Friend,
+  UserSummary,
+} from '../components/friends/types.ts';
 import FriendsActivity from '../components/home/FriendsActivity.tsx';
 import ChatWindow from '../components/messages/ChatWindow.tsx';
 import { ConfirmDialog } from '../components/ui/ConfirmDialog.tsx';
@@ -27,7 +31,15 @@ const TAB_OPTIONS: { value: Tab; label: string }[] = [
   { value: 'requests', label: 'Demandes' },
 ];
 
-export default function FriendsPage() {
+interface FriendsPageProps {
+  pendingReply?: ActivityItem | null;
+}
+
+function replyDraft(activity: ActivityItem) {
+  return `A propos de : "${activity.message}"`;
+}
+
+export default function FriendsPage({ pendingReply }: FriendsPageProps) {
   const { user } = useAuth();
   const userId = user!.userId;
   const { friends, requests, sentRequestIds, isLoading, loadError, reload } =
@@ -40,8 +52,12 @@ export default function FriendsPage() {
   const [actionError, setActionError] = useState<string | null>(null);
   const addDialogRef = useRef<HTMLDialogElement>(null);
   const confirmDialogRef = useRef<HTMLDialogElement>(null);
-  const [chatDraft, setChatDraft] = useState('');
-  const [chatFriend, setChatFriend] = useState<UserSummary | null>(null);
+  const [chatDraft, setChatDraft] = useState(() =>
+    pendingReply ? replyDraft(pendingReply) : '',
+  );
+  const [chatFriend, setChatFriend] = useState<UserSummary | null>(
+    () => pendingReply?.user ?? null,
+  );
   const chatDialogRef = useRef<HTMLDialogElement>(null);
   const presence = usePresence(userId);
 
@@ -180,7 +196,7 @@ export default function FriendsPage() {
           presence={presence}
           onReply={(activity) => {
             setChatFriend(activity.user);
-            setChatDraft(`A propos de : "${activity.message}"`);
+            setChatDraft(replyDraft(activity));
           }}
         />
       </div>
