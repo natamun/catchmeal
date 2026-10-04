@@ -142,6 +142,7 @@ export default function LandingPage({ onLogin, onRegister }: Props) {
           Suisse
         </div>
         <button
+          type="button"
           onClick={onLogin}
           className="cursor-pointer text-sm font-medium text-green-600 transition-colors hover:text-green-300"
         >
@@ -176,12 +177,14 @@ export default function LandingPage({ onLogin, onRegister }: Props) {
           </p>
           <div className="flex w-full max-w-xs flex-col gap-3">
             <button
+              type="button"
               onClick={onRegister}
               className="w-full cursor-pointer rounded-xl bg-green-500 py-3 font-semibold text-white shadow-sm transition-colors hover:bg-green-500"
             >
               Créer un compte
             </button>
             <button
+              type="button"
               onClick={onLogin}
               className="w-full cursor-pointer rounded-xl border border-green-200 bg-white py-3 font-semibold text-green-800 transition-colors hover:bg-green-100"
             >
@@ -380,6 +383,7 @@ export default function LandingPage({ onLogin, onRegister }: Props) {
               aujourd'hui. Gratuit, sans engagement.
             </p>
             <button
+              type="button"
               onClick={onRegister}
               className="cursor-pointer rounded-xl bg-white px-8 py-3 font-semibold text-green-700 shadow-sm transition-colors hover:bg-green-100"
             >
@@ -404,6 +408,7 @@ export default function LandingPage({ onLogin, onRegister }: Props) {
                 href="#"
                 className="py-1 transition-colors hover:text-green-300"
                 aria-disabled="true"
+                tabIndex={-1}
               >
                 Politique de confidentialité
               </a>
@@ -411,6 +416,7 @@ export default function LandingPage({ onLogin, onRegister }: Props) {
                 href="#"
                 className="py-1 transition-colors hover:text-green-300"
                 aria-disabled="true"
+                tabIndex={-1}
               >
                 Conditions d'utilisation
               </a>
@@ -418,6 +424,7 @@ export default function LandingPage({ onLogin, onRegister }: Props) {
                 href="#"
                 className="py-1 transition-colors hover:text-green-300"
                 aria-disabled="true"
+                tabIndex={-1}
               >
                 Mentions légales
               </a>
@@ -428,6 +435,7 @@ export default function LandingPage({ onLogin, onRegister }: Props) {
                 href="#"
                 className="py-1 transition-colors hover:text-green-300"
                 aria-disabled="true"
+                tabIndex={-1}
               >
                 Exporter mes données
               </a>
@@ -435,6 +443,7 @@ export default function LandingPage({ onLogin, onRegister }: Props) {
                 href="#"
                 className="py-1 transition-colors hover:text-green-300"
                 aria-disabled="true"
+                tabIndex={-1}
               >
                 Supprimer mon compte
               </a>
@@ -442,6 +451,7 @@ export default function LandingPage({ onLogin, onRegister }: Props) {
                 href="#"
                 className="py-1 transition-colors hover:text-green-300"
                 aria-disabled="true"
+                tabIndex={-1}
               >
                 Politique RGPD
               </a>
