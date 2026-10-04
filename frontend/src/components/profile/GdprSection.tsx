@@ -162,12 +162,14 @@ export function GdprSection() {
           Compte
         </p>
         <button
+          type="button"
           onClick={() => void logout()}
           className={`${ROW_CLASS} text-green-600 hover:bg-white`}
         >
           Se déconnecter {chevron}
         </button>
         <button
+          type="button"
           onClick={() => void handleExport()}
           disabled={exportLoading}
           className={`${ROW_CLASS} text-green-600 hover:bg-white disabled:cursor-not-allowed disabled:opacity-50`}
@@ -175,10 +177,11 @@ export function GdprSection() {
           {exportLoading ? 'Export en cours...' : 'Exporter mes données'}{' '}
           {chevron}
         </button>
-        <button className={`${ROW_CLASS} text-green-600 hover:bg-white`}>
+        <button type="button" className={`${ROW_CLASS} text-green-600 hover:bg-white`}>
           Politique de confidentialité {chevron}
         </button>
         <button
+          type="button"
           onClick={openDeleteDialog}
           className={`${ROW_CLASS} text-red-500 hover:bg-red-50`}
         >
