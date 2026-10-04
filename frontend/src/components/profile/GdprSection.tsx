@@ -177,7 +177,10 @@ export function GdprSection() {
           {exportLoading ? 'Export en cours...' : 'Exporter mes données'}{' '}
           {chevron}
         </button>
-        <button type="button" className={`${ROW_CLASS} text-green-600 hover:bg-white`}>
+        <button
+          type="button"
+          className={`${ROW_CLASS} text-green-600 hover:bg-white`}
+        >
           Politique de confidentialité {chevron}
         </button>
         <button
