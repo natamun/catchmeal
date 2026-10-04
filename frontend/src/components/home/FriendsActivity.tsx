@@ -16,18 +16,21 @@ export default function FriendsActivity({
   onReply,
 }: FriendsActivityProps) {
   return (
-    <div className="rounded-2xl border border-green-200 bg-white p-6 shadow-sm">
-      <h2 className="mb-4 text-sm font-semibold tracking-wide text-green-500 uppercase">
+    <div className="overflow-hidden rounded-2xl border border-green-200 bg-white shadow-sm">
+      <h2 className="px-5 pt-5 pb-3 text-sm font-semibold tracking-wide text-green-500 uppercase">
         Activité des amis
       </h2>
       {activities.length === 0 ? (
-        <p className="py-4 text-center text-sm text-green-500">
+        <p className="px-5 pt-1 pb-6 text-center text-sm text-green-500">
           Aucune activité récente
         </p>
       ) : (
-        <ul className="flex flex-col gap-3" aria-label="Activité des amis">
+        <ul className="flex flex-col" aria-label="Activité des amis">
           {activities.map((a) => (
-            <li key={a.id} className="flex items-center gap-3">
+            <li
+              key={a.id}
+              className="flex items-center gap-3 border-b border-green-200 px-5 py-4 last:border-b-0"
+            >
               <Avatar
                 username={a.user.username}
                 online={presence.get(a.user.id)?.online ?? false}
