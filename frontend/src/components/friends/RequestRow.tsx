@@ -29,6 +29,7 @@ export default function RequestRow({
         type="button"
         onClick={onAccept}
         disabled={isBusy}
+        aria-label={`Accepter ${from.username}`}
         className="shrink-0 cursor-pointer rounded-xl bg-green-500 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-green-600 disabled:cursor-not-allowed disabled:opacity-60"
       >
         Accepter
