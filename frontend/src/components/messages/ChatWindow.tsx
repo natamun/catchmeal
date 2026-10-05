@@ -97,6 +97,9 @@ export default function ChatWindow({
 
         <div
           ref={threadRef}
+          role="log"
+          aria-label="Conversation"
+          aria-live="polite"
           onScroll={handleScroll}
           className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto p-4"
         >
@@ -107,6 +110,7 @@ export default function ChatWindow({
               className={`flex ${m.senderId === userId ? 'justify-end' : ''}`}
             >
               <div
+                aria-label={m.senderId === userId ? 'Vous' : friend.name}
                 className={`max-w-[75%] rounded-2xl px-3 py-2 text-sm break-words ${
                   m.senderId === userId
                     ? 'rounded-br-sm bg-green-500 text-white'
@@ -121,6 +125,7 @@ export default function ChatWindow({
 
         {hasNewMessage && (
           <button
+            type="button"
             onClick={scrollToBottom}
             className="absolute bottom-20 left-1/2 -translate-x-1/2 rounded-full bg-green-500 px-3 py-1 text-xs font-medium text-white shadow-md"
           >
@@ -149,6 +154,7 @@ export default function ChatWindow({
             onChange={(e) => setDraft(e.target.value)}
             maxLength={2000}
             readOnly={isSending}
+            aria-disabled={isSending}
           />
           <button
             type="submit"
