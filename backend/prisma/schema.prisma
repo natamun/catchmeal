@@ -90,6 +90,9 @@ model Message {
   sentAt      DateTime  @default(now())
   sender      User      @relation("SenderMessage", fields: [senderId], references: [id])
   receiver    User      @relation("ReceivedMessage", fields: [receiverId], references: [id])
+  
+  @@index([senderId, receiverId])
+  @@index([receiverId, senderId])
 }
 
 model WeightLog {
