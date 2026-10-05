@@ -35,10 +35,6 @@ interface FriendsPageProps {
   pendingReply?: ActivityItem | null;
 }
 
-function replyDraft(activity: ActivityItem) {
-  return `A propos de : "${activity.message}"`;
-}
-
 export default function FriendsPage({ pendingReply }: FriendsPageProps) {
   const { user } = useAuth();
   const userId = user!.userId;
@@ -52,8 +48,8 @@ export default function FriendsPage({ pendingReply }: FriendsPageProps) {
   const [actionError, setActionError] = useState<string | null>(null);
   const addDialogRef = useRef<HTMLDialogElement>(null);
   const confirmDialogRef = useRef<HTMLDialogElement>(null);
-  const [chatDraft, setChatDraft] = useState(() =>
-    pendingReply ? replyDraft(pendingReply) : '',
+  const [chatActivity, setChatActivity] = useState<ActivityItem | null>(
+    pendingReply ?? null,
   );
   const [chatFriend, setChatFriend] = useState<UserSummary | null>(
     () => pendingReply?.user ?? null,
@@ -196,7 +192,7 @@ export default function FriendsPage({ pendingReply }: FriendsPageProps) {
           presence={presence}
           onReply={(activity) => {
             setChatFriend(activity.user);
-            setChatDraft(replyDraft(activity));
+            setChatActivity(activity);
           }}
         />
       </div>
@@ -215,10 +211,10 @@ export default function FriendsPage({ pendingReply }: FriendsPageProps) {
         <ChatWindow
           dialogRef={chatDialogRef}
           friend={chatFriend}
-          initialDraft={chatDraft}
+          quotedActivity={chatActivity}
           onClose={() => {
             setChatFriend(null);
-            setChatDraft('');
+            setChatActivity(null);
           }}
         />
       )}
