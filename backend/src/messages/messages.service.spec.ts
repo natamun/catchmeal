@@ -1,6 +1,11 @@
-import { BadRequestException, ForbiddenException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  NotFoundException,
+} from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 
+import { ActivityService } from '../activity/activity.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { MessagesService } from './messages.service';
 
@@ -15,7 +20,12 @@ describe('MessagesService', () => {
       create: jest.fn(),
       findMany: jest.fn(),
     },
+    activity: {
+      findFirst: jest.fn(),
+    },
   };
+
+  const activityServiceMock = { toFeedItem: jest.fn() };
 
   beforeEach(async () => {
     jest.resetAllMocks();
@@ -23,6 +33,7 @@ describe('MessagesService', () => {
       providers: [
         MessagesService,
         { provide: PrismaService, useValue: prismaMock },
+        { provide: ActivityService, useValue: activityServiceMock },
       ],
     }).compile();
 
@@ -55,9 +66,9 @@ describe('MessagesService', () => {
         id: 5,
         status: 'ACCEPTED',
       });
-      prismaMock.message.create.mockResolvedValue({ id: 10 });
+      prismaMock.message.create.mockResolvedValue({ id: 10, activity: null });
 
-      await service.send(1, 2, 'hello');
+      const result = await service.send(1, 2, 'hello');
 
       expect(prismaMock.friend.findFirst).toHaveBeenCalledWith({
         where: {
@@ -69,8 +80,55 @@ describe('MessagesService', () => {
         },
       });
       expect(prismaMock.message.create).toHaveBeenCalledWith({
-        data: { senderId: 1, receiverId: 2, content: 'hello' },
+        data: {
+          senderId: 1,
+          receiverId: 2,
+          content: 'hello',
+          activityId: undefined,
+        },
+        include: {
+          activity: {
+            include: {
+              user: { select: { id: true, username: true, name: true } },
+            },
+          },
+        },
       });
+      expect(result).toEqual({ id: 10, activity: null });
+    });
+
+    it('should reject quoting an activity that does not belong to the recipient', async () => {
+      prismaMock.friend.findFirst.mockResolvedValue({
+        id: 5,
+        status: 'ACCEPTED',
+      });
+      prismaMock.activity.findFirst.mockResolvedValue(null);
+
+      await expect(service.send(1, 2, 'hello', 99)).rejects.toBeInstanceOf(
+        NotFoundException,
+      );
+      expect(prismaMock.activity.findFirst).toHaveBeenCalledWith({
+        where: { id: 99, userId: 2 },
+        select: { id: true },
+      });
+      expect(prismaMock.message.create).not.toHaveBeenCalled();
+    });
+
+    it('should store the activity id and return the formatted quote', async () => {
+      const activity = { id: 7, user: { id: 2 } };
+      const feedItem = { id: 7, message: 'a enregistré un repas' };
+      prismaMock.friend.findFirst.mockResolvedValue({
+        id: 5,
+        status: 'ACCEPTED',
+      });
+      prismaMock.activity.findFirst.mockResolvedValue({ id: 7 });
+      prismaMock.message.create.mockResolvedValue({ id: 10, activity });
+      activityServiceMock.toFeedItem.mockReturnValue(feedItem);
+
+      const result = await service.send(1, 2, 'bravo', 7);
+
+      expect(result).toEqual({ id: 10, activity: feedItem });
+      expect(activityServiceMock.toFeedItem).toHaveBeenCalledWith(activity);
     });
   });
 
@@ -89,7 +147,10 @@ describe('MessagesService', () => {
         id: 5,
         status: 'ACCEPTED',
       });
-      prismaMock.message.findMany.mockResolvedValue([{ id: 1 }, { id: 2 }]);
+      prismaMock.message.findMany.mockResolvedValue([
+        { id: 1, activity: null },
+        { id: 2, activity: null },
+      ]);
 
       const result = await service.getConversation(1, 2);
 
@@ -101,8 +162,18 @@ describe('MessagesService', () => {
           ],
         },
         orderBy: { sentAt: 'asc' },
+        include: {
+          activity: {
+            include: {
+              user: { select: { id: true, username: true, name: true } }
+            },
+          },
+        },
       });
-      expect(result).toEqual([{ id: 1 }, { id: 2 }]);
+      expect(result).toEqual([
+        { id: 1, activity: null },
+        { id: 2, activity: null },
+      ]);
     });
   });
 });
