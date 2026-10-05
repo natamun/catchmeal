@@ -36,7 +36,7 @@ export class ActivityService {
     private readonly activityGateway: ActivityGateway,
   ) {}
 
-  private toFeedItem(activity: {
+  toFeedItem(activity: {
     id: number;
     type: ActivityType;
     metadata: Prisma.JsonValue;

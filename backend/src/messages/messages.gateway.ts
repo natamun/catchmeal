@@ -41,6 +41,7 @@ export class MessagesGateway {
         userId,
         dto.toUserId,
         dto.content,
+        dto.activityId,
       );
       this.server
         .to(`user:${dto.toUserId}`)

@@ -32,7 +32,12 @@ export class MessagesController {
     if (req.user.userId !== userId) {
       throw new ForbiddenException('You can only send messages as yourself');
     }
-    return this.messagesService.send(userId, dto.toUserId, dto.content);
+    return this.messagesService.send(
+      userId,
+      dto.toUserId,
+      dto.content,
+      dto.activityId,
+    );
   }
 
   @Get('messages/:otherUserId')
