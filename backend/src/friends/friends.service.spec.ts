@@ -219,4 +219,18 @@ describe('FriendsService', () => {
       expect(result).toEqual([5, 8]);
     });
   });
+
+  describe('getFriendIds', () => {
+    it('should return the other side of each accepted friendship', async () => {
+      prismaMock.friend.findMany.mockResolvedValue([
+        { userId: 1, friendId: 2 },
+        { userId: 3, friendId: 1 },
+      ]);
+
+      await expect(service.getFriendIds(1)).resolves.toEqual([2, 3]);
+      expect(prismaMock.friend.findMany).toHaveBeenCalledWith({
+        where: { status: 'ACCEPTED', OR: [{ userId: 1 }, { friendId: 1 }] },
+      });
+    });
+  });
 });
