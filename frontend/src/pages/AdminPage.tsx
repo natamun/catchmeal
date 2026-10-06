@@ -1,5 +1,5 @@
 // Skeleton — real data will be wired up by a teammate
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { BaseDialog } from '../components/ui/BaseDialog';
 import { ConfirmDialog } from '../components/ui/ConfirmDialog';
@@ -350,10 +350,20 @@ export default function AdminPage() {
   const [filterStatus, setFilterStatus] = useState<FilterStatus>('all');
   const [selectedUser, setSelectedUser] = useState<SkeletonUser | null>(null);
   const [isPending, setIsPending] = useState(false);
+  const pendingDialogRef = useRef<'details' | 'edit' | 'delete' | null>(null);
 
   const detailsDialogRef = useRef<HTMLDialogElement>(null);
   const editDialogRef = useRef<HTMLDialogElement>(null);
   const deleteDialogRef = useRef<HTMLDialogElement>(null);
+
+  useEffect(() => {
+    if (!pendingDialogRef.current || !selectedUser) return;
+    const target = pendingDialogRef.current;
+    pendingDialogRef.current = null;
+    if (target === 'details') detailsDialogRef.current?.showModal();
+    if (target === 'edit') editDialogRef.current?.showModal();
+    if (target === 'delete') deleteDialogRef.current?.showModal();
+  }, [selectedUser]);
 
   const filtered = SKELETON_USERS.filter((user) => {
     const matchesSearch =
@@ -371,18 +381,18 @@ export default function AdminPage() {
   });
 
   const openDetails = (user: SkeletonUser) => {
+    pendingDialogRef.current = 'details';
     setSelectedUser(user);
-    detailsDialogRef.current?.showModal();
   };
 
   const openEdit = (user: SkeletonUser) => {
+    pendingDialogRef.current = 'edit';
     setSelectedUser(user);
-    editDialogRef.current?.showModal();
   };
 
   const openDelete = (user: SkeletonUser) => {
+    pendingDialogRef.current = 'delete';
     setSelectedUser(user);
-    deleteDialogRef.current?.showModal();
   };
 
   const handleSaveRole = () => {

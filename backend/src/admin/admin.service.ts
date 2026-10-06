@@ -57,6 +57,7 @@ export class AdminService {
     return this.prisma.user.update({
       where: { id: userId },
       data: { deletedAt: new Date() },
+      select: { id: true, username: true, deletedAt: true },
     });
   }
 
