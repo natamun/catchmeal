@@ -5,14 +5,11 @@ import { ChevronRight, Filter, Search } from 'lucide-react';
 import { BaseDialog } from '../ui/BaseDialog';
 import { DropdownPanel } from '../ui/DropdownPanel';
 import { Input } from '../ui/Input';
+import { SelectDropdown } from '../ui/SelectDropdown';
 import {
   EMPTY_ADMIN_FILTER,
   type AdminFilterCriteria,
-  type AdminOAuthFilter,
-  type AdminOnlineFilter,
-  type AdminRoleFilter,
   type AdminSortOption,
-  type AdminStatusFilter,
 } from './types';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -54,51 +51,31 @@ const SORT_OPTIONS: {
   },
 ];
 
-// ─── Sub-component: FilterSelect ──────────────────────────────────────────────
+const ROLE_OPTIONS = [
+  { value: 'all', label: 'Tous' },
+  { value: 'USER', label: 'User' },
+  { value: 'ADMIN', label: 'Admin' },
+];
 
-function FilterRow({
-  label,
-  children,
-}: {
-  label: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="flex items-center justify-between gap-4">
-      <span className="text-xs font-medium text-green-700">{label}</span>
-      {children}
-    </div>
-  );
-}
+const STATUS_OPTIONS = [
+  { value: 'all', label: 'Tous' },
+  { value: 'active', label: 'Actif' },
+  { value: 'deleted', label: 'Supprimé' },
+];
 
-function FilterPills<T extends string>({
-  options,
-  value,
-  onChange,
-}: {
-  options: { value: T; label: string }[];
-  value: T;
-  onChange: (v: T) => void;
-}) {
-  return (
-    <div className="flex gap-1.5">
-      {options.map((opt) => (
-        <button
-          key={opt.value}
-          type="button"
-          onClick={() => onChange(opt.value)}
-          className={`cursor-pointer rounded-lg px-2.5 py-1 text-xs font-semibold transition-colors ${
-            value === opt.value
-              ? 'bg-green-500 text-white'
-              : 'border border-green-200 bg-white text-green-700 hover:bg-green-50'
-          }`}
-        >
-          {opt.label}
-        </button>
-      ))}
-    </div>
-  );
-}
+const ONLINE_OPTIONS = [
+  { value: 'all', label: 'Tous' },
+  { value: 'online', label: 'En ligne' },
+  { value: 'offline', label: 'Hors ligne' },
+];
+
+const OAUTH_OPTIONS = [
+  { value: 'all', label: 'Tous' },
+  { value: 'local', label: 'Local' },
+  { value: 'google', label: 'Google' },
+  { value: 'github', label: 'GitHub' },
+  { value: '42', label: '42' },
+];
 
 // ─── Main component ───────────────────────────────────────────────────────────
 
@@ -209,55 +186,75 @@ export default function AdminSearchBar({
 
         {/* Filters */}
         <div className="flex flex-col gap-4 border-t border-green-100 pt-5">
-          <FilterRow label="Rôle">
-            <FilterPills<AdminRoleFilter>
-              options={[
-                { value: 'all', label: 'Tous' },
-                { value: 'USER', label: 'User' },
-                { value: 'ADMIN', label: 'Admin' },
-              ]}
-              value={draft.role}
-              onChange={(v) => setDraft((prev) => ({ ...prev, role: v }))}
-            />
-          </FilterRow>
+          <div className="flex flex-col gap-3">
+            <div className="flex items-center gap-3">
+              <span className="w-16 shrink-0 text-xs font-medium text-green-700">
+                Rôle
+              </span>
+              <SelectDropdown
+                value={draft.role}
+                options={ROLE_OPTIONS}
+                onChange={(v) =>
+                  setDraft((prev) => ({
+                    ...prev,
+                    role: v as AdminFilterCriteria['role'],
+                  }))
+                }
+                container={dialogNode}
+              />
+            </div>
 
-          <FilterRow label="Statut">
-            <FilterPills<AdminStatusFilter>
-              options={[
-                { value: 'all', label: 'Tous' },
-                { value: 'active', label: 'Actif' },
-                { value: 'deleted', label: 'Supprimé' },
-              ]}
-              value={draft.status}
-              onChange={(v) => setDraft((prev) => ({ ...prev, status: v }))}
-            />
-          </FilterRow>
+            <div className="flex items-center gap-3">
+              <span className="w-16 shrink-0 text-xs font-medium text-green-700">
+                Statut
+              </span>
+              <SelectDropdown
+                value={draft.status}
+                options={STATUS_OPTIONS}
+                onChange={(v) =>
+                  setDraft((prev) => ({
+                    ...prev,
+                    status: v as AdminFilterCriteria['status'],
+                  }))
+                }
+                container={dialogNode}
+              />
+            </div>
 
-          <FilterRow label="En ligne">
-            <FilterPills<AdminOnlineFilter>
-              options={[
-                { value: 'all', label: 'Tous' },
-                { value: 'online', label: 'Oui' },
-                { value: 'offline', label: 'Non' },
-              ]}
-              value={draft.online}
-              onChange={(v) => setDraft((prev) => ({ ...prev, online: v }))}
-            />
-          </FilterRow>
+            <div className="flex items-center gap-3">
+              <span className="w-16 shrink-0 text-xs font-medium text-green-700">
+                En ligne
+              </span>
+              <SelectDropdown
+                value={draft.online}
+                options={ONLINE_OPTIONS}
+                onChange={(v) =>
+                  setDraft((prev) => ({
+                    ...prev,
+                    online: v as AdminFilterCriteria['online'],
+                  }))
+                }
+                container={dialogNode}
+              />
+            </div>
 
-          <FilterRow label="OAuth">
-            <FilterPills<AdminOAuthFilter>
-              options={[
-                { value: 'all', label: 'Tous' },
-                { value: 'local', label: 'Local' },
-                { value: 'google', label: 'Google' },
-                { value: 'github', label: 'GitHub' },
-                { value: '42', label: '42' },
-              ]}
-              value={draft.oauth}
-              onChange={(v) => setDraft((prev) => ({ ...prev, oauth: v }))}
-            />
-          </FilterRow>
+            <div className="flex items-center gap-3">
+              <span className="w-16 shrink-0 text-xs font-medium text-green-700">
+                OAuth
+              </span>
+              <SelectDropdown
+                value={draft.oauth}
+                options={OAUTH_OPTIONS}
+                onChange={(v) =>
+                  setDraft((prev) => ({
+                    ...prev,
+                    oauth: v as AdminFilterCriteria['oauth'],
+                  }))
+                }
+                container={dialogNode}
+              />
+            </div>
+          </div>
 
           <button
             type="button"
