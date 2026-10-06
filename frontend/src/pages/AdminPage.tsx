@@ -1,6 +1,11 @@
 // Skeleton — real data will be wired up by a teammate
 import { useEffect, useRef, useState } from 'react';
 
+import AdminSearchBar from '../components/admin/AdminSearchBar';
+import {
+  EMPTY_ADMIN_FILTER,
+  type AdminFilterCriteria,
+} from '../components/admin/types';
 import { BaseDialog } from '../components/ui/BaseDialog';
 import { ConfirmDialog } from '../components/ui/ConfirmDialog';
 
@@ -343,11 +348,9 @@ function EditUserDialog({
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
-type FilterStatus = 'all' | 'online' | 'active' | 'deleted';
-
 export default function AdminPage() {
-  const [search, setSearch] = useState('');
-  const [filterStatus, setFilterStatus] = useState<FilterStatus>('all');
+  const [criteria, setCriteria] =
+    useState<AdminFilterCriteria>(EMPTY_ADMIN_FILTER);
   const [selectedUser, setSelectedUser] = useState<SkeletonUser | null>(null);
   const [isPending, setIsPending] = useState(false);
   const pendingDialogRef = useRef<'details' | 'edit' | 'delete' | null>(null);
@@ -365,19 +368,45 @@ export default function AdminPage() {
     if (target === 'delete') deleteDialogRef.current?.showModal();
   }, [selectedUser]);
 
+  const query = criteria.query.trim().toLowerCase();
+
   const filtered = SKELETON_USERS.filter((user) => {
-    const matchesSearch =
-      user.username.toLowerCase().includes(search.toLowerCase()) ||
-      user.name.toLowerCase().includes(search.toLowerCase()) ||
-      user.email.toLowerCase().includes(search.toLowerCase());
+    const matchesQuery =
+      !query ||
+      user.username.toLowerCase().includes(query) ||
+      user.name.toLowerCase().includes(query) ||
+      user.email.toLowerCase().includes(query);
 
-    const matchesFilter =
-      filterStatus === 'all' ||
-      (filterStatus === 'online' && user.onlineStatus) ||
-      (filterStatus === 'active' && user.accountStatus === 'active') ||
-      (filterStatus === 'deleted' && user.accountStatus === 'deleted');
+    const matchesRole = criteria.role === 'all' || user.role === criteria.role;
 
-    return matchesSearch && matchesFilter;
+    const matchesStatus =
+      criteria.status === 'all' || user.accountStatus === criteria.status;
+
+    const matchesOnline =
+      criteria.online === 'all' ||
+      (criteria.online === 'online' && user.onlineStatus) ||
+      (criteria.online === 'offline' && !user.onlineStatus);
+
+    const matchesOAuth =
+      criteria.oauth === 'all' ||
+      (criteria.oauth === 'local' && !user.oauthProvider) ||
+      user.oauthProvider === criteria.oauth;
+
+    return (
+      matchesQuery &&
+      matchesRole &&
+      matchesStatus &&
+      matchesOnline &&
+      matchesOAuth
+    );
+  }).sort((a, b) => {
+    const { field, direction } = criteria.sort;
+    const dir = direction === 'asc' ? 1 : -1;
+    if (field === 'name') return a.username.localeCompare(b.username) * dir;
+    if (field === 'role') return a.role.localeCompare(b.role) * dir;
+    if (field === 'createdAt')
+      return a.createdAt.localeCompare(b.createdAt) * dir;
+    return 0;
   });
 
   const openDetails = (user: SkeletonUser) => {
@@ -418,7 +447,9 @@ export default function AdminPage() {
       <div className="flex flex-col gap-8">
         {/* Header */}
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-green-800">Tableau de bord Admin</h1>
+          <h1 className="text-2xl font-bold text-green-800">
+            Tableau de bord Admin
+          </h1>
           <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-700">
             Admin
           </span>
@@ -464,40 +495,8 @@ export default function AdminPage() {
           </h2>
 
           {/* Search & Filters */}
-          <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <input
-              type="text"
-              placeholder="Rechercher par nom d'utilisateur, nom ou email..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full rounded-xl border border-green-200 bg-white px-4 py-2 text-sm text-green-800 placeholder-green-300 outline-none focus:ring-2 focus:ring-green-300 sm:max-w-xs"
-            />
-            <div className="flex gap-2">
-              {(['all', 'online', 'active', 'deleted'] as FilterStatus[]).map(
-                (f) => {
-                  const labels: Record<FilterStatus, string> = {
-                    all: 'Tous',
-                    online: 'En ligne',
-                    active: 'Actifs',
-                    deleted: 'Supprimés',
-                  };
-                  return (
-                    <button
-                      key={f}
-                      type="button"
-                      onClick={() => setFilterStatus(f)}
-                      className={`cursor-pointer rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors ${
-                        filterStatus === f
-                          ? 'bg-green-500 text-white'
-                          : 'border border-green-200 bg-white text-green-700 hover:bg-green-50'
-                      }`}
-                    >
-                      {labels[f]}
-                    </button>
-                  );
-                },
-              )}
-            </div>
+          <div className="mb-4 flex items-center gap-3">
+            <AdminSearchBar criteria={criteria} onFilterChange={setCriteria} />
           </div>
 
           {/* Table */}
