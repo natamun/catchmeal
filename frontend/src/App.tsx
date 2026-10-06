@@ -6,6 +6,7 @@ import Nav, { type Tab } from './components/layout/Nav';
 
 const LandingPage = lazy(() => import('./pages/LandingPage'));
 const AuthPage = lazy(() => import('./pages/AuthPage'));
+const AdminPage = lazy(() => import('./pages/AdminPage'));
 const HomePage = lazy(() => import('./pages/HomePage'));
 const StatsPage = lazy(() => import('./pages/StatsPage'));
 const FriendsPage = lazy(() => import('./pages/FriendsPage'));
@@ -15,7 +16,7 @@ const ProfilePage = lazy(() => import('./pages/ProfilePage'));
 type Page = 'landing' | 'login' | 'register';
 
 function AppShell() {
-  const { status } = useAuth();
+  const { status, user } = useAuth();
   const [page, setPage] = useState<Page>(() => {
     const params = new URLSearchParams(window.location.search);
     return params.get('error') === 'oauth_failed' ? 'login' : 'landing';
@@ -25,7 +26,7 @@ function AppShell() {
     const params = new URLSearchParams(window.location.search);
     if (params.get('error') === 'oauth_failed') {
       window.history.replaceState({}, '', window.location.pathname);
-      return 'La connexion avec 42 a échoué. Réessaye.';
+      return 'La connexion a échoué. Réessaye.';
     }
     return null;
   });
@@ -61,12 +62,15 @@ function AppShell() {
     );
   }
 
+  const isAdmin = user?.role === 'ADMIN';
+
   const pages: Record<Tab, React.ReactNode> = {
     home: <HomePage onNavigateToProfile={() => setActiveTab('profile')} />,
     food: <FoodPage />,
     stats: <StatsPage />,
     friends: <FriendsPage />,
     profile: <ProfilePage />,
+    admin: <AdminPage />,
   };
 
   return (
@@ -85,7 +89,7 @@ function AppShell() {
           {pages[activeTab]}
         </Suspense>
       </main>
-      <Nav active={activeTab} onChange={setActiveTab} />
+      <Nav active={activeTab} onChange={setActiveTab} isAdmin={isAdmin} />
     </div>
   );
 }

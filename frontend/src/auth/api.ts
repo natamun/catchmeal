@@ -35,6 +35,7 @@ async function request<T>(url: string, init?: RequestInit): Promise<T> {
 export interface AuthUser {
   userId: number;
   username: string;
+  role?: string;
   name?: string;
   avatarUrl?: string | null;
   height?: number | null;

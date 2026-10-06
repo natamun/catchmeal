@@ -25,6 +25,7 @@ function toUserResponse(data: SignInData): UserResponse {
   return {
     userId: data.userId,
     username: data.username,
+    role: data.role,
     name: data.name,
     avatarUrl: data.avatarUrl,
     height: data.height,
@@ -40,19 +41,14 @@ function toUserResponse(data: SignInData): UserResponse {
 }
 
 const COOKIE_NAME = 'access_token';
-const COOKIE_MAX_AGE_MS = 24 * 60 * 60 * 1000; // same as expiresIn from JwtModule
+const COOKIE_MAX_AGE_MS = 24 * 60 * 60 * 1000;
 
 const ALLOWED_FRONTEND_URL =
   process.env.FRONTEND_URL ?? 'http://localhost:5173';
 
-/**
- * Validates that the redirect target is exactly the configured FRONTEND_URL origin.
- * Prevents open redirect / SSRF if FRONTEND_URL is misconfigured or injected.
- */
 function safeRedirectUrl(path: string = ''): string {
   try {
     const base = new URL(ALLOWED_FRONTEND_URL);
-    // Only allow redirects to the same origin
     return `${base.origin}${path}`;
   } catch {
     return `http://localhost:5173${path}`;
@@ -98,14 +94,10 @@ export class PassportAuthController {
     return toUserResponse(request.user);
   }
 
-  // OAuth Google — Step 1: redirect to Google login page
   @Get('google')
   @UseGuards(AuthGuard('google'))
-  redirectToGoogle() {
-    // Passport handles the redirect automatically
-  }
+  redirectToGoogle() {}
 
-  // OAuth Google — Step 2: Google redirects back here after user grants permission
   @Get('google/callback')
   @UseGuards(AuthGuard('google'))
   async googleCallback(
@@ -122,14 +114,10 @@ export class PassportAuthController {
     }
   }
 
-  // OAuth GitHub — Step 1: redirect to GitHub login page
   @Get('github')
   @UseGuards(AuthGuard('github'))
-  redirectToGitHub() {
-    // Passport handles the redirect automatically
-  }
+  redirectToGitHub() {}
 
-  // OAuth GitHub — Step 2: GitHub redirects back here after user grants permission
   @Get('github/callback')
   @UseGuards(AuthGuard('github'))
   async githubCallback(
@@ -146,14 +134,10 @@ export class PassportAuthController {
     }
   }
 
-  // OAuth 42 — Step 1: redirect to 42 login page
   @Get('42')
   @UseGuards(AuthGuard('42'))
-  redirectToFortyTwo() {
-    // Passport handles the redirect automatically
-  }
+  redirectToFortyTwo() {}
 
-  // OAuth 42 — Step 2: 42 redirects back here after user grants permission
   @Get('42/callback')
   @UseGuards(AuthGuard('42'))
   async fortyTwoCallback(

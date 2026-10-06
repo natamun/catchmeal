@@ -9,9 +9,11 @@ import { RegisterDto } from './dto/register.dto';
 const SALT_ROUNDS = 10;
 
 type AuthInput = { username: string; password: string };
+
 export type SignInData = {
   userId: number;
   username: string;
+  role?: string;
   name?: string;
   avatarUrl?: string | null;
   height?: number | null;
@@ -24,10 +26,12 @@ export type SignInData = {
   birthDate?: Date | null;
   activityLevel?: string | null;
 };
+
 type AuthResult = {
   accessToken: string;
   userId: number;
   username: string;
+  role?: string;
   name?: string;
   avatarUrl?: string | null;
   height?: number | null;
@@ -72,6 +76,7 @@ export class AuthService {
     return {
       userId: user.id,
       username: user.username,
+      role: user.role,
       name: user.name,
       avatarUrl: user.avatarUrl,
       height: user.height,
@@ -160,6 +165,7 @@ export class AuthService {
     const tokenPayload = {
       sub: user.userId,
       username: user.username,
+      role: user.role,
     };
 
     const accessToken = await this.jwtService.signAsync(tokenPayload);
@@ -168,6 +174,7 @@ export class AuthService {
       accessToken,
       username: user.username,
       userId: user.userId,
+      role: user.role,
       name: user.name,
       avatarUrl: user.avatarUrl,
       height: user.height,
