@@ -21,7 +21,7 @@ async function parseErrorMessage(response: Response): Promise<string> {
 }
 
 async function request<T>(url: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(url, init);
+  const response = await fetch(url, { credentials: 'include', ...init });
   if (!response.ok) {
     throw new ApiError(await parseErrorMessage(response));
   }

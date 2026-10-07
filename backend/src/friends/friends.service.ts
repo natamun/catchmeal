@@ -8,7 +8,12 @@ import {
 import { Prisma } from '../generated/prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 
-const SAFE_USER_SELECT = { id: true, username: true, name: true } as const;
+const SAFE_USER_SELECT = {
+  id: true,
+  username: true,
+  name: true,
+  avatarUrl: true,
+} as const;
 
 @Injectable()
 export class FriendsService {
@@ -76,6 +81,69 @@ export class FriendsService {
     }
 
     return this.prisma.friend.delete({ where: { id } });
+  }
+
+  async getFriendsActivity(userId: number) {
+    const rows = await this.prisma.friend.findMany({
+      where: {
+        status: 'ACCEPTED',
+        OR: [{ userId }, { friendId: userId }],
+      },
+      include: {
+        user: { select: SAFE_USER_SELECT },
+        friendUser: { select: SAFE_USER_SELECT },
+      },
+      take: 50,
+    });
+
+    const results = await Promise.all(
+      rows.map(async (row) => {
+        const friend = row.userId === userId ? row.friendUser : row.user;
+
+        const [meal, weight] = await Promise.all([
+          this.prisma.meal.findFirst({
+            where: { userId: friend.id, loggedAt: { not: null } },
+            orderBy: { loggedAt: 'desc' },
+            select: { loggedAt: true, typeMeal: true },
+          }),
+          this.prisma.weightLog.findFirst({
+            where: { userId: friend.id },
+            orderBy: { loggedAt: 'desc' },
+            select: { loggedAt: true, weight: true },
+          }),
+        ]);
+
+        let lastAction: string | null = null;
+        let lastActionAt: string | null = null;
+
+        if (meal && (!weight || meal.loggedAt! >= weight.loggedAt)) {
+          const label = meal.typeMeal ?? 'repas';
+          lastAction = `a enregistré un ${label.toLowerCase()}`;
+          lastActionAt = meal.loggedAt!.toISOString();
+        } else if (weight) {
+          lastAction = `a enregistré son poids (${weight.weight} kg)`;
+          lastActionAt = weight.loggedAt.toISOString();
+        }
+
+        return {
+          friendshipId: row.id,
+          friend: {
+            id: friend.id,
+            username: friend.username,
+            name: friend.name,
+            avatarUrl: friend.avatarUrl,
+          },
+          lastAction,
+          lastActionAt,
+        };
+      }),
+    );
+
+    return results.sort((a, b) => {
+      if (!a.lastActionAt) return 1;
+      if (!b.lastActionAt) return -1;
+      return b.lastActionAt.localeCompare(a.lastActionAt);
+    });
   }
 
   async listFriends(userId: number) {

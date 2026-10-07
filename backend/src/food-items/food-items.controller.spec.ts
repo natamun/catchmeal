@@ -29,6 +29,8 @@ describe('FoodItemsController', () => {
     controller = module.get<FoodItemsController>(FoodItemsController);
   });
 
+  const mockReq = { user: { userId: 2 } };
+
   it('should be defined', () => {
     expect(controller).toBeDefined();
   });
@@ -46,7 +48,7 @@ describe('FoodItemsController', () => {
     };
     foodItemsServiceMock.create.mockResolvedValue({ id: 1, userId: 2, ...dto });
 
-    await controller.create(2, dto);
+    await controller.create(2, dto, mockReq);
 
     expect(foodItemsServiceMock.create).toHaveBeenCalledWith(2, dto);
   });
@@ -54,7 +56,7 @@ describe('FoodItemsController', () => {
   it('should list food items for a user', async () => {
     foodItemsServiceMock.findAll.mockResolvedValue([]);
 
-    await controller.findAll(2);
+    await controller.findAll(2, mockReq);
 
     expect(foodItemsServiceMock.findAll).toHaveBeenCalledWith(2);
   });
@@ -62,7 +64,7 @@ describe('FoodItemsController', () => {
   it('should find one food item', async () => {
     foodItemsServiceMock.findOne.mockResolvedValue({ id: 1 });
 
-    await controller.findOne(2, 1);
+    await controller.findOne(2, 1, mockReq);
 
     expect(foodItemsServiceMock.findOne).toHaveBeenCalledWith(2, 1);
   });
@@ -74,7 +76,7 @@ describe('FoodItemsController', () => {
       name: 'Riz complet',
     });
 
-    await controller.update(2, 1, dto);
+    await controller.update(2, 1, dto, mockReq);
 
     expect(foodItemsServiceMock.update).toHaveBeenCalledWith(2, 1, dto);
   });
@@ -82,7 +84,7 @@ describe('FoodItemsController', () => {
   it('should archive a food item', async () => {
     foodItemsServiceMock.archive.mockResolvedValue({ id: 1, archived: true });
 
-    await controller.archive(2, 1);
+    await controller.archive(2, 1, mockReq);
 
     expect(foodItemsServiceMock.archive).toHaveBeenCalledWith(2, 1);
   });

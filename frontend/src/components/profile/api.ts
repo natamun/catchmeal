@@ -105,6 +105,8 @@ export function logWeight(userId: number, input: LogWeightInput) {
   });
 }
 
-export function getWeightHistory(userId: number) {
-  return request<WeightEntry[]>(`${BASE_URL}/users/${userId}/weight`);
+export function getWeightHistory(userId: number, signal?: AbortSignal) {
+  return request<WeightEntry[]>(`${BASE_URL}/users/${userId}/weight`, {
+    signal,
+  });
 }

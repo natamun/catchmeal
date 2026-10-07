@@ -9,15 +9,21 @@ export interface FriendActivity {
 
 export default function FriendsActivity({
   activities,
+  isLoading = false,
+  loadError = null,
 }: {
   activities: FriendActivity[];
+  isLoading?: boolean;
+  loadError?: string | null;
 }) {
   return (
     <div className="rounded-2xl border border-green-200 bg-white p-6 shadow-sm">
       <h2 className="mb-4 text-sm font-semibold tracking-wide text-green-500 uppercase">
         Activité des amis
       </h2>
-      {activities.length === 0 ? (
+      {isLoading ? null : loadError ? (
+        <p className="py-4 text-center text-sm text-green-500">{loadError}</p>
+      ) : activities.length === 0 ? (
         <p className="py-4 text-center text-sm text-green-500">
           Aucune activité récente
         </p>

@@ -13,9 +13,11 @@ const friendsUrl = (userId: number) =>
   `${import.meta.env.VITE_API_URL}/users/${userId}/friends`;
 
 export class ApiError extends Error {
-  constructor(message: string) {
+  readonly status?: number;
+  constructor(message: string, status?: number) {
     super(message);
     this.name = 'ApiError';
+    this.status = status;
   }
 }
 
@@ -30,11 +32,29 @@ async function parseErrorMessage(response: Response): Promise<string> {
 }
 
 async function request<T>(url: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(url, init);
+  const response = await fetch(url, { ...init, credentials: 'include' });
   if (!response.ok) {
-    throw new ApiError(await parseErrorMessage(response));
+    throw new ApiError(await parseErrorMessage(response), response.status);
   }
   return (await response.json()) as T;
+}
+
+export interface FriendActivityItem {
+  friendshipId: number;
+  friend: {
+    id: number;
+    username: string;
+    name: string;
+    avatarUrl: string | null;
+  };
+  lastAction: string | null;
+  lastActionAt: string | null;
+}
+
+export function listFriendsActivity(userId: number, signal?: AbortSignal) {
+  return request<FriendActivityItem[]>(`${friendsUrl(userId)}/activity`, {
+    signal,
+  });
 }
 
 export function listFriends(userId: number, signal?: AbortSignal) {
@@ -74,8 +94,8 @@ export function removeFriendship(userId: number, id: number) {
   return request<unknown>(`${friendsUrl(userId)}/${id}`, { method: 'DELETE' });
 }
 
-export function getFriendsPresence(userId: number, signal?: AbortSignal) {
-  return request<FriendPresence[]>(`${USERS_URL}/${userId}/presence`, {
+export function getFriendsPresence(signal?: AbortSignal) {
+  return request<FriendPresence[]>(`${import.meta.env.VITE_API_URL}/presence`, {
     signal,
   });
 }

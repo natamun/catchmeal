@@ -89,7 +89,7 @@ export function GdprSection() {
     setExportLoading(true);
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/gdpr/export/${user.userId}`,
+        `${import.meta.env.VITE_API_URL}/gdpr/export`,
         { credentials: 'include' },
       );
       if (!response.ok) throw new Error('Failed to fetch user data');
@@ -114,7 +114,7 @@ export function GdprSection() {
     setDeleteLoading(true);
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/gdpr/account/${user.userId}`,
+        `${import.meta.env.VITE_API_URL}/gdpr/account`,
         { method: 'DELETE', credentials: 'include' },
       );
       if (!response.ok) throw new Error('Failed to delete account');

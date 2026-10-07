@@ -8,7 +8,6 @@ import {
   ApiError,
   removeFriendship,
 } from '../components/friends/api.ts';
-import { Avatar } from '../components/friends/Avatar.tsx';
 import FriendRow from '../components/friends/FriendRow.tsx';
 import RequestRow from '../components/friends/RequestRow.tsx';
 import type { Friend, UserSummary } from '../components/friends/types.ts';
@@ -24,37 +23,6 @@ type Tab = 'friends' | 'requests';
 const TAB_OPTIONS: { value: Tab; label: string }[] = [
   { value: 'friends', label: 'Mes amis' },
   { value: 'requests', label: 'Demandes' },
-];
-
-const ACTIVITY = [
-  {
-    id: 1,
-    username: 'alice',
-    action: 'a ajouté un repas (540 kcal)',
-    time: 'il y a 5 min',
-    online: true,
-  },
-  {
-    id: 2,
-    username: 'bob',
-    action: 'a atteint son objectif du jour',
-    time: 'il y a 23 min',
-    online: false,
-  },
-  {
-    id: 3,
-    username: 'carol',
-    action: 'a enregistré son poids (63 kg)',
-    time: 'il y a 1h',
-    online: true,
-  },
-  {
-    id: 4,
-    username: 'david',
-    action: 'a scanné un nouveau produit',
-    time: 'il y a 2h',
-    online: false,
-  },
 ];
 
 export default function FriendsPage() {
@@ -102,7 +70,7 @@ export default function FriendsPage() {
   const list = activeTab === 'friends' ? friends : requests;
   const emptyMessage =
     activeTab === 'friends'
-      ? "Aucun ami pour l'instant."
+      ? "Tu n'as pas encore d'amis. Utilise le bouton + pour en ajouter !"
       : 'Aucune demande en attente.';
 
   return (
@@ -142,7 +110,7 @@ export default function FriendsPage() {
           </button>
         </div>
 
-        {actionError && <p className="test-sm test-red-500">{actionError}</p>}
+        {actionError && <p className="text-sm text-red-500">{actionError}</p>}
 
         <div className="overflow-hidden rounded-2xl border border-green-200 bg-white shadow-sm">
           {isLoading && (
@@ -200,27 +168,6 @@ export default function FriendsPage() {
                     }
                   />
                 ))}
-          </ul>
-        </div>
-
-        {/* Activité récente */}
-        <div className="rounded-2xl border border-green-200 bg-white p-5 shadow-sm">
-          <p className="mb-4 text-xs font-semibold tracking-wide text-green-500 uppercase">
-            Activité récente
-          </p>
-          <ul className="flex flex-col gap-4">
-            {ACTIVITY.map((a) => (
-              <li key={a.id} className="flex items-center gap-3">
-                <Avatar username={a.username} online={a.online} />
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm text-green-800">
-                    <span className="font-semibold">{a.username}</span>{' '}
-                    {a.action}
-                  </p>
-                  <p className="text-xs text-green-500">{a.time}</p>
-                </div>
-              </li>
-            ))}
           </ul>
         </div>
       </div>

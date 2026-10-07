@@ -28,12 +28,14 @@ describe('MessagesController', () => {
 
   it('should send a message', async () => {
     const dto: SendMessageDto = { toUserId: 2, content: 'hello' };
-    await controller.send(1, dto);
+    const req = { user: { userId: 1, username: 'test' } } as never;
+    await controller.send(1, dto, req);
     expect(messagesServiceMock.send).toHaveBeenCalledWith(1, 2, 'hello');
   });
 
   it('should get a conversation', async () => {
-    await controller.getConversation(1, 2);
+    const req = { user: { userId: 1, username: 'test' } } as never;
+    await controller.getConversation(1, 2, req);
     expect(messagesServiceMock.getConversation).toHaveBeenCalledWith(1, 2);
   });
 });

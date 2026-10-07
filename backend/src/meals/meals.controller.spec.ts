@@ -32,6 +32,8 @@ describe('MealsController', () => {
     expect(controller).toBeDefined();
   });
 
+  const req = { user: { userId: 7 } };
+
   it('should create a meal', async () => {
     const dto: CreateMealDto = {
       typeMeal: MealType.LUNCH,
@@ -39,7 +41,7 @@ describe('MealsController', () => {
     };
     mealsServiceMock.create.mockResolvedValue({ id: 5, ...dto });
 
-    await controller.create(7, dto);
+    await controller.create(7, dto, req);
 
     expect(mealsServiceMock.create).toHaveBeenCalledWith(7, dto);
   });
@@ -47,7 +49,7 @@ describe('MealsController', () => {
   it('should list meals for a user', async () => {
     mealsServiceMock.findAll.mockResolvedValue([]);
 
-    await controller.findAll(7);
+    await controller.findAll(7, req);
 
     expect(mealsServiceMock.findAll).toHaveBeenCalledWith(
       7,
@@ -59,7 +61,7 @@ describe('MealsController', () => {
   it('should list only logged meals when logged=true', async () => {
     mealsServiceMock.findAll.mockResolvedValue([]);
 
-    await controller.findAll(7, true);
+    await controller.findAll(7, req, 'true');
 
     expect(mealsServiceMock.findAll).toHaveBeenCalledWith(7, true, undefined);
   });
@@ -67,7 +69,7 @@ describe('MealsController', () => {
   it('should list only template meals when logged=false', async () => {
     mealsServiceMock.findAll.mockResolvedValue([]);
 
-    await controller.findAll(7, false);
+    await controller.findAll(7, req, 'false');
 
     expect(mealsServiceMock.findAll).toHaveBeenCalledWith(7, false, undefined);
   });
@@ -76,7 +78,7 @@ describe('MealsController', () => {
     mealsServiceMock.findAll.mockResolvedValue([]);
     const date = new Date('2026-09-18');
 
-    await controller.findAll(7, undefined, date);
+    await controller.findAll(7, req, undefined, date);
 
     expect(mealsServiceMock.findAll).toHaveBeenCalledWith(7, undefined, date);
   });
@@ -84,7 +86,7 @@ describe('MealsController', () => {
   it('should find one meal', async () => {
     mealsServiceMock.findOne.mockResolvedValue({ id: 5 });
 
-    await controller.findOne(7, 5);
+    await controller.findOne(7, 5, req);
 
     expect(mealsServiceMock.findOne).toHaveBeenCalledWith(7, 5);
   });
@@ -93,7 +95,7 @@ describe('MealsController', () => {
     const dto: UpdateMealDto = { name: 'Riz-steak' };
     mealsServiceMock.update.mockResolvedValue({ id: 5, name: 'Riz-steak' });
 
-    await controller.update(7, 5, dto);
+    await controller.update(7, 5, dto, req);
 
     expect(mealsServiceMock.update).toHaveBeenCalledWith(7, 5, dto);
   });
@@ -101,7 +103,7 @@ describe('MealsController', () => {
   it('should remove a meal', async () => {
     mealsServiceMock.remove.mockResolvedValue({ id: 5 });
 
-    await controller.remove(7, 5);
+    await controller.remove(7, 5, req);
 
     expect(mealsServiceMock.remove).toHaveBeenCalledWith(7, 5);
   });

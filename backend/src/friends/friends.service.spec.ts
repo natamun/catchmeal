@@ -193,7 +193,11 @@ describe('FriendsService', () => {
 
       expect(prismaMock.friend.findMany).toHaveBeenCalledWith({
         where: { friendId: 2, status: 'PENDING' },
-        include: { user: { select: { id: true, username: true, name: true } } },
+        include: {
+          user: {
+            select: { id: true, username: true, name: true, avatarUrl: true },
+          },
+        },
       });
       expect(result).toEqual([{ requestId: 1, from: { id: 3 } }]);
     });
