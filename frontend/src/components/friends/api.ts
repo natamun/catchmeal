@@ -94,8 +94,9 @@ export function removeFriendship(userId: number, id: number) {
   return request<unknown>(`${friendsUrl(userId)}/${id}`, { method: 'DELETE' });
 }
 
-export function getFriendsPresence(userId: number, signal?: AbortSignal) {
-  return request<FriendPresence[]>(`${USERS_URL}/${userId}/presence`, {
-    signal,
-  });
+export function getFriendsPresence(signal?: AbortSignal) {
+  return request<FriendPresence[]>(
+    `${import.meta.env.VITE_API_URL}/presence`,
+    { signal },
+  );
 }

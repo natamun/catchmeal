@@ -12,7 +12,7 @@ export function usePresence(userId: number) {
 
   useEffect(() => {
     const loadPresence = () => {
-      getFriendsPresence(userId)
+      getFriendsPresence()
         .then((list) => setPresence(new Map(list.map((p) => [p.userId, p]))))
         .catch(console.error);
     };
