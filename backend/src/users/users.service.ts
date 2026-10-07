@@ -108,7 +108,7 @@ export class UsersService {
           currentGoalCalories !== null &&
           currentGoalCalories !== beforeUpdate?.dailyCalorieGoal
         ) {
-          let objective = '';
+          let objective: string | null = null;
           if (beforeUpdate?.dailyCalorieGoal) {
             objective =
               currentGoalCalories > beforeUpdate?.dailyCalorieGoal
