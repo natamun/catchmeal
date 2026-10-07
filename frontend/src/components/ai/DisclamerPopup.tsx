@@ -12,6 +12,7 @@ export default function DisclamerPopup({ setDisclamer }: DisclamerPopupProps) {
           Avertissement important
         </h3>
         <button
+          type="button"
           className="flex font-bold hover:text-gray-500"
           onClick={() => setDisclamer(false)}
         >
