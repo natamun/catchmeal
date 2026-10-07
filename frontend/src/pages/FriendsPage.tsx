@@ -16,6 +16,7 @@ import ChatWindow from '../components/messages/ChatWindow.tsx';
 import { ConfirmDialog } from '../components/ui/ConfirmDialog.tsx';
 import { Toast } from '../components/ui/Toast.tsx';
 import { useFriends } from '../hooks/useFriends.ts';
+import { usePresence } from '../hooks/usePresence.ts';
 import { useTimeout } from '../hooks/useTimeout.ts';
 
 type Tab = 'friends' | 'requests';
@@ -70,6 +71,7 @@ export default function FriendsPage() {
   const confirmDialogRef = useRef<HTMLDialogElement>(null);
   const [chatFriend, setChatFriend] = useState<UserSummary | null>(null);
   const chatDialogRef = useRef<HTMLDialogElement>(null);
+  const presence = usePresence(userId);
 
   useTimeout(() => setSuccessMessage(null), successMessage ? 3000 : null);
 
@@ -166,6 +168,8 @@ export default function FriendsPage() {
                   <FriendRow
                     key={f.friendshipId}
                     friend={f.friend}
+                    online={presence.get(f.friend.id)?.online ?? false}
+                    lastSeenAt={presence.get(f.friend.id)?.lastSeenAt ?? null}
                     onMessage={() => {
                       setChatFriend(f.friend);
                     }}

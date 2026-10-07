@@ -13,3 +13,9 @@ export interface FriendRequest {
   requestId: number;
   from: UserSummary;
 }
+
+export interface FriendPresence {
+  userId: number;
+  online: boolean;
+  lastSeenAt: string | null;
+}

@@ -51,6 +51,7 @@ model User {
   role              Role          @default(USER)
   createAt          DateTime      @default(now())
   deletedAt          DateTime?
+  lastSeenAt        DateTime?
   meal              Meal[]
   foodItems         FoodItem[]
   mealFoodItems     MealFoodItem[]
