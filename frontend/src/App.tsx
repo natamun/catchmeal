@@ -116,13 +116,14 @@ function AppShell() {
           {pages[activeTab]}
         </Suspense>
       </main>
-      <Nav 
-        active={activeTab} 
+      <Nav
+        active={activeTab}
         onChange={(tab) => {
           setPendingReply(null);
           setActiveTab(tab);
         }}
-        isAdmin={isAdmin} />
+        isAdmin={isAdmin}
+      />
       {(activeTab === 'stats' ||
         activeTab === 'home' ||
         activeTab === 'food') && (
