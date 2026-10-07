@@ -333,4 +333,72 @@ describe('MealsService', () => {
       where: { id_userId: { id: 5, userId: 7 } },
     });
   });
+
+  it('should find meals within a date range for a user, with food item names', async () => {
+    prismaMock.meal.findMany.mockResolvedValue([]);
+    const from = new Date('2026-09-01');
+    const to = new Date('2026-09-18');
+
+    await service.findRange(7, from, to);
+
+    expect(prismaMock.meal.findMany).toHaveBeenCalledWith({
+      where: { userId: 7, loggedAt: { gte: from, lte: to } },
+      include: {
+        items: {
+          include: {
+            foodItem: { select: { name: true, brand: true, baseUnit: true } },
+          },
+        },
+      },
+      orderBy: [{ loggedAt: 'asc' }, { id: 'asc' }],
+    });
+  });
+
+  it('should return the meals with their food item names unchanged', async () => {
+    const meals = [
+      {
+        id: 1,
+        loggedAt: new Date('2026-09-17'),
+        items: [
+          {
+            quantity: 150,
+            foodItem: { name: 'Riz blanc', brand: null, baseUnit: 'GRAM' },
+          },
+        ],
+      },
+      {
+        id: 2,
+        loggedAt: new Date('2026-09-16'),
+        items: [{ quantity: 1, foodItem: null }],
+      },
+    ];
+    prismaMock.meal.findMany.mockResolvedValue(meals);
+
+    const result = await service.findRange(
+      7,
+      new Date('2026-09-01'),
+      new Date('2026-09-18'),
+    );
+
+    expect(result).toEqual(meals);
+  });
+
+  it('should handle a range spanning a single day', async () => {
+    prismaMock.meal.findMany.mockResolvedValue([]);
+    const sameDay = new Date('2026-09-18');
+
+    await service.findRange(7, sameDay, sameDay);
+
+    expect(prismaMock.meal.findMany).toHaveBeenCalledWith({
+      where: { userId: 7, loggedAt: { gte: sameDay, lte: sameDay } },
+      include: {
+        items: {
+          include: {
+            foodItem: { select: { name: true, brand: true, baseUnit: true } },
+          },
+        },
+      },
+      orderBy: [{ loggedAt: 'asc' }, { id: 'asc' }],
+    });
+  });
 });

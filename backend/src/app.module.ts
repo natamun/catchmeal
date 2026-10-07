@@ -2,6 +2,8 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 
 import { AdminModule } from './admin/admin.module';
+import { AiContextModule } from './ai-context/ai-context.module';
+import { AiModule } from './ai/ai.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
@@ -25,6 +27,8 @@ import { UsersModule } from './users/users.module';
     GdprModule,
     MessagesModule,
     AdminModule,
+    AiModule,
+    AiContextModule,
   ],
   controllers: [AppController],
   providers: [AppService],

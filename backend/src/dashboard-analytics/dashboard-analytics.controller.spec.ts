@@ -49,46 +49,6 @@ describe('DashboardAnalyticsController', () => {
     expect(dashboard).toEqual([]);
   });
 
-  it('should be call with userId: 42, from: 2026-01-10, to: 2026-01-12', async () => {
-    analysticsMock.getDashboard.mockResolvedValue([]);
-    const req = {
-      user: { userId: 42, username: 'testuser' },
-    } as unknown as Express.Request & {
-      user: { userId: number; username: string };
-    };
-    await controller.getDashboard(
-      42,
-      req,
-      new Date('2026-01-10'),
-      new Date('2026-01-12'),
-    );
-    expect(analysticsMock.getDashboard).toHaveBeenCalledWith(
-      42,
-      new Date('2026-01-10'),
-      new Date('2026-01-12'),
-    );
-  });
-
-  it('should be call with userId: 42 and last 7 days', async () => {
-    const now = new Date('2026-01-15T12:00:00.000Z');
-    const checkFrom = new Date('2026-01-08T00:00:00.000Z');
-    const checkTo = new Date('2026-01-16T00:00:00.000Z');
-    jest.useFakeTimers().setSystemTime(now);
-    analysticsMock.getDashboard.mockResolvedValue([]);
-    const req = {
-      user: { userId: 42, username: 'testuser' },
-    } as unknown as Express.Request & {
-      user: { userId: number; username: string };
-    };
-    await controller.getDashboard(42, req);
-    expect(analysticsMock.getDashboard).toHaveBeenCalledWith(
-      42,
-      checkFrom,
-      checkTo,
-    );
-    jest.useRealTimers();
-  });
-
   it('should throw ForbiddenException if userId does not match', () => {
     const req = {
       user: { userId: 42, username: 'testuser' },

@@ -2,7 +2,9 @@ import { lazy, Suspense, useState } from 'react';
 
 import { useAuth } from './auth/auth-context';
 import { AuthProvider } from './auth/AuthProvider';
+import ChatBotPopup from './components/ai/ChatBotPopup';
 import Nav, { type Tab } from './components/layout/Nav';
+import type { ChatMessage } from './types/ChatBotType';
 
 const LandingPage = lazy(() => import('./pages/LandingPage'));
 const AuthPage = lazy(() => import('./pages/AuthPage'));
@@ -30,6 +32,14 @@ function AppShell() {
     }
     return null;
   });
+  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [message, setMessage] = useState<ChatMessage[]>([
+    {
+      role: 'assistant',
+      content:
+        "Salut ! Je peux t'aider à comprendre tes stats ou te conseiller sur tes repas 😊",
+    },
+  ]);
 
   if (status === 'loading') {
     return (
@@ -90,6 +100,17 @@ function AppShell() {
         </Suspense>
       </main>
       <Nav active={activeTab} onChange={setActiveTab} isAdmin={isAdmin} />
+      {(activeTab === 'stats' ||
+        activeTab === 'home' ||
+        activeTab === 'food') && (
+        <ChatBotPopup
+          isOpen={isOpen}
+          onToggle={setIsOpen}
+          messages={message}
+          onMessagesChange={setMessage}
+          activePage={activeTab}
+        />
+      )}
     </div>
   );
 }

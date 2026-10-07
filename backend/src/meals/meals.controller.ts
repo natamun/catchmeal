@@ -37,6 +37,18 @@ export class MealsController {
     return this.mealsService.findAll(userId, logged, date);
   }
 
+  @Get('meals/range')
+  findRange(
+    @Param('userId', ParseIntPipe) userId: number,
+    @Query('from', new ParseDatePipe({ optional: true })) from?: Date,
+    @Query('to', new ParseDatePipe({ optional: true })) to?: Date,
+  ) {
+    const fromDate =
+      from ?? new Date(new Date().setDate(new Date().getDate() - 7));
+    const toDate = to ?? new Date();
+    return this.mealsService.findRange(userId, fromDate, toDate);
+  }
+
   @Get('meals/:id')
   findOne(
     @Param('userId', ParseIntPipe) userId: number,

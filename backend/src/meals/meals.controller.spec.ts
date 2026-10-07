@@ -15,6 +15,7 @@ describe('MealsController', () => {
     findOne: jest.fn(),
     update: jest.fn(),
     remove: jest.fn(),
+    findRange: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -103,5 +104,40 @@ describe('MealsController', () => {
     await controller.remove(7, 5);
 
     expect(mealsServiceMock.remove).toHaveBeenCalledWith(7, 5);
+  });
+
+  it('should find a range of meals with explicit from/to', async () => {
+    mealsServiceMock.findRange.mockResolvedValue([{ id: 5 }]);
+    const from = new Date('2026-09-01');
+    const to = new Date('2026-09-18');
+
+    await controller.findRange(7, from, to);
+
+    expect(mealsServiceMock.findRange).toHaveBeenCalledWith(7, from, to);
+  });
+
+  it('should default "to" to now when only "from" is provided', async () => {
+    mealsServiceMock.findRange.mockResolvedValue([]);
+    const from = new Date('2026-09-01');
+
+    await controller.findRange(7, from, undefined);
+
+    expect(mealsServiceMock.findRange).toHaveBeenCalledWith(
+      7,
+      from,
+      expect.any(Date),
+    );
+  });
+
+  it('should default "from" to 7 days ago when no dates are provided', async () => {
+    mealsServiceMock.findRange.mockResolvedValue([]);
+
+    await controller.findRange(7, undefined, undefined);
+
+    expect(mealsServiceMock.findRange).toHaveBeenCalledWith(
+      7,
+      expect.any(Date),
+      expect.any(Date),
+    );
   });
 });
