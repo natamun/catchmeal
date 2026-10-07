@@ -66,7 +66,7 @@ export default function DatePick({
                   setSelectedButton(d);
                   setLastDays(d, setFrom, setTo);
                 }}
-                className={`m-1 rounded-full bg-green-50 px-5 py-1.5 text-sm font-semibold ring-1 ring-green-500 transition-all duration-200 ${isActive ? 'bg-green-600 text-white shadow-sm' : 'hover:bg-emerald-100/60'} `}
+                className={`m-1 cursor-pointer rounded-full bg-green-50 px-5 py-1.5 text-sm font-semibold ring-1 ring-green-500 transition-all duration-200 ${isActive ? 'bg-green-600 text-white shadow-sm' : 'hover:bg-emerald-100/60'} `}
               >
                 {`${d} j`}
               </button>
