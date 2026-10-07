@@ -5,6 +5,7 @@ import ReactMarkdown from 'react-markdown';
 import { useAuth } from '../../auth/auth-context';
 import type { ChatMessage, ResponseMistral } from '../../types/ChatBotType';
 import type { Tab } from '../layout/Nav';
+import DisclamerPopup from './DisclamerPopup';
 
 interface ChatBotPopupProps {
   isOpen: boolean;
@@ -26,6 +27,7 @@ export default function ChatBotPopup({
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const lastAssistantRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const [disclamer, setDisclamer] = useState<boolean>(false);
   const { user } = useAuth();
   const CURRENT_USER_ID = user?.userId;
   const API_URL = import.meta.env.VITE_API_URL;
@@ -112,8 +114,13 @@ export default function ChatBotPopup({
         </button>
       )}
       {isOpen === true && (
-        <div className="fixed right-2 bottom-25 flex h-121 w-75 flex-col rounded-2xl border border-green-400 bg-white shadow-xl sm:right-5 sm:w-100 md:bottom-10">
-          <div className="flex justify-between rounded-t-2xl bg-green-400 shadow-sm">
+        <div className="fixed right-2 bottom-25 flex h-125 w-75 flex-col rounded-xl border border-green-400 bg-white shadow-xl sm:right-5 sm:w-100 md:bottom-10">
+          {disclamer === true && (
+            <div className="absolute inset-0 z-10 flex rounded-xl bg-black/30 p-3">
+              <DisclamerPopup setDisclamer={setDisclamer} />
+            </div>
+          )}
+          <div className="flex justify-between rounded-t-xl bg-green-400 shadow-sm">
             <p className="m-1.5 ml-5 p-1 text-xl font-semibold text-white">
               Chat Assistant
             </p>
@@ -150,6 +157,7 @@ export default function ChatBotPopup({
               className="m-2 max-h-20 min-w-0 flex-1 resize-none overflow-y-auto outline-none focus:outline-none"
               value={input}
               maxLength={250}
+              disabled={disclamer}
               minLength={1}
               rows={1}
               ref={textareaRef}
@@ -182,6 +190,18 @@ export default function ChatBotPopup({
                 <Loader height={20} width={20} className="animate-spin" />
               )}
             </div>
+          </div>
+          <div className="m-0.5 flex flex-col">
+            <p className="flex justify-center text-[10px] sm:text-[11px]">
+              Par votre utilisation du chat, vous acceptez cette
+            </p>
+            <button
+              className="flex self-center text-[10px] text-green-400 hover:text-green-100/80"
+              type="button"
+              onClick={() => setDisclamer(true)}
+            >
+              <span>clause de non-responsabilité.</span>
+            </button>
           </div>
         </div>
       )}
