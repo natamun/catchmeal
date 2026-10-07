@@ -71,27 +71,61 @@ export class UsersService {
   async updateProfile(userId: number, dto: UpdateProfileDto) {
     const { birthDate, ...rest } = dto;
     try {
-      return await this.prisma.user.update({
-        where: { id: userId },
-        data: {
-          ...rest,
-          ...(birthDate ? { birthDate: new Date(birthDate) } : {}),
-        },
-        select: {
-          id: true,
-          username: true,
-          name: true,
-          avatarUrl: true,
-          height: true,
-          targetWeight: true,
-          dailyCalorieGoal: true,
-          dailyProteinGoal: true,
-          dailyCarbsGoal: true,
-          dailyFatGoal: true,
-          gender: true,
-          birthDate: true,
-          activityLevel: true,
-        },
+      return await this.prisma.$transaction(async (tsc) => {
+        const beforeUpdate = await tsc.user.findUnique({
+          where: { id: userId },
+          select: {
+            dailyCalorieGoal: true,
+          },
+        });
+
+        const user = await tsc.user.update({
+          where: { id: userId },
+          data: {
+            ...rest,
+            ...(birthDate ? { birthDate: new Date(birthDate) } : {}),
+          },
+          select: {
+            id: true,
+            username: true,
+            name: true,
+            avatarUrl: true,
+            height: true,
+            targetWeight: true,
+            dailyCalorieGoal: true,
+            dailyProteinGoal: true,
+            dailyCarbsGoal: true,
+            dailyFatGoal: true,
+            gender: true,
+            birthDate: true,
+            activityLevel: true,
+          },
+        });
+
+        const currentGoalCalories = user.dailyCalorieGoal;
+
+        if (
+          currentGoalCalories !== null &&
+          currentGoalCalories !== beforeUpdate?.dailyCalorieGoal
+        ) {
+          let objective: string | null = null;
+          if (beforeUpdate?.dailyCalorieGoal) {
+            objective =
+              currentGoalCalories > beforeUpdate?.dailyCalorieGoal
+                ? 'gain'
+                : 'lose';
+          }
+          await tsc.goalSetting.create({
+            data: {
+              userId,
+              startDate: new Date(),
+              dailyCalories: currentGoalCalories,
+              objective: objective,
+            },
+          });
+        }
+
+        return user;
       });
     } catch (error) {
       if (
