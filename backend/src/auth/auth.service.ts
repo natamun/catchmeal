@@ -25,6 +25,10 @@ export type SignInData = {
   gender?: string | null;
   birthDate?: Date | null;
   activityLevel?: string | null;
+  bodyFat?: number | null;
+  fatFreeMass?: number | null;
+  bodyWater?: number | null;
+  muscleMass?: number | null;
 };
 
 type AuthResult = {
@@ -88,6 +92,10 @@ export class AuthService {
       gender: user.gender,
       birthDate: user.birthDate,
       activityLevel: user.activityLevel,
+      bodyFat: user.bodyFat,
+      fatFreeMass: user.fatFreeMass,
+      bodyWater: user.bodyWater,
+      muscleMass: user.muscleMass,
     };
   }
 
@@ -111,6 +119,10 @@ export class AuthService {
         gender: existingUser.gender,
         birthDate: existingUser.birthDate,
         activityLevel: existingUser.activityLevel,
+        bodyFat: existingUser.bodyFat,
+        fatFreeMass: existingUser.fatFreeMass,
+        bodyWater: existingUser.bodyWater,
+        muscleMass: existingUser.muscleMass,
       };
     }
 

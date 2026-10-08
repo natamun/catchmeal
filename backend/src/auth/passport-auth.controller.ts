@@ -37,6 +37,10 @@ function toUserResponse(data: SignInData): UserResponse {
     gender: data.gender,
     birthDate: data.birthDate,
     activityLevel: data.activityLevel,
+    bodyFat: data.bodyFat,
+    fatFreeMass: data.fatFreeMass,
+    bodyWater: data.bodyWater,
+    muscleMass: data.muscleMass,
   };
 }
 
