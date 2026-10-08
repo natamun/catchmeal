@@ -33,15 +33,9 @@ type Field =
   | 'dailyCarbsGoal'
   | 'dailyFatGoal'
   | 'bodyFat'
-  | 'skeletalMuscle'
   | 'fatFreeMass'
-  | 'subcutaneousFat'
-  | 'visceralFat'
   | 'bodyWater'
-  | 'muscleMass'
-  | 'boneMass'
-  | 'protein'
-  | 'metabolicAge';
+  | 'muscleMass';
 
 interface FormState {
   username: string;
@@ -56,15 +50,9 @@ interface FormState {
   birthDate: string;
   activityLevel: string;
   bodyFat: string;
-  skeletalMuscle: string;
   fatFreeMass: string;
-  subcutaneousFat: string;
-  visceralFat: string;
   bodyWater: string;
   muscleMass: string;
-  boneMass: string;
-  protein: string;
-  metabolicAge: string;
 }
 
 function validate(form: FormState): Partial<Record<Field, string>> {
@@ -156,15 +144,9 @@ export function ProfileIdentityCard({ user, onUpdate, currentWeight }: Props) {
     birthDate: user.birthDate ? user.birthDate.slice(0, 10) : '',
     activityLevel: user.activityLevel ?? '',
     bodyFat: user.bodyFat?.toString() ?? '',
-    skeletalMuscle: user.skeletalMuscle?.toString() ?? '',
     fatFreeMass: user.fatFreeMass?.toString() ?? '',
-    subcutaneousFat: user.subcutaneousFat?.toString() ?? '',
-    visceralFat: user.visceralFat?.toString() ?? '',
     bodyWater: user.bodyWater?.toString() ?? '',
     muscleMass: user.muscleMass?.toString() ?? '',
-    boneMass: user.boneMass?.toString() ?? '',
-    protein: user.protein?.toString() ?? '',
-    metabolicAge: user.metabolicAge?.toString() ?? '',
   });
 
   const [form, setForm] = useState<FormState>(initForm);
@@ -297,15 +279,9 @@ export function ProfileIdentityCard({ user, onUpdate, currentWeight }: Props) {
 
     const bodyCompFields = [
       'bodyFat',
-      'skeletalMuscle',
       'fatFreeMass',
-      'subcutaneousFat',
-      'visceralFat',
       'bodyWater',
       'muscleMass',
-      'boneMass',
-      'protein',
-      'metabolicAge',
     ] as const;
     for (const f of bodyCompFields) {
       const parsed = form[f] ? parseFloat(form[f]) : undefined;
@@ -335,15 +311,9 @@ export function ProfileIdentityCard({ user, onUpdate, currentWeight }: Props) {
         birthDate: updated.birthDate ?? undefined,
         activityLevel: updated.activityLevel ?? undefined,
         bodyFat: updated.bodyFat ?? undefined,
-        skeletalMuscle: updated.skeletalMuscle ?? undefined,
         fatFreeMass: updated.fatFreeMass ?? undefined,
-        subcutaneousFat: updated.subcutaneousFat ?? undefined,
-        visceralFat: updated.visceralFat ?? undefined,
         bodyWater: updated.bodyWater ?? undefined,
         muscleMass: updated.muscleMass ?? undefined,
-        boneMass: updated.boneMass ?? undefined,
-        protein: updated.protein ?? undefined,
-        metabolicAge: updated.metabolicAge ?? undefined,
       });
       dialogRef.current?.close();
     } catch (err) {
@@ -524,24 +494,9 @@ export function ProfileIdentityCard({ user, onUpdate, currentWeight }: Props) {
               label: 'Masse grasse (%)',
             },
             {
-              field: 'skeletalMuscle' as Field,
-              id: 'pf-skeletal-muscle',
-              label: 'Muscle squelettique (%)',
-            },
-            {
               field: 'fatFreeMass' as Field,
               id: 'pf-fat-free-mass',
-              label: 'Masse sans graisse (kg)',
-            },
-            {
-              field: 'subcutaneousFat' as Field,
-              id: 'pf-subcutaneous-fat',
-              label: 'Graisse sous-cutanée (%)',
-            },
-            {
-              field: 'visceralFat' as Field,
-              id: 'pf-visceral-fat',
-              label: 'Graisse viscérale (niveau)',
+              label: 'Masse maigre (kg)',
             },
             {
               field: 'bodyWater' as Field,
@@ -552,21 +507,6 @@ export function ProfileIdentityCard({ user, onUpdate, currentWeight }: Props) {
               field: 'muscleMass' as Field,
               id: 'pf-muscle-mass',
               label: 'Masse musculaire (kg)',
-            },
-            {
-              field: 'boneMass' as Field,
-              id: 'pf-bone-mass',
-              label: 'Masse osseuse (kg)',
-            },
-            {
-              field: 'protein' as Field,
-              id: 'pf-protein',
-              label: 'Protéines (%)',
-            },
-            {
-              field: 'metabolicAge' as Field,
-              id: 'pf-metabolic-age',
-              label: 'Âge métabolique',
             },
           ].map(({ field, id, label }) => (
             <div key={field} className="relative flex flex-col gap-1">
