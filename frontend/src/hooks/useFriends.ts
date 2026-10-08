@@ -7,6 +7,7 @@ import {
 } from '../components/friends/api';
 import type { Friend, FriendRequest } from '../components/friends/types';
 import { ApiError } from '../utils/request';
+import { useSocket } from '../socket/socket-context';
 
 export function useFriends(userId: number) {
   const [friends, setFriends] = useState<Friend[]>([]);
@@ -15,6 +16,7 @@ export function useFriends(userId: number) {
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [reloadCount, setReloadCount] = useState(0);
+  const { socket } = useSocket();
 
   useEffect(() => {
     const controller = new AbortController();
@@ -41,6 +43,24 @@ export function useFriends(userId: number) {
       });
     return () => controller.abort();
   }, [userId, reloadCount]);
+
+  useEffect(() => {
+    if (!socket) return;
+
+    const refresh = () => setReloadCount((count) => count + 1);
+
+    socket.on('friend:request', refresh);
+    socket.on('friend:accepted', refresh);
+    socket.on('friend:removed', refresh);
+    socket.io.on('reconnect', refresh);
+
+    return () => {
+      socket.off('friend:request', refresh);
+      socket.off('friend:accepted', refresh);
+      socket.off('friend:removed', refresh);
+      socket.io.off('reconnect', refresh);
+    };
+  }, [socket]);
 
   return {
     friends,
