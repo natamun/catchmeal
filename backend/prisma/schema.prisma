@@ -65,6 +65,7 @@ model User {
   receiverMessage   Message[]     @relation("ReceivedMessage")
   weightLogs        WeightLog[]
   goalSettings      GoalSetting[]
+  activities        Activity[]
 }
 
 enum FriendStatus {
@@ -93,6 +94,8 @@ model Message {
   senderId    Int
   content     String
   sentAt      DateTime  @default(now())
+  activityId  Int?
+  activity    Activity?    @relation(fields: [activityId], references: [id])
   sender      User      @relation("SenderMessage", fields: [senderId], references: [id])
   receiver    User      @relation("ReceivedMessage", fields: [receiverId], references: [id])
   
@@ -179,6 +182,24 @@ model MealFoodItem {
 
   @@index([mealId])
   @@index([foodItemId])
+}
+
+enum ActivityType {
+  MEAL_LOGGED
+  WEIGHT_LOGGED
+  GOAL_REACHED
+  CALORIE_GOAL_CHANGED
+}
+
+model Activity {
+  id        Int          @id @default(autoincrement())
+  userId    Int
+  user      User         @relation(fields: [userId], references: [id])
+  type      ActivityType
+  metadata  Json?
+  createdAt DateTime     @default(now())
+  messages  Message[]
+  @@index([userId, createdAt])
 }
 
 model GoalSetting {
