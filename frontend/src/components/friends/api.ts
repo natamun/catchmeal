@@ -40,24 +40,6 @@ async function request<T>(url: string, init?: RequestInit): Promise<T> {
   return (await response.json()) as T;
 }
 
-export interface FriendActivityItem {
-  friendshipId: number;
-  friend: {
-    id: number;
-    username: string;
-    name: string;
-    avatarUrl: string | null;
-  };
-  lastAction: string | null;
-  lastActionAt: string | null;
-}
-
-export function listFriendsActivity(userId: number, signal?: AbortSignal) {
-  return request<FriendActivityItem[]>(`${friendsUrl(userId)}/activity`, {
-    signal,
-  });
-}
-
 export function listFriends(userId: number, signal?: AbortSignal) {
   return request<Friend[]>(friendsUrl(userId), { signal });
 }
