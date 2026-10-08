@@ -76,15 +76,9 @@ export default function ProfilePage() {
 
       {/* Composition corporelle */}
       {(user.bodyFat ??
-        user.skeletalMuscle ??
         user.fatFreeMass ??
-        user.subcutaneousFat ??
-        user.visceralFat ??
         user.bodyWater ??
-        user.muscleMass ??
-        user.boneMass ??
-        user.protein ??
-        user.metabolicAge) !== null && (
+        user.muscleMass) !== null && (
         <div className="overflow-hidden rounded-2xl border border-green-200 bg-white shadow-sm">
           <p className="px-5 pt-5 pb-3 text-sm font-semibold tracking-wide text-green-500 uppercase">
             Composition corporelle
@@ -93,30 +87,12 @@ export default function ProfilePage() {
             [
               { label: 'Masse grasse', value: user.bodyFat, unit: '%' },
               {
-                label: 'Muscle squelettique',
-                value: user.skeletalMuscle,
-                unit: '%',
-              },
-              {
-                label: 'Masse sans graisse',
+                label: 'Masse maigre',
                 value: user.fatFreeMass,
                 unit: 'kg',
               },
-              {
-                label: 'Graisse sous-cutanée',
-                value: user.subcutaneousFat,
-                unit: '%',
-              },
-              { label: 'Graisse viscérale', value: user.visceralFat, unit: '' },
               { label: 'Eau corporelle', value: user.bodyWater, unit: '%' },
               { label: 'Masse musculaire', value: user.muscleMass, unit: 'kg' },
-              { label: 'Masse osseuse', value: user.boneMass, unit: 'kg' },
-              { label: 'Protéines', value: user.protein, unit: '%' },
-              {
-                label: 'Âge métabolique',
-                value: user.metabolicAge,
-                unit: 'ans',
-              },
             ] as {
               label: string;
               value: number | null | undefined;
