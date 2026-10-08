@@ -75,10 +75,10 @@ export default function ProfilePage() {
       />
 
       {/* Composition corporelle */}
-      {(user.bodyFat ??
-        user.fatFreeMass ??
-        user.bodyWater ??
-        user.muscleMass) !== null && (
+      {(user.bodyFat != null ||
+        user.fatFreeMass != null ||
+        user.bodyWater != null ||
+        user.muscleMass != null) && (
         <div className="overflow-hidden rounded-2xl border border-green-200 bg-white shadow-sm">
           <p className="px-5 pt-5 pb-3 text-sm font-semibold tracking-wide text-green-500 uppercase">
             Composition corporelle
