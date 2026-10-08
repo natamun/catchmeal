@@ -19,9 +19,9 @@ export interface AdminUser {
   avatarUrl: string | null;
   createAt: string;
   deletedAt: string | null;
+  lastSeenAt: string | null;
   oauthProvider: string | null;
   onlineStatus: boolean;
-  lastActivity: string | null;
   _count?: { userFriend: number };
 }
 
@@ -29,6 +29,10 @@ export interface AdminStats {
   totalUsers: number;
   totalMeals: number;
   totalFoodItems: number;
+}
+
+export function getUserById(id: number) {
+  return request<AdminUser>(`${BASE_URL}/admin/users/${id}`);
 }
 
 export function getUsers() {
