@@ -21,7 +21,7 @@ import { useActivityFeed } from '../hooks/useActivityFeed';
 import { useDailyMeals } from '../hooks/useDailyMeals';
 import { usePresence } from '../hooks/usePresence';
 import { useTimeout } from '../hooks/useTimeout';
-
+import { latestActivityPerFriend } from '../utils/latestActivityPerFriend';
 
 interface SectionEdit {
   mealType: MealType;
@@ -81,6 +81,7 @@ export default function HomePage({
   const quickAddDialogRef = useRef<HTMLDialogElement>(null);
   const presence = usePresence(user!.userId);
   const activities = useActivityFeed(user!.userId);
+  const latestActivties = latestActivityPerFriend(activities);
 
   useTimeout(() => setSuccessMessage(null), successMessage ? 3000 : null);
 
@@ -163,7 +164,7 @@ export default function HomePage({
               onEdit={openSectionEditor}
             />
             <FriendsActivity
-              activities={activities}
+              activities={latestActivties}
               presence={presence}
               onReply={(activity) => onReplyToActivity?.(activity)}
             />
