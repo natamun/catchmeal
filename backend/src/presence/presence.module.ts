@@ -9,5 +9,6 @@ import { PresenceService } from './presence.service';
   imports: [PrismaModule],
   controllers: [PresenceController],
   providers: [PresenceService, PresenceGateway],
+  exports: [PresenceService],
 })
 export class PresenceModule {}
