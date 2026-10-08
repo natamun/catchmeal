@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 
 import { useAuth } from '../auth/auth-context';
-
 import AdminSearchBar from '../components/admin/AdminSearchBar';
 import * as adminApi from '../components/admin/api';
 import type { AdminStats, AdminUser } from '../components/admin/api';
@@ -150,9 +149,9 @@ function UserDetailsDialog({ user, dialogRef, onClose }: DetailsDialogProps) {
               },
               {
                 label: 'Dernière activité',
-                value: user.lastActivity ?? (
-                  <span className="text-xs text-green-400">—</span>
-                ),
+                value: user.lastSeenAt
+                  ? new Date(user.lastSeenAt).toLocaleString()
+                  : (<span className="text-xs text-green-400">—</span>),
               },
             ].map(({ label, value }) => (
               <div
@@ -337,7 +336,10 @@ export default function AdminPage() {
 
   const openDetails = (user: AdminUser) => {
     pendingDialogRef.current = 'details';
-    setSelectedUser(user);
+    void adminApi
+      .getUserById(user.id)
+      .then((fresh) => setSelectedUser(fresh))
+      .catch(() => setSelectedUser(user));
   };
 
   const openEdit = (user: AdminUser) => {
