@@ -86,6 +86,9 @@ export class UsersService {
           where: { id: userId },
           select: {
             dailyCalorieGoal: true,
+            dailyProteinGoal: true,
+            dailyCarbsGoal: true,
+            dailyFatGoal: true,
           },
         });
 
@@ -140,6 +143,9 @@ export class UsersService {
               userId,
               startDate: new Date(),
               dailyCalories: currentGoalCalories,
+              dailyProtein: user.dailyProteinGoal ?? null,
+              dailyCarbs: user.dailyCarbsGoal ?? null,
+              dailyFat: user.dailyFatGoal ?? null,
               objective: objective,
             },
           });
