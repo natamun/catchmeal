@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 
+import { useAuth } from '../auth/auth-context';
+
 import AdminSearchBar from '../components/admin/AdminSearchBar';
 import * as adminApi from '../components/admin/api';
 import type { AdminStats, AdminUser } from '../components/admin/api';
@@ -259,6 +261,7 @@ function EditUserDialog({
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
 export default function AdminPage() {
+  const { user: currentUser, logout } = useAuth();
   const [criteria, setCriteria] =
     useState<AdminFilterCriteria>(EMPTY_ADMIN_FILTER);
   const [users, setUsers] = useState<AdminUser[]>([]);
@@ -375,6 +378,7 @@ export default function AdminPage() {
           ),
         );
         deleteDialogRef.current?.close();
+        if (currentUser?.userId === selectedUser.id) void logout();
       })
       .finally(() => setIsPending(false));
   };
