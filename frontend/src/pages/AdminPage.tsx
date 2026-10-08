@@ -149,9 +149,11 @@ function UserDetailsDialog({ user, dialogRef, onClose }: DetailsDialogProps) {
               },
               {
                 label: 'Dernière activité',
-                value: user.lastSeenAt
-                  ? new Date(user.lastSeenAt).toLocaleString()
-                  : (<span className="text-xs text-green-400">—</span>),
+                value: user.lastSeenAt ? (
+                  new Date(user.lastSeenAt).toLocaleString()
+                ) : (
+                  <span className="text-xs text-green-400">—</span>
+                ),
               },
             ].map(({ label, value }) => (
               <div

@@ -29,7 +29,10 @@ export class AdminService {
       },
       orderBy: { createAt: 'desc' },
     });
-    return users.map((u) => ({ ...u, onlineStatus: this.presenceService.isOnline(u.id) }));
+    return users.map((u) => ({
+      ...u,
+      onlineStatus: this.presenceService.isOnline(u.id),
+    }));
   }
 
   async getUserById(userId: number) {
