@@ -1,7 +1,8 @@
-// Skeleton — real data will be wired up by a teammate
 import { useEffect, useRef, useState } from 'react';
 
 import AdminSearchBar from '../components/admin/AdminSearchBar';
+import * as adminApi from '../components/admin/api';
+import type { AdminStats, AdminUser } from '../components/admin/api';
 import {
   EMPTY_ADMIN_FILTER,
   type AdminFilterCriteria,
@@ -9,105 +10,9 @@ import {
 import { BaseDialog } from '../components/ui/BaseDialog';
 import { ConfirmDialog } from '../components/ui/ConfirmDialog';
 
-// ─── Skeleton data ────────────────────────────────────────────────────────────
-
-interface SkeletonUser {
-  id: number;
-  avatarUrl: string | null;
-  username: string;
-  name: string;
-  email: string;
-  role: 'USER' | 'ADMIN';
-  oauthProvider: string | null; // no field in DB yet — placeholder
-  accountStatus: 'active' | 'deleted';
-  onlineStatus: boolean; // no field in DB yet — placeholder
-  lastActivity: string | null; // no field in DB yet — placeholder
-  friendsCount: number; // will come from _count.userFriend
-  createdAt: string;
-}
-
-const SKELETON_USERS: SkeletonUser[] = [
-  {
-    id: 1,
-    avatarUrl: null,
-    username: 'alice_w',
-    name: 'Alice Walker',
-    email: 'alice@example.com',
-    role: 'USER',
-    oauthProvider: 'google',
-    accountStatus: 'active',
-    onlineStatus: true,
-    lastActivity: '2026-09-27 08:42',
-    friendsCount: 12,
-    createdAt: '2026-01-01',
-  },
-  {
-    id: 2,
-    avatarUrl: null,
-    username: 'bob_m',
-    name: 'Bob Martin',
-    email: 'bob@example.com',
-    role: 'USER',
-    oauthProvider: 'github',
-    accountStatus: 'active',
-    onlineStatus: false,
-    lastActivity: '2026-09-26 14:10',
-    friendsCount: 5,
-    createdAt: '2026-01-02',
-  },
-  {
-    id: 3,
-    avatarUrl: null,
-    username: 'carol_d',
-    name: 'Carol Dupont',
-    email: 'carol@example.com',
-    role: 'USER',
-    oauthProvider: null,
-    accountStatus: 'deleted',
-    onlineStatus: false,
-    lastActivity: null,
-    friendsCount: 3,
-    createdAt: '2026-01-03',
-  },
-  {
-    id: 4,
-    avatarUrl: null,
-    username: 'dan_42',
-    name: 'Dan Fortytwo',
-    email: 'dan@example.com',
-    role: 'USER',
-    oauthProvider: '42',
-    accountStatus: 'active',
-    onlineStatus: true,
-    lastActivity: '2026-09-27 09:15',
-    friendsCount: 8,
-    createdAt: '2026-02-10',
-  },
-  {
-    id: 5,
-    avatarUrl: null,
-    username: 'eve_admin',
-    name: 'Eve Admin',
-    email: 'eve@example.com',
-    role: 'ADMIN',
-    oauthProvider: null,
-    accountStatus: 'active',
-    onlineStatus: true,
-    lastActivity: '2026-09-27 09:30',
-    friendsCount: 0,
-    createdAt: '2026-01-01',
-  },
-];
-
-const SKELETON_STATS = {
-  totalUsers: 42,
-  totalMeals: 318,
-  totalFoodItems: 1024,
-};
-
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
-function UserAvatar({ user }: { user: SkeletonUser }) {
+function UserAvatar({ user }: { user: AdminUser }) {
   if (user.avatarUrl) {
     return (
       <img
@@ -173,13 +78,15 @@ function OAuthBadge({ provider }: { provider: string | null }) {
 // ─── Details Dialog ───────────────────────────────────────────────────────────
 
 interface DetailsDialogProps {
-  user: SkeletonUser | null;
+  user: AdminUser | null;
   dialogRef: React.RefObject<HTMLDialogElement | null>;
   onClose: () => void;
 }
 
 function UserDetailsDialog({ user, dialogRef, onClose }: DetailsDialogProps) {
   if (!user) return null;
+  const accountStatus = user.deletedAt ? 'deleted' : 'active';
+  const friendsCount = user._count?.userFriend ?? 0;
 
   return (
     <BaseDialog
@@ -229,13 +136,16 @@ function UserDetailsDialog({ user, dialogRef, onClose }: DetailsDialogProps) {
               { label: 'Rôle', value: <RoleBadge role={user.role} /> },
               {
                 label: 'Statut du compte',
-                value: <StatusBadge status={user.accountStatus} />,
+                value: <StatusBadge status={accountStatus} />,
               },
               {
                 label: 'Fournisseur OAuth',
                 value: <OAuthBadge provider={user.oauthProvider} />,
               },
-              { label: 'Créé le', value: user.createdAt },
+              {
+                label: 'Créé le',
+                value: new Date(user.createAt).toLocaleDateString(),
+              },
               {
                 label: 'Dernière activité',
                 value: user.lastActivity ?? (
@@ -263,7 +173,7 @@ function UserDetailsDialog({ user, dialogRef, onClose }: DetailsDialogProps) {
             <div className="flex items-center justify-between px-4 py-3">
               <p className="text-sm text-green-500">Amis</p>
               <p className="text-sm font-medium text-green-800">
-                {user.friendsCount}
+                {friendsCount}
               </p>
             </div>
           </div>
@@ -276,10 +186,10 @@ function UserDetailsDialog({ user, dialogRef, onClose }: DetailsDialogProps) {
 // ─── Edit Dialog ──────────────────────────────────────────────────────────────
 
 interface EditDialogProps {
-  user: SkeletonUser | null;
+  user: AdminUser | null;
   dialogRef: React.RefObject<HTMLDialogElement | null>;
   onClose: () => void;
-  onSave: () => void;
+  onSave: (role: 'USER' | 'ADMIN') => void;
   isPending: boolean;
 }
 
@@ -335,7 +245,7 @@ function EditUserDialog({
           <button
             type="button"
             disabled={isPending}
-            onClick={() => onSave()}
+            onClick={() => onSave(selectedRole)}
             className="flex-1 cursor-pointer rounded-xl bg-green-500 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-green-600 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {isPending ? 'Enregistrement...' : 'Enregistrer'}
@@ -351,13 +261,20 @@ function EditUserDialog({
 export default function AdminPage() {
   const [criteria, setCriteria] =
     useState<AdminFilterCriteria>(EMPTY_ADMIN_FILTER);
-  const [selectedUser, setSelectedUser] = useState<SkeletonUser | null>(null);
+  const [users, setUsers] = useState<AdminUser[]>([]);
+  const [stats, setStats] = useState<AdminStats | null>(null);
+  const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null);
   const [isPending, setIsPending] = useState(false);
   const pendingDialogRef = useRef<'details' | 'edit' | 'delete' | null>(null);
 
   const detailsDialogRef = useRef<HTMLDialogElement>(null);
   const editDialogRef = useRef<HTMLDialogElement>(null);
   const deleteDialogRef = useRef<HTMLDialogElement>(null);
+
+  useEffect(() => {
+    void adminApi.getUsers().then(setUsers);
+    void adminApi.getStats().then(setStats);
+  }, []);
 
   useEffect(() => {
     if (!pendingDialogRef.current || !selectedUser) return;
@@ -370,76 +287,96 @@ export default function AdminPage() {
 
   const query = criteria.query.trim().toLowerCase();
 
-  const filtered = SKELETON_USERS.filter((user) => {
-    const matchesQuery =
-      !query ||
-      user.username.toLowerCase().includes(query) ||
-      user.name.toLowerCase().includes(query) ||
-      user.email.toLowerCase().includes(query);
+  const filtered = users
+    .filter((user) => {
+      const matchesQuery =
+        !query ||
+        user.username.toLowerCase().includes(query) ||
+        user.name.toLowerCase().includes(query) ||
+        user.email.toLowerCase().includes(query);
 
-    const matchesRole = criteria.role === 'all' || user.role === criteria.role;
+      const matchesRole =
+        criteria.role === 'all' || user.role === criteria.role;
 
-    const matchesStatus =
-      criteria.status === 'all' || user.accountStatus === criteria.status;
+      const matchesStatus =
+        criteria.status === 'all' ||
+        (criteria.status === 'deleted'
+          ? user.deletedAt !== null
+          : user.deletedAt === null);
 
-    const matchesOnline =
-      criteria.online === 'all' ||
-      (criteria.online === 'online' && user.onlineStatus) ||
-      (criteria.online === 'offline' && !user.onlineStatus);
+      const matchesOnline =
+        criteria.online === 'all' ||
+        (criteria.online === 'online' && user.onlineStatus) ||
+        (criteria.online === 'offline' && !user.onlineStatus);
 
-    const matchesOAuth =
-      criteria.oauth === 'all' ||
-      (criteria.oauth === 'local' && !user.oauthProvider) ||
-      user.oauthProvider === criteria.oauth;
+      const matchesOAuth =
+        criteria.oauth === 'all' ||
+        (criteria.oauth === 'local' && !user.oauthProvider) ||
+        user.oauthProvider === criteria.oauth;
 
-    return (
-      matchesQuery &&
-      matchesRole &&
-      matchesStatus &&
-      matchesOnline &&
-      matchesOAuth
-    );
-  }).sort((a, b) => {
-    const { field, direction } = criteria.sort;
-    const dir = direction === 'asc' ? 1 : -1;
-    if (field === 'name') return a.username.localeCompare(b.username) * dir;
-    if (field === 'role') return a.role.localeCompare(b.role) * dir;
-    if (field === 'createdAt')
-      return a.createdAt.localeCompare(b.createdAt) * dir;
-    return 0;
-  });
+      return (
+        matchesQuery &&
+        matchesRole &&
+        matchesStatus &&
+        matchesOnline &&
+        matchesOAuth
+      );
+    })
+    .sort((a, b) => {
+      const { field, direction } = criteria.sort;
+      const dir = direction === 'asc' ? 1 : -1;
+      if (field === 'name') return a.username.localeCompare(b.username) * dir;
+      if (field === 'role') return a.role.localeCompare(b.role) * dir;
+      if (field === 'createdAt')
+        return a.createAt.localeCompare(b.createAt) * dir;
+      return 0;
+    });
 
-  const openDetails = (user: SkeletonUser) => {
+  const openDetails = (user: AdminUser) => {
     pendingDialogRef.current = 'details';
     setSelectedUser(user);
   };
 
-  const openEdit = (user: SkeletonUser) => {
+  const openEdit = (user: AdminUser) => {
     pendingDialogRef.current = 'edit';
     setSelectedUser(user);
   };
 
-  const openDelete = (user: SkeletonUser) => {
+  const openDelete = (user: AdminUser) => {
     pendingDialogRef.current = 'delete';
     setSelectedUser(user);
   };
 
-  const handleSaveRole = () => {
-    // TODO: call PATCH /admin/users/:id/role — wired up by teammate
+  const handleSaveRole = (role: 'USER' | 'ADMIN') => {
+    if (!selectedUser) return;
     setIsPending(true);
-    setTimeout(() => {
-      setIsPending(false);
-      editDialogRef.current?.close();
-    }, 500);
+    adminApi
+      .updateUserRole(selectedUser.id, role)
+      .then((updated) => {
+        setUsers((prev) =>
+          prev.map((u) =>
+            u.id === updated.id ? { ...u, role: updated.role } : u,
+          ),
+        );
+        editDialogRef.current?.close();
+      })
+      .finally(() => setIsPending(false));
   };
 
   const handleDelete = () => {
-    // TODO: call DELETE /admin/users/:id — wired up by teammate
+    if (!selectedUser) return;
     setIsPending(true);
-    setTimeout(() => {
-      setIsPending(false);
-      deleteDialogRef.current?.close();
-    }, 500);
+    adminApi
+      .deleteUser(selectedUser.id)
+      .then((updated) => {
+        setUsers((prev) =>
+          prev.map((u) =>
+            u.id === updated.id ? { ...u, deletedAt: updated.deletedAt } : u,
+          ),
+        );
+        deleteDialogRef.current?.close();
+      })
+      .finally(() => setIsPending(false));
   };
 
   return (
@@ -465,12 +402,9 @@ export default function AdminPage() {
           </h2>
           <div className="grid grid-cols-3 gap-4">
             {[
-              { label: 'Total utilisateurs', value: SKELETON_STATS.totalUsers },
-              { label: 'Total repas', value: SKELETON_STATS.totalMeals },
-              {
-                label: 'Total aliments',
-                value: SKELETON_STATS.totalFoodItems,
-              },
+              { label: 'Total utilisateurs', value: stats?.totalUsers ?? '—' },
+              { label: 'Total repas', value: stats?.totalMeals ?? '—' },
+              { label: 'Total aliments', value: stats?.totalFoodItems ?? '—' },
             ].map((stat) => (
               <div
                 key={stat.label}
@@ -542,13 +476,15 @@ export default function AdminPage() {
                         <OAuthBadge provider={user.oauthProvider} />
                       </td>
                       <td className="px-4 py-3">
-                        <StatusBadge status={user.accountStatus} />
+                        <StatusBadge
+                          status={user.deletedAt ? 'deleted' : 'active'}
+                        />
                       </td>
                       <td className="px-4 py-3">
                         <OnlineDot online={user.onlineStatus} />
                       </td>
                       <td className="px-4 py-3 text-xs text-green-600">
-                        {user.createdAt}
+                        {new Date(user.createAt).toLocaleDateString()}
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex gap-1.5">
@@ -596,6 +532,7 @@ export default function AdminPage() {
         dialogRef={editDialogRef}
         onClose={() => setSelectedUser(null)}
         onSave={handleSaveRole}
+
         isPending={isPending}
       />
 
