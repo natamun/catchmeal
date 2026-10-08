@@ -44,15 +44,9 @@ export interface UserProfile {
   birthDate: string | null;
   activityLevel: string | null;
   bodyFat: number | null;
-  skeletalMuscle: number | null;
   fatFreeMass: number | null;
-  subcutaneousFat: number | null;
-  visceralFat: number | null;
   bodyWater: number | null;
   muscleMass: number | null;
-  boneMass: number | null;
-  protein: number | null;
-  metabolicAge: number | null;
 }
 
 export interface UpdateProfileInput {
@@ -68,15 +62,9 @@ export interface UpdateProfileInput {
   birthDate?: string;
   activityLevel?: string;
   bodyFat?: number;
-  skeletalMuscle?: number;
   fatFreeMass?: number;
-  subcutaneousFat?: number;
-  visceralFat?: number;
   bodyWater?: number;
   muscleMass?: number;
-  boneMass?: number;
-  protein?: number;
-  metabolicAge?: number;
 }
 
 export interface WeightEntry {
