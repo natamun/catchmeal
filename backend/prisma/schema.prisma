@@ -49,15 +49,9 @@ model User {
   birthDate         DateTime?
   activityLevel     ActivityLevel?
   bodyFat           Float?
-  skeletalMuscle    Float?
   fatFreeMass       Float?
-  subcutaneousFat   Float?
-  visceralFat       Float?
   bodyWater         Float?
   muscleMass        Float?
-  boneMass          Float?
-  protein           Float?
-  metabolicAge      Int?
   role              Role          @default(USER)
   createAt          DateTime      @default(now())
   deletedAt          DateTime?
@@ -112,6 +106,9 @@ model WeightLog {
   user      User     @relation(fields: [userId], references: [id])
   weight    Float
   bodyFat   Float?
+  fatFreeMass Float?
+  bodyWater   Float?
+  muscleMass  Float?
   loggedAt  DateTime @default(now())
   note      String?  @db.VarChar(255)
   @@index([userId, loggedAt])
