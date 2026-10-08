@@ -357,7 +357,7 @@ export default function AdminPage() {
   const handleSaveRole = (role: 'USER' | 'ADMIN') => {
     if (!selectedUser) return;
     setIsPending(true);
-    adminApi
+    void adminApi
       .updateUserRole(selectedUser.id, role)
       .then((updated) => {
         setUsers((prev) =>
@@ -373,7 +373,7 @@ export default function AdminPage() {
   const handleDelete = () => {
     if (!selectedUser) return;
     setIsPending(true);
-    adminApi
+    void adminApi
       .deleteUser(selectedUser.id)
       .then((updated) => {
         setUsers((prev) =>
