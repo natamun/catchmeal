@@ -189,6 +189,9 @@ model GoalSetting {
   userId        Int
   user          User     @relation(fields: [userId], references: [id])
   dailyCalories Int
+  dailyProtein  Int?
+  dailyCarbs    Int?
+  dailyFat      Int?
   objective     String?
   startDate     DateTime @default(now())
   @@index([userId, startDate])
