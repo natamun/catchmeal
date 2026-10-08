@@ -20,15 +20,9 @@ export interface AuthUser {
   birthDate?: string | null;
   activityLevel?: string | null;
   bodyFat?: number | null;
-  skeletalMuscle?: number | null;
   fatFreeMass?: number | null;
-  subcutaneousFat?: number | null;
-  visceralFat?: number | null;
   bodyWater?: number | null;
   muscleMass?: number | null;
-  boneMass?: number | null;
-  protein?: number | null;
-  metabolicAge?: number | null;
 }
 
 export interface AuthContextValue {
