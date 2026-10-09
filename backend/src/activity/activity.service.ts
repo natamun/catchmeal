@@ -78,7 +78,7 @@ export class ActivityService {
     if (friendIds.length === 0) return [];
 
     const activities = await this.prisma.activity.findMany({
-      where: { userId: { in: friendIds } },
+      where: { userId: { in: friendIds }, user: { deletedAt: null } },
       include: { user: { select: SAFE_USER_SELECT } },
       orderBy: { createdAt: 'desc' },
       take: 30,
