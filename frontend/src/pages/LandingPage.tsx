@@ -1,6 +1,9 @@
 interface Props {
   onLogin: () => void;
   onRegister: () => void;
+  onMentionsLegales: () => void;
+  onConfidentialite: () => void;
+  onConditions: () => void;
 }
 
 const FEATURES = [
@@ -117,7 +120,13 @@ const SWISS_RETAILERS = [
   { name: 'Manor Food', note: 'Épicerie fine et produits régionaux' },
 ];
 
-export default function LandingPage({ onLogin, onRegister }: Props) {
+export default function LandingPage({
+  onLogin,
+  onRegister,
+  onMentionsLegales,
+  onConfidentialite,
+  onConditions,
+}: Props) {
   return (
     <div className="flex min-h-screen flex-col bg-white">
       {/* Nav */}
@@ -406,25 +415,31 @@ export default function LandingPage({ onLogin, onRegister }: Props) {
               <span className="font-semibold text-green-600">Légal</span>
               <a
                 href="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  onConfidentialite();
+                }}
                 className="py-1 transition-colors hover:text-green-300"
-                aria-disabled="true"
-                tabIndex={-1}
               >
-                Politique de confidentialité
+                Politique de confidentialité et RGPD
               </a>
               <a
                 href="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  onConditions();
+                }}
                 className="py-1 transition-colors hover:text-green-300"
-                aria-disabled="true"
-                tabIndex={-1}
               >
                 Conditions d'utilisation
               </a>
               <a
                 href="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  onMentionsLegales();
+                }}
                 className="py-1 transition-colors hover:text-green-300"
-                aria-disabled="true"
-                tabIndex={-1}
               >
                 Mentions légales
               </a>
@@ -446,14 +461,6 @@ export default function LandingPage({ onLogin, onRegister }: Props) {
                 tabIndex={-1}
               >
                 Supprimer mon compte
-              </a>
-              <a
-                href="#"
-                className="py-1 transition-colors hover:text-green-300"
-                aria-disabled="true"
-                tabIndex={-1}
-              >
-                Politique RGPD
               </a>
             </div>
           </div>
