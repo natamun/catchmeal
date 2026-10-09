@@ -18,7 +18,11 @@ const DURATION_OPTIONS = [
   { label: '1 an', days: 365 },
 ];
 
-export default function ProfilePage() {
+export default function ProfilePage({
+  onPolitiqueConfidentialite,
+}: {
+  onPolitiqueConfidentialite: () => void;
+}) {
   const { user, updateUser } = useAuth();
   const [latestWeight, setLatestWeight] = useState<number | null>(null);
   const [durationDays, setDurationDays] = useState(90);
@@ -204,7 +208,7 @@ export default function ProfilePage() {
       </div>
 
       {/* Compte */}
-      <GdprSection />
+      <GdprSection onPolitiqueConfidentialite={onPolitiqueConfidentialite} />
     </div>
   );
 }
