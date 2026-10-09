@@ -39,6 +39,7 @@ function AppShell() {
     const params = new URLSearchParams(window.location.search);
     return params.get('error') === 'oauth_failed' ? 'login' : 'landing';
   });
+  const [previousPage, setPreviousPage] = useState<Page>('landing');
   const [activeTab, setActiveTab] = useState<Tab>('home');
   const [pendingReply, setPendingReply] = useState<ActivityItem | null>(null);
   const [oauthError] = useState<string | null>(() => {
@@ -58,6 +59,11 @@ function AppShell() {
     },
   ]);
 
+  const navigateTo = (dest: Page) => {
+    setPreviousPage(page);
+    setPage(dest);
+  };
+
   if (status === 'loading') {
     return (
       <div className="flex min-h-screen items-center justify-center text-sm text-green-500">
@@ -69,7 +75,7 @@ function AppShell() {
   if (page === 'mentions-legales') {
     return (
       <Suspense fallback={null}>
-        <MentionsLegalesPage onBack={() => setPage('landing')} />
+        <MentionsLegalesPage onBack={() => setPage(previousPage)} />
       </Suspense>
     );
   }
@@ -77,7 +83,7 @@ function AppShell() {
   if (page === 'confidentialite') {
     return (
       <Suspense fallback={null}>
-        <PolitiqueConfidentialitePage onBack={() => setPage('landing')} />
+        <PolitiqueConfidentialitePage onBack={() => setPage(previousPage)} />
       </Suspense>
     );
   }
@@ -85,7 +91,7 @@ function AppShell() {
   if (page === 'conditions') {
     return (
       <Suspense fallback={null}>
-        <ConditionsUtilisationPage onBack={() => setPage('landing')} />
+        <ConditionsUtilisationPage onBack={() => setPage(previousPage)} />
       </Suspense>
     );
   }
@@ -98,6 +104,8 @@ function AppShell() {
             initialMode={page}
             onCancel={() => setPage('landing')}
             oauthError={oauthError}
+            onConditions={() => navigateTo('conditions')}
+            onConfidentialite={() => navigateTo('confidentialite')}
           />
         </Suspense>
       );
@@ -106,11 +114,11 @@ function AppShell() {
     return (
       <Suspense fallback={null}>
         <LandingPage
-          onLogin={() => setPage('login')}
-          onRegister={() => setPage('register')}
-          onMentionsLegales={() => setPage('mentions-legales')}
-          onConfidentialite={() => setPage('confidentialite')}
-          onConditions={() => setPage('conditions')}
+          onLogin={() => navigateTo('login')}
+          onRegister={() => navigateTo('register')}
+          onMentionsLegales={() => navigateTo('mentions-legales')}
+          onConfidentialite={() => navigateTo('confidentialite')}
+          onConditions={() => navigateTo('conditions')}
         />
       </Suspense>
     );
@@ -133,7 +141,7 @@ function AppShell() {
     friends: <FriendsPage pendingReply={pendingReply} />,
     profile: (
       <ProfilePage
-        onPolitiqueConfidentialite={() => setPage('confidentialite')}
+        onPolitiqueConfidentialite={() => navigateTo('confidentialite')}
       />
     ),
     admin: isAdmin ? (
