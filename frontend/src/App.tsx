@@ -12,13 +12,26 @@ import type { ChatMessage } from './types/ChatBotType';
 const LandingPage = lazy(() => import('./pages/LandingPage'));
 const AuthPage = lazy(() => import('./pages/AuthPage'));
 const AdminPage = lazy(() => import('./pages/AdminPage'));
+const MentionsLegalesPage = lazy(() => import('./pages/MentionsLegalesPage'));
+const PolitiqueConfidentialitePage = lazy(
+  () => import('./pages/PolitiqueConfidentialitePage'),
+);
+const ConditionsUtilisationPage = lazy(
+  () => import('./pages/ConditionsUtilisationPage'),
+);
 const HomePage = lazy(() => import('./pages/HomePage'));
 const StatsPage = lazy(() => import('./pages/StatsPage'));
 const FriendsPage = lazy(() => import('./pages/FriendsPage'));
 const FoodPage = lazy(() => import('./pages/FoodPage'));
 const ProfilePage = lazy(() => import('./pages/ProfilePage'));
 
-type Page = 'landing' | 'login' | 'register';
+type Page =
+  | 'landing'
+  | 'login'
+  | 'register'
+  | 'mentions-legales'
+  | 'confidentialite'
+  | 'conditions';
 
 function AppShell() {
   const { status, user } = useAuth();
@@ -53,6 +66,30 @@ function AppShell() {
     );
   }
 
+  if (page === 'mentions-legales') {
+    return (
+      <Suspense fallback={null}>
+        <MentionsLegalesPage onBack={() => setPage('landing')} />
+      </Suspense>
+    );
+  }
+
+  if (page === 'confidentialite') {
+    return (
+      <Suspense fallback={null}>
+        <PolitiqueConfidentialitePage onBack={() => setPage('landing')} />
+      </Suspense>
+    );
+  }
+
+  if (page === 'conditions') {
+    return (
+      <Suspense fallback={null}>
+        <ConditionsUtilisationPage onBack={() => setPage('landing')} />
+      </Suspense>
+    );
+  }
+
   if (status === 'unauthenticated') {
     if (page === 'login' || page === 'register') {
       return (
@@ -71,6 +108,9 @@ function AppShell() {
         <LandingPage
           onLogin={() => setPage('login')}
           onRegister={() => setPage('register')}
+          onMentionsLegales={() => setPage('mentions-legales')}
+          onConfidentialite={() => setPage('confidentialite')}
+          onConditions={() => setPage('conditions')}
         />
       </Suspense>
     );
