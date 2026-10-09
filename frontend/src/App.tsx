@@ -104,8 +104,6 @@ function AppShell() {
             initialMode={page}
             onCancel={() => setPage('landing')}
             oauthError={oauthError}
-            onConditions={() => navigateTo('conditions')}
-            onConfidentialite={() => navigateTo('confidentialite')}
           />
         </Suspense>
       );
