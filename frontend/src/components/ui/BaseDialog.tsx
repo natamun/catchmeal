@@ -4,6 +4,7 @@ import { X } from 'lucide-react';
 const MAX_WIDTH_CLASS = {
   sm: 'max-w-sm',
   lg: 'max-w-lg',
+  xl: 'max-w-2xl',
 } as const;
 
 interface BaseDialogProps {
