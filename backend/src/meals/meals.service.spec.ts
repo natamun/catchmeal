@@ -2,7 +2,7 @@ import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 
 import { ActivityService } from '../activity/activity.service';
-import { MealType } from '../generated/prisma/enums';
+import { ActivityType, MealType } from '../generated/prisma/enums';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateMealDto } from './dto/create-meal.dto';
 import { MealsService } from './meals.service';
@@ -20,6 +20,12 @@ describe('MealsService', () => {
       findFirstOrThrow: jest.fn(),
       update: jest.fn(),
       delete: jest.fn(),
+    },
+    user: {
+      findUnique: jest.fn(),
+    },
+    activity: {
+      findFirst: jest.fn(),
     },
   };
 
@@ -405,6 +411,87 @@ describe('MealsService', () => {
         },
       },
       orderBy: [{ loggedAt: 'asc' }, { id: 'asc' }],
+    });
+  });
+
+  describe('friend activities on create', () => {
+    const day = new Date('2026-09-13T00:00:00.000Z');
+    const dto: CreateMealDto = {
+      name: 'Oeuf fromage',
+      loggedAt: '2026-09-13T00:00:00.000Z',
+      items: [{ quantity: 1, kcal: 349.6, protein: 20, carbs: 1, fat: 25 }],
+    };
+
+    beforeEach(() => {
+      prismaMock.meal.create.mockResolvedValue({
+        id: 1,
+        name: 'Oeuf fromage',
+        loggedAt: day,
+        items: [],
+      });
+      prismaMock.user.findUnique.mockResolvedValue({ dailyCalorieGoal: 2000 });
+      prismaMock.activity.findFirst.mockResolvedValue(null);
+    });
+
+    it('should record MEAL_LOGGED with the meal name and rounded kcal', async () => {
+      prismaMock.meal.findMany.mockResolvedValue([]);
+
+      await service.create(7, dto);
+
+      expect(activityServiceMock.record).toHaveBeenCalledWith(
+        7,
+        ActivityType.MEAL_LOGGED,
+        { name: 'Oeuf fromage', kcal: 350 },
+      );
+    });
+
+    it('should not record anything for a template meal without loggedAt', async () => {
+      prismaMock.meal.create.mockResolvedValue({ id: 2, loggedAt: null });
+
+      await service.create(7, { ...dto, loggedAt: undefined });
+
+      expect(activityServiceMock.record).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      [1700, false],
+      [1800, true],
+      [2000, true],
+      [2001, false],
+    ])(
+      'with %i kcal of a 2000 goal, GOAL_REACHED recorded: %s',
+      async (total, expected) => {
+        prismaMock.meal.findMany.mockResolvedValue([
+          { items: [{ kcal: total }] },
+        ]);
+
+        await service.create(7, dto);
+
+        const goalCalls = activityServiceMock.record.mock.calls.filter(
+          (call: unknown[]) => call[1] === ActivityType.GOAL_REACHED,
+        );
+        expect(goalCalls.length).toBe(expected ? 1 : 0);
+      },
+    );
+
+    it('should not record GOAL_REACHED twice on the same day', async () => {
+      prismaMock.meal.findMany.mockResolvedValue([{ items: [{ kcal: 1900 }] }]);
+      prismaMock.activity.findFirst.mockResolvedValue({ id: 3 });
+
+      await service.create(7, dto);
+
+      expect(activityServiceMock.record).not.toHaveBeenCalledWith(
+        7,
+        ActivityType.GOAL_REACHED,
+      );
+    });
+
+    it('should not check the goal when the user has none', async () => {
+      prismaMock.user.findUnique.mockResolvedValue({ dailyCalorieGoal: null });
+
+      await service.create(7, dto);
+
+      expect(prismaMock.meal.findMany).not.toHaveBeenCalled();
     });
   });
 });
