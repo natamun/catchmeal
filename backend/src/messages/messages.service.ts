@@ -98,4 +98,22 @@ export class MessagesService {
 
     return messages.map((message) => this.toMessageDto(message));
   }
+
+  async getUnreadSenderIds(userId: number): Promise<number[]> {
+    const rows = await this.prisma.message.groupBy({
+      by: ['senderId'],
+      where: { receiverId: userId, readAt: null },
+    });
+    return rows.map((row) => row.senderId);
+  }
+
+  async markConversationRead(userId: number, otherUserId: number) {
+    await this.assertAreFriends(userId, otherUserId);
+
+    const { count } = await this.prisma.message.updateMany({
+      where: { receiverId: userId, senderId: otherUserId, readAt: null },
+      data: { readAt: new Date() },
+    });
+    return { count };
+  }
 }
