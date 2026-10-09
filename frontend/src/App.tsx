@@ -131,7 +131,11 @@ function AppShell() {
     food: <FoodPage />,
     stats: <StatsPage />,
     friends: <FriendsPage pendingReply={pendingReply} />,
-    profile: <ProfilePage />,
+    profile: (
+      <ProfilePage
+        onPolitiqueConfidentialite={() => setPage('confidentialite')}
+      />
+    ),
     admin: isAdmin ? (
       <AdminPage />
     ) : (
