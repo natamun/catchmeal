@@ -82,7 +82,11 @@ function AppShell() {
     stats: <StatsPage />,
     friends: <FriendsPage />,
     profile: <ProfilePage />,
-    admin: <AdminPage />,
+    admin: isAdmin ? (
+      <AdminPage />
+    ) : (
+      <HomePage onNavigateToProfile={() => setActiveTab('profile')} />
+    ),
   };
 
   return (
