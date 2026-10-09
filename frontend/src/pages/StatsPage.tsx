@@ -16,45 +16,61 @@ export default function StatsPage() {
       .split('T')[0],
   );
   const [to, setTo] = useState(new Date().toISOString().split('T')[0]);
+  const [error, setError] = useState(false);
+  const { dashboard } = useDashboard({
+    fromStr: from,
+    toStr: to,
+    onError: setError,
+  });
 
-  const { dashboard } = useDashboard({ fromStr: from, toStr: to });
+  let averageKcal: number | null = null;
+  let averageProtein: number | null = null;
+  let averageCarbs: number | null = null;
+  let averageFat: number | null = null;
+  let diffWeight: number | null = null;
+  if (error === false) {
+    const DayKcal = dashboard.filter((d) => d.totalKcal !== null);
+    const RecordWeight = dashboard.filter((d) => d.weight !== null);
+    averageKcal = DayKcal.length
+      ? Math.round(
+          DayKcal.reduce((s, d) => s + (d.totalKcal ?? 0), 0) / DayKcal.length,
+        )
+      : 0;
 
-  const DayKcal = dashboard.filter((d) => d.totalKcal !== null);
-  const RecordWeight = dashboard.filter((d) => d.weight !== null);
+    averageProtein = DayKcal.length
+      ? Math.round(
+          DayKcal.reduce((s, d) => s + (d.totalProtein ?? 0), 0) /
+            DayKcal.length,
+        )
+      : 0;
 
-  const averageKcal = DayKcal.length
-    ? Math.round(
-        DayKcal.reduce((s, d) => s + (d.totalKcal ?? 0), 0) / DayKcal.length,
-      )
-    : 0;
+    averageCarbs = DayKcal.length
+      ? Math.round(
+          DayKcal.reduce((s, d) => s + (d.totalCarbs ?? 0), 0) / DayKcal.length,
+        )
+      : 0;
 
-  const averageProtein = DayKcal.length
-    ? Math.round(
-        DayKcal.reduce((s, d) => s + (d.totalProtein ?? 0), 0) / DayKcal.length,
-      )
-    : 0;
+    averageFat = DayKcal.length
+      ? Math.round(
+          DayKcal.reduce((s, d) => s + (d.totalFat ?? 0), 0) / DayKcal.length,
+        )
+      : 0;
 
-  const averageCarbs = DayKcal.length
-    ? Math.round(
-        DayKcal.reduce((s, d) => s + (d.totalCarbs ?? 0), 0) / DayKcal.length,
-      )
-    : 0;
-
-  const averageFat = DayKcal.length
-    ? Math.round(
-        DayKcal.reduce((s, d) => s + (d.totalFat ?? 0), 0) / DayKcal.length,
-      )
-    : 0;
-
-  const LastWeight = RecordWeight.at(-1)?.weight ?? 0;
-  const firstWeight = RecordWeight[0]?.weight ?? null;
-  const diffWeight =
-    firstWeight !== null && LastWeight !== null
-      ? Math.round((LastWeight - firstWeight) * 10) / 10
-      : null;
+    const LastWeight = RecordWeight.at(-1)?.weight ?? 0;
+    const firstWeight = RecordWeight[0]?.weight ?? null;
+    diffWeight =
+      firstWeight !== null && LastWeight !== null
+        ? Math.round((LastWeight - firstWeight) * 10) / 10
+        : null;
+  }
 
   return (
     <div className="flex flex-col gap-2">
+      {error === true && (
+        <p className="flex justify-center text-sm text-red-500">
+          Impossible de charger vos données. Réessayez.
+        </p>
+      )}
       <div className="flex-col">
         <DatePick from={from} to={to} setFrom={setFrom} setTo={setTo} />
 

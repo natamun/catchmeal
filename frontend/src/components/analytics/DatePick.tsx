@@ -14,7 +14,7 @@ export default function DatePick({
   setFrom: (date: string) => void;
   setTo: (date: string) => void;
 }) {
-  const [selectedButton, setSelectedButton] = useState<number | null>(null);
+  const [selectedButton, setSelectedButton] = useState<number | null>(7);
   return (
     <div className="flex flex-col flex-wrap justify-between rounded-2xl border border-green-200 bg-white shadow-sm lg:flex-row lg:items-center lg:gap-2">
       <div className="m-2 flex justify-center gap-2 font-mono text-xs font-semibold sm:text-sm md:m-3">
