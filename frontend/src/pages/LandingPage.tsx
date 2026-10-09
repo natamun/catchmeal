@@ -471,6 +471,22 @@ export default function LandingPage({
             protection des données (RGPD). KcalApp n'est pas affilié à Migros,
             Coop, Denner, Lidl, Aldi ou Manor.
           </p>
+          <p className="text-xs text-green-600">
+            Ce site utilise uniquement des témoins de session strictement
+            nécessaires à son bon fonctionnement et à votre authentification.
+            Pour en savoir plus, consultez notre{' '}
+            <button
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                onConfidentialite();
+              }}
+              className="cursor-pointer underline underline-offset-2 transition-colors hover:text-green-400"
+            >
+              Politique de confidentialité et RGPD
+            </button>
+            .
+          </p>
         </div>
       </footer>
     </div>
