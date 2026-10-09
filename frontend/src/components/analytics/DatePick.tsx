@@ -59,6 +59,9 @@ export default function DatePick({
             return (
               <button
                 key={d}
+                type="button"
+                aria-label={`${d} derniers jours`}
+                aria-pressed={isActive}
                 onClick={() => {
                   setSelectedButton(d);
                   setLastDays(d, setFrom, setTo);

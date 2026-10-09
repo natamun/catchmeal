@@ -107,6 +107,7 @@ export default function ChatBotPopup({
     <div>
       {isOpen === false && (
         <button
+          type="button"
           className="fixed right-3 bottom-20 h-14 w-14 rounded-full bg-green-500 text-sm font-semibold text-white ring-1 ring-green-500 hover:bg-emerald-400/80"
           onClick={() => onToggle(true)}
         >
@@ -125,6 +126,7 @@ export default function ChatBotPopup({
               Chat Assistant
             </p>
             <button
+              type="button"
               className="m-3 flex justify-end font-semibold text-white hover:text-gray-200"
               onClick={() => onToggle(false)}
             >
@@ -180,6 +182,7 @@ export default function ChatBotPopup({
               )}
               {loading === false && (
                 <button
+                  type="button"
                   className="shrink-0 rounded-3xl hover:bg-green-100/80"
                   onClick={() => void handleSend()}
                 >

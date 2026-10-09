@@ -140,6 +140,7 @@ function NavButton({ tab, isActive, variant, onClick }: NavButtonProps) {
   if (variant === 'sidebar') {
     return (
       <button
+        type="button"
         onClick={onClick}
         aria-current={isActive ? 'page' : undefined}
         className={`${baseClass} flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-medium ${
@@ -156,6 +157,7 @@ function NavButton({ tab, isActive, variant, onClick }: NavButtonProps) {
 
   return (
     <button
+      type="button"
       onClick={onClick}
       aria-current={isActive ? 'page' : undefined}
       aria-label={tab.label}
