@@ -8,9 +8,11 @@ const API_URL = `${import.meta.env.VITE_API_URL}`;
 export default function useDashboard({
   fromStr,
   toStr,
+  onError,
 }: {
   fromStr: string;
   toStr: string;
+  onError: (x: boolean) => void;
 }) {
   const { user } = useAuth();
   const userId = user?.userId;
@@ -30,15 +32,17 @@ export default function useDashboard({
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = (await res.json()) as DashboardDay[];
         setDashboardState(data);
+        onError(false);
       } catch (error) {
-        if ((error as Error).name === 'AbortError') return;
+        onError(true);
         console.error('useDashboard: ', error);
+        if ((error as Error).name === 'AbortError') return;
       }
     };
 
     void load();
     return () => controller.abort();
-  }, [userId, fromStr, toStr]);
+  }, [userId, fromStr, toStr, onError]);
 
   return { dashboard, setDashboard: setDashboardState };
 }
