@@ -64,6 +64,10 @@ export class UsersService {
         gender: true,
         birthDate: true,
         activityLevel: true,
+        bodyFat: true,
+        fatFreeMass: true,
+        bodyWater: true,
+        muscleMass: true,
       },
     });
   }
@@ -76,6 +80,9 @@ export class UsersService {
           where: { id: userId },
           select: {
             dailyCalorieGoal: true,
+            dailyProteinGoal: true,
+            dailyCarbsGoal: true,
+            dailyFatGoal: true,
           },
         });
 
@@ -99,6 +106,10 @@ export class UsersService {
             gender: true,
             birthDate: true,
             activityLevel: true,
+            bodyFat: true,
+            fatFreeMass: true,
+            bodyWater: true,
+            muscleMass: true,
           },
         });
 
@@ -120,6 +131,9 @@ export class UsersService {
               userId,
               startDate: new Date(),
               dailyCalories: currentGoalCalories,
+              dailyProtein: user.dailyProteinGoal ?? null,
+              dailyCarbs: user.dailyCarbsGoal ?? null,
+              dailyFat: user.dailyFatGoal ?? null,
               objective: objective,
             },
           });

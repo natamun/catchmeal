@@ -41,6 +41,10 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       gender: user.gender,
       birthDate: user.birthDate,
       activityLevel: user.activityLevel,
+      bodyFat: user.bodyFat,
+      fatFreeMass: user.fatFreeMass,
+      bodyWater: user.bodyWater,
+      muscleMass: user.muscleMass,
     };
   }
 }

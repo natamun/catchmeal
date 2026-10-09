@@ -22,7 +22,9 @@ export function calculateBMR(
   heightCm: number,
   birthDate: string,
   gender: string,
+  muscleMass?: number | null,
 ): number {
+  if (muscleMass) return Math.round(370 + 21.6 * muscleMass);
   const age = getAge(birthDate);
   const base = 10 * weightKg + 6.25 * heightCm - 5 * age;
   if (gender === 'MALE') return Math.round(base + 5);

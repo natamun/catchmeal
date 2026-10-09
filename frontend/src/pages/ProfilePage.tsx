@@ -28,7 +28,13 @@ export default function ProfilePage() {
 
   const bmr =
     latestWeight && user.height && user.birthDate && user.gender
-      ? calculateBMR(latestWeight, user.height, user.birthDate, user.gender)
+      ? calculateBMR(
+          latestWeight,
+          user.height,
+          user.birthDate,
+          user.gender,
+          user.muscleMass,
+        )
       : null;
 
   const tdee =
@@ -39,6 +45,17 @@ export default function ProfilePage() {
     const diff = latestWeight - user.targetWeight;
     const coefficient = diff > 0 ? 7700 : 4800;
     return Math.round(tdee - (diff * coefficient) / durationDays);
+  })();
+
+  const recommendedMacros = (() => {
+    const kcal = kcalToReachGoal ?? tdee;
+    if (!kcal || !latestWeight) return null;
+    const protein = Math.round(
+      user.muscleMass ? 2.2 * user.muscleMass : 1.8 * latestWeight,
+    );
+    const fat = Math.round((kcal * 0.3) / 9);
+    const carbs = Math.round((kcal - protein * 4 - fat * 9) / 4);
+    return carbs > 0 ? { protein, fat, carbs } : null;
   })();
 
   return (
@@ -56,6 +73,51 @@ export default function ProfilePage() {
         targetWeight={user.targetWeight}
         onLatestWeight={handleLatestWeight}
       />
+
+      {/* Composition corporelle */}
+      {((user.bodyFat !== null && user.bodyFat !== undefined) ||
+        (user.fatFreeMass !== null && user.fatFreeMass !== undefined) ||
+        (user.bodyWater !== null && user.bodyWater !== undefined) ||
+        (user.muscleMass !== null && user.muscleMass !== undefined)) && (
+        <div className="overflow-hidden rounded-2xl border border-green-200 bg-white shadow-sm">
+          <p className="px-5 pt-5 pb-3 text-sm font-semibold tracking-wide text-green-500 uppercase">
+            Composition corporelle
+          </p>
+          {(
+            [
+              { label: 'Masse grasse', value: user.bodyFat, unit: '%' },
+              {
+                label: 'Masse maigre',
+                value: user.fatFreeMass,
+                unit: 'kg',
+              },
+              { label: 'Eau corporelle', value: user.bodyWater, unit: '%' },
+              { label: 'Masse musculaire', value: user.muscleMass, unit: 'kg' },
+            ] as {
+              label: string;
+              value: number | null | undefined;
+              unit: string;
+            }[]
+          )
+            .filter((r) => r.value !== null && r.value !== undefined)
+            .map((row, i, arr) => (
+              <div
+                key={row.label}
+                className={`flex items-center justify-between px-5 py-4 ${
+                  i < arr.length - 1 ? 'border-b border-green-200' : ''
+                }`}
+              >
+                <p className="text-sm font-semibold text-green-600">
+                  {row.label}
+                </p>
+                <p className="text-sm font-semibold text-green-800">
+                  {row.value}
+                  {row.unit ? ` ${row.unit}` : ''}
+                </p>
+              </div>
+            ))}
+        </div>
+      )}
 
       {/* Objectifs */}
       <div className="overflow-hidden rounded-2xl border border-green-200 bg-white shadow-sm">
@@ -100,21 +162,44 @@ export default function ProfilePage() {
         )}
         <div className="flex items-center justify-between border-b border-green-200 px-5 py-4">
           <p className="text-sm font-semibold text-green-600">Protéines</p>
-          <p className="text-sm font-semibold text-green-800">
-            {user.dailyProteinGoal ? `${user.dailyProteinGoal} g / jour` : '—'}
-          </p>
+          <div className="text-right">
+            <p className="text-sm font-semibold text-green-800">
+              {user.dailyProteinGoal
+                ? `${user.dailyProteinGoal} g / jour`
+                : '—'}
+            </p>
+            {recommendedMacros && (
+              <p className="text-xs text-green-400">
+                Recommandé : {recommendedMacros.protein} g
+              </p>
+            )}
+          </div>
         </div>
         <div className="flex items-center justify-between border-b border-green-200 px-5 py-4">
           <p className="text-sm font-semibold text-green-600">Glucides</p>
-          <p className="text-sm font-semibold text-green-800">
-            {user.dailyCarbsGoal ? `${user.dailyCarbsGoal} g / jour` : '—'}
-          </p>
+          <div className="text-right">
+            <p className="text-sm font-semibold text-green-800">
+              {user.dailyCarbsGoal ? `${user.dailyCarbsGoal} g / jour` : '—'}
+            </p>
+            {recommendedMacros && (
+              <p className="text-xs text-green-400">
+                Recommandé : {recommendedMacros.carbs} g
+              </p>
+            )}
+          </div>
         </div>
         <div className="flex items-center justify-between px-5 py-4">
           <p className="text-sm font-semibold text-green-600">Lipides</p>
-          <p className="text-sm font-semibold text-green-800">
-            {user.dailyFatGoal ? `${user.dailyFatGoal} g / jour` : '—'}
-          </p>
+          <div className="text-right">
+            <p className="text-sm font-semibold text-green-800">
+              {user.dailyFatGoal ? `${user.dailyFatGoal} g / jour` : '—'}
+            </p>
+            {recommendedMacros && (
+              <p className="text-xs text-green-400">
+                Recommandé : {recommendedMacros.fat} g
+              </p>
+            )}
+          </div>
         </div>
       </div>
 

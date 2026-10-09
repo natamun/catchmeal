@@ -31,7 +31,11 @@ type Field =
   | 'dailyCalorieGoal'
   | 'dailyProteinGoal'
   | 'dailyCarbsGoal'
-  | 'dailyFatGoal';
+  | 'dailyFatGoal'
+  | 'bodyFat'
+  | 'fatFreeMass'
+  | 'bodyWater'
+  | 'muscleMass';
 
 interface FormState {
   username: string;
@@ -45,6 +49,10 @@ interface FormState {
   gender: string;
   birthDate: string;
   activityLevel: string;
+  bodyFat: string;
+  fatFreeMass: string;
+  bodyWater: string;
+  muscleMass: string;
 }
 
 function validate(form: FormState): Partial<Record<Field, string>> {
@@ -82,6 +90,26 @@ function validate(form: FormState): Partial<Record<Field, string>> {
     const f = parseInt(form.dailyFatGoal);
     if (isNaN(f)) errors.dailyFatGoal = 'Valeur invalide';
     else if (f < 10 || f > 1000) errors.dailyFatGoal = 'Entre 10 et 1000 g';
+  }
+  if (form.bodyFat) {
+    const v = parseFloat(form.bodyFat);
+    if (isNaN(v)) errors.bodyFat = 'Valeur invalide';
+    else if (v < 1 || v > 100) errors.bodyFat = 'Entre 1 et 100 %';
+  }
+  if (form.fatFreeMass) {
+    const v = parseFloat(form.fatFreeMass);
+    if (isNaN(v)) errors.fatFreeMass = 'Valeur invalide';
+    else if (v < 1 || v > 500) errors.fatFreeMass = 'Entre 1 et 500 kg';
+  }
+  if (form.bodyWater) {
+    const v = parseFloat(form.bodyWater);
+    if (isNaN(v)) errors.bodyWater = 'Valeur invalide';
+    else if (v < 1 || v > 100) errors.bodyWater = 'Entre 1 et 100 %';
+  }
+  if (form.muscleMass) {
+    const v = parseFloat(form.muscleMass);
+    if (isNaN(v)) errors.muscleMass = 'Valeur invalide';
+    else if (v < 1 || v > 500) errors.muscleMass = 'Entre 1 et 500 kg';
   }
   return errors;
 }
@@ -135,6 +163,10 @@ export function ProfileIdentityCard({ user, onUpdate, currentWeight }: Props) {
     gender: user.gender ?? '',
     birthDate: user.birthDate ? user.birthDate.slice(0, 10) : '',
     activityLevel: user.activityLevel ?? '',
+    bodyFat: user.bodyFat?.toString() ?? '',
+    fatFreeMass: user.fatFreeMass?.toString() ?? '',
+    bodyWater: user.bodyWater?.toString() ?? '',
+    muscleMass: user.muscleMass?.toString() ?? '',
   });
 
   const [form, setForm] = useState<FormState>(initForm);
@@ -265,6 +297,18 @@ export function ProfileIdentityCard({ user, onUpdate, currentWeight }: Props) {
     if (form.activityLevel !== (user.activityLevel ?? ''))
       input.activityLevel = form.activityLevel || undefined;
 
+    const bodyCompFields = [
+      'bodyFat',
+      'fatFreeMass',
+      'bodyWater',
+      'muscleMass',
+    ] as const;
+    for (const f of bodyCompFields) {
+      const parsed = form[f] ? parseFloat(form[f]) : undefined;
+      if (parsed !== (user[f] ?? undefined))
+        (input as Record<string, number | undefined>)[f] = parsed;
+    }
+
     if (Object.keys(input).length === 0) {
       dialogRef.current?.close();
       return;
@@ -286,6 +330,10 @@ export function ProfileIdentityCard({ user, onUpdate, currentWeight }: Props) {
         gender: updated.gender ?? undefined,
         birthDate: updated.birthDate ?? undefined,
         activityLevel: updated.activityLevel ?? undefined,
+        bodyFat: updated.bodyFat ?? undefined,
+        fatFreeMass: updated.fatFreeMass ?? undefined,
+        bodyWater: updated.bodyWater ?? undefined,
+        muscleMass: updated.muscleMass ?? undefined,
       });
       dialogRef.current?.close();
     } catch (err) {
@@ -454,6 +502,57 @@ export function ProfileIdentityCard({ user, onUpdate, currentWeight }: Props) {
               container={dialogNode}
             />
           </div>
+
+          <p className="col-span-2 pt-2 text-xs font-semibold tracking-wide text-green-400 uppercase">
+            Composition corporelle
+          </p>
+
+          {[
+            {
+              field: 'bodyFat' as Field,
+              id: 'pf-body-fat',
+              label: 'Masse grasse (%)',
+            },
+            {
+              field: 'fatFreeMass' as Field,
+              id: 'pf-fat-free-mass',
+              label: 'Masse maigre (kg)',
+            },
+            {
+              field: 'bodyWater' as Field,
+              id: 'pf-body-water',
+              label: 'Eau corporelle (%)',
+            },
+            {
+              field: 'muscleMass' as Field,
+              id: 'pf-muscle-mass',
+              label: 'Masse musculaire (kg)',
+            },
+          ].map(({ field, id, label }) => (
+            <div key={field} className="relative flex flex-col gap-1">
+              <label
+                htmlFor={id}
+                className="text-sm font-semibold text-green-600"
+              >
+                {label}
+              </label>
+              <Input
+                id={id}
+                type="text"
+                inputMode="decimal"
+                value={form[field]}
+                onChange={(e) => handleChange(field, e.target.value)}
+                onFocus={() => setFocusedField(field)}
+                onBlur={() => handleBlur(field)}
+                aria-invalid={isInvalid(field)}
+              />
+              <FieldError id={`${id}-error`} message={errorMessage(field)} />
+            </div>
+          ))}
+
+          <p className="col-span-2 pt-2 text-xs font-semibold tracking-wide text-green-400 uppercase">
+            Objectifs
+          </p>
 
           {[
             { field: 'height' as Field, id: 'pf-height', label: 'Taille (cm)' },
