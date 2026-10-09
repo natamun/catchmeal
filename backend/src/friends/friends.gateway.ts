@@ -1,7 +1,12 @@
 import { WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server } from 'socket.io';
 
-type UserSummary = { id: number; username: string; name: string };
+type UserSummary = {
+  id: number;
+  username: string;
+  name: string;
+  avatarUrl: string | null;
+};
 
 @WebSocketGateway()
 export class FriendsGateway {

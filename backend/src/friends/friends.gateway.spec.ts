@@ -14,7 +14,7 @@ describe('FriendsGateway', () => {
   it('sends friend:request to the recipient room', () => {
     const payload = {
       requestId: 1,
-      from: { id: 2, username: 'bob', name: 'Bob' },
+      from: { id: 2, username: 'bob', name: 'Bob', avatarUrl: null },
     };
     gateway.notifyRequestReceived(5, payload);
     expect(to).toHaveBeenCalledWith('user:5');
@@ -24,7 +24,7 @@ describe('FriendsGateway', () => {
   it('send friend:accepted to the sender room', () => {
     const payload = {
       friendshipId: 1,
-      friend: { id: 2, username: 'bob', name: 'Bob' },
+      friend: { id: 2, username: 'bob', name: 'Bob', avatarUrl: null },
     };
     gateway.notifyRequestAccepted(5, payload);
     expect(to).toHaveBeenCalledWith('user:5');

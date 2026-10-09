@@ -77,7 +77,11 @@ describe('FriendsService', () => {
       });
       expect(prismaMock.friend.create).toHaveBeenCalledWith({
         data: { userId: 1, friendId: 2, status: 'PENDING' },
-        include: { user: { select: { id: true, username: true, name: true } } },
+        include: {
+          user: {
+            select: { id: true, username: true, name: true, avatarUrl: true },
+          },
+        },
       });
       expect(friendsGatewayMock.notifyRequestReceived).toHaveBeenCalledWith(2, {
         requestId: 7,
@@ -139,7 +143,9 @@ describe('FriendsService', () => {
         where: { id: 5 },
         data: { status: 'ACCEPTED' },
         include: {
-          friendUser: { select: { id: true, username: true, name: true } },
+          friendUser: {
+            select: { id: true, username: true, name: true, avatarUrl: true },
+          },
         },
       });
       expect(friendsGatewayMock.notifyRequestAccepted).toHaveBeenCalledWith(1, {
