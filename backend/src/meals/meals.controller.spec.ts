@@ -113,7 +113,7 @@ describe('MealsController', () => {
     const from = new Date('2026-09-01');
     const to = new Date('2026-09-18');
 
-    await controller.findRange(7, from, to);
+    await controller.findRange(7, req, from, to);
 
     expect(mealsServiceMock.findRange).toHaveBeenCalledWith(7, from, to);
   });
@@ -122,7 +122,7 @@ describe('MealsController', () => {
     mealsServiceMock.findRange.mockResolvedValue([]);
     const from = new Date('2026-09-01');
 
-    await controller.findRange(7, from, undefined);
+    await controller.findRange(7, req, from, undefined);
 
     expect(mealsServiceMock.findRange).toHaveBeenCalledWith(
       7,
@@ -134,7 +134,7 @@ describe('MealsController', () => {
   it('should default "from" to 7 days ago when no dates are provided', async () => {
     mealsServiceMock.findRange.mockResolvedValue([]);
 
-    await controller.findRange(7, undefined, undefined);
+    await controller.findRange(7, req, undefined, undefined);
 
     expect(mealsServiceMock.findRange).toHaveBeenCalledWith(
       7,

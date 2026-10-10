@@ -59,9 +59,11 @@ export class MealsController {
   @Get('meals/range')
   findRange(
     @Param('userId', ParseIntPipe) userId: number,
+    @Request() req: { user: { userId: number } },
     @Query('from', new ParseDatePipe({ optional: true })) from?: Date,
     @Query('to', new ParseDatePipe({ optional: true })) to?: Date,
   ) {
+    this.checkOwnership(userId, req.user.userId);
     const fromDate =
       from ?? new Date(new Date().setDate(new Date().getDate() - 7));
     const toDate = to ?? new Date();
