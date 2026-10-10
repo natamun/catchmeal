@@ -1,5 +1,11 @@
 import { useRef, useState, type RefObject } from 'react';
-import { CheckCircle2, ScanBarcode, Search, Trash2 } from 'lucide-react';
+import {
+  CheckCircle2,
+  LoaderCircle,
+  ScanBarcode,
+  Search,
+  Trash2,
+} from 'lucide-react';
 
 import { useAuth } from '../../auth/auth-context';
 import { useTimeout } from '../../hooks/useTimeout';
@@ -13,6 +19,7 @@ import {
   ApiError,
   createFoodItem,
   deleteFoodItem,
+  lookupOffProduct,
   updateFoodItem,
 } from './api';
 import type { FoodItem, QuantityUnit } from './types';
@@ -43,6 +50,16 @@ const EMPTY_FORM: FoodItemFormState = {
 
 const LABEL_CLASS =
   'text-xs font-semibold tracking-wide text-green-500 uppercase';
+
+const ICON_BUTTON_CLASS =
+  'flex w-11 shrink-0 cursor-pointer items-center justify-center rounded-xl border border-green-200 text-green-600 transition-colors hover:bg-green-50 disabled:cursor-not-allowed disabled:opacity-60';
+
+const LOOKUP_ERRORS: Record<number, string> = {
+  400: 'Code-barres invalide',
+  404: 'Produit introuvable',
+  429: 'Trop de recherches, patientez 1 min',
+  503: 'Open Food Facts ne répond pas',
+};
 
 const UNIT_OPTIONS = [
   { value: 'GRAM', label: 'g' },
@@ -132,16 +149,23 @@ export default function FoodItemForm({
   const [submitAttempted, setSubmitAttempted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [isLookingUp, setIsLookingUp] = useState(false);
+  const [lookupError, setLookupError] = useState<{
+    message: string;
+    onField: boolean;
+  } | null>(null);
   const [syncedItemId, setSyncedItemId] = useState<number | null>(
     editingItem?.id ?? null,
   );
   const confirmDialogRef = useRef<HTMLDialogElement>(null);
+  const barcodeRef = useRef<HTMLInputElement>(null);
 
   if ((editingItem?.id ?? null) !== syncedItemId) {
     setSyncedItemId(editingItem?.id ?? null);
     setForm(editingItem ? itemToForm(editingItem) : EMPTY_FORM);
     setTouched({});
     setError(null);
+    setLookupError(null);
     setSubmitAttempted(false);
   }
 
@@ -153,6 +177,7 @@ export default function FoodItemForm({
 
   useTimeout(() => setSubmitAttempted(false), submitAttempted ? 5000 : null);
   useTimeout(() => setSuccessMessage(null), successMessage ? 3000 : null);
+  useTimeout(() => setLookupError(null), lookupError ? 5000 : null);
 
   const handleFocus = (field: keyof FoodItemFormState) => {
     setFocusedField(field);
@@ -175,6 +200,34 @@ export default function FoodItemForm({
     touched[field] && (focusedField === field || submitAttempted)
       ? errors[field]
       : undefined;
+
+  const handleLookup = async () => {
+    const barcode = form.barcode.trim();
+    if (barcode === '' || isLookingUp) {
+      return;
+    }
+    setLookupError(null);
+    if (errors.barcode) {
+      setTouched((prev) => ({ ...prev, barcode: true }));
+      barcodeRef.current?.focus();
+      return;
+    }
+
+    setIsLookingUp(true);
+    try {
+      const product = await lookupOffProduct(userId, barcode);
+      setForm((prev) => ({ ...prev, barcode: product.barcode }));
+    } catch (err: unknown) {
+      console.error(err);
+      const status = err instanceof ApiError ? (err.status ?? 0) : 0;
+      setLookupError({
+        message: LOOKUP_ERRORS[status] ?? 'Une erreur est survenue',
+        onField: status === 400,
+      });
+    } finally {
+      setIsLookingUp(false);
+    }
+  };
 
   const handleSubmit = async (event: React.SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -212,6 +265,7 @@ export default function FoodItemForm({
       } else {
         onItemAdded(savedItem);
         setForm(EMPTY_FORM);
+        setLookupError(null);
       }
       setTouched({});
       setSubmitAttempted(false);
@@ -287,32 +341,66 @@ export default function FoodItemForm({
                   id="food-barcode"
                   type="text"
                   inputMode="numeric"
-                  placeholder="Ex : 3017620422003"
+                  placeholder="Ex : 7612100018477"
+                  ref={barcodeRef}
                   value={form.barcode}
-                  onChange={(e) => handleChange('barcode', e.target.value)}
+                  readOnly={isLookingUp}
+                  onChange={(e) => {
+                    setForm((prev) => ({ ...prev, barcode: e.target.value }));
+                    setLookupError(null);
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      void handleLookup();
+                    }
+                  }}
                   onFocus={() => handleFocus('barcode')}
                   onBlur={() => handleBlur('barcode')}
-                  aria-invalid={isInvalid('barcode')}
+                  aria-invalid={isInvalid('barcode') || lookupError?.onField}
                   aria-describedby="food-barcode-error"
                 />
                 <button
                   type="button"
+                  disabled={isLookingUp}
                   aria-label="Scanner un code-barres"
-                  className="flex w-11 shrink-0 cursor-pointer items-center justify-center rounded-xl border border-green-200 text-green-600 transition-colors hover:bg-green-50"
+                  className={ICON_BUTTON_CLASS}
                 >
                   <ScanBarcode className="h-4 w-4" />
                 </button>
-                <button
-                  type="button"
-                  aria-label="Rechercher le produit"
-                  className="flex w-11 shrink-0 cursor-pointer items-center justify-center rounded-xl border border-green-200 text-green-600 transition-colors hover:bg-green-50"
-                >
-                  <Search className="h-4 w-4" />
-                </button>
+                <div className="relative flex shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => void handleLookup()}
+                    disabled={form.barcode.trim() === '' || isLookingUp}
+                    aria-label="Rechercher le produit"
+                    aria-describedby="food-lookup-error"
+                    className={ICON_BUTTON_CLASS}
+                  >
+                    {isLookingUp ? (
+                      <LoaderCircle className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Search className="h-4 w-4" />
+                    )}
+                  </button>
+                  <FieldError
+                    id="food-lookup-error"
+                    align="right"
+                    message={
+                      lookupError && !lookupError.onField
+                        ? lookupError.message
+                        : undefined
+                    }
+                  />
+                </div>
               </div>
               <FieldError
                 id="food-barcode-error"
-                message={errorMessage('barcode')}
+                message={
+                  lookupError?.onField
+                    ? lookupError.message
+                    : errorMessage('barcode')
+                }
               />
             </div>
           )}
