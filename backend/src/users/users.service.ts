@@ -18,6 +18,18 @@ export const SAFE_USER_SELECT = {
   name: true,
 } as const;
 
+function crossedTarget(
+  previous: number | undefined,
+  current: number,
+  target: number,
+): boolean {
+  if (previous === undefined) return false;
+  return (
+    (previous > target && current <= target) ||
+    (previous < target && current >= target)
+  );
+}
+
 @Injectable()
 export class UsersService {
   constructor(
@@ -202,11 +214,16 @@ export class UsersService {
     bodyFat?: number,
     note?: string,
   ) {
-    await this.prisma.user
+    const user = await this.prisma.user
       .findFirstOrThrow({ where: { id: userId } })
       .catch(() => {
         throw new NotFoundException('User not found');
       });
+    const previous = await this.prisma.weightLog.findFirst({
+      where: { userId },
+      orderBy: { loggedAt: 'desc' },
+      select: { weight: true },
+    });
     const entry = await this.prisma.weightLog.create({
       data: { userId, weight, bodyFat, note },
       select: {
@@ -220,6 +237,16 @@ export class UsersService {
     await this.activityService.record(userId, ActivityType.WEIGHT_LOGGED, {
       weight,
     });
+    if (
+      user.targetWeight !== null &&
+      crossedTarget(previous?.weight, weight, user.targetWeight)
+    ) {
+      await this.activityService.record(
+        userId,
+        ActivityType.WEIGHT_GOAL_REACHED,
+        { targetWeight: user.targetWeight },
+      );
+    }
     return entry;
   }
 
