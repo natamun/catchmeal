@@ -1,4 +1,4 @@
-import { useRef, useState, type RefObject } from 'react';
+import { lazy, Suspense, useRef, useState, type RefObject } from 'react';
 import {
   ArrowUpRight,
   CheckCircle2,
@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 
 import { useAuth } from '../../auth/auth-context';
+import { useHasCamera } from '../../hooks/useHasCamera';
 import { useTimeout } from '../../hooks/useTimeout';
 import { BaseDialog } from '../ui/BaseDialog';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
@@ -48,6 +49,8 @@ const EMPTY_FORM: FoodItemFormState = {
   carbs: '',
   fat: '',
 };
+
+const BarcodeScannerDialog = lazy(() => import('./BarcodeScannerDialog'));
 
 const LABEL_CLASS =
   'text-xs font-semibold tracking-wide text-green-500 uppercase';
@@ -174,6 +177,8 @@ export default function FoodItemForm({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [isLookingUp, setIsLookingUp] = useState(false);
+  const [isScannerOpen, setIsScannerOpen] = useState(false);
+  const hasCamera = useHasCamera();
   const [foundBarcode, setFoundBarcode] = useState<string | null>(null);
   const [lookupError, setLookupError] = useState<{
     message: string;
@@ -250,9 +255,20 @@ export default function FoodItemForm({
       return;
     }
 
+    await runLookup(barcode);
+  };
+
+  const handleScanned = (scannedBarcode: string) => {
+    setIsScannerOpen(false);
+    setForm((prev) => ({ ...prev, barcode: scannedBarcode }));
+    setLookupError(null);
+    void runLookup(scannedBarcode);
+  };
+
+  const runLookup = async (code: string) => {
     setIsLookingUp(true);
     try {
-      const product = await lookupOffProduct(userId, barcode);
+      const product = await lookupOffProduct(userId, code);
       setForm(productToForm(product));
       setFoundBarcode(product.barcode);
       setTouched({});
@@ -431,14 +447,17 @@ export default function FoodItemForm({
                   aria-invalid={isInvalid('barcode') || lookupError?.onField}
                   aria-describedby="food-barcode-error"
                 />
-                <button
-                  type="button"
-                  disabled={isLookingUp}
-                  aria-label="Scanner un code-barres"
-                  className={ICON_BUTTON_CLASS}
-                >
-                  <ScanBarcode className="h-4 w-4" />
-                </button>
+                {hasCamera && (
+                  <button
+                    type="button"
+                    onClick={() => setIsScannerOpen(true)}
+                    disabled={isLookingUp}
+                    aria-label="Scanner un code-barres"
+                    className={ICON_BUTTON_CLASS}
+                  >
+                    <ScanBarcode className="h-4 w-4" />
+                  </button>
+                )}
                 <div className="relative flex shrink-0">
                   <button
                     type="button"
@@ -611,6 +630,15 @@ export default function FoodItemForm({
         onConfirm={() => void save()}
         tone="primary"
       />
+
+      {isScannerOpen && (
+        <Suspense fallback={null}>
+          <BarcodeScannerDialog
+            onDetected={handleScanned}
+            onClose={() => setIsScannerOpen(false)}
+          />
+        </Suspense>
+      )}
 
       <Toast message={successMessage} icon={CheckCircle2} />
     </>
