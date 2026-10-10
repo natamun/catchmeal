@@ -1,7 +1,11 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 
 import { ActivityService } from '../activity/activity.service';
-import { ActivityType, FoodItem } from '../generated/prisma/client';
+import { ActivityType, FoodItem, MealType } from '../generated/prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateMealDto, CreateMealItemDto } from './dto/create-meal.dto';
 import { UpdateMealDto } from './dto/update-meal.dto';
@@ -24,7 +28,11 @@ export class MealsService {
 
     const foodItems = ids.length
       ? await this.prisma.foodItem.findMany({
-          where: { id: { in: ids }, userId, archived: false },
+          where: {
+            id: { in: ids },
+            userId,
+            OR: [{ archived: false }, { mealFoodItems: { some: {} } }],
+          },
         })
       : [];
 
@@ -62,7 +70,16 @@ export class MealsService {
     });
   }
 
+  private checkLoggedMealHasType(
+    loggedAt: Date | string | null | undefined,
+    typeMeal: MealType | null | undefined,
+  ) {
+    if (loggedAt && !typeMeal)
+      throw new BadRequestException('typeMeal is required for a logged meal');
+  }
+
   async create(userId: number, dto: CreateMealDto) {
+    this.checkLoggedMealHasType(dto.loggedAt, dto.typeMeal);
     const items = await this.buildItemsData(userId, dto.items);
     const kcal = items.reduce((sum, item) => sum + item.kcal, 0);
 
@@ -138,6 +155,17 @@ export class MealsService {
   }
 
   async update(userId: number, id: number, dto: UpdateMealDto) {
+    if (dto.loggedAt !== undefined || dto.typeMeal !== undefined) {
+      const meal = await this.prisma.meal.findFirstOrThrow({
+        where: { id, userId },
+        select: { loggedAt: true, typeMeal: true },
+      });
+      this.checkLoggedMealHasType(
+        dto.loggedAt ?? meal.loggedAt,
+        dto.typeMeal === undefined ? meal.typeMeal : dto.typeMeal,
+      );
+    }
+
     const items = dto.items
       ? await this.buildItemsData(userId, dto.items)
       : undefined;

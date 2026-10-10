@@ -6,6 +6,7 @@ import {
   IsOptional,
   IsPositive,
   IsString,
+  Matches,
   MaxLength,
   Min,
 } from 'class-validator';
@@ -15,6 +16,9 @@ import { QuantityUnit } from '../../generated/prisma/enums';
 const trim = ({ value }: { value: unknown }) =>
   typeof value === 'string' ? value.trim() : value;
 
+const trimOrNull = ({ value }: { value: unknown }) =>
+  typeof value === 'string' ? value.trim() || null : value;
+
 export class CreateFoodItemDto {
   @Transform(trim)
   @IsString()
@@ -22,17 +26,16 @@ export class CreateFoodItemDto {
   @MaxLength(120)
   name: string;
 
-  @Transform(trim)
+  @Transform(trimOrNull)
   @IsOptional()
   @IsString()
   @MaxLength(80)
-  brand?: string;
+  brand?: string | null;
 
-  @Transform(trim)
+  @Transform(trimOrNull)
   @IsOptional()
-  @IsString()
-  @MaxLength(32)
-  barcode?: string;
+  @Matches(/^\d{8,14}$/, { message: 'barcode must be 8 to 14 digits' })
+  barcode?: string | null;
 
   @IsNumber()
   @IsPositive()

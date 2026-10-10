@@ -120,6 +120,7 @@ model WeightLog {
 enum QuantityUnit {
   GRAM
   PIECE
+  MILLILITER
 }
 
 enum MealType {

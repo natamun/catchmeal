@@ -1,5 +1,5 @@
 import { useRef, useState, type RefObject } from 'react';
-import { CheckCircle2, ScanBarcode, Trash2 } from 'lucide-react';
+import { CheckCircle2, Trash2 } from 'lucide-react';
 
 import { useAuth } from '../../auth/auth-context';
 import { useTimeout } from '../../hooks/useTimeout';
@@ -15,9 +15,11 @@ import {
   deleteFoodItem,
   updateFoodItem,
 } from './api';
-import type { FoodItem, QuantityUnit } from './types';
+import BarcodeField from './BarcodeField';
+import type { FoodItem, OffProduct, QuantityUnit } from './types';
 
 interface FoodItemFormState {
+  barcode: string;
   name: string;
   brand: string;
   baseQuantity: string;
@@ -29,6 +31,7 @@ interface FoodItemFormState {
 }
 
 const EMPTY_FORM: FoodItemFormState = {
+  barcode: '',
   name: '',
   brand: '',
   baseQuantity: '',
@@ -43,8 +46,9 @@ const LABEL_CLASS =
   'text-xs font-semibold tracking-wide text-green-500 uppercase';
 
 const UNIT_OPTIONS = [
-  { value: 'GRAM', label: 'Grammes' },
-  { value: 'PIECE', label: 'Pièce' },
+  { value: 'GRAM', label: 'g' },
+  { value: 'MILLILITER', label: 'ml' },
+  { value: 'PIECE', label: 'pièce' },
 ] as const;
 
 const MACRO_FIELDS = [
@@ -56,6 +60,7 @@ const MACRO_FIELDS = [
 
 function itemToForm(item: FoodItem): FoodItemFormState {
   return {
+    barcode: item.barcode ?? '',
     name: item.name,
     brand: item.brand ?? '',
     baseQuantity: String(item.baseQuantity),
@@ -67,10 +72,34 @@ function itemToForm(item: FoodItem): FoodItemFormState {
   };
 }
 
+const significantDigits = (barcode: string) => barcode.replace(/^0+/, '');
+
+function productToForm(product: OffProduct): FoodItemFormState {
+  const toField = (value: number | null) =>
+    value === null ? '' : String(value);
+
+  return {
+    barcode: product.barcode,
+    name: product.name ?? '',
+    brand: product.brand ?? '',
+    baseQuantity: String(product.baseQuantity),
+    baseUnit: product.baseUnit,
+    kcal: toField(product.kcal),
+    protein: toField(product.protein),
+    carbs: toField(product.carbs),
+    fat: toField(product.fat),
+  };
+}
+
 function validateForm(
   form: FoodItemFormState,
 ): Partial<Record<keyof FoodItemFormState, string>> {
   const errors: Partial<Record<keyof FoodItemFormState, string>> = {};
+
+  const barcode = form.barcode.trim();
+  if (barcode !== '' && !/^\d{8,14}$/.test(barcode)) {
+    errors.barcode = '8 à 14 chiffres';
+  }
 
   if (form.name.trim() === '') {
     errors.name = 'Nom requis';
@@ -98,6 +127,7 @@ function validateForm(
 interface FoodItemFormProps {
   dialogRef: RefObject<HTMLDialogElement | null>;
   editingItem: FoodItem | null;
+  foodItems: FoodItem[];
   onItemAdded: (item: FoodItem) => void;
   onItemUpdated: (item: FoodItem) => void;
   onItemDeleted: (id: number) => void;
@@ -106,6 +136,7 @@ interface FoodItemFormProps {
 export default function FoodItemForm({
   dialogRef,
   editingItem,
+  foodItems,
   onItemAdded,
   onItemUpdated,
   onItemDeleted,
@@ -123,10 +154,12 @@ export default function FoodItemForm({
   const [submitAttempted, setSubmitAttempted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [barcodeFieldKey, setBarcodeFieldKey] = useState(0);
   const [syncedItemId, setSyncedItemId] = useState<number | null>(
     editingItem?.id ?? null,
   );
   const confirmDialogRef = useRef<HTMLDialogElement>(null);
+  const duplicateDialogRef = useRef<HTMLDialogElement>(null);
 
   if ((editingItem?.id ?? null) !== syncedItemId) {
     setSyncedItemId(editingItem?.id ?? null);
@@ -141,6 +174,17 @@ export default function FoodItemForm({
   };
 
   const errors = validateForm(form);
+
+  const barcode = form.barcode.trim();
+  const duplicates =
+    editingItem || barcode === ''
+      ? []
+      : foodItems.filter(
+          (item) =>
+            !item.archived &&
+            item.barcode !== null &&
+            significantDigits(item.barcode) === significantDigits(barcode),
+        );
 
   useTimeout(() => setSubmitAttempted(false), submitAttempted ? 5000 : null);
   useTimeout(() => setSuccessMessage(null), successMessage ? 3000 : null);
@@ -167,6 +211,13 @@ export default function FoodItemForm({
       ? errors[field]
       : undefined;
 
+  const handleProduct = (product: OffProduct) => {
+    setForm(productToForm(product));
+    setTouched({});
+    setSubmitAttempted(false);
+    setError(null);
+  };
+
   const handleSubmit = async (event: React.SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
     setError(null);
@@ -180,12 +231,21 @@ export default function FoodItemForm({
       setSubmitAttempted(true);
       return;
     }
+    if (duplicates.length > 0) {
+      duplicateDialogRef.current?.showModal();
+      return;
+    }
 
+    await save();
+  };
+
+  const save = async () => {
     setIsSubmitting(true);
     try {
       const input = {
         name: form.name,
         brand: form.brand.trim() === '' ? null : form.brand,
+        barcode: barcode === '' ? null : barcode,
         baseQuantity: Number(form.baseQuantity),
         baseUnit: form.baseUnit,
         kcal: Number(form.kcal),
@@ -202,6 +262,7 @@ export default function FoodItemForm({
       } else {
         onItemAdded(savedItem);
         setForm(EMPTY_FORM);
+        setBarcodeFieldKey((key) => key + 1);
       }
       setTouched({});
       setSubmitAttempted(false);
@@ -220,6 +281,7 @@ export default function FoodItemForm({
       );
     } finally {
       setIsSubmitting(false);
+      duplicateDialogRef.current?.close();
     }
   };
 
@@ -267,13 +329,18 @@ export default function FoodItemForm({
           autoComplete="off"
           className="contents"
         >
-          <button
-            type="button"
-            className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-green-200 py-2.5 text-sm font-medium text-green-600 transition-colors hover:bg-green-50"
-          >
-            <ScanBarcode className="h-4 w-4" />
-            Scanner un produit
-          </button>
+          {!editingItem && (
+            <BarcodeField
+              key={barcodeFieldKey}
+              value={form.barcode}
+              error={errors.barcode}
+              showError={submitAttempted}
+              onChange={(value) =>
+                setForm((prev) => ({ ...prev, barcode: value }))
+              }
+              onProduct={handleProduct}
+            />
+          )}
 
           <div className="flex flex-col gap-5 sm:flex-row sm:gap-3">
             <div className="relative flex flex-col gap-1.5 sm:flex-1">
@@ -394,6 +461,21 @@ export default function FoodItemForm({
         pendingLabel="Suppression..."
         isPending={isSubmitting}
         onConfirm={() => void handleDelete()}
+      />
+
+      <ConfirmDialog
+        dialogRef={duplicateDialogRef}
+        title="Aliment déjà enregistré"
+        description={
+          duplicates.length > 1
+            ? `${duplicates.length} aliments existent déjà avec ce code-barres. En ajouter un autre ?`
+            : `« ${duplicates[0]?.name ?? ''} » existe déjà avec ce code-barres. L'ajouter quand même ?`
+        }
+        confirmLabel="Ajouter"
+        pendingLabel="Enregistrement..."
+        isPending={isSubmitting}
+        onConfirm={() => void save()}
+        tone="primary"
       />
 
       <Toast message={successMessage} icon={CheckCircle2} />

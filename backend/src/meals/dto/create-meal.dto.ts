@@ -9,6 +9,7 @@ import {
   IsOptional,
   IsPositive,
   IsString,
+  Matches,
   MaxLength,
   Min,
   ValidateIf,
@@ -16,11 +17,14 @@ import {
 } from 'class-validator';
 
 import { MealType } from '../../generated/prisma/enums';
+import { DATE_ONLY_PATTERN } from '../pipes/parse-date-only.pipe';
 
-const trim = ({ value }: { value: unknown }) =>
-  typeof value === 'string' ? value.trim() : value;
+const trimOrNull = ({ value }: { value: unknown }) =>
+  typeof value === 'string' ? value.trim() || null : value;
 
 const isQuickAdd = (dto: CreateMealItemDto) => dto.foodItemId === undefined;
+
+const isDefined = (_: unknown, value: unknown) => value !== undefined;
 
 export class CreateMealItemDto {
   @IsOptional()
@@ -54,18 +58,21 @@ export class CreateMealItemDto {
 }
 
 export class CreateMealDto {
-  @Transform(trim)
+  @Transform(trimOrNull)
   @IsOptional()
   @IsString()
   @MaxLength(120)
-  name?: string;
+  name?: string | null;
 
   @IsOptional()
   @IsEnum(MealType)
-  typeMeal?: MealType;
+  typeMeal?: MealType | null;
 
-  @IsOptional()
-  @IsDateString()
+  @ValidateIf(isDefined)
+  @Matches(DATE_ONLY_PATTERN, {
+    message: 'loggedAt must be formatted as YYYY-MM-DD',
+  })
+  @IsDateString({ strict: true })
   loggedAt?: string;
 
   @IsArray()

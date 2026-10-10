@@ -1,4 +1,4 @@
-import type { FoodItem, FoodItemInput } from './types';
+import type { FoodItem, FoodItemInput, OffProduct } from './types';
 
 const BASE_URL: string = import.meta.env.VITE_API_URL;
 
@@ -63,4 +63,10 @@ export function deleteFoodItem(userId: number, id: number) {
   return request<FoodItem>(`${foodItemsUrl(userId)}/${id}`, {
     method: 'DELETE',
   });
+}
+
+export function lookupOffProduct(userId: number, barcode: string) {
+  return request<OffProduct>(
+    `${BASE_URL}/users/${userId}/off-products/${encodeURIComponent(barcode)}`,
+  );
 }

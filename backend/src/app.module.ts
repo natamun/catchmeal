@@ -14,6 +14,7 @@ import { FriendsModule } from './friends/friends.module';
 import { GdprModule } from './gdpr/gdpr.module';
 import { MealsModule } from './meals/meals.module';
 import { MessagesModule } from './messages/messages.module';
+import { OpenFoodFactsModule } from './open-food-facts/open-food-facts.module';
 import { PresenceModule } from './presence/presence.module';
 import { UsersModule } from './users/users.module';
 import { WebsocketModule } from './websocket/websocket.module';
@@ -22,6 +23,7 @@ import { WebsocketModule } from './websocket/websocket.module';
   imports: [
     ConfigModule.forRoot(),
     FoodItemsModule,
+    OpenFoodFactsModule,
     ActivityModule,
 
     AuthModule,

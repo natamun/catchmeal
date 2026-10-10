@@ -1,5 +1,6 @@
 import { X } from 'lucide-react';
 
+import { UNIT_LABELS } from '../food/types';
 import { QuantityStepper } from '../ui/QuantityStepper';
 import type { MealItemDraft } from './draft';
 
@@ -52,7 +53,7 @@ export default function DraftItemList({
             <QuantityStepper
               name={foodItem.name}
               quantity={quantity}
-              unitLabel={foodItem.baseUnit === 'GRAM' ? 'g' : 'x'}
+              unitLabel={UNIT_LABELS[foodItem.baseUnit]}
               onAdjust={(delta) => onAdjust(item.id, delta)}
             />
             <button

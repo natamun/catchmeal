@@ -6,6 +6,7 @@ import { MacroBadge } from '../ui/MacroBadge';
 import FoodItemSearchBar from './FoodItemSearchBar';
 import {
   EMPTY_FILTER_CRITERIA,
+  UNIT_LABELS,
   type FoodFilterCriteria,
   type FoodItem,
   type MacroFilter,
@@ -24,9 +25,7 @@ interface FoodItemListProps {
 }
 
 function formatBaseQuantity(item: FoodItem) {
-  return item.baseUnit === 'GRAM'
-    ? `${item.baseQuantity}g`
-    : `${item.baseQuantity}x`;
+  return `${item.baseQuantity}${UNIT_LABELS[item.baseUnit]}`;
 }
 
 function macrosOf(item: FoodItem) {
