@@ -22,6 +22,8 @@ const trim = ({ value }: { value: unknown }) =>
 
 const isQuickAdd = (dto: CreateMealItemDto) => dto.foodItemId === undefined;
 
+const isDefined = (_: unknown, value: unknown) => value !== undefined;
+
 export class CreateMealItemDto {
   @IsOptional()
   @IsInt()
@@ -64,7 +66,7 @@ export class CreateMealDto {
   @IsEnum(MealType)
   typeMeal?: MealType;
 
-  @IsOptional()
+  @ValidateIf(isDefined)
   @IsDateString()
   loggedAt?: string;
 
