@@ -91,6 +91,9 @@ export class MealsService {
   }
 
   private async checkGoalReached(userId: number, day: Date) {
+    const dayKey = day.toISOString().slice(0, 10);
+    if (dayKey !== new Date().toISOString().slice(0, 10)) return;
+
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
       select: { dailyCalorieGoal: true },
@@ -108,21 +111,7 @@ export class MealsService {
     const ratio = total / user.dailyCalorieGoal;
     if (ratio < 0.9 || ratio > 1) return;
 
-    const dayStart = new Date(day);
-    dayStart.setHours(0, 0, 0, 0);
-    const dayEnd = new Date(day);
-    dayEnd.setHours(23, 59, 59, 999);
-
-    const alreadyRecorded = await this.prisma.activity.findFirst({
-      where: {
-        userId,
-        type: ActivityType.GOAL_REACHED,
-        createdAt: { gte: dayStart, lte: dayEnd },
-      },
-    });
-    if (alreadyRecorded) return;
-
-    await this.activityService.record(userId, ActivityType.GOAL_REACHED);
+    await this.activityService.recordGoalReached(userId, dayKey);
   }
 
   findAll(userId: number, logged?: boolean, date?: Date) {
