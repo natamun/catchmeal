@@ -67,7 +67,7 @@ const ICON_BUTTON_CLASS =
 
 const OFF_URL = 'https://world.openfoodfacts.org';
 
-const LOOKUP_ERRORS: Record<number, string> = {
+const LOOKUP_ERRORS: Partial<Record<number, string>> = {
   400: 'Code-barres invalide',
   404: 'Produit introuvable',
   429: 'Trop de recherches, patientez 1 min',
@@ -487,7 +487,7 @@ export default function FoodItemForm({
                   <button
                     type="button"
                     onClick={() => void handleLookup()}
-                    disabled={form.barcode.trim() === '' || isLookingUp}
+                    disabled={barcode === '' || isLookingUp}
                     aria-label="Rechercher le produit"
                     aria-describedby="food-lookup-error"
                     className={ICON_BUTTON_CLASS}
