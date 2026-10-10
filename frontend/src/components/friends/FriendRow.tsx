@@ -8,6 +8,7 @@ interface FriendRowProps {
   friend: UserSummary;
   online: boolean;
   lastSeenAt: string | null;
+  hasUnread: boolean;
   onMessage: () => void;
   onRemove: () => void;
 }
@@ -16,6 +17,7 @@ export default function FriendRow({
   friend,
   online,
   lastSeenAt,
+  hasUnread,
   onMessage,
   onRemove,
 }: FriendRowProps) {
@@ -37,10 +39,20 @@ export default function FriendRow({
       <button
         type="button"
         onClick={onMessage}
-        aria-label={`Envoyer un message à ${friend.username}`}
-        className="shrink-0 cursor-pointer text-green-400 transition-colors hover:text-green-600"
+        aria-label={
+          hasUnread
+            ? `Nouveaux messages de ${friend.username}`
+            : `Envoyer un message à ${friend.username}`
+        }
+        className="relative shrink-0 cursor-pointer text-green-400 transition-colors hover:text-green-600"
       >
         <MessageCircle className="h-4 w-4" />
+        {hasUnread && (
+          <span
+            aria-hidden="true"
+            className="absolute -top-1 -right-1 h-2.5 w-2.5 rounded-full bg-green-600 ring-2 ring-white"
+          />
+        )}
       </button>
       <button
         type="button"

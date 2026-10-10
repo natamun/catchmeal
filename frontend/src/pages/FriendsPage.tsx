@@ -30,6 +30,7 @@ import { useFriends } from '../hooks/useFriends.ts';
 import { usePresence } from '../hooks/usePresence.ts';
 import { useTimeout } from '../hooks/useTimeout.ts';
 import { requestErrorMessage } from '../utils/requestErrorMessage';
+import { useUnreadMessages } from '../hooks/useUnreadMessages.ts';
 
 type Tab = 'friends' | 'requests';
 
@@ -70,6 +71,7 @@ export default function FriendsPage({ pendingReply }: FriendsPageProps) {
   );
   const chatDialogRef = useRef<HTMLDialogElement>(null);
   const presence = usePresence(userId);
+  const unreadIds = useUnreadMessages(userId, chatFriend?.id ?? null);
 
   useTimeout(() => setSuccessMessage(null), successMessage ? 3000 : null);
 
@@ -153,6 +155,7 @@ export default function FriendsPage({ pendingReply }: FriendsPageProps) {
                     friend={f.friend}
                     online={presence.get(f.friend.id)?.online ?? false}
                     lastSeenAt={presence.get(f.friend.id)?.lastSeenAt ?? null}
+                    hasUnread={unreadIds.has(f.friend.id)}
                     onMessage={() => {
                       setChatFriend(f.friend);
                     }}
