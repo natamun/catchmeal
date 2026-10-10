@@ -1,4 +1,5 @@
 import {
+  type ActivityItem,
   type Friend,
   type FriendPresence,
   type FriendRequest,
@@ -37,24 +38,6 @@ async function request<T>(url: string, init?: RequestInit): Promise<T> {
     throw new ApiError(await parseErrorMessage(response), response.status);
   }
   return (await response.json()) as T;
-}
-
-export interface FriendActivityItem {
-  friendshipId: number;
-  friend: {
-    id: number;
-    username: string;
-    name: string;
-    avatarUrl: string | null;
-  };
-  lastAction: string | null;
-  lastActionAt: string | null;
-}
-
-export function listFriendsActivity(userId: number, signal?: AbortSignal) {
-  return request<FriendActivityItem[]>(`${friendsUrl(userId)}/activity`, {
-    signal,
-  });
 }
 
 export function listFriends(userId: number, signal?: AbortSignal) {
@@ -96,6 +79,12 @@ export function removeFriendship(userId: number, id: number) {
 
 export function getFriendsPresence(signal?: AbortSignal) {
   return request<FriendPresence[]>(`${import.meta.env.VITE_API_URL}/presence`, {
+    signal,
+  });
+}
+
+export function getFriendsActivity(userId: number, signal?: AbortSignal) {
+  return request<ActivityItem[]>(`${USERS_URL}/${userId}/activities`, {
     signal,
   });
 }

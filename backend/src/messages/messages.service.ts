@@ -2,13 +2,29 @@ import {
   BadRequestException,
   ForbiddenException,
   Injectable,
+  NotFoundException,
 } from '@nestjs/common';
 
+import { ActivityService } from '../activity/activity.service';
+import { Prisma } from '../generated/prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
+
+const WITH_ACTIVITY = {
+  activity: {
+    include: { user: { select: { id: true, username: true, name: true } } },
+  },
+} satisfies Prisma.MessageInclude;
+
+type MessageWithActivity = Prisma.MessageGetPayload<{
+  include: typeof WITH_ACTIVITY;
+}>;
 
 @Injectable()
 export class MessagesService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly activityService: ActivityService,
+  ) {}
 
   private async assertAreFriends(userId: number, otherUserId: number) {
     const friendship = await this.prisma.friend.findFirst({
@@ -27,7 +43,20 @@ export class MessagesService {
     }
   }
 
-  async send(userId: number, toUserId: number, content: string) {
+  private toMessageDto(message: MessageWithActivity) {
+    const { activity, ...rest } = message;
+    return {
+      ...rest,
+      activity: activity ? this.activityService.toFeedItem(activity) : null,
+    };
+  }
+
+  async send(
+    userId: number,
+    toUserId: number,
+    content: string,
+    activityId?: number,
+  ) {
     if (userId === toUserId) {
       throw new BadRequestException(
         'Impossible de vous envoyer un message à vous-même',
@@ -35,15 +64,28 @@ export class MessagesService {
     }
     await this.assertAreFriends(userId, toUserId);
 
-    return this.prisma.message.create({
-      data: { senderId: userId, receiverId: toUserId, content },
+    if (activityId !== undefined) {
+      const activity = await this.prisma.activity.findFirst({
+        where: { id: activityId, userId: toUserId },
+        select: { id: true },
+      });
+      if (!activity) {
+        throw new NotFoundException('Activité introuvable');
+      }
+    }
+
+    const message = await this.prisma.message.create({
+      data: { senderId: userId, receiverId: toUserId, content, activityId },
+      include: WITH_ACTIVITY,
     });
+
+    return this.toMessageDto(message);
   }
 
   async getConversation(userId: number, otherUserId: number) {
     await this.assertAreFriends(userId, otherUserId);
 
-    return this.prisma.message.findMany({
+    const messages = await this.prisma.message.findMany({
       where: {
         OR: [
           { senderId: userId, receiverId: otherUserId },
@@ -51,6 +93,9 @@ export class MessagesService {
         ],
       },
       orderBy: { sentAt: 'asc' },
+      include: WITH_ACTIVITY,
     });
+
+    return messages.map((message) => this.toMessageDto(message));
   }
 }

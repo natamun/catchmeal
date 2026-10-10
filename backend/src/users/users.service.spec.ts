@@ -1,5 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 
+import { ActivityService } from '../activity/activity.service';
+import { ActivityType } from '../generated/prisma/enums';
 import { PrismaService } from '../prisma/prisma.service';
 import { SupabaseService } from '../supabase/supabase.service';
 import { UsersService } from './users.service';
@@ -17,12 +19,17 @@ describe('UsersService', () => {
     },
     weightLog: {
       create: jest.fn(),
+      findFirst: jest.fn(),
       findMany: jest.fn(),
     },
   };
 
   const supabaseMock = {
     uploadAvatar: jest.fn(),
+  };
+
+  const activityServiceMock = {
+    record: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -32,6 +39,7 @@ describe('UsersService', () => {
         UsersService,
         { provide: PrismaService, useValue: prismaMock },
         { provide: SupabaseService, useValue: supabaseMock },
+        { provide: ActivityService, useValue: activityServiceMock },
       ],
     }).compile();
 
@@ -84,7 +92,10 @@ describe('UsersService', () => {
       note: null,
       loggedAt: new Date(),
     };
-    prismaMock.user.findFirstOrThrow.mockResolvedValue({ id: 1 });
+    prismaMock.user.findFirstOrThrow.mockResolvedValue({
+      id: 1,
+      targetWeight: null,
+    });
     prismaMock.weightLog.create.mockResolvedValue(entry);
 
     const result = await service.logWeight(1, 75.5);
@@ -100,6 +111,55 @@ describe('UsersService', () => {
       },
     });
     expect(result).toEqual(entry);
+  });
+
+  it.each<[number | undefined, number, number, boolean]>([
+    [82, 79.8, 80, true],
+    [81, 80, 80, true],
+    [79, 80.5, 80, true],
+    [79.5, 79, 80, false],
+    [80, 79, 80, false],
+    [81, 80.5, 80, false],
+    [undefined, 79, 80, false],
+  ])(
+    'logging %s -> %s with a %s kg target records WEIGHT_GOAL_REACHED: %s',
+    async (previous, current, target, expected) => {
+      prismaMock.user.findFirstOrThrow.mockResolvedValue({
+        id: 1,
+        targetWeight: target,
+      });
+      prismaMock.weightLog.findFirst.mockResolvedValue(
+        previous === undefined ? null : { weight: previous },
+      );
+      prismaMock.weightLog.create.mockResolvedValue({
+        id: 1,
+        weight: current,
+      });
+
+      await service.logWeight(1, current);
+
+      const goalCalls = activityServiceMock.record.mock.calls.filter(
+        (call: unknown[]) => call[1] === ActivityType.WEIGHT_GOAL_REACHED,
+      );
+      expect(goalCalls.length).toBe(expected ? 1 : 0);
+    },
+  );
+
+  it('should not record a weight goal when the user has no target', async () => {
+    prismaMock.user.findFirstOrThrow.mockResolvedValue({
+      id: 1,
+      targetWeight: null,
+    });
+    prismaMock.weightLog.findFirst.mockResolvedValue({ weight: 82 });
+    prismaMock.weightLog.create.mockResolvedValue({ id: 1, weight: 70 });
+
+    await service.logWeight(1, 70);
+
+    expect(activityServiceMock.record).not.toHaveBeenCalledWith(
+      1,
+      ActivityType.WEIGHT_GOAL_REACHED,
+      expect.anything(),
+    );
   });
 
   it('should return weight history for a user', async () => {

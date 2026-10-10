@@ -19,3 +19,12 @@ export interface FriendPresence {
   online: boolean;
   lastSeenAt: string | null;
 }
+
+export interface ActivityItem {
+  id: number;
+  user: UserSummary;
+  type:
+    'MEAL_LOGGED' | 'WEIGHT_LOGGED' | 'GOAL_REACHED' | 'CALORIE_GOAL_CHANGED';
+  message: string;
+  createdAt: string;
+}

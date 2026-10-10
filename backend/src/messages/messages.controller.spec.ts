@@ -30,12 +30,28 @@ describe('MessagesController', () => {
     const dto: SendMessageDto = { toUserId: 2, content: 'hello' };
     const req = { user: { userId: 1, username: 'test' } } as never;
     await controller.send(1, dto, req);
-    expect(messagesServiceMock.send).toHaveBeenCalledWith(1, 2, 'hello');
+    expect(messagesServiceMock.send).toHaveBeenCalledWith(
+      1,
+      2,
+      'hello',
+      undefined,
+    );
   });
 
   it('should get a conversation', async () => {
     const req = { user: { userId: 1, username: 'test' } } as never;
     await controller.getConversation(1, 2, req);
     expect(messagesServiceMock.getConversation).toHaveBeenCalledWith(1, 2);
+  });
+
+  it('should forward the quoted activity id', async () => {
+    const dto: SendMessageDto = {
+      toUserId: 2,
+      content: 'hello',
+      activityId: 7,
+    };
+    const req = { user: { userId: 1, username: 'test' } } as never;
+    await controller.send(1, dto, req);
+    expect(messagesServiceMock.send).toHaveBeenCalledWith(1, 2, 'hello', 7);
   });
 });

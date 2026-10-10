@@ -2,10 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { CheckCircle2, Zap } from 'lucide-react';
 
 import { useAuth } from '../auth/auth-context';
-import {
-  listFriendsActivity,
-  type FriendActivityItem,
-} from '../components/friends/api';
+import type { ActivityItem } from '../components/friends/types';
 import CalorieSummary from '../components/home/CalorieSummary';
 import DailyMealForm from '../components/home/DailyMealForm';
 import DailyMealList from '../components/home/DailyMealList';
@@ -20,9 +17,11 @@ import { buildDrafts, type MealItemDraft } from '../components/meal/draft';
 import { mealTotals, type Meal, type MealType } from '../components/meal/types';
 import { getWeightHistory } from '../components/profile/api';
 import { Toast } from '../components/ui/Toast';
+import { useActivityFeed } from '../hooks/useActivityFeed';
 import { useDailyMeals } from '../hooks/useDailyMeals';
+import { usePresence } from '../hooks/usePresence';
 import { useTimeout } from '../hooks/useTimeout';
-import { timeAgo } from '../utils/timeAgo';
+import { latestActivityPerFriend } from '../utils/latestActivityPerFriend';
 
 interface SectionEdit {
   mealType: MealType;
@@ -33,36 +32,20 @@ interface SectionEdit {
 
 interface HomePageProps {
   onNavigateToProfile?: () => void;
+  onReplyToActivity?: (activity: ActivityItem) => void;
 }
 
-export default function HomePage({ onNavigateToProfile }: HomePageProps) {
+export default function HomePage({
+  onNavigateToProfile,
+  onReplyToActivity,
+}: HomePageProps) {
   const { user } = useAuth();
   const [selectedDate, setSelectedDate] = useState(() => new Date());
   const [addingMealType, setAddingMealType] = useState<MealType | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const { meals, foodItems, isLoading, loadError, reload } =
     useDailyMeals(selectedDate);
-
-  const [friendsActivity, setFriendsActivity] = useState<FriendActivityItem[]>(
-    [],
-  );
-  const [friendsLoading, setFriendsLoading] = useState(true);
-
   const [weightHistory, setWeightHistory] = useState<{ weight: number }[]>([]);
-
-  useEffect(() => {
-    if (!user) return;
-    const controller = new AbortController();
-    listFriendsActivity(user.userId, controller.signal)
-      .then((data) => {
-        setFriendsActivity(data);
-        setFriendsLoading(false);
-      })
-      .catch(() => {
-        setFriendsLoading(false);
-      });
-    return () => controller.abort();
-  }, [user]);
 
   useEffect(() => {
     if (!user) return;
@@ -96,6 +79,9 @@ export default function HomePage({ onNavigateToProfile }: HomePageProps) {
   });
   const editDialogRef = useRef<HTMLDialogElement>(null);
   const quickAddDialogRef = useRef<HTMLDialogElement>(null);
+  const presence = usePresence(user!.userId);
+  const activities = useActivityFeed(user!.userId);
+  const latestActivties = latestActivityPerFriend(activities);
 
   useTimeout(() => setSuccessMessage(null), successMessage ? 3000 : null);
 
@@ -177,17 +163,11 @@ export default function HomePage({ onNavigateToProfile }: HomePageProps) {
               onAdd={setAddingMealType}
               onEdit={openSectionEditor}
             />
-            {!friendsLoading && (
-              <FriendsActivity
-                activities={friendsActivity.map((a) => ({
-                  id: a.friendshipId,
-                  username: a.friend.username,
-                  action: a.lastAction ?? '',
-                  time: a.lastActionAt ? timeAgo(a.lastActionAt) : '',
-                  online: false,
-                }))}
-              />
-            )}
+            <FriendsActivity
+              activities={latestActivties}
+              presence={presence}
+              onReply={(activity) => onReplyToActivity?.(activity)}
+            />
           </div>
         </div>
       )}

@@ -1,6 +1,7 @@
 import {
   IsInt,
   IsNotEmpty,
+  IsOptional,
   IsPositive,
   IsString,
   MaxLength,
@@ -15,4 +16,9 @@ export class SendMessageDto {
   @IsNotEmpty()
   @MaxLength(2000)
   content: string;
+
+  @IsOptional()
+  @IsInt()
+  @IsPositive()
+  activityId?: number;
 }

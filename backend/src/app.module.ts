@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 
+import { ActivityModule } from './activity/activity.module';
 import { AdminModule } from './admin/admin.module';
 import { AiContextModule } from './ai-context/ai-context.module';
 import { AiModule } from './ai/ai.module';
@@ -21,6 +22,8 @@ import { WebsocketModule } from './websocket/websocket.module';
   imports: [
     ConfigModule.forRoot(),
     FoodItemsModule,
+    ActivityModule,
+
     AuthModule,
     MealsModule,
     DashboardAnalyticsModule,

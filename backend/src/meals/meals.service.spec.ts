@@ -1,7 +1,8 @@
 import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 
-import { MealType } from '../generated/prisma/enums';
+import { ActivityService } from '../activity/activity.service';
+import { ActivityType, MealType } from '../generated/prisma/enums';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateMealDto } from './dto/create-meal.dto';
 import { MealsService } from './meals.service';
@@ -20,6 +21,17 @@ describe('MealsService', () => {
       update: jest.fn(),
       delete: jest.fn(),
     },
+    user: {
+      findUnique: jest.fn(),
+    },
+    activity: {
+      findFirst: jest.fn(),
+    },
+  };
+
+  const activityServiceMock = {
+    record: jest.fn(),
+    recordGoalReached: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -28,6 +40,7 @@ describe('MealsService', () => {
       providers: [
         MealsService,
         { provide: PrismaService, useValue: prismaMock },
+        { provide: ActivityService, useValue: activityServiceMock },
       ],
     }).compile();
 
@@ -399,6 +412,98 @@ describe('MealsService', () => {
         },
       },
       orderBy: [{ loggedAt: 'asc' }, { id: 'asc' }],
+    });
+  });
+
+  describe('friend activities on create', () => {
+    const today = '2026-09-13';
+    const dto: CreateMealDto = {
+      name: 'Oeuf fromage',
+      loggedAt: `${today}T00:00:00.000Z`,
+      items: [{ quantity: 1, kcal: 349.6, protein: 20, carbs: 1, fat: 25 }],
+    };
+
+    beforeEach(() => {
+      jest.useFakeTimers().setSystemTime(new Date(`${today}T12:00:00.000Z`));
+      prismaMock.meal.create.mockResolvedValue({
+        id: 1,
+        name: 'Oeuf fromage',
+        loggedAt: new Date(`${today}T00:00:00.000Z`),
+        items: [],
+      });
+      prismaMock.user.findUnique.mockResolvedValue({ dailyCalorieGoal: 2000 });
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    it('should record MEAL_LOGGED with the meal name and rounded kcal', async () => {
+      prismaMock.meal.findMany.mockResolvedValue([]);
+
+      await service.create(7, dto);
+
+      expect(activityServiceMock.record).toHaveBeenCalledWith(
+        7,
+        ActivityType.MEAL_LOGGED,
+        { name: 'Oeuf fromage', kcal: 350 },
+      );
+    });
+
+    it('should not record anything for a template meal without loggedAt', async () => {
+      prismaMock.meal.create.mockResolvedValue({ id: 2, loggedAt: null });
+
+      await service.create(7, { ...dto, loggedAt: undefined });
+
+      expect(activityServiceMock.record).not.toHaveBeenCalled();
+      expect(activityServiceMock.recordGoalReached).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      [1700, false],
+      [1800, true],
+      [2000, true],
+      [2001, false],
+    ])(
+      'with %i kcal of a 2000 goal, goal reached recorded: %s',
+      async (total, expected) => {
+        prismaMock.meal.findMany.mockResolvedValue([
+          { items: [{ kcal: total }] },
+        ]);
+
+        await service.create(7, dto);
+
+        if (expected) {
+          expect(activityServiceMock.recordGoalReached).toHaveBeenCalledWith(
+            7,
+            today,
+          );
+        } else {
+          expect(activityServiceMock.recordGoalReached).not.toHaveBeenCalled();
+        }
+      },
+    );
+
+    it('should not check the goal for a meal logged on a past day', async () => {
+      prismaMock.meal.create.mockResolvedValue({
+        id: 3,
+        name: 'Hier',
+        loggedAt: new Date('2026-09-12T00:00:00.000Z'),
+        items: [],
+      });
+
+      await service.create(7, { ...dto, loggedAt: '2026-09-12T00:00:00.000Z' });
+
+      expect(prismaMock.user.findUnique).not.toHaveBeenCalled();
+      expect(activityServiceMock.recordGoalReached).not.toHaveBeenCalled();
+    });
+
+    it('should not check the goal when the user has none', async () => {
+      prismaMock.user.findUnique.mockResolvedValue({ dailyCalorieGoal: null });
+
+      await service.create(7, dto);
+
+      expect(prismaMock.meal.findMany).not.toHaveBeenCalled();
     });
   });
 });

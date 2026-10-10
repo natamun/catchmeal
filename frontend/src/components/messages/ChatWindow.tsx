@@ -9,19 +9,22 @@ import { Send } from 'lucide-react';
 
 import { useAuth } from '../../auth/auth-context';
 import { useConversation } from '../../hooks/useConversation';
-import type { UserSummary } from '../friends/types';
+import type { ActivityItem, UserSummary } from '../friends/types';
 import { BaseDialog } from '../ui/BaseDialog';
 import { Input } from '../ui/Input';
+import QuotedActivity from './QuotedActivity';
 
 interface ChatWindowProps {
   dialogRef: RefObject<HTMLDialogElement | null>;
   friend: UserSummary;
+  quotedActivity?: ActivityItem | null;
   onClose?: () => void;
 }
 
 export default function ChatWindow({
   dialogRef,
   friend,
+  quotedActivity,
   onClose,
 }: ChatWindowProps) {
   const { user } = useAuth();
@@ -31,6 +34,9 @@ export default function ChatWindow({
     friend.id,
   );
   const [draft, setDraft] = useState('');
+  const [quote, setQuote] = useState<ActivityItem | null>(
+    quotedActivity ?? null,
+  );
   const [isSending, setIsSending] = useState(false);
   const isAtBottomRef = useRef(true);
   const [hasNewMessage, setHasNewMessage] = useState(false);
@@ -75,8 +81,9 @@ export default function ChatWindow({
     setIsSending(true);
     setSendError(null);
     try {
-      await send(content);
+      await send(content, quote?.id);
       setDraft('');
+      setQuote(null);
     } catch (err) {
       console.error(err);
       setSendError(
@@ -117,6 +124,14 @@ export default function ChatWindow({
                     : 'rounded-bl-sm border border-green-200 bg-white text-green-800'
                 }`}
               >
+                {m.activity && (
+                  <div className="mb-1">
+                    <QuotedActivity
+                      activity={m.activity}
+                      variant={m.senderId === userId ? 'sent' : 'received'}
+                    />
+                  </div>
+                )}
                 {m.content}
               </div>
             </div>
@@ -145,25 +160,34 @@ export default function ChatWindow({
 
         <form
           onSubmit={(e) => void handleSend(e)}
-          className="flex shrink-0 items-center gap-2 border-t border-green-100 p-3"
+          className="flex shrink-0 flex-col gap-2 border-t border-green-100 p-3"
         >
-          <Input
-            type="text"
-            placeholder="Écrire un message..."
-            value={draft}
-            onChange={(e) => setDraft(e.target.value)}
-            maxLength={2000}
-            readOnly={isSending}
-            aria-disabled={isSending}
-          />
-          <button
-            type="submit"
-            disabled={isSending || !draft.trim()}
-            aria-label="Envoyer"
-            className="flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-full bg-green-500 text-white transition-colors hover:bg-green-600 disabled:opacity-50"
-          >
-            <Send className="h-4 w-4" />
-          </button>
+          {quote && (
+            <QuotedActivity
+              activity={quote}
+              variant="composer"
+              onDismiss={() => setQuote(null)}
+            />
+          )}
+          <div className="flex items-center gap-2">
+            <Input
+              type="text"
+              placeholder="Écrire un message..."
+              value={draft}
+              onChange={(e) => setDraft(e.target.value)}
+              maxLength={2000}
+              readOnly={isSending}
+              aria-disabled={isSending}
+            />
+            <button
+              type="submit"
+              disabled={isSending || !draft.trim()}
+              aria-label="Envoyer"
+              className="flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-full bg-green-500 text-white transition-colors hover:bg-green-600 disabled:opacity-50"
+            >
+              <Send className="h-4 w-4" />
+            </button>
+          </div>
         </form>
       </div>
     </BaseDialog>

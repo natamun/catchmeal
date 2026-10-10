@@ -1,5 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 
+import { FriendsService } from '../friends/friends.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { PresenceService } from './presence.service';
 
@@ -7,9 +8,10 @@ describe('PresenceService', () => {
   let service: PresenceService;
 
   const prismaMock = {
-    friend: { findMany: jest.fn() },
     user: { update: jest.fn(), findMany: jest.fn() },
   };
+
+  const friendsMock = { getFriendIds: jest.fn() };
 
   beforeEach(async () => {
     jest.resetAllMocks();
@@ -17,6 +19,7 @@ describe('PresenceService', () => {
       providers: [
         PresenceService,
         { provide: PrismaService, useValue: prismaMock },
+        { provide: FriendsService, useValue: friendsMock },
       ],
     }).compile();
 
@@ -77,28 +80,10 @@ describe('PresenceService', () => {
     });
   });
 
-  describe('getFriendIds', () => {
-    it('should return the other side of each accepted friendship', async () => {
-      prismaMock.friend.findMany.mockResolvedValue([
-        { userId: 1, friendId: 2 },
-        { userId: 3, friendId: 1 },
-      ]);
-
-      await expect(service.getFriendIds(1)).resolves.toEqual([2, 3]);
-      expect(prismaMock.friend.findMany).toHaveBeenCalledWith({
-        where: { status: 'ACCEPTED', OR: [{ userId: 1 }, { friendId: 1 }] },
-      });
-    });
-  });
-
   describe('getFriendsPresence', () => {
     it('should combine live presence with lastSeenAt for offline friends only', async () => {
       const seen = new Date('2026-10-03T08:00:00.000Z');
-      prismaMock.friend.findMany.mockResolvedValue([
-        { userId: 1, friendId: 2 },
-        { userId: 1, friendId: 3 },
-        { userId: 1, friendId: 4 },
-      ]);
+      friendsMock.getFriendIds.mockResolvedValue([2, 3, 4]);
       prismaMock.user.findMany.mockResolvedValue([
         { id: 3, lastSeenAt: seen },
         { id: 4, lastSeenAt: null },
@@ -119,9 +104,7 @@ describe('PresenceService', () => {
     });
 
     it('should not query lastSeenAt when every friend is online', async () => {
-      prismaMock.friend.findMany.mockResolvedValue([
-        { userId: 1, friendId: 2 },
-      ]);
+      friendsMock.getFriendIds.mockResolvedValue([2]);
       service.addConnection(2, 'socket-2');
 
       await service.getFriendsPresence(1);

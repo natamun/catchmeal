@@ -8,5 +8,6 @@ import { FriendsService } from './friends.service';
   imports: [PrismaModule],
   controllers: [FriendsController],
   providers: [FriendsService],
+  exports: [FriendsService],
 })
 export class FriendsModule {}

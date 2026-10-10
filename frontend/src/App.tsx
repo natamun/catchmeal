@@ -3,6 +3,7 @@ import { lazy, Suspense, useState } from 'react';
 import { useAuth } from './auth/auth-context';
 import { AuthProvider } from './auth/AuthProvider';
 import ChatBotPopup from './components/ai/ChatBotPopup';
+import type { ActivityItem } from './components/friends/types';
 import { ConnectionBanner } from './components/layout/ConnectionBanner';
 import Nav, { type Tab } from './components/layout/Nav';
 import { SocketProvider } from './socket/SocketProvider';
@@ -26,6 +27,7 @@ function AppShell() {
     return params.get('error') === 'oauth_failed' ? 'login' : 'landing';
   });
   const [activeTab, setActiveTab] = useState<Tab>('home');
+  const [pendingReply, setPendingReply] = useState<ActivityItem | null>(null);
   const [oauthError] = useState<string | null>(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get('error') === 'oauth_failed') {
@@ -77,10 +79,18 @@ function AppShell() {
   const isAdmin = user?.role === 'ADMIN';
 
   const pages: Record<Tab, React.ReactNode> = {
-    home: <HomePage onNavigateToProfile={() => setActiveTab('profile')} />,
+    home: (
+      <HomePage
+        onNavigateToProfile={() => setActiveTab('profile')}
+        onReplyToActivity={(activity) => {
+          setPendingReply(activity);
+          setActiveTab('friends');
+        }}
+      />
+    ),
     food: <FoodPage />,
     stats: <StatsPage />,
-    friends: <FriendsPage />,
+    friends: <FriendsPage pendingReply={pendingReply} />,
     profile: <ProfilePage />,
     admin: isAdmin ? (
       <AdminPage />
@@ -106,7 +116,14 @@ function AppShell() {
           {pages[activeTab]}
         </Suspense>
       </main>
-      <Nav active={activeTab} onChange={setActiveTab} isAdmin={isAdmin} />
+      <Nav
+        active={activeTab}
+        onChange={(tab) => {
+          setPendingReply(null);
+          setActiveTab(tab);
+        }}
+        isAdmin={isAdmin}
+      />
       {(activeTab === 'stats' ||
         activeTab === 'home' ||
         activeTab === 'food') && (

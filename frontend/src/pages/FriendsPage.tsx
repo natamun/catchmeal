@@ -10,10 +10,16 @@ import {
 } from '../components/friends/api.ts';
 import FriendRow from '../components/friends/FriendRow.tsx';
 import RequestRow from '../components/friends/RequestRow.tsx';
-import type { Friend, UserSummary } from '../components/friends/types.ts';
+import type {
+  ActivityItem,
+  Friend,
+  UserSummary,
+} from '../components/friends/types.ts';
+import FriendsActivity from '../components/home/FriendsActivity.tsx';
 import ChatWindow from '../components/messages/ChatWindow.tsx';
 import { ConfirmDialog } from '../components/ui/ConfirmDialog.tsx';
 import { Toast } from '../components/ui/Toast.tsx';
+import { useActivityFeed } from '../hooks/useActivityFeed.ts';
 import { useFriends } from '../hooks/useFriends.ts';
 import { usePresence } from '../hooks/usePresence.ts';
 import { useTimeout } from '../hooks/useTimeout.ts';
@@ -25,11 +31,16 @@ const TAB_OPTIONS: { value: Tab; label: string }[] = [
   { value: 'requests', label: 'Demandes' },
 ];
 
-export default function FriendsPage() {
+interface FriendsPageProps {
+  pendingReply?: ActivityItem | null;
+}
+
+export default function FriendsPage({ pendingReply }: FriendsPageProps) {
   const { user } = useAuth();
   const userId = user!.userId;
   const { friends, requests, sentRequestIds, isLoading, loadError, reload } =
     useFriends(userId);
+  const activities = useActivityFeed(userId);
   const [activeTab, setActiveTab] = useState<Tab>('friends');
   const [busyId, setBusyId] = useState<number | null>(null);
   const [friendToRemove, setFriendToRemove] = useState<Friend | null>(null);
@@ -37,7 +48,12 @@ export default function FriendsPage() {
   const [actionError, setActionError] = useState<string | null>(null);
   const addDialogRef = useRef<HTMLDialogElement>(null);
   const confirmDialogRef = useRef<HTMLDialogElement>(null);
-  const [chatFriend, setChatFriend] = useState<UserSummary | null>(null);
+  const [chatActivity, setChatActivity] = useState<ActivityItem | null>(
+    pendingReply ?? null,
+  );
+  const [chatFriend, setChatFriend] = useState<UserSummary | null>(
+    () => pendingReply?.user ?? null,
+  );
   const chatDialogRef = useRef<HTMLDialogElement>(null);
   const presence = usePresence(userId);
 
@@ -170,6 +186,15 @@ export default function FriendsPage() {
                 ))}
           </ul>
         </div>
+
+        <FriendsActivity
+          activities={activities}
+          presence={presence}
+          onReply={(activity) => {
+            setChatFriend(activity.user);
+            setChatActivity(activity);
+          }}
+        />
       </div>
 
       <AddFriendDialog
@@ -186,7 +211,11 @@ export default function FriendsPage() {
         <ChatWindow
           dialogRef={chatDialogRef}
           friend={chatFriend}
-          onClose={() => setChatFriend(null)}
+          quotedActivity={chatActivity}
+          onClose={() => {
+            setChatFriend(null);
+            setChatActivity(null);
+          }}
         />
       )}
 

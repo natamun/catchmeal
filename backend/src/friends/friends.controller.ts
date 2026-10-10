@@ -48,15 +48,6 @@ export class FriendsController {
     return this.friendsService.listFriends(userId);
   }
 
-  @Get('friends/activity')
-  getFriendsActivity(
-    @Param('userId', ParseIntPipe) userId: number,
-    @Request() req: RequestWithUser,
-  ) {
-    this.checkOwnership(userId, req.user.userId);
-    return this.friendsService.getFriendsActivity(userId);
-  }
-
   @Get('friends/pending')
   listPending(
     @Param('userId', ParseIntPipe) userId: number,

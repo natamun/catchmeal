@@ -6,7 +6,8 @@ import {
 
 import 'multer';
 
-import { Prisma } from '../generated/prisma/client';
+import { ActivityService } from '../activity/activity.service';
+import { ActivityType, Prisma } from '../generated/prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { SupabaseService } from '../supabase/supabase.service';
 import { UpdateProfileDto } from './dto/update-profile.dto';
@@ -17,11 +18,24 @@ export const SAFE_USER_SELECT = {
   name: true,
 } as const;
 
+function crossedTarget(
+  previous: number | undefined,
+  current: number,
+  target: number,
+): boolean {
+  if (previous === undefined) return false;
+  return (
+    (previous > target && current <= target) ||
+    (previous < target && current >= target)
+  );
+}
+
 @Injectable()
 export class UsersService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly supabase: SupabaseService,
+    private readonly activityService: ActivityService,
   ) {}
 
   create(data: {
@@ -74,8 +88,18 @@ export class UsersService {
 
   async updateProfile(userId: number, dto: UpdateProfileDto) {
     const { birthDate, ...rest } = dto;
+    const previousGoal =
+      dto.dailyCalorieGoal !== undefined
+        ? (
+            await this.prisma.user.findUnique({
+              where: { id: userId },
+              select: { dailyCalorieGoal: true },
+            })
+          )?.dailyCalorieGoal
+        : undefined;
+
     try {
-      return await this.prisma.$transaction(async (tsc) => {
+      const updated = await this.prisma.$transaction(async (tsc) => {
         const beforeUpdate = await tsc.user.findUnique({
           where: { id: userId },
           select: {
@@ -141,6 +165,19 @@ export class UsersService {
 
         return user;
       });
+
+      if (
+        dto.dailyCalorieGoal !== undefined &&
+        dto.dailyCalorieGoal !== previousGoal
+      ) {
+        await this.activityService.record(
+          userId,
+          ActivityType.CALORIE_GOAL_CHANGED,
+          { goal: dto.dailyCalorieGoal },
+        );
+      }
+
+      return updated;
     } catch (error) {
       if (
         error instanceof Prisma.PrismaClientKnownRequestError &&
@@ -177,12 +214,17 @@ export class UsersService {
     bodyFat?: number,
     note?: string,
   ) {
-    await this.prisma.user
+    const user = await this.prisma.user
       .findFirstOrThrow({ where: { id: userId } })
       .catch(() => {
         throw new NotFoundException('User not found');
       });
-    return this.prisma.weightLog.create({
+    const previous = await this.prisma.weightLog.findFirst({
+      where: { userId },
+      orderBy: { loggedAt: 'desc' },
+      select: { weight: true },
+    });
+    const entry = await this.prisma.weightLog.create({
       data: { userId, weight, bodyFat, note },
       select: {
         id: true,
@@ -192,6 +234,20 @@ export class UsersService {
         loggedAt: true,
       },
     });
+    await this.activityService.record(userId, ActivityType.WEIGHT_LOGGED, {
+      weight,
+    });
+    if (
+      user.targetWeight !== null &&
+      crossedTarget(previous?.weight, weight, user.targetWeight)
+    ) {
+      await this.activityService.record(
+        userId,
+        ActivityType.WEIGHT_GOAL_REACHED,
+        { targetWeight: user.targetWeight },
+      );
+    }
+    return entry;
   }
 
   async getWeightHistory(userId: number) {

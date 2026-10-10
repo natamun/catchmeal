@@ -1,6 +1,7 @@
 import { forwardRef, Module } from '@nestjs/common';
 import { MulterModule } from '@nestjs/platform-express';
 
+import { ActivityModule } from '../activity/activity.module';
 import { AuthModule } from '../auth/auth.module';
 import { PrismaModule } from '../prisma/prisma.module';
 import { SupabaseModule } from '../supabase/supabase.module';
@@ -10,6 +11,7 @@ import { UsersService } from './users.service';
 
 @Module({
   imports: [
+    ActivityModule,
     PrismaModule,
     SupabaseModule,
     MulterModule.register({ limits: { fileSize: 5 * 1024 * 1024 } }),

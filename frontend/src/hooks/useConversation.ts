@@ -56,11 +56,11 @@ export function useConversation(userId: number, otherUserId: number) {
     };
   }, [socket, userId, otherUserId]);
 
-  const send = (content: string) => {
+  const send = (content: string, activityId?: number) => {
     return new Promise<Message>((resolve, reject) => {
       socket?.emit(
         'message:send',
-        { toUserId: otherUserId, content },
+        { toUserId: otherUserId, content, activityId },
         (response: Message | { error: string }) => {
           if ('error' in response) reject(new Error(response.error));
           else resolve(response);
