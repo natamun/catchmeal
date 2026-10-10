@@ -7,3 +7,14 @@ const messagesUrl = (userId: number) =>
 export function getConversation(userId: number, otherUserId: number) {
   return request<Message[]>(`${messagesUrl(userId)}/${otherUserId}`);
 }
+
+export function getUnreadSenderIds(userId: number) {
+  return request<number[]>(`${messagesUrl(userId)}/unread`);
+}
+
+export function markConversationRead(userId: number, otherUserId: number) {
+  return request<{ count: number }>(
+    `${messagesUrl(userId)}/${otherUserId}/read`,
+    { method: 'PATCH' },
+  );
+}
