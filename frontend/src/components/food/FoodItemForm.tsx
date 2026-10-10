@@ -43,8 +43,9 @@ const LABEL_CLASS =
   'text-xs font-semibold tracking-wide text-green-500 uppercase';
 
 const UNIT_OPTIONS = [
-  { value: 'GRAM', label: 'Grammes' },
-  { value: 'PIECE', label: 'Pièce' },
+  { value: 'GRAM', label: 'g' },
+  { value: 'MILLILITER', label: 'ml' },
+  { value: 'PIECE', label: 'pièce' },
 ] as const;
 
 const MACRO_FIELDS = [

@@ -1,4 +1,10 @@
-export type QuantityUnit = 'GRAM' | 'PIECE';
+export type QuantityUnit = 'GRAM' | 'MILLILITER' | 'PIECE';
+
+export const UNIT_LABELS: Record<QuantityUnit, string> = {
+  GRAM: 'g',
+  MILLILITER: 'ml',
+  PIECE: 'x',
+};
 
 export interface FoodItem {
   id: number;
