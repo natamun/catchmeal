@@ -22,7 +22,7 @@ import {
   lookupOffProduct,
   updateFoodItem,
 } from './api';
-import type { FoodItem, QuantityUnit } from './types';
+import type { FoodItem, OffProduct, QuantityUnit } from './types';
 
 interface FoodItemFormState {
   barcode: string;
@@ -85,6 +85,23 @@ function itemToForm(item: FoodItem): FoodItemFormState {
     protein: String(item.protein),
     carbs: String(item.carbs),
     fat: String(item.fat),
+  };
+}
+
+function productToForm(product: OffProduct): FoodItemFormState {
+  const toField = (value: number | null) =>
+    value === null ? '' : String(value);
+
+  return {
+    barcode: product.barcode,
+    name: product.name ?? '',
+    brand: product.brand ?? '',
+    baseQuantity: String(product.baseQuantity),
+    baseUnit: product.baseUnit,
+    kcal: toField(product.kcal),
+    protein: toField(product.protein),
+    carbs: toField(product.carbs),
+    fat: toField(product.fat),
   };
 }
 
@@ -216,7 +233,10 @@ export default function FoodItemForm({
     setIsLookingUp(true);
     try {
       const product = await lookupOffProduct(userId, barcode);
-      setForm((prev) => ({ ...prev, barcode: product.barcode }));
+      setForm(productToForm(product));
+      setTouched({});
+      setSubmitAttempted(false);
+      setError(null);
     } catch (err: unknown) {
       console.error(err);
       const status = err instanceof ApiError ? (err.status ?? 0) : 0;
