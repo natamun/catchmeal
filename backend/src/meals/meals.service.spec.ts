@@ -1,4 +1,4 @@
-import { NotFoundException } from '@nestjs/common';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 
 import { ActivityService } from '../activity/activity.service';
@@ -230,6 +230,16 @@ describe('MealsService', () => {
     expect(prismaMock.meal.create).not.toHaveBeenCalled();
   });
 
+  it('should reject a logged meal without a meal type', async () => {
+    const dto: CreateMealDto = {
+      loggedAt: '2026-09-13',
+      items: [{ quantity: 1, kcal: 100, protein: 1, carbs: 1, fat: 1 }],
+    };
+
+    await expect(service.create(7, dto)).rejects.toThrow(BadRequestException);
+    expect(prismaMock.meal.create).not.toHaveBeenCalled();
+  });
+
   it('should list all meals for a user when logged is not specified', async () => {
     prismaMock.meal.findMany.mockResolvedValue([]);
 
@@ -372,6 +382,46 @@ describe('MealsService', () => {
         where: { id_userId: { id: 5, userId: 7 } },
       }),
     );
+  });
+
+  it('should reject removing the meal type of a logged meal', async () => {
+    prismaMock.meal.findFirstOrThrow.mockResolvedValue({
+      loggedAt: new Date('2026-09-13'),
+      typeMeal: MealType.LUNCH,
+    });
+
+    await expect(service.update(7, 5, { typeMeal: null })).rejects.toThrow(
+      BadRequestException,
+    );
+    expect(prismaMock.meal.update).not.toHaveBeenCalled();
+  });
+
+  it('should reject logging a template meal that has no meal type', async () => {
+    prismaMock.meal.findFirstOrThrow.mockResolvedValue({
+      loggedAt: null,
+      typeMeal: null,
+    });
+
+    await expect(
+      service.update(7, 5, { loggedAt: '2026-09-13' }),
+    ).rejects.toThrow(BadRequestException);
+    expect(prismaMock.meal.update).not.toHaveBeenCalled();
+  });
+
+  it('should let a logged meal change date when it keeps its meal type', async () => {
+    prismaMock.meal.findFirstOrThrow.mockResolvedValue({
+      loggedAt: new Date('2026-09-13'),
+      typeMeal: MealType.LUNCH,
+    });
+    prismaMock.meal.update.mockResolvedValue({ id: 5 });
+
+    await service.update(7, 5, { loggedAt: '2026-09-14' });
+
+    expect(prismaMock.meal.findFirstOrThrow).toHaveBeenCalledWith({
+      where: { id: 5, userId: 7 },
+      select: { loggedAt: true, typeMeal: true },
+    });
+    expect(prismaMock.meal.update).toHaveBeenCalled();
   });
 
   it('should delete a meal for real', async () => {

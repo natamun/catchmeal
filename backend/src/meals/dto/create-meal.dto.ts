@@ -66,7 +66,7 @@ export class CreateMealDto {
 
   @IsOptional()
   @IsEnum(MealType)
-  typeMeal?: MealType;
+  typeMeal?: MealType | null;
 
   @ValidateIf(isDefined)
   @Matches(DATE_ONLY_PATTERN, {
