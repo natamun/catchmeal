@@ -9,6 +9,7 @@ import {
   IsOptional,
   IsPositive,
   IsString,
+  Matches,
   MaxLength,
   Min,
   ValidateIf,
@@ -16,6 +17,7 @@ import {
 } from 'class-validator';
 
 import { MealType } from '../../generated/prisma/enums';
+import { DATE_ONLY_PATTERN } from '../pipes/parse-date-only.pipe';
 
 const trim = ({ value }: { value: unknown }) =>
   typeof value === 'string' ? value.trim() : value;
@@ -67,7 +69,10 @@ export class CreateMealDto {
   typeMeal?: MealType;
 
   @ValidateIf(isDefined)
-  @IsDateString()
+  @Matches(DATE_ONLY_PATTERN, {
+    message: 'loggedAt must be formatted as YYYY-MM-DD',
+  })
+  @IsDateString({ strict: true })
   loggedAt?: string;
 
   @IsArray()

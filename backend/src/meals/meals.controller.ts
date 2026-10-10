@@ -6,7 +6,6 @@ import {
   ForbiddenException,
   Get,
   Param,
-  ParseDatePipe,
   ParseIntPipe,
   Patch,
   Post,
@@ -19,6 +18,7 @@ import { PassportJwtAuthGuard } from '../auth/guards/passport-jwt.guard';
 import { CreateMealDto } from './dto/create-meal.dto';
 import { UpdateMealDto } from './dto/update-meal.dto';
 import { MealsService } from './meals.service';
+import { ParseDateOnlyPipe } from './pipes/parse-date-only.pipe';
 
 @UseGuards(PassportJwtAuthGuard)
 @Controller('users/:userId')
@@ -44,7 +44,7 @@ export class MealsController {
     @Param('userId', ParseIntPipe) userId: number,
     @Request() req: { user: { userId: number } },
     @Query('logged') loggedRaw?: string,
-    @Query('date', new ParseDatePipe({ optional: true })) date?: Date,
+    @Query('date', ParseDateOnlyPipe) date?: Date,
   ) {
     this.checkOwnership(userId, req.user.userId);
     let logged: boolean | undefined;
@@ -60,8 +60,8 @@ export class MealsController {
   findRange(
     @Param('userId', ParseIntPipe) userId: number,
     @Request() req: { user: { userId: number } },
-    @Query('from', new ParseDatePipe({ optional: true })) from?: Date,
-    @Query('to', new ParseDatePipe({ optional: true })) to?: Date,
+    @Query('from', ParseDateOnlyPipe) from?: Date,
+    @Query('to', ParseDateOnlyPipe) to?: Date,
   ) {
     this.checkOwnership(userId, req.user.userId);
     const fromDate =
