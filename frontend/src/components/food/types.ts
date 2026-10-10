@@ -10,6 +10,7 @@ export interface FoodItem {
   id: number;
   name: string;
   brand: string | null;
+  barcode: string | null;
   baseQuantity: number;
   baseUnit: QuantityUnit;
   kcal: number;
@@ -20,6 +21,18 @@ export interface FoodItem {
 }
 
 export type FoodItemInput = Omit<FoodItem, 'id' | 'archived'>;
+
+export interface OffProduct {
+  barcode: string;
+  name: string | null;
+  brand: string | null;
+  baseQuantity: number;
+  baseUnit: QuantityUnit;
+  kcal: number | null;
+  protein: number | null;
+  carbs: number | null;
+  fat: number | null;
+}
 
 export interface MacroFilter {
   min: number;

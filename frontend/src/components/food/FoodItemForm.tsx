@@ -1,5 +1,5 @@
 import { useRef, useState, type RefObject } from 'react';
-import { CheckCircle2, ScanBarcode, Trash2 } from 'lucide-react';
+import { CheckCircle2, ScanBarcode, Search, Trash2 } from 'lucide-react';
 
 import { useAuth } from '../../auth/auth-context';
 import { useTimeout } from '../../hooks/useTimeout';
@@ -18,6 +18,7 @@ import {
 import type { FoodItem, QuantityUnit } from './types';
 
 interface FoodItemFormState {
+  barcode: string;
   name: string;
   brand: string;
   baseQuantity: string;
@@ -29,6 +30,7 @@ interface FoodItemFormState {
 }
 
 const EMPTY_FORM: FoodItemFormState = {
+  barcode: '',
   name: '',
   brand: '',
   baseQuantity: '',
@@ -57,6 +59,7 @@ const MACRO_FIELDS = [
 
 function itemToForm(item: FoodItem): FoodItemFormState {
   return {
+    barcode: item.barcode ?? '',
     name: item.name,
     brand: item.brand ?? '',
     baseQuantity: String(item.baseQuantity),
@@ -72,6 +75,11 @@ function validateForm(
   form: FoodItemFormState,
 ): Partial<Record<keyof FoodItemFormState, string>> {
   const errors: Partial<Record<keyof FoodItemFormState, string>> = {};
+
+  const barcode = form.barcode.trim();
+  if (barcode !== '' && !/^\d{8,14}$/.test(barcode)) {
+    errors.barcode = '8 à 14 chiffres';
+  }
 
   if (form.name.trim() === '') {
     errors.name = 'Nom requis';
@@ -187,6 +195,7 @@ export default function FoodItemForm({
       const input = {
         name: form.name,
         brand: form.brand.trim() === '' ? null : form.brand,
+        barcode: form.barcode.trim() === '' ? null : form.barcode.trim(),
         baseQuantity: Number(form.baseQuantity),
         baseUnit: form.baseUnit,
         kcal: Number(form.kcal),
@@ -268,13 +277,45 @@ export default function FoodItemForm({
           autoComplete="off"
           className="contents"
         >
-          <button
-            type="button"
-            className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-green-200 py-2.5 text-sm font-medium text-green-600 transition-colors hover:bg-green-50"
-          >
-            <ScanBarcode className="h-4 w-4" />
-            Scanner un produit
-          </button>
+          {!editingItem && (
+            <div className="relative flex flex-col gap-1.5">
+              <label htmlFor="food-barcode" className={LABEL_CLASS}>
+                Code-barres (optionnel)
+              </label>
+              <div className="flex gap-2">
+                <Input
+                  id="food-barcode"
+                  type="text"
+                  inputMode="numeric"
+                  placeholder="Ex : 3017620422003"
+                  value={form.barcode}
+                  onChange={(e) => handleChange('barcode', e.target.value)}
+                  onFocus={() => handleFocus('barcode')}
+                  onBlur={() => handleBlur('barcode')}
+                  aria-invalid={isInvalid('barcode')}
+                  aria-describedby="food-barcode-error"
+                />
+                <button
+                  type="button"
+                  aria-label="Scanner un code-barres"
+                  className="flex w-11 shrink-0 cursor-pointer items-center justify-center rounded-xl border border-green-200 text-green-600 transition-colors hover:bg-green-50"
+                >
+                  <ScanBarcode className="h-4 w-4" />
+                </button>
+                <button
+                  type="button"
+                  aria-label="Rechercher le produit"
+                  className="flex w-11 shrink-0 cursor-pointer items-center justify-center rounded-xl border border-green-200 text-green-600 transition-colors hover:bg-green-50"
+                >
+                  <Search className="h-4 w-4" />
+                </button>
+              </div>
+              <FieldError
+                id="food-barcode-error"
+                message={errorMessage('barcode')}
+              />
+            </div>
+          )}
 
           <div className="flex flex-col gap-5 sm:flex-row sm:gap-3">
             <div className="relative flex flex-col gap-1.5 sm:flex-1">
