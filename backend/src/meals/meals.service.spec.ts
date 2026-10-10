@@ -31,6 +31,7 @@ describe('MealsService', () => {
 
   const activityServiceMock = {
     record: jest.fn(),
+    recordGoalReached: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -415,22 +416,26 @@ describe('MealsService', () => {
   });
 
   describe('friend activities on create', () => {
-    const day = new Date('2026-09-13T00:00:00.000Z');
+    const today = '2026-09-13';
     const dto: CreateMealDto = {
       name: 'Oeuf fromage',
-      loggedAt: '2026-09-13T00:00:00.000Z',
+      loggedAt: `${today}T00:00:00.000Z`,
       items: [{ quantity: 1, kcal: 349.6, protein: 20, carbs: 1, fat: 25 }],
     };
 
     beforeEach(() => {
+      jest.useFakeTimers().setSystemTime(new Date(`${today}T12:00:00.000Z`));
       prismaMock.meal.create.mockResolvedValue({
         id: 1,
         name: 'Oeuf fromage',
-        loggedAt: day,
+        loggedAt: new Date(`${today}T00:00:00.000Z`),
         items: [],
       });
       prismaMock.user.findUnique.mockResolvedValue({ dailyCalorieGoal: 2000 });
-      prismaMock.activity.findFirst.mockResolvedValue(null);
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
     });
 
     it('should record MEAL_LOGGED with the meal name and rounded kcal', async () => {
@@ -451,6 +456,7 @@ describe('MealsService', () => {
       await service.create(7, { ...dto, loggedAt: undefined });
 
       expect(activityServiceMock.record).not.toHaveBeenCalled();
+      expect(activityServiceMock.recordGoalReached).not.toHaveBeenCalled();
     });
 
     it.each([
@@ -459,7 +465,7 @@ describe('MealsService', () => {
       [2000, true],
       [2001, false],
     ])(
-      'with %i kcal of a 2000 goal, GOAL_REACHED recorded: %s',
+      'with %i kcal of a 2000 goal, goal reached recorded: %s',
       async (total, expected) => {
         prismaMock.meal.findMany.mockResolvedValue([
           { items: [{ kcal: total }] },
@@ -467,23 +473,29 @@ describe('MealsService', () => {
 
         await service.create(7, dto);
 
-        const goalCalls = activityServiceMock.record.mock.calls.filter(
-          (call: unknown[]) => call[1] === ActivityType.GOAL_REACHED,
-        );
-        expect(goalCalls.length).toBe(expected ? 1 : 0);
+        if (expected) {
+          expect(activityServiceMock.recordGoalReached).toHaveBeenCalledWith(
+            7,
+            today,
+          );
+        } else {
+          expect(activityServiceMock.recordGoalReached).not.toHaveBeenCalled();
+        }
       },
     );
 
-    it('should not record GOAL_REACHED twice on the same day', async () => {
-      prismaMock.meal.findMany.mockResolvedValue([{ items: [{ kcal: 1900 }] }]);
-      prismaMock.activity.findFirst.mockResolvedValue({ id: 3 });
+    it('should not check the goal for a meal logged on a past day', async () => {
+      prismaMock.meal.create.mockResolvedValue({
+        id: 3,
+        name: 'Hier',
+        loggedAt: new Date('2026-09-12T00:00:00.000Z'),
+        items: [],
+      });
 
-      await service.create(7, dto);
+      await service.create(7, { ...dto, loggedAt: '2026-09-12T00:00:00.000Z' });
 
-      expect(activityServiceMock.record).not.toHaveBeenCalledWith(
-        7,
-        ActivityType.GOAL_REACHED,
-      );
+      expect(prismaMock.user.findUnique).not.toHaveBeenCalled();
+      expect(activityServiceMock.recordGoalReached).not.toHaveBeenCalled();
     });
 
     it('should not check the goal when the user has none', async () => {

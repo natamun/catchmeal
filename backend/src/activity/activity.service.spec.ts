@@ -13,6 +13,7 @@ describe('ActivityService', () => {
   const prismaMock = {
     activity: {
       create: jest.fn(),
+      findFirst: jest.fn(),
       findMany: jest.fn(),
     },
   };
@@ -62,6 +63,21 @@ describe('ActivityService', () => {
         ActivityType.CALORIE_GOAL_CHANGED,
         { goal: 2200 },
         'a changé son objectif calorique (2200 kcal)',
+      ],
+      [
+        ActivityType.WEIGHT_GOAL_REACHED,
+        { targetWeight: 70 },
+        'a atteint son poids cible (70 kg)',
+      ],
+      [
+        ActivityType.STREAK_REACHED,
+        { days: 7 },
+        'a atteint son objectif calorique 7 jours de suite',
+      ],
+      [
+        ActivityType.STREAK_REACHED,
+        null,
+        'a atteint son objectif calorique plusieurs jours de suite',
       ],
     ];
 
@@ -135,6 +151,82 @@ describe('ActivityService', () => {
 
       expect(prismaMock.activity.create).toHaveBeenCalled();
       expect(to).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('recordGoalReached', () => {
+    const lastDays = (end: string, count: number) =>
+      Array.from({ length: count }, (_, i) => {
+        const date = new Date(`${end}T00:00:00.000Z`);
+        date.setUTCDate(date.getUTCDate() - i);
+        return { metadata: { day: date.toISOString().slice(0, 10) } };
+      });
+
+    let recordSpy: jest.SpyInstance;
+
+    beforeEach(() => {
+      recordSpy = jest.spyOn(service, 'record').mockResolvedValue({} as never);
+      prismaMock.activity.findFirst.mockResolvedValue(null);
+    });
+
+    it('should do nothing when the goal was already recorded for that day', async () => {
+      prismaMock.activity.findFirst.mockResolvedValue({ id: 1 });
+
+      await service.recordGoalReached(1, '2026-10-10');
+
+      expect(prismaMock.activity.findFirst).toHaveBeenCalledWith({
+        where: {
+          userId: 1,
+          type: ActivityType.GOAL_REACHED,
+          metadata: { path: ['day'], equals: '2026-10-10' },
+        },
+        select: { id: true },
+      });
+      expect(recordSpy).not.toHaveBeenCalled();
+    });
+
+    it('should record the goal with its day and no streak below a milestone', async () => {
+      prismaMock.activity.findMany.mockResolvedValue(lastDays('2026-10-10', 3));
+
+      await service.recordGoalReached(1, '2026-10-10');
+
+      expect(recordSpy).toHaveBeenCalledTimes(1);
+      expect(recordSpy).toHaveBeenCalledWith(1, ActivityType.GOAL_REACHED, {
+        day: '2026-10-10',
+      });
+    });
+
+    it('should record STREAK_REACHED after 7 consecutive days', async () => {
+      prismaMock.activity.findMany.mockResolvedValue(lastDays('2026-10-10', 7));
+
+      await service.recordGoalReached(1, '2026-10-10');
+
+      expect(recordSpy).toHaveBeenLastCalledWith(
+        1,
+        ActivityType.STREAK_REACHED,
+        { days: 7 },
+      );
+    });
+
+    it('should not count a streak across a missing day', async () => {
+      prismaMock.activity.findMany.mockResolvedValue([
+        ...lastDays('2026-10-10', 6),
+        ...lastDays('2026-10-03', 3),
+      ]);
+
+      await service.recordGoalReached(1, '2026-10-10');
+
+      expect(recordSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('should not repeat the 30-day milestone on the 31st day', async () => {
+      prismaMock.activity.findMany.mockResolvedValue(
+        lastDays('2026-10-10', 31),
+      );
+
+      await service.recordGoalReached(1, '2026-10-10');
+
+      expect(recordSpy).toHaveBeenCalledTimes(1);
     });
   });
 
