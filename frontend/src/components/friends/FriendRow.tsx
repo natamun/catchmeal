@@ -50,8 +50,11 @@ export default function FriendRow({
         {hasUnread && (
           <span
             aria-hidden="true"
-            className="absolute -top-1 -right-1 h-2.5 w-2.5 rounded-full bg-green-600 ring-2 ring-white"
-          />
+            className="absolute -top-1.5 -right-1.5 flex h-3 w-3"
+          >
+            <span className="absolute inline-flex h-full w-full rounded-full bg-green-400 motion-safe:animate-unread-ping" />
+            <span className="relative inline-flex h-3 w-3 rounded-full bg-green-500 ring-2 ring-white" />
+          </span>
         )}
       </button>
       <button

@@ -49,6 +49,17 @@
   }
 }
 
+@keyframes unread-ping {
+  from {
+    transform: scale(1);
+    opacity: 0.9;
+  }
+  to {
+    transform: scale(3);
+    opacity: 0;
+  }
+}
+
 @keyframes toast-in {
   from {
     opacity: 0;
@@ -89,6 +100,7 @@
   --animate-fade-out: fade-out 0.1s ease-in;
   --animate-delayed-reveal: delayed-reveal 0.15s ease-out 0.25s backwards;
   --animate-pill-select: pill-select 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  --animate-unread-ping: unread-ping 1.2s ease-out 3;
   --animate-toast-in: toast-in 0.2s ease-out;
   --animate-toast-out: toast-out 0.15s ease-in;
   --animate-breathe: breathe 4s ease-in-out infinite;
