@@ -14,7 +14,7 @@ export default function DatePick({
   setFrom: (date: string) => void;
   setTo: (date: string) => void;
 }) {
-  const [selectedButton, setSelectedButton] = useState<number | null>(null);
+  const [selectedButton, setSelectedButton] = useState<number | null>(7);
   return (
     <div className="flex flex-col flex-wrap justify-between rounded-2xl border border-green-200 bg-white shadow-sm lg:flex-row lg:items-center lg:gap-2">
       <div className="m-2 flex justify-center gap-2 font-mono text-xs font-semibold sm:text-sm md:m-3">
@@ -66,7 +66,7 @@ export default function DatePick({
                   setSelectedButton(d);
                   setLastDays(d, setFrom, setTo);
                 }}
-                className={`m-1 rounded-full bg-green-50 px-5 py-1.5 text-sm font-semibold ring-1 ring-green-500 transition-all duration-200 ${isActive ? 'bg-green-600 text-white shadow-sm' : 'hover:bg-emerald-100/60'} `}
+                className={`m-1 cursor-pointer rounded-full bg-green-50 px-5 py-1.5 text-sm font-semibold ring-1 ring-green-500 transition-all duration-200 ${isActive ? 'bg-green-600 text-white shadow-sm' : 'hover:bg-emerald-100/60'} `}
               >
                 {`${d} j`}
               </button>

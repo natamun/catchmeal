@@ -54,7 +54,7 @@ export function DatePickerButton({
       popperPlacement={placement ?? undefined}
       portalId="datepicker-portal"
       customInput={
-        <CustomInput className="rounded-full bg-green-50 px-5 py-1.5 text-sm font-semibold ring-1 ring-green-500 hover:bg-emerald-100/60" />
+        <CustomInput className="cursor-pointer rounded-full bg-green-50 px-5 py-1.5 text-sm font-semibold ring-1 ring-green-500 hover:bg-emerald-100/60" />
       }
     />
   );
