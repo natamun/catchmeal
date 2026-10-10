@@ -1,4 +1,11 @@
-import { lazy, Suspense, useRef, useState, type RefObject } from 'react';
+import {
+  lazy,
+  Suspense,
+  useEffect,
+  useRef,
+  useState,
+  type RefObject,
+} from 'react';
 import {
   ArrowUpRight,
   CheckCircle2,
@@ -190,6 +197,7 @@ export default function FoodItemForm({
   const confirmDialogRef = useRef<HTMLDialogElement>(null);
   const barcodeRef = useRef<HTMLInputElement>(null);
   const duplicateDialogRef = useRef<HTMLDialogElement>(null);
+  const lookupIdRef = useRef(0);
 
   if ((editingItem?.id ?? null) !== syncedItemId) {
     setSyncedItemId(editingItem?.id ?? null);
@@ -198,8 +206,13 @@ export default function FoodItemForm({
     setError(null);
     setLookupError(null);
     setFoundBarcode(null);
+    setIsLookingUp(false);
     setSubmitAttempted(false);
   }
+
+  useEffect(() => {
+    lookupIdRef.current += 1;
+  }, [syncedItemId]);
 
   const closeDialog = () => {
     dialogRef.current?.close();
@@ -266,9 +279,14 @@ export default function FoodItemForm({
   };
 
   const runLookup = async (code: string) => {
+    lookupIdRef.current += 1;
+    const lookupId = lookupIdRef.current;
     setIsLookingUp(true);
     try {
       const product = await lookupOffProduct(userId, code);
+      if (lookupId !== lookupIdRef.current) {
+        return;
+      }
       setForm(productToForm(product));
       setFoundBarcode(product.barcode);
       setTouched({});
@@ -276,13 +294,18 @@ export default function FoodItemForm({
       setError(null);
     } catch (err: unknown) {
       console.error(err);
+      if (lookupId !== lookupIdRef.current) {
+        return;
+      }
       const status = err instanceof ApiError ? (err.status ?? 0) : 0;
       setLookupError({
         message: LOOKUP_ERRORS[status] ?? 'Une erreur est survenue',
         onField: status === 400,
       });
     } finally {
-      setIsLookingUp(false);
+      if (lookupId === lookupIdRef.current) {
+        setIsLookingUp(false);
+      }
     }
   };
 
@@ -332,6 +355,8 @@ export default function FoodItemForm({
         setForm(EMPTY_FORM);
         setLookupError(null);
         setFoundBarcode(null);
+        setIsLookingUp(false);
+        lookupIdRef.current += 1;
       }
       setTouched({});
       setSubmitAttempted(false);
