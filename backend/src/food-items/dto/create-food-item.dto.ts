@@ -6,6 +6,7 @@ import {
   IsOptional,
   IsPositive,
   IsString,
+  Matches,
   MaxLength,
   Min,
 } from 'class-validator';
@@ -33,8 +34,7 @@ export class CreateFoodItemDto {
 
   @Transform(trimOrNull)
   @IsOptional()
-  @IsString()
-  @MaxLength(32)
+  @Matches(/^\d{8,14}$/, { message: 'barcode must be 8 to 14 digits' })
   barcode?: string | null;
 
   @IsNumber()

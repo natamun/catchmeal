@@ -43,6 +43,24 @@ describe('CreateFoodItemDto', () => {
     expect(dto.barcode).toBeNull();
   });
 
+  it('should accept a barcode of 8 to 14 digits', async () => {
+    const dto = await parse({ barcode: ' 3017620422003 ' });
+
+    expect(dto.barcode).toBe('3017620422003');
+  });
+
+  it('should reject a barcode that is not 8 to 14 digits', async () => {
+    await expect(parse({ barcode: '1234567' })).rejects.toThrow(
+      BadRequestException,
+    );
+    await expect(parse({ barcode: '301762042200A' })).rejects.toThrow(
+      BadRequestException,
+    );
+    await expect(
+      parse({ barcode: '12345678901234567890123456789012' }),
+    ).rejects.toThrow(BadRequestException);
+  });
+
   it('should reject a blank name', async () => {
     await expect(parse({ name: '   ' })).rejects.toThrow(BadRequestException);
   });
