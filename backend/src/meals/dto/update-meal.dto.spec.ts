@@ -3,7 +3,6 @@ import { BadRequestException, ValidationPipe } from '@nestjs/common';
 import { UpdateMealDto } from './update-meal.dto';
 
 describe('UpdateMealDto', () => {
-  // same options as the global pipe in main.ts
   const pipe = new ValidationPipe({
     whitelist: true,
     forbidNonWhitelisted: true,

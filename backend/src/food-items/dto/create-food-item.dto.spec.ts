@@ -4,7 +4,6 @@ import { QuantityUnit } from '../../generated/prisma/enums';
 import { CreateFoodItemDto } from './create-food-item.dto';
 
 describe('CreateFoodItemDto', () => {
-  // same options as the global pipe in main.ts
   const pipe = new ValidationPipe({
     whitelist: true,
     forbidNonWhitelisted: true,
