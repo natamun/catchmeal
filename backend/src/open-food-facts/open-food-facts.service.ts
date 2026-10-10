@@ -9,6 +9,7 @@ import {
 
 import { QuantityUnit } from '../generated/prisma/enums';
 
+const API_URL = 'https://world.openfoodfacts.org';
 const FIELDS =
   'code,product_name,product_name_fr,brands,quantity,product_quantity_unit,nutriments';
 const TIMEOUT_MS = 5000;
@@ -54,8 +55,6 @@ const toAmount = (value: unknown) => {
 
 @Injectable()
 export class OpenFoodFactsService {
-  private readonly apiUrl =
-    process.env.OFF_API_URL || 'https://world.openfoodfacts.org';
   private readonly userAgent = process.env.OFF_USER_AGENT || 'CatCHMeal/1.0';
   private readonly cache = new Map<
     string,
@@ -105,7 +104,7 @@ export class OpenFoodFactsService {
 
     try {
       const response = await fetch(
-        `${this.apiUrl}/api/v3.4/product/${barcode}?fields=${FIELDS}`,
+        `${API_URL}/api/v3.4/product/${barcode}?fields=${FIELDS}`,
         {
           headers: { 'User-Agent': this.userAgent },
           signal: AbortSignal.timeout(TIMEOUT_MS),
