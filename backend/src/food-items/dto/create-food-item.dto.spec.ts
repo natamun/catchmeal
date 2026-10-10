@@ -1,0 +1,49 @@
+import { BadRequestException, ValidationPipe } from '@nestjs/common';
+
+import { QuantityUnit } from '../../generated/prisma/enums';
+import { CreateFoodItemDto } from './create-food-item.dto';
+
+describe('CreateFoodItemDto', () => {
+  // same options as the global pipe in main.ts
+  const pipe = new ValidationPipe({
+    whitelist: true,
+    forbidNonWhitelisted: true,
+    transform: true,
+  });
+  const food = {
+    name: 'Riz blanc',
+    baseQuantity: 100,
+    baseUnit: QuantityUnit.GRAM,
+    kcal: 130,
+    protein: 2.4,
+    carbs: 28,
+    fat: 0.3,
+  };
+  const parse = (body: object) =>
+    pipe.transform(
+      { ...food, ...body },
+      { type: 'body', metatype: CreateFoodItemDto },
+    ) as Promise<CreateFoodItemDto>;
+
+  it('should trim the brand', async () => {
+    const dto = await parse({ brand: '  Danone  ' });
+
+    expect(dto.brand).toBe('Danone');
+  });
+
+  it('should turn a blank brand into no brand', async () => {
+    const dto = await parse({ brand: '   ' });
+
+    expect(dto.brand).toBeNull();
+  });
+
+  it('should turn a blank barcode into no barcode', async () => {
+    const dto = await parse({ barcode: '   ' });
+
+    expect(dto.barcode).toBeNull();
+  });
+
+  it('should reject a blank name', async () => {
+    await expect(parse({ name: '   ' })).rejects.toThrow(BadRequestException);
+  });
+});

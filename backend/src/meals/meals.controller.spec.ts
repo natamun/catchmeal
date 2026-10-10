@@ -1,3 +1,4 @@
+import { ForbiddenException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 
 import { MealType } from '../generated/prisma/enums';
@@ -141,5 +142,42 @@ describe('MealsController', () => {
       expect.any(Date),
       expect.any(Date),
     );
+  });
+
+  it('should refuse to create a meal for another user', () => {
+    const dto: CreateMealDto = {
+      typeMeal: MealType.LUNCH,
+      items: [{ foodItemId: 2, quantity: 150 }],
+    };
+
+    expect(() => controller.create(8, dto, req)).toThrow(ForbiddenException);
+    expect(mealsServiceMock.create).not.toHaveBeenCalled();
+  });
+
+  it('should refuse to list the meals of another user', () => {
+    expect(() => controller.findAll(8, req)).toThrow(ForbiddenException);
+    expect(mealsServiceMock.findAll).not.toHaveBeenCalled();
+  });
+
+  it('should refuse to list a range of meals of another user', () => {
+    expect(() => controller.findRange(8, req)).toThrow(ForbiddenException);
+    expect(mealsServiceMock.findRange).not.toHaveBeenCalled();
+  });
+
+  it('should refuse to read a meal of another user', () => {
+    expect(() => controller.findOne(8, 5, req)).toThrow(ForbiddenException);
+    expect(mealsServiceMock.findOne).not.toHaveBeenCalled();
+  });
+
+  it('should refuse to update a meal of another user', () => {
+    expect(() => controller.update(8, 5, { name: 'Riz-steak' }, req)).toThrow(
+      ForbiddenException,
+    );
+    expect(mealsServiceMock.update).not.toHaveBeenCalled();
+  });
+
+  it('should refuse to remove a meal of another user', () => {
+    expect(() => controller.remove(8, 5, req)).toThrow(ForbiddenException);
+    expect(mealsServiceMock.remove).not.toHaveBeenCalled();
   });
 });

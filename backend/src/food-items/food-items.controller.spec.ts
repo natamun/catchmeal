@@ -1,3 +1,4 @@
+import { ForbiddenException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 
 import { QuantityUnit } from '../generated/prisma/enums';
@@ -87,5 +88,44 @@ describe('FoodItemsController', () => {
     await controller.archive(2, 1, mockReq);
 
     expect(foodItemsServiceMock.archive).toHaveBeenCalledWith(2, 1);
+  });
+
+  it('should refuse to create a food item for another user', () => {
+    const dto: CreateFoodItemDto = {
+      name: 'Riz blanc',
+      baseQuantity: 100,
+      baseUnit: QuantityUnit.GRAM,
+      kcal: 130,
+      protein: 2.4,
+      carbs: 28,
+      fat: 0.3,
+    };
+
+    expect(() => controller.create(3, dto, mockReq)).toThrow(
+      ForbiddenException,
+    );
+    expect(foodItemsServiceMock.create).not.toHaveBeenCalled();
+  });
+
+  it('should refuse to list the food items of another user', () => {
+    expect(() => controller.findAll(3, mockReq)).toThrow(ForbiddenException);
+    expect(foodItemsServiceMock.findAll).not.toHaveBeenCalled();
+  });
+
+  it('should refuse to read a food item of another user', () => {
+    expect(() => controller.findOne(3, 1, mockReq)).toThrow(ForbiddenException);
+    expect(foodItemsServiceMock.findOne).not.toHaveBeenCalled();
+  });
+
+  it('should refuse to update a food item of another user', () => {
+    expect(() =>
+      controller.update(3, 1, { name: 'Riz complet' }, mockReq),
+    ).toThrow(ForbiddenException);
+    expect(foodItemsServiceMock.update).not.toHaveBeenCalled();
+  });
+
+  it('should refuse to archive a food item of another user', () => {
+    expect(() => controller.archive(3, 1, mockReq)).toThrow(ForbiddenException);
+    expect(foodItemsServiceMock.archive).not.toHaveBeenCalled();
   });
 });
