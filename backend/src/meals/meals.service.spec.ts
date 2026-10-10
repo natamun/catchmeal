@@ -506,6 +506,7 @@ describe('MealsService', () => {
     const today = '2026-09-13';
     const dto: CreateMealDto = {
       name: 'Oeuf fromage',
+      typeMeal: MealType.LUNCH,
       loggedAt: `${today}T00:00:00.000Z`,
       items: [{ quantity: 1, kcal: 349.6, protein: 20, carbs: 1, fat: 25 }],
     };
