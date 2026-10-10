@@ -646,8 +646,8 @@ export default function FoodItemForm({
         title="Aliment déjà enregistré"
         description={
           duplicates.length > 1
-            ? `Tu as déjà ${duplicates.length} aliments avec ce code-barres. En ajouter un autre ?`
-            : `Tu as déjà « ${duplicates[0]?.name ?? ''} » avec ce code-barres. L'ajouter quand même ?`
+            ? `${duplicates.length} aliments existent déjà avec ce code-barres. En ajouter un autre ?`
+            : `« ${duplicates[0]?.name ?? ''} » existe déjà avec ce code-barres. L'ajouter quand même ?`
         }
         confirmLabel="Ajouter"
         pendingLabel="Enregistrement..."
