@@ -78,7 +78,11 @@ describe('MealsService', () => {
     await service.create(7, dto);
 
     expect(prismaMock.foodItem.findMany).toHaveBeenCalledWith({
-      where: { id: { in: [2, 3, 1] }, userId: 7, archived: false },
+      where: {
+        id: { in: [2, 3, 1] },
+        userId: 7,
+        OR: [{ archived: false }, { mealFoodItems: { some: {} } }],
+      },
     });
     expect(prismaMock.meal.create).toHaveBeenCalledWith({
       data: {
@@ -167,7 +171,11 @@ describe('MealsService', () => {
     await service.create(7, dto);
 
     expect(prismaMock.foodItem.findMany).toHaveBeenCalledWith({
-      where: { id: { in: [1] }, userId: 7, archived: false },
+      where: {
+        id: { in: [1] },
+        userId: 7,
+        OR: [{ archived: false }, { mealFoodItems: { some: {} } }],
+      },
     });
     expect(prismaMock.meal.create).toHaveBeenCalledWith({
       data: {
@@ -311,7 +319,11 @@ describe('MealsService', () => {
     });
 
     expect(prismaMock.foodItem.findMany).toHaveBeenCalledWith({
-      where: { id: { in: [1] }, userId: 7, archived: false },
+      where: {
+        id: { in: [1] },
+        userId: 7,
+        OR: [{ archived: false }, { mealFoodItems: { some: {} } }],
+      },
     });
     expect(prismaMock.meal.update).toHaveBeenCalledWith({
       where: { id_userId: { id: 5, userId: 7 } },
@@ -335,6 +347,31 @@ describe('MealsService', () => {
       },
       include: { items: true },
     });
+  });
+
+  it('should keep an archived food item that a meal still holds', async () => {
+    prismaMock.foodItem.findMany.mockResolvedValue([
+      {
+        id: 1,
+        kcal: 400,
+        protein: 25,
+        carbs: 1,
+        fat: 33,
+        baseQuantity: 100,
+        archived: true,
+      },
+    ]);
+    prismaMock.meal.update.mockResolvedValue({ id: 5 });
+
+    await service.update(7, 5, {
+      items: [{ foodItemId: 1, quantity: 50 }],
+    });
+
+    expect(prismaMock.meal.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { id_userId: { id: 5, userId: 7 } },
+      }),
+    );
   });
 
   it('should delete a meal for real', async () => {

@@ -24,7 +24,11 @@ export class MealsService {
 
     const foodItems = ids.length
       ? await this.prisma.foodItem.findMany({
-          where: { id: { in: ids }, userId, archived: false },
+          where: {
+            id: { in: ids },
+            userId,
+            OR: [{ archived: false }, { mealFoodItems: { some: {} } }],
+          },
         })
       : [];
 
