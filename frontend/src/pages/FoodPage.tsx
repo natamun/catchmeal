@@ -185,6 +185,7 @@ export default function FoodPage() {
       <FoodItemForm
         dialogRef={dialogRef}
         editingItem={editingItem}
+        foodItems={foodItems}
         onItemAdded={(item) => setFoodItems((prev) => [...prev, item])}
         onItemUpdated={(updated) =>
           setFoodItems((prev) =>

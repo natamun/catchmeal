@@ -8,7 +8,13 @@ interface ConfirmDialogProps {
   pendingLabel: string;
   isPending: boolean;
   onConfirm: () => void;
+  tone?: 'danger' | 'primary';
 }
+
+const CONFIRM_TONE_CLASS = {
+  danger: 'bg-red-500 hover:bg-red-600',
+  primary: 'bg-green-500 hover:bg-green-600',
+};
 
 export function ConfirmDialog({
   dialogRef,
@@ -18,6 +24,7 @@ export function ConfirmDialog({
   pendingLabel,
   isPending,
   onConfirm,
+  tone = 'danger',
 }: ConfirmDialogProps) {
   const titleId = useId();
 
@@ -43,7 +50,7 @@ export function ConfirmDialog({
           type="button"
           onClick={onConfirm}
           disabled={isPending}
-          className="flex-1 cursor-pointer rounded-xl bg-red-500 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-60"
+          className={`flex-1 cursor-pointer rounded-xl px-4 py-2.5 text-sm font-semibold text-white transition-colors disabled:cursor-not-allowed disabled:opacity-60 ${CONFIRM_TONE_CLASS[tone]}`}
         >
           {isPending ? pendingLabel : confirmLabel}
         </button>

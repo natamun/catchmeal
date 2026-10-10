@@ -1,5 +1,6 @@
 import { useRef, useState, type RefObject } from 'react';
 import {
+  ArrowUpRight,
   CheckCircle2,
   LoaderCircle,
   ScanBarcode,
@@ -54,6 +55,8 @@ const LABEL_CLASS =
 const ICON_BUTTON_CLASS =
   'flex w-11 shrink-0 cursor-pointer items-center justify-center rounded-xl border border-green-200 text-green-600 transition-colors hover:bg-green-50 disabled:cursor-not-allowed disabled:opacity-60';
 
+const OFF_URL = 'https://world.openfoodfacts.org';
+
 const LOOKUP_ERRORS: Record<number, string> = {
   400: 'Code-barres invalide',
   404: 'Produit introuvable',
@@ -87,6 +90,8 @@ function itemToForm(item: FoodItem): FoodItemFormState {
     fat: String(item.fat),
   };
 }
+
+const significantDigits = (barcode: string) => barcode.replace(/^0+/, '');
 
 function productToForm(product: OffProduct): FoodItemFormState {
   const toField = (value: number | null) =>
@@ -141,6 +146,7 @@ function validateForm(
 interface FoodItemFormProps {
   dialogRef: RefObject<HTMLDialogElement | null>;
   editingItem: FoodItem | null;
+  foodItems: FoodItem[];
   onItemAdded: (item: FoodItem) => void;
   onItemUpdated: (item: FoodItem) => void;
   onItemDeleted: (id: number) => void;
@@ -149,6 +155,7 @@ interface FoodItemFormProps {
 export default function FoodItemForm({
   dialogRef,
   editingItem,
+  foodItems,
   onItemAdded,
   onItemUpdated,
   onItemDeleted,
@@ -167,6 +174,7 @@ export default function FoodItemForm({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [isLookingUp, setIsLookingUp] = useState(false);
+  const [foundBarcode, setFoundBarcode] = useState<string | null>(null);
   const [lookupError, setLookupError] = useState<{
     message: string;
     onField: boolean;
@@ -176,6 +184,7 @@ export default function FoodItemForm({
   );
   const confirmDialogRef = useRef<HTMLDialogElement>(null);
   const barcodeRef = useRef<HTMLInputElement>(null);
+  const duplicateDialogRef = useRef<HTMLDialogElement>(null);
 
   if ((editingItem?.id ?? null) !== syncedItemId) {
     setSyncedItemId(editingItem?.id ?? null);
@@ -183,6 +192,7 @@ export default function FoodItemForm({
     setTouched({});
     setError(null);
     setLookupError(null);
+    setFoundBarcode(null);
     setSubmitAttempted(false);
   }
 
@@ -191,6 +201,17 @@ export default function FoodItemForm({
   };
 
   const errors = validateForm(form);
+
+  const barcode = form.barcode.trim();
+  const duplicates =
+    editingItem || barcode === ''
+      ? []
+      : foodItems.filter(
+          (item) =>
+            !item.archived &&
+            item.barcode !== null &&
+            significantDigits(item.barcode) === significantDigits(barcode),
+        );
 
   useTimeout(() => setSubmitAttempted(false), submitAttempted ? 5000 : null);
   useTimeout(() => setSuccessMessage(null), successMessage ? 3000 : null);
@@ -219,7 +240,6 @@ export default function FoodItemForm({
       : undefined;
 
   const handleLookup = async () => {
-    const barcode = form.barcode.trim();
     if (barcode === '' || isLookingUp) {
       return;
     }
@@ -234,6 +254,7 @@ export default function FoodItemForm({
     try {
       const product = await lookupOffProduct(userId, barcode);
       setForm(productToForm(product));
+      setFoundBarcode(product.barcode);
       setTouched({});
       setSubmitAttempted(false);
       setError(null);
@@ -262,13 +283,21 @@ export default function FoodItemForm({
       setSubmitAttempted(true);
       return;
     }
+    if (duplicates.length > 0) {
+      duplicateDialogRef.current?.showModal();
+      return;
+    }
 
+    await save();
+  };
+
+  const save = async () => {
     setIsSubmitting(true);
     try {
       const input = {
         name: form.name,
         brand: form.brand.trim() === '' ? null : form.brand,
-        barcode: form.barcode.trim() === '' ? null : form.barcode.trim(),
+        barcode: barcode === '' ? null : barcode,
         baseQuantity: Number(form.baseQuantity),
         baseUnit: form.baseUnit,
         kcal: Number(form.kcal),
@@ -286,6 +315,7 @@ export default function FoodItemForm({
         onItemAdded(savedItem);
         setForm(EMPTY_FORM);
         setLookupError(null);
+        setFoundBarcode(null);
       }
       setTouched({});
       setSubmitAttempted(false);
@@ -304,6 +334,7 @@ export default function FoodItemForm({
       );
     } finally {
       setIsSubmitting(false);
+      duplicateDialogRef.current?.close();
     }
   };
 
@@ -353,9 +384,29 @@ export default function FoodItemForm({
         >
           {!editingItem && (
             <div className="relative flex flex-col gap-1.5">
-              <label htmlFor="food-barcode" className={LABEL_CLASS}>
-                Code-barres (optionnel)
-              </label>
+              <div className="flex items-baseline justify-between gap-2">
+                <label htmlFor="food-barcode" className={LABEL_CLASS}>
+                  Code-barres (optionnel)
+                </label>
+                <a
+                  href={
+                    foundBarcode !== null && foundBarcode === barcode
+                      ? `${OFF_URL}/product/${foundBarcode}`
+                      : OFF_URL
+                  }
+                  target="_blank"
+                  rel="noreferrer"
+                  title="Données fournies par Open Food Facts"
+                  className="flex shrink-0 items-center gap-1 text-xs text-green-500 transition-colors hover:text-green-700"
+                >
+                  <span>
+                    via{' '}
+                    <span className="max-[400px]:hidden">Open Food Facts</span>
+                    <span className="min-[401px]:hidden">OFF</span>
+                  </span>
+                  <ArrowUpRight className="h-3 w-3" />
+                </a>
+              </div>
               <div className="flex gap-2">
                 <Input
                   id="food-barcode"
@@ -544,6 +595,21 @@ export default function FoodItemForm({
         pendingLabel="Suppression..."
         isPending={isSubmitting}
         onConfirm={() => void handleDelete()}
+      />
+
+      <ConfirmDialog
+        dialogRef={duplicateDialogRef}
+        title="Aliment déjà enregistré"
+        description={
+          duplicates.length > 1
+            ? `Tu as déjà ${duplicates.length} aliments avec ce code-barres. En ajouter un autre ?`
+            : `Tu as déjà « ${duplicates[0]?.name ?? ''} » avec ce code-barres. L'ajouter quand même ?`
+        }
+        confirmLabel="Ajouter"
+        pendingLabel="Enregistrement..."
+        isPending={isSubmitting}
+        onConfirm={() => void save()}
+        tone="primary"
       />
 
       <Toast message={successMessage} icon={CheckCircle2} />
