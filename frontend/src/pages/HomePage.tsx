@@ -129,35 +129,40 @@ export default function HomePage({ onReplyToActivity }: HomePageProps) {
                 </span>
               </button>
             </div>
-            <div className="grid auto-rows-fr grid-cols-1 gap-4 md:gap-6 lg:grid-cols-3">
-              <CalorieSummary
-                consumed={Math.round(dayTotals.kcal)}
-                goal={user.dailyCalorieGoal ?? 2000}
-                isLoading={!isReady}
-              />
-              <MacroBreakdown
-                protein={Math.round(dayTotals.protein)}
-                proteinGoal={user.dailyProteinGoal ?? 150}
-                carbs={Math.round(dayTotals.carbs)}
-                carbsGoal={user.dailyCarbsGoal ?? 250}
-                fat={Math.round(dayTotals.fat)}
-                fatGoal={user.dailyFatGoal ?? 65}
-                isLoading={!isReady}
-              />
-              <WeightWidget
-                history={weightHistory}
-                hasError={weightError}
-                goalWeight={user.targetWeight ?? null}
+            <div
+              key={selectedDate.toDateString()}
+              className="flex animate-fade-in-up flex-col gap-4 md:gap-6"
+            >
+              <div className="grid auto-rows-fr grid-cols-1 gap-4 md:gap-6 lg:grid-cols-3">
+                <CalorieSummary
+                  consumed={Math.round(dayTotals.kcal)}
+                  goal={user.dailyCalorieGoal ?? 2000}
+                  isLoading={!isReady}
+                />
+                <MacroBreakdown
+                  protein={Math.round(dayTotals.protein)}
+                  proteinGoal={user.dailyProteinGoal ?? 150}
+                  carbs={Math.round(dayTotals.carbs)}
+                  carbsGoal={user.dailyCarbsGoal ?? 250}
+                  fat={Math.round(dayTotals.fat)}
+                  fatGoal={user.dailyFatGoal ?? 65}
+                  isLoading={!isReady}
+                />
+                <WeightWidget
+                  history={weightHistory}
+                  hasError={weightError}
+                  goalWeight={user.targetWeight ?? null}
+                />
+              </div>
+              <DailyMealList
+                meals={meals}
+                foodItems={foodItems}
+                isLoading={isLoading}
+                loadError={loadError}
+                onAdd={setAddingMealType}
+                onEdit={openSectionEditor}
               />
             </div>
-            <DailyMealList
-              meals={meals}
-              foodItems={foodItems}
-              isLoading={isLoading}
-              loadError={loadError}
-              onAdd={setAddingMealType}
-              onEdit={openSectionEditor}
-            />
             <FriendsActivity
               activities={latestActivities}
               presence={presence}
