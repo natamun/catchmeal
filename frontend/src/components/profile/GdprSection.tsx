@@ -74,7 +74,11 @@ function buildExportHtml(data: ExportResponse): string {
 </html>`;
 }
 
-export function GdprSection() {
+export function GdprSection({
+  onPolitiqueConfidentialite,
+}: {
+  onPolitiqueConfidentialite: () => void;
+}) {
   const { logout, user } = useAuth();
   const [exportLoading, setExportLoading] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
@@ -179,9 +183,10 @@ export function GdprSection() {
         </button>
         <button
           type="button"
+          onClick={onPolitiqueConfidentialite}
           className={`${ROW_CLASS} text-green-600 hover:bg-white`}
         >
-          Politique de confidentialité {chevron}
+          Politique de confidentialité et RGPD {chevron}
         </button>
         <button
           type="button"

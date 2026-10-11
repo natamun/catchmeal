@@ -12,13 +12,26 @@ import type { ChatMessage } from './types/ChatBotType';
 const LandingPage = lazy(() => import('./pages/LandingPage'));
 const AuthPage = lazy(() => import('./pages/AuthPage'));
 const AdminPage = lazy(() => import('./pages/AdminPage'));
+const MentionsLegalesPage = lazy(() => import('./pages/MentionsLegalesPage'));
+const PolitiqueConfidentialitePage = lazy(
+  () => import('./pages/PolitiqueConfidentialitePage'),
+);
+const ConditionsUtilisationPage = lazy(
+  () => import('./pages/ConditionsUtilisationPage'),
+);
 const HomePage = lazy(() => import('./pages/HomePage'));
 const StatsPage = lazy(() => import('./pages/StatsPage'));
 const FriendsPage = lazy(() => import('./pages/FriendsPage'));
 const FoodPage = lazy(() => import('./pages/FoodPage'));
 const ProfilePage = lazy(() => import('./pages/ProfilePage'));
 
-type Page = 'landing' | 'login' | 'register';
+type Page =
+  | 'landing'
+  | 'login'
+  | 'register'
+  | 'mentions-legales'
+  | 'confidentialite'
+  | 'conditions';
 
 function AppShell() {
   const { status, user } = useAuth();
@@ -26,6 +39,7 @@ function AppShell() {
     const params = new URLSearchParams(window.location.search);
     return params.get('error') === 'oauth_failed' ? 'login' : 'landing';
   });
+  const [previousPage, setPreviousPage] = useState<Page>('landing');
   const [activeTab, setActiveTab] = useState<Tab>('home');
   const [pendingReply, setPendingReply] = useState<ActivityItem | null>(null);
   const [oauthError] = useState<string | null>(() => {
@@ -45,11 +59,40 @@ function AppShell() {
     },
   ]);
 
+  const navigateTo = (dest: Page) => {
+    setPreviousPage(page);
+    setPage(dest);
+  };
+
   if (status === 'loading') {
     return (
       <div className="flex min-h-screen items-center justify-center text-sm text-green-500">
         Chargement...
       </div>
+    );
+  }
+
+  if (page === 'mentions-legales') {
+    return (
+      <Suspense fallback={null}>
+        <MentionsLegalesPage onBack={() => setPage(previousPage)} />
+      </Suspense>
+    );
+  }
+
+  if (page === 'confidentialite') {
+    return (
+      <Suspense fallback={null}>
+        <PolitiqueConfidentialitePage onBack={() => setPage(previousPage)} />
+      </Suspense>
+    );
+  }
+
+  if (page === 'conditions') {
+    return (
+      <Suspense fallback={null}>
+        <ConditionsUtilisationPage onBack={() => setPage(previousPage)} />
+      </Suspense>
     );
   }
 
@@ -69,8 +112,11 @@ function AppShell() {
     return (
       <Suspense fallback={null}>
         <LandingPage
-          onLogin={() => setPage('login')}
-          onRegister={() => setPage('register')}
+          onLogin={() => navigateTo('login')}
+          onRegister={() => navigateTo('register')}
+          onMentionsLegales={() => navigateTo('mentions-legales')}
+          onConfidentialite={() => navigateTo('confidentialite')}
+          onConditions={() => navigateTo('conditions')}
         />
       </Suspense>
     );
@@ -91,7 +137,11 @@ function AppShell() {
     food: <FoodPage />,
     stats: <StatsPage />,
     friends: <FriendsPage pendingReply={pendingReply} />,
-    profile: <ProfilePage />,
+    profile: (
+      <ProfilePage
+        onPolitiqueConfidentialite={() => navigateTo('confidentialite')}
+      />
+    ),
     admin: isAdmin ? (
       <AdminPage />
     ) : (
