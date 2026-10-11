@@ -40,7 +40,7 @@ function buildExportHtml(data: ExportResponse): string {
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <title>Mes données KcalApp</title>
+  <title>Mes données CatCHMeal</title>
   <style>
     body { font-family: sans-serif; max-width: 700px; margin: 40px auto; padding: 0 20px; color: #1a2e1a; }
     h1 { color: #16a34a; }
@@ -53,7 +53,7 @@ function buildExportHtml(data: ExportResponse): string {
   </style>
 </head>
 <body>
-  <h1>Mes données personnelles — KcalApp</h1>
+  <h1>Mes données personnelles sur CatCHMeal</h1>
   <p class="meta">Exporté le ${new Date(data.exportedAt).toLocaleString('fr-FR')}</p>
   <h2>Profil</h2>
   <table>
@@ -102,7 +102,7 @@ export function GdprSection({
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = 'mes-donnees-kcalapp.html';
+      link.download = 'mes-donnees-catchmeal.html';
       link.click();
       URL.revokeObjectURL(url);
       exportSuccessDialogRef.current?.showModal();
@@ -205,7 +205,7 @@ export function GdprSection({
       >
         <p className="text-sm text-green-600">
           Vos données ont été téléchargées. Ouvrez le fichier{' '}
-          <strong>mes-donnees-kcalapp.html</strong> dans votre navigateur pour
+          <strong>mes-donnees-catchmeal.html</strong> dans votre navigateur pour
           les consulter.
         </p>
         <button

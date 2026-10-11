@@ -1,4 +1,4 @@
-export default function OpenFoodFactsLink() {
+export function OpenFoodFactsLink() {
   return (
     <a
       href="https://world.openfoodfacts.org"

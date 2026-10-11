@@ -1,4 +1,4 @@
-export function ConditionsUtilisationContent() {
+export function TermsOfServiceContent() {
   return (
     <div className="flex flex-col gap-6 text-sm text-green-600">
       <section>
@@ -6,7 +6,7 @@ export function ConditionsUtilisationContent() {
           1. Objet du service
         </h3>
         <p className="leading-relaxed">
-          CatchMeal est une application de suivi nutritionnel et de composition
+          CatCHMeal est une application de suivi nutritionnel et de composition
           corporelle incluant un assistant virtuel basé sur l'intelligence
           artificielle.
         </p>
@@ -23,7 +23,7 @@ export function ConditionsUtilisationContent() {
               desc: "L'application, ses calculs de composition corporelle (BMR, Katch-McArdle, masse grasse, etc.) et l'assistant IA fournissent des estimations à titre purement indicatif et éducatif.",
             },
             {
-              title: 'Modèle de langage (LLM — Mistral AI)',
+              title: 'Modèle de langage (LLM de Mistral AI)',
               desc: "L'assistant IA peut parfois générer des informations inexactes ou imprécises. L'utilisateur ne doit pas s'appuyer sur les réponses de l'IA pour établir un régime médical, traiter un trouble alimentaire ou diagnostiquer une condition médicale.",
             },
             {
@@ -48,9 +48,10 @@ export function ConditionsUtilisationContent() {
         </h3>
         <p className="leading-relaxed">
           En créant un compte et en renseignant vos métriques de composition
-          corporelle (masse grasse, graisse viscérale, hydratation, etc.), vous
-          consentez expressément au traitement de ces données de santé sensibles
-          pour le bon fonctionnement des fonctionnalités de l'application.
+          corporelle (masse grasse, masse musculaire, eau corporelle, etc.),
+          vous consentez expressément au traitement de ces données de santé
+          sensibles pour le bon fonctionnement des fonctionnalités de
+          l'application.
         </p>
       </section>
 

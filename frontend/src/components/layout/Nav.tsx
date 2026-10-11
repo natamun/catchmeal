@@ -1,5 +1,7 @@
 import { Apple } from 'lucide-react';
 
+import { Brand } from '../ui/Brand';
+
 export type Tab = 'home' | 'food' | 'stats' | 'friends' | 'profile' | 'admin';
 
 interface Props {
@@ -181,9 +183,9 @@ export default function Nav({ active, onChange, isAdmin = false }: Props) {
         aria-label="Navigation principale"
         className="fixed top-0 left-0 z-10 hidden h-full w-56 flex-col border-r border-green-200 bg-white py-6 md:flex"
       >
-        <span className="mb-8 px-6 text-lg font-bold tracking-tight text-green-300">
-          KcalApp
-        </span>
+        <div className="mb-8 px-6">
+          <Brand />
+        </div>
         <nav>
           <ul className="flex flex-col gap-1 px-3">
             {tabs.map((tab) => (

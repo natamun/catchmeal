@@ -2,8 +2,8 @@ import { useRef, useState, type FormEvent } from 'react';
 
 import { ApiError } from '../auth/api';
 import { useAuth } from '../auth/auth-context';
-import { ConditionsUtilisationContent } from '../components/legal/ConditionsUtilisationContent';
-import { PolitiqueConfidentialiteContent } from '../components/legal/PolitiqueConfidentialiteContent';
+import { PrivacyPolicyContent } from '../components/legal/PrivacyPolicyContent';
+import { TermsOfServiceContent } from '../components/legal/TermsOfServiceContent';
 import { BaseDialog } from '../components/ui/BaseDialog';
 import { FieldError } from '../components/ui/FieldError';
 import { Input } from '../components/ui/Input';
@@ -393,7 +393,7 @@ export default function AuthPage({ initialMode, onCancel, oauthError }: Props) {
         title="Conditions générales d'utilisation"
         maxWidth="lg"
       >
-        <ConditionsUtilisationContent />
+        <TermsOfServiceContent />
       </BaseDialog>
 
       <BaseDialog
@@ -401,7 +401,7 @@ export default function AuthPage({ initialMode, onCancel, oauthError }: Props) {
         title="Politique de confidentialité et RGPD"
         maxWidth="xl"
       >
-        <PolitiqueConfidentialiteContent />
+        <PrivacyPolicyContent />
       </BaseDialog>
     </>
   );

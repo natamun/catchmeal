@@ -17,7 +17,7 @@ export default function LandingSection({
     <section
       id={id}
       aria-labelledby={`${id}-title`}
-      className={`scroll-mt-(--header-height) px-8 py-20 ${tinted ? 'border-y border-green-200 bg-green-50' : ''}`}
+      className={`scroll-mt-header px-8 py-20 ${tinted ? 'border-y border-green-200 bg-green-50' : ''}`}
     >
       <div className="mx-auto max-w-6xl">
         <h2

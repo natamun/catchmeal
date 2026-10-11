@@ -12,13 +12,9 @@ import type { ChatMessage } from './types/ChatBotType';
 const LandingPage = lazy(() => import('./pages/LandingPage'));
 const AuthPage = lazy(() => import('./pages/AuthPage'));
 const AdminPage = lazy(() => import('./pages/AdminPage'));
-const MentionsLegalesPage = lazy(() => import('./pages/MentionsLegalesPage'));
-const PolitiqueConfidentialitePage = lazy(
-  () => import('./pages/PolitiqueConfidentialitePage'),
-);
-const ConditionsUtilisationPage = lazy(
-  () => import('./pages/ConditionsUtilisationPage'),
-);
+const LegalNoticePage = lazy(() => import('./pages/LegalNoticePage'));
+const PrivacyPolicyPage = lazy(() => import('./pages/PrivacyPolicyPage'));
+const TermsOfServicePage = lazy(() => import('./pages/TermsOfServicePage'));
 const HomePage = lazy(() => import('./pages/HomePage'));
 const StatsPage = lazy(() => import('./pages/StatsPage'));
 const FriendsPage = lazy(() => import('./pages/FriendsPage'));
@@ -75,7 +71,10 @@ function AppShell() {
   if (page === 'mentions-legales') {
     return (
       <Suspense fallback={null}>
-        <MentionsLegalesPage onBack={() => setPage(previousPage)} />
+        <LegalNoticePage
+          onBack={() => setPage(previousPage)}
+          onNavigate={setPage}
+        />
       </Suspense>
     );
   }
@@ -83,7 +82,10 @@ function AppShell() {
   if (page === 'confidentialite') {
     return (
       <Suspense fallback={null}>
-        <PolitiqueConfidentialitePage onBack={() => setPage(previousPage)} />
+        <PrivacyPolicyPage
+          onBack={() => setPage(previousPage)}
+          onNavigate={setPage}
+        />
       </Suspense>
     );
   }
@@ -91,7 +93,10 @@ function AppShell() {
   if (page === 'conditions') {
     return (
       <Suspense fallback={null}>
-        <ConditionsUtilisationPage onBack={() => setPage(previousPage)} />
+        <TermsOfServicePage
+          onBack={() => setPage(previousPage)}
+          onNavigate={setPage}
+        />
       </Suspense>
     );
   }

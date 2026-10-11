@@ -3,6 +3,7 @@ import {
   Check,
   Feather,
   Gift,
+  LogIn,
   MapPin,
   ScanBarcode,
   Sparkles,
@@ -12,11 +13,11 @@ import {
 } from 'lucide-react';
 
 import FeatureCard from '../components/landing/FeatureCard';
-import LandingFooter from '../components/landing/LandingFooter';
-import LandingHeader from '../components/landing/LandingHeader';
 import LandingSection from '../components/landing/LandingSection';
-import OpenFoodFactsLink from '../components/landing/OpenFoodFactsLink';
 import PhoneMockup from '../components/landing/PhoneMockup';
+import PublicFooter from '../components/layout/PublicFooter';
+import PublicHeader from '../components/layout/PublicHeader';
+import { OpenFoodFactsLink } from '../components/ui/OpenFoodFactsLink';
 
 interface Props {
   onLogin: () => void;
@@ -27,10 +28,13 @@ interface Props {
 }
 
 const NAV_LINKS = [
-  { label: 'Avantages', href: '#avantages' },
-  { label: 'Fonctionnalités', href: '#fonctionnalites' },
-  { label: 'À propos', href: '#a-propos' },
-];
+  { label: 'Avantages', id: 'avantages' },
+  { label: 'Fonctionnalités', id: 'fonctionnalites' },
+  { label: 'À propos', id: 'a-propos' },
+].map(({ label, id }) => ({
+  label,
+  onClick: () => document.getElementById(id)?.scrollIntoView(),
+}));
 
 const ADVANTAGES = [
   {
@@ -104,15 +108,19 @@ export default function LandingPage({
   onConditions,
 }: Props) {
   return (
-    <div id="landing-page" className="bg-white [--header-height:4rem]">
-      <LandingHeader links={NAV_LINKS} onLogin={onLogin} />
+    <div id="landing-page" className="bg-white">
+      <PublicHeader
+        links={NAV_LINKS}
+        action={{ label: 'Connexion', icon: LogIn, onClick: onLogin }}
+        onBrandClick={() => window.scrollTo({ top: 0 })}
+      />
 
       <main id="main-content">
         <section
           aria-labelledby="hero-title"
           className="overflow-hidden bg-linear-to-b from-green-50 to-white"
         >
-          <div className="mx-auto grid min-h-[calc(100dvh-var(--header-height))] w-full max-w-6xl items-center gap-12 px-8 py-12 lg:grid-cols-2 lg:pt-8 lg:pb-28 xl:grid-cols-[1.5fr_1fr]">
+          <div className="mx-auto grid min-h-[calc(100dvh-var(--spacing-header))] w-full max-w-6xl items-center gap-12 px-8 py-12 lg:grid-cols-2 lg:pt-8 lg:pb-28 xl:grid-cols-[1.5fr_1fr]">
             <div className="flex flex-col items-center text-center lg:items-start lg:text-left">
               <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700">
                 <span
@@ -241,10 +249,12 @@ export default function LandingPage({
         </section>
       </main>
 
-      <LandingFooter
-        onMentionsLegales={onMentionsLegales}
-        onConfidentialite={onConfidentialite}
-        onConditions={onConditions}
+      <PublicFooter
+        legalLinks={[
+          { label: 'Politique de confidentialité', onClick: onConfidentialite },
+          { label: "Conditions d'utilisation", onClick: onConditions },
+          { label: 'Mentions légales', onClick: onMentionsLegales },
+        ]}
       />
     </div>
   );

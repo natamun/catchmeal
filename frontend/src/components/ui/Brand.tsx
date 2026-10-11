@@ -1,6 +1,6 @@
 import logo from '../../assets/logo.svg';
 
-export default function Brand() {
+export function Brand() {
   return (
     <span className="flex items-center gap-2">
       <img src={logo} alt="" className="h-8 w-auto" />
