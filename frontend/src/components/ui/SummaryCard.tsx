@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 
 interface Props {
   title: string;
+  aside?: ReactNode;
   busy?: boolean;
   className?: string;
   children: ReactNode;
@@ -9,6 +10,7 @@ interface Props {
 
 export default function SummaryCard({
   title,
+  aside,
   busy = false,
   className = '',
   children,
@@ -18,9 +20,12 @@ export default function SummaryCard({
       className={`flex flex-col rounded-2xl border border-green-200 bg-white p-6 shadow-sm ${className}`}
       aria-busy={busy || undefined}
     >
-      <h2 className="mb-4 text-sm font-semibold tracking-wide text-green-500 uppercase">
-        {title}
-      </h2>
+      <div className="mb-4 flex flex-wrap items-baseline justify-between gap-x-3">
+        <h2 className="text-sm font-semibold tracking-wide text-green-500 uppercase">
+          {title}
+        </h2>
+        {aside}
+      </div>
       {children}
     </div>
   );

@@ -1,10 +1,11 @@
 import { useState } from 'react';
 
-import Charts from '../components/analytics/Charts';
+import CalorieChart from '../components/analytics/CalorieChart';
 import NutritionAverages from '../components/analytics/NutritionAverages';
 import { lastDays } from '../components/analytics/period';
 import PeriodSelector from '../components/analytics/PeriodSelector';
 import ShowDataDay from '../components/analytics/ShowDataDay';
+import WeightChart from '../components/analytics/WeightChart';
 import WeightVariation from '../components/analytics/WeightVariation';
 import { toApiDate } from '../components/meal/api';
 import useDashboard from '../hooks/useDashboard';
@@ -39,7 +40,8 @@ export default function StatsPage() {
         <WeightVariation days={dashboard} unavailable={error} />
       </div>
 
-      <Charts dashboard={dashboard} />
+      <CalorieChart days={dashboard} />
+      <WeightChart days={dashboard} period={period} />
 
       <div className="flex flex-col flex-wrap justify-between rounded-2xl border border-green-200 bg-white">
         <ShowDataDay dashboard={dashboard} to={to} from={from}></ShowDataDay>

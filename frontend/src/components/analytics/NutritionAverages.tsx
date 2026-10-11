@@ -1,22 +1,16 @@
 import { CalendarDays } from 'lucide-react';
 
+import { MACROS } from '../../constants/macros';
 import type { DashboardDay } from '../../types/dashboard-analytics';
+import { averageOf } from '../../utils/buildDataGraph';
 import StatTile from '../ui/StatTile';
 import SummaryCard from '../ui/SummaryCard';
 
-const MACROS = [
-  { label: 'Protéines', key: 'totalProtein' },
-  { label: 'Glucides', key: 'totalCarbs' },
-  { label: 'Lipides', key: 'totalFat' },
-] as const;
-
-type NutrientKey = 'totalKcal' | (typeof MACROS)[number]['key'];
-
-function average(days: DashboardDay[], key: NutrientKey) {
-  const total = days.reduce((sum, day) => sum + (day[key] ?? 0), 0);
-
-  return Math.round(total / days.length);
-}
+const TOTAL_KEYS = {
+  protein: 'totalProtein',
+  carbs: 'totalCarbs',
+  fat: 'totalFat',
+} as const;
 
 interface Props {
   days: DashboardDay[];
@@ -33,7 +27,7 @@ export default function NutritionAverages({
     ? []
     : days.filter((day) => day.totalKcal !== null);
   const hasData = logged.length > 0;
-  const kcal = hasData ? average(logged, 'totalKcal') : 0;
+  const kcal = averageOf(logged, 'totalKcal');
 
   return (
     <SummaryCard title="Moyennes par jour" className={className}>
@@ -64,9 +58,9 @@ export default function NutritionAverages({
           </p>
         )}
         <dl className="grid grid-cols-3 gap-3 max-2xs:grid-cols-1 sm:flex-1">
-          {MACROS.map(({ label, key }) => (
+          {MACROS.map(({ key, label }) => (
             <StatTile key={key} label={label}>
-              {hasData ? `${average(logged, key)} g` : '–'}
+              {hasData ? `${averageOf(logged, TOTAL_KEYS[key])} g` : '–'}
             </StatTile>
           ))}
         </dl>

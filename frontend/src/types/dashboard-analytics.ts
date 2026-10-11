@@ -11,17 +11,23 @@ export type DashboardDay = {
   noteWeight: string | null;
 };
 
-export type WeightPoint = { date: string; poids: number };
-
-export type KcalPoint = { date: string; kcal: number; objectif: number };
-
 export type DataGraph = {
+  from: string;
   date: string;
   kcal: number;
-  objective: number;
-  weight: number;
+  protein: number;
+  carbs: number;
+  fat: number;
+};
+
+export type KcalPoint = DataGraph & {
+  proteinKcal: number;
+  carbsKcal: number;
+  fatKcal: number;
+  otherKcal: number;
 };
 
 export type Grain = 'day' | 'week' | 'biWeek';
 
-export type NumericKey = 'totalKcal' | 'goalKcal' | 'weight';
+export type NumericKey =
+  'totalKcal' | 'totalProtein' | 'totalCarbs' | 'totalFat';

@@ -279,6 +279,15 @@ body {
   border-color: var(--color-green-500);
 }
 
+.recharts-wrapper :focus {
+  outline: none;
+}
+
+.recharts-surface:focus-visible {
+  outline: 2px solid var(--color-green-400);
+  outline-offset: 2px;
+}
+
 @layer components {
   .legal-document {
     color: var(--color-green-800);
