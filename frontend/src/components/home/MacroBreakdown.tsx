@@ -28,16 +28,17 @@ function Bar({
     <div>
       <div className="mb-1 flex justify-between text-sm">
         <span className="font-medium text-green-600">{label}</span>
-        {isLoading ? (
-          <span
-            className="h-4 w-20 animate-pulse rounded bg-green-100"
-            aria-hidden="true"
-          />
-        ) : (
-          <span className="text-green-500">
-            {value}g / {goal}g
-          </span>
-        )}
+        <span className="flex items-center gap-1 text-green-500">
+          {isLoading ? (
+            <span
+              className="h-4 w-8 animate-pulse rounded bg-green-100"
+              aria-hidden="true"
+            />
+          ) : (
+            `${value}g`
+          )}
+          <span>/ {goal}g</span>
+        </span>
       </div>
       <div
         className="relative h-2 overflow-hidden rounded-full bg-green-100"

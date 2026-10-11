@@ -40,14 +40,19 @@ export default function HomePage({ onReplyToActivity }: HomePageProps) {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const { meals, foodItems, isReady, isLoading, loadError, reload } =
     useDailyMeals(selectedDate);
-  const [weightHistory, setWeightHistory] = useState<WeightEntry[]>([]);
+  const [weightHistory, setWeightHistory] = useState<WeightEntry[] | null>(
+    null,
+  );
+  const [weightError, setWeightError] = useState(false);
 
   useEffect(() => {
     if (!user) return;
     const controller = new AbortController();
     getWeightHistory(user.userId, controller.signal)
       .then(setWeightHistory)
-      .catch(() => {});
+      .catch(() => {
+        if (!controller.signal.aborted) setWeightError(true);
+      });
     return () => controller.abort();
   }, [user]);
 
@@ -139,13 +144,11 @@ export default function HomePage({ onReplyToActivity }: HomePageProps) {
                 fatGoal={user.dailyFatGoal ?? 65}
                 isLoading={!isReady}
               />
-              {weightHistory.length > 0 && (
-                <WeightWidget
-                  currentWeight={weightHistory[0].weight}
-                  previous={weightHistory[1] ?? null}
-                  goalWeight={user.targetWeight ?? null}
-                />
-              )}
+              <WeightWidget
+                history={weightHistory}
+                hasError={weightError}
+                goalWeight={user.targetWeight ?? null}
+              />
             </div>
             <DailyMealList
               meals={meals}
