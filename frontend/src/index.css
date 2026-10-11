@@ -208,7 +208,45 @@ body {
   box-shadow: 0 0 0 8px rgb(34 197 94 / 0.15);
 }
 
+.kcal-datepicker .react-datepicker__day,
+.kcal-datepicker .react-datepicker__day:not([aria-disabled='true']):hover {
+  border-radius: var(--day-radius, 0.3rem);
+}
+
 .kcal-datepicker .react-datepicker__day--keyboard-selected {
+  background-color: var(--color-green-100);
+  color: var(--color-green-800);
+}
+
+.kcal-datepicker .react-datepicker__day--in-range,
+.kcal-datepicker .react-datepicker__day--in-selecting-range {
+  --day-radius: 0;
+  width: calc(1.7rem + 2 * 0.166rem);
+  margin-inline: 0;
+}
+
+.kcal-datepicker .react-datepicker__day--range-start,
+.kcal-datepicker .react-datepicker__day--selecting-range-start {
+  --day-radius: 0.3rem 0 0 0.3rem;
+}
+
+.kcal-datepicker .react-datepicker__day--range-end,
+.kcal-datepicker .react-datepicker__day--selecting-range-end {
+  --day-radius: 0 0.3rem 0.3rem 0;
+}
+
+.kcal-datepicker
+  .react-datepicker__day--range-start.react-datepicker__day--range-end,
+.kcal-datepicker
+  .react-datepicker__day--selecting-range-start.react-datepicker__day--selecting-range-end {
+  --day-radius: 0.3rem;
+}
+
+.kcal-datepicker .react-datepicker__day--in-range,
+.kcal-datepicker
+  .react-datepicker__day--in-selecting-range:not(
+    .react-datepicker__day--in-range
+  ) {
   background-color: var(--color-green-100);
   color: var(--color-green-800);
 }
@@ -218,11 +256,19 @@ body {
   color: var(--color-green-800);
 }
 
-.kcal-datepicker .react-datepicker__day--selected,
 .kcal-datepicker
-  .react-datepicker__day--selected:not([aria-disabled='true']):hover {
-  background-color: var(--color-green-500);
-  color: white;
+  .react-datepicker__day:is(
+    .react-datepicker__day--selected,
+    .react-datepicker__day--range-start,
+    .react-datepicker__day--range-end,
+    .react-datepicker__day--selecting-range-start,
+    .react-datepicker__day--selecting-range-end
+  ) {
+  &,
+  &:not([aria-disabled='true']):hover {
+    background-color: var(--color-green-500);
+    color: white;
+  }
 }
 
 .kcal-datepicker .react-datepicker__day--today {
