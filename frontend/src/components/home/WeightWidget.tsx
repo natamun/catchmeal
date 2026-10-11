@@ -1,16 +1,14 @@
 import { Minus, TrendingDown, TrendingUp } from 'lucide-react';
 
-import StatTile from './StatTile';
-import SummaryCard from './SummaryCard';
+import { formatKg } from '../../utils/format';
+import StatTile from '../ui/StatTile';
+import SummaryCard from '../ui/SummaryCard';
 
 interface Props {
   history: { weight: number; loggedAt: string }[] | null;
   hasError?: boolean;
   goalWeight: number | null;
 }
-
-const formatKg = (value: number) =>
-  value.toLocaleString('fr-FR', { maximumFractionDigits: 1 });
 
 function formatDay(isoDate: string) {
   const date = new Date(isoDate);

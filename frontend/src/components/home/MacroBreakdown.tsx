@@ -1,5 +1,5 @@
+import SummaryCard from '../ui/SummaryCard';
 import { progressLaps } from './progress';
-import SummaryCard from './SummaryCard';
 
 interface Macros {
   protein: number;

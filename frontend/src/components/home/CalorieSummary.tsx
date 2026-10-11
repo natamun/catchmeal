@@ -1,6 +1,6 @@
+import StatTile from '../ui/StatTile';
+import SummaryCard from '../ui/SummaryCard';
 import { progressLaps } from './progress';
-import StatTile from './StatTile';
-import SummaryCard from './SummaryCard';
 
 interface Props {
   consumed: number;
