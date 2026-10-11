@@ -6,15 +6,15 @@ import ChatBotPopup from './components/ai/ChatBotPopup';
 import type { ActivityItem } from './components/friends/types';
 import { ConnectionBanner } from './components/layout/ConnectionBanner';
 import Nav, { type Tab } from './components/layout/Nav';
+import AuthPage from './pages/AuthPage';
+import LandingPage from './pages/LandingPage';
+import LegalNoticePage from './pages/LegalNoticePage';
+import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
+import TermsOfServicePage from './pages/TermsOfServicePage';
 import { SocketProvider } from './socket/SocketProvider';
 import type { ChatMessage } from './types/ChatBotType';
 
-const LandingPage = lazy(() => import('./pages/LandingPage'));
-const AuthPage = lazy(() => import('./pages/AuthPage'));
 const AdminPage = lazy(() => import('./pages/AdminPage'));
-const LegalNoticePage = lazy(() => import('./pages/LegalNoticePage'));
-const PrivacyPolicyPage = lazy(() => import('./pages/PrivacyPolicyPage'));
-const TermsOfServicePage = lazy(() => import('./pages/TermsOfServicePage'));
 const HomePage = lazy(() => import('./pages/HomePage'));
 const StatsPage = lazy(() => import('./pages/StatsPage'));
 const FriendsPage = lazy(() => import('./pages/FriendsPage'));
@@ -70,60 +70,50 @@ function AppShell() {
 
   if (page === 'mentions-legales') {
     return (
-      <Suspense fallback={null}>
-        <LegalNoticePage
-          onBack={() => setPage(previousPage)}
-          onNavigate={setPage}
-        />
-      </Suspense>
+      <LegalNoticePage
+        onBack={() => setPage(previousPage)}
+        onNavigate={setPage}
+      />
     );
   }
 
   if (page === 'confidentialite') {
     return (
-      <Suspense fallback={null}>
-        <PrivacyPolicyPage
-          onBack={() => setPage(previousPage)}
-          onNavigate={setPage}
-        />
-      </Suspense>
+      <PrivacyPolicyPage
+        onBack={() => setPage(previousPage)}
+        onNavigate={setPage}
+      />
     );
   }
 
   if (page === 'conditions') {
     return (
-      <Suspense fallback={null}>
-        <TermsOfServicePage
-          onBack={() => setPage(previousPage)}
-          onNavigate={setPage}
-        />
-      </Suspense>
+      <TermsOfServicePage
+        onBack={() => setPage(previousPage)}
+        onNavigate={setPage}
+      />
     );
   }
 
   if (status === 'unauthenticated') {
     if (page === 'login' || page === 'register') {
       return (
-        <Suspense fallback={null}>
-          <AuthPage
-            initialMode={page}
-            onCancel={() => setPage('landing')}
-            oauthError={oauthError}
-          />
-        </Suspense>
+        <AuthPage
+          initialMode={page}
+          onCancel={() => setPage('landing')}
+          oauthError={oauthError}
+        />
       );
     }
 
     return (
-      <Suspense fallback={null}>
-        <LandingPage
-          onLogin={() => navigateTo('login')}
-          onRegister={() => navigateTo('register')}
-          onMentionsLegales={() => navigateTo('mentions-legales')}
-          onConfidentialite={() => navigateTo('confidentialite')}
-          onConditions={() => navigateTo('conditions')}
-        />
-      </Suspense>
+      <LandingPage
+        onLogin={() => navigateTo('login')}
+        onRegister={() => navigateTo('register')}
+        onMentionsLegales={() => navigateTo('mentions-legales')}
+        onConfidentialite={() => navigateTo('confidentialite')}
+        onConditions={() => navigateTo('conditions')}
+      />
     );
   }
 
