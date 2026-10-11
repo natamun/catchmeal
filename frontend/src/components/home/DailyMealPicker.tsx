@@ -77,7 +77,7 @@ export default function DailyMealPicker({
           return;
         }
         console.error(err);
-        setLoadError('Impossible de charger ta bibliothèque, réessaye.');
+        setLoadError('Impossible de charger la bibliothèque. Réessayez.');
       })
       .finally(() => {
         if (!controller.signal.aborted) {

@@ -95,6 +95,9 @@
 
   --spacing-header: 4rem;
 
+  --breakpoint-2xs: 21.875rem;
+  --breakpoint-xs: 28.75rem;
+
   /* Colors */
   --color-green-50: #d8f3dc;
   --color-green-100: #b7e4c7;

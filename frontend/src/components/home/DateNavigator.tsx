@@ -78,7 +78,7 @@ function DateButton({
       aria-haspopup="dialog"
       aria-expanded={isOpen}
       aria-live="polite"
-      className={`w-36 cursor-pointer rounded-lg bg-green-500 px-3 py-1.5 text-center text-sm font-medium text-white capitalize transition-colors hover:bg-green-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-400 ${className ?? ''}`}
+      className={`w-36 cursor-pointer rounded-lg bg-green-500 px-3 py-1.5 text-center text-sm font-medium text-white capitalize transition-colors hover:bg-green-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-400 max-2xs:w-full ${className ?? ''}`}
     >
       {label}
     </button>
@@ -95,7 +95,7 @@ export default function DateNavigator({ value, onChange }: DateNavigatorProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div className="flex gap-1.5 self-start rounded-xl border border-green-200 bg-white p-1.5">
+    <div className="flex gap-1.5 self-start rounded-xl border border-green-200 bg-white p-1.5 max-2xs:w-full">
       <button
         type="button"
         onClick={() => onChange(shiftDay(value, -1))}
@@ -117,6 +117,7 @@ export default function DateNavigator({ value, onChange }: DateNavigatorProps) {
         locale={fr}
         calendarStartDay={1}
         calendarClassName="kcal-datepicker"
+        wrapperClassName="max-2xs:flex-1"
         portalId="datepicker-portal"
         customInput={
           <DateButton

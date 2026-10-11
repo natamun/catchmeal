@@ -125,7 +125,7 @@ export default function DailyMealList({
                 </div>
                 <div className="flex items-center gap-3">
                   {rows.length > 0 && (
-                    <span className="animate-fade-in-up text-sm font-semibold text-green-800 max-[350px]:hidden">
+                    <span className="animate-fade-in-up text-sm font-semibold text-green-800 max-2xs:hidden">
                       {Math.round(total)} kcal
                     </span>
                   )}

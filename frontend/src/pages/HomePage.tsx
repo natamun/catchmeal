@@ -12,10 +12,9 @@ import FriendsActivity from '../components/home/FriendsActivity';
 import MacroBreakdown from '../components/home/MacroBreakdown';
 import QuickAddDialog from '../components/home/QuickAddDialog';
 import WeightWidget from '../components/home/WeightWidget';
-import Header from '../components/layout/Header';
 import { buildDrafts, type MealItemDraft } from '../components/meal/draft';
 import { mealTotals, type Meal, type MealType } from '../components/meal/types';
-import { getWeightHistory } from '../components/profile/api';
+import { getWeightHistory, type WeightEntry } from '../components/profile/api';
 import { Toast } from '../components/ui/Toast';
 import { useActivityFeed } from '../hooks/useActivityFeed';
 import { useDailyMeals } from '../hooks/useDailyMeals';
@@ -39,9 +38,9 @@ export default function HomePage({ onReplyToActivity }: HomePageProps) {
   const [selectedDate, setSelectedDate] = useState(() => new Date());
   const [addingMealType, setAddingMealType] = useState<MealType | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const { meals, foodItems, isLoading, loadError, reload } =
+  const { meals, foodItems, isReady, isLoading, loadError, reload } =
     useDailyMeals(selectedDate);
-  const [weightHistory, setWeightHistory] = useState<{ weight: number }[]>([]);
+  const [weightHistory, setWeightHistory] = useState<WeightEntry[]>([]);
 
   useEffect(() => {
     if (!user) return;
@@ -51,9 +50,6 @@ export default function HomePage({ onReplyToActivity }: HomePageProps) {
       .catch(() => {});
     return () => controller.abort();
   }, [user]);
-
-  const latestWeight = weightHistory[0]?.weight ?? null;
-  const firstWeight = weightHistory.at(-1)?.weight ?? null;
 
   const dayTotals = meals.reduce(
     (acc, meal) => {
@@ -77,7 +73,7 @@ export default function HomePage({ onReplyToActivity }: HomePageProps) {
   const quickAddDialogRef = useRef<HTMLDialogElement>(null);
   const presence = usePresence(user!.userId);
   const activities = useActivityFeed(user!.userId);
-  const latestActivties = latestActivityPerFriend(activities);
+  const latestActivities = latestActivityPerFriend(activities);
 
   useTimeout(() => setSuccessMessage(null), successMessage ? 3000 : null);
 
@@ -111,7 +107,7 @@ export default function HomePage({ onReplyToActivity }: HomePageProps) {
         />
       ) : (
         <div className="animate-fade-in-up">
-          <Header username={user.username} />
+          <h1 className="sr-only">Accueil</h1>
           <div className="flex flex-col gap-4 md:gap-6">
             <div className="flex flex-wrap justify-between gap-3">
               <DateNavigator value={selectedDate} onChange={setSelectedDate} />
@@ -120,16 +116,19 @@ export default function HomePage({ onReplyToActivity }: HomePageProps) {
                 onClick={() => quickAddDialogRef.current?.showModal()}
                 aria-label="Ajout rapide"
                 title="Ajout rapide"
-                className="flex cursor-pointer items-center justify-center gap-2 rounded-xl bg-green-500 px-3 text-sm font-medium text-white transition-colors hover:bg-green-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-400 sm:px-4"
+                className="flex cursor-pointer items-center justify-center gap-2 rounded-xl bg-green-500 px-3 text-sm font-medium text-white transition-colors hover:bg-green-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-400 max-2xs:order-first max-2xs:w-full max-2xs:py-2.5 xs:px-4"
               >
                 <Zap className="h-4 w-4" />
-                <span className="hidden sm:inline">Ajout rapide</span>
+                <span className="hidden max-2xs:inline xs:inline">
+                  Ajout rapide
+                </span>
               </button>
             </div>
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-3 md:gap-6">
+            <div className="grid auto-rows-fr grid-cols-1 gap-4 md:gap-6 lg:grid-cols-3">
               <CalorieSummary
                 consumed={Math.round(dayTotals.kcal)}
                 goal={user.dailyCalorieGoal ?? 2000}
+                isLoading={!isReady}
               />
               <MacroBreakdown
                 protein={Math.round(dayTotals.protein)}
@@ -138,12 +137,13 @@ export default function HomePage({ onReplyToActivity }: HomePageProps) {
                 carbsGoal={user.dailyCarbsGoal ?? 250}
                 fat={Math.round(dayTotals.fat)}
                 fatGoal={user.dailyFatGoal ?? 65}
+                isLoading={!isReady}
               />
-              {latestWeight !== null && firstWeight !== null && (
+              {weightHistory.length > 0 && (
                 <WeightWidget
-                  currentWeight={latestWeight}
-                  startWeight={firstWeight}
-                  goalWeight={user.targetWeight ?? latestWeight}
+                  currentWeight={weightHistory[0].weight}
+                  previous={weightHistory[1] ?? null}
+                  goalWeight={user.targetWeight ?? null}
                 />
               )}
             </div>
@@ -156,7 +156,7 @@ export default function HomePage({ onReplyToActivity }: HomePageProps) {
               onEdit={openSectionEditor}
             />
             <FriendsActivity
-              activities={latestActivties}
+              activities={latestActivities}
               presence={presence}
               onReply={(activity) => onReplyToActivity?.(activity)}
             />
