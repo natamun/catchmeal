@@ -6,6 +6,7 @@ interface Props {
   consumed: number;
   goal: number;
   isLoading?: boolean;
+  unavailable?: boolean;
 }
 
 const RADIUS = 42;
@@ -15,10 +16,14 @@ export default function CalorieSummary({
   consumed,
   goal,
   isLoading = false,
+  unavailable = false,
 }: Props) {
   const over = consumed > goal;
   const difference = Math.abs(goal - consumed);
-  const { lap, extraLap } = progressLaps(isLoading ? 0 : consumed, goal);
+  const { lap, extraLap } = progressLaps(
+    isLoading || unavailable ? 0 : consumed,
+    goal,
+  );
 
   return (
     <SummaryCard title="Calories du jour" busy={isLoading}>
@@ -68,11 +73,17 @@ export default function CalorieSummary({
                 aria-live="polite"
               >
                 <span className="text-2xl font-bold text-green-800">
-                  {difference}
-                  <span className="sr-only"> kilocalories</span>
+                  {unavailable ? '–' : difference}
+                  {!unavailable && (
+                    <span className="sr-only"> kilocalories</span>
+                  )}
                 </span>
                 <span className="text-xs text-green-600">
-                  {over ? 'en trop' : 'restantes'}
+                  {unavailable
+                    ? 'indisponible'
+                    : over
+                      ? 'en trop'
+                      : 'restantes'}
                 </span>
               </p>
             )}
@@ -89,6 +100,8 @@ export default function CalorieSummary({
                 className="block h-6 w-16 animate-pulse rounded bg-green-100"
                 aria-hidden="true"
               />
+            ) : unavailable ? (
+              '–'
             ) : (
               <>
                 {consumed}

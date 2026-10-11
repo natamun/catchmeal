@@ -21,6 +21,7 @@ export function useDailyMeals(date: Date) {
   const dateKey = toApiDate(date);
   const [foodItems, setFoodItems] = useState<FoodItem[]>([]);
   const [foodsError, setFoodsError] = useState<string | null>(null);
+  const [foodsAttempt, setFoodsAttempt] = useState(0);
   const [days, setDays] = useState<Record<string, Meal[]>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
   const loaded = useRef(new Set<string>());
@@ -34,10 +35,10 @@ export function useDailyMeals(date: Date) {
       .catch((err: unknown) => {
         if (controller.signal.aborted) return;
         console.error(err);
-        setFoodsError('Impossible de charger les aliments. Réessayez.');
+        setFoodsError('Impossible de charger les aliments.');
       });
     return () => controller.abort();
-  }, [userId]);
+  }, [userId, foodsAttempt]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -72,7 +73,7 @@ export function useDailyMeals(date: Date) {
           console.error(err);
           setErrors((prev) => ({
             ...prev,
-            [cacheKey]: 'Impossible de charger le journal. Réessayez.',
+            [cacheKey]: 'Impossible de charger le journal.',
           }));
         })
         .finally(() => {
@@ -106,5 +107,18 @@ export function useDailyMeals(date: Date) {
     isLoading: meals === undefined && dayError === undefined,
     loadError: dayError ?? foodsError,
     reload: () => loadDay(dateKey),
+    retry: () => {
+      if (foodsError !== null) {
+        setFoodsError(null);
+        setFoodsAttempt((attempt) => attempt + 1);
+      }
+      setErrors((prev) => {
+        if (!(cacheKey in prev)) return prev;
+        const next = { ...prev };
+        delete next[cacheKey];
+        return next;
+      });
+      loadDay(dateKey);
+    },
   };
 }

@@ -73,10 +73,12 @@ export default function FoodPage() {
   const [editingItem, setEditingItem] = useState<FoodItem | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [foodsAttempt, setFoodsAttempt] = useState(0);
   const [meals, setMeals] = useState<Meal[]>([]);
   const [editingMeal, setEditingMeal] = useState<Meal | null>(null);
   const [isMealsLoading, setIsMealsLoading] = useState(true);
   const [mealsLoadError, setMealsLoadError] = useState<string | null>(null);
+  const [mealsAttempt, setMealsAttempt] = useState(0);
   const dialogRef = useRef<HTMLDialogElement>(null);
   const mealDialogRef = useRef<HTMLDialogElement>(null);
   const legendRef = useRef<HTMLDivElement>(null);
@@ -111,7 +113,7 @@ export default function FoodPage() {
         )
           return;
         console.error(err);
-        setLoadError('Impossible de charger tes aliments, réessaye.');
+        setLoadError('Impossible de charger les aliments.');
       })
       .finally(() => {
         if (!controller.signal.aborted) {
@@ -119,7 +121,7 @@ export default function FoodPage() {
         }
       });
     return () => controller.abort();
-  }, [userId]);
+  }, [userId, foodsAttempt]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -134,7 +136,7 @@ export default function FoodPage() {
         )
           return;
         console.error(err);
-        setMealsLoadError('Impossible de charger tes repas, réessaye.');
+        setMealsLoadError('Impossible de charger les repas.');
       })
       .finally(() => {
         if (!controller.signal.aborted) {
@@ -142,7 +144,7 @@ export default function FoodPage() {
         }
       });
     return () => controller.abort();
-  }, [userId]);
+  }, [userId, mealsAttempt]);
 
   const openDialog = (item: FoodItem | null) => {
     setEditingItem(item);
@@ -218,6 +220,11 @@ export default function FoodPage() {
             items={foodItems}
             isLoading={isLoading}
             loadError={loadError}
+            onRetry={() => {
+              setLoadError(null);
+              setIsLoading(true);
+              setFoodsAttempt((attempt) => attempt + 1);
+            }}
             headerAction={
               <AddCircleButton
                 label="Ajouter un aliment"
@@ -236,6 +243,11 @@ export default function FoodPage() {
             meals={meals}
             isLoading={isMealsLoading}
             loadError={mealsLoadError}
+            onRetry={() => {
+              setMealsLoadError(null);
+              setIsMealsLoading(true);
+              setMealsAttempt((attempt) => attempt + 1);
+            }}
             headerAction={
               <AddCircleButton
                 label="Ajouter un repas"

@@ -38,8 +38,9 @@ export default function HomePage({ onReplyToActivity }: HomePageProps) {
   const [selectedDate, setSelectedDate] = useState(() => new Date());
   const [addingMealType, setAddingMealType] = useState<MealType | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const { meals, foodItems, isReady, isLoading, loadError, reload } =
+  const { meals, foodItems, isReady, isLoading, loadError, reload, retry } =
     useDailyMeals(selectedDate);
+  const unavailable = !isReady && !isLoading;
   const [weightHistory, setWeightHistory] = useState<WeightEntry[] | null>(
     null,
   );
@@ -137,7 +138,8 @@ export default function HomePage({ onReplyToActivity }: HomePageProps) {
                 <CalorieSummary
                   consumed={Math.round(dayTotals.kcal)}
                   goal={user.dailyCalorieGoal ?? 2000}
-                  isLoading={!isReady}
+                  isLoading={isLoading}
+                  unavailable={unavailable}
                 />
                 <MacroBreakdown
                   protein={Math.round(dayTotals.protein)}
@@ -146,7 +148,8 @@ export default function HomePage({ onReplyToActivity }: HomePageProps) {
                   carbsGoal={user.dailyCarbsGoal ?? 250}
                   fat={Math.round(dayTotals.fat)}
                   fatGoal={user.dailyFatGoal ?? 65}
-                  isLoading={!isReady}
+                  isLoading={isLoading}
+                  unavailable={unavailable}
                 />
                 <WeightWidget
                   history={weightHistory}
@@ -159,6 +162,7 @@ export default function HomePage({ onReplyToActivity }: HomePageProps) {
                 foodItems={foodItems}
                 isLoading={isLoading}
                 loadError={loadError}
+                onRetry={retry}
                 onAdd={setAddingMealType}
                 onEdit={openSectionEditor}
               />

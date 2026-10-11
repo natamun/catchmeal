@@ -9,6 +9,7 @@ interface Macros {
   carbsGoal: number;
   fatGoal: number;
   isLoading?: boolean;
+  unavailable?: boolean;
 }
 
 function Bar({
@@ -16,13 +17,18 @@ function Bar({
   value,
   goal,
   isLoading,
+  unavailable,
 }: {
   label: string;
   value: number;
   goal: number;
   isLoading: boolean;
+  unavailable: boolean;
 }) {
-  const { lap, extraLap } = progressLaps(isLoading ? 0 : value, goal);
+  const { lap, extraLap } = progressLaps(
+    isLoading || unavailable ? 0 : value,
+    goal,
+  );
 
   return (
     <div>
@@ -34,6 +40,8 @@ function Bar({
               className="h-4 w-8 animate-pulse rounded bg-green-100"
               aria-hidden="true"
             />
+          ) : unavailable ? (
+            '–'
           ) : (
             `${value}g`
           )}
@@ -73,6 +81,7 @@ export default function MacroBreakdown({
   carbsGoal,
   fatGoal,
   isLoading = false,
+  unavailable = false,
 }: Macros) {
   return (
     <SummaryCard title="Macronutriments" busy={isLoading}>
@@ -82,14 +91,22 @@ export default function MacroBreakdown({
           value={protein}
           goal={proteinGoal}
           isLoading={isLoading}
+          unavailable={unavailable}
         />
         <Bar
           label="Glucides"
           value={carbs}
           goal={carbsGoal}
           isLoading={isLoading}
+          unavailable={unavailable}
         />
-        <Bar label="Lipides" value={fat} goal={fatGoal} isLoading={isLoading} />
+        <Bar
+          label="Lipides"
+          value={fat}
+          goal={fatGoal}
+          isLoading={isLoading}
+          unavailable={unavailable}
+        />
       </div>
     </SummaryCard>
   );

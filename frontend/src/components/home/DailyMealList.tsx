@@ -4,6 +4,7 @@ import { LoaderCircle, Plus } from 'lucide-react';
 import type { FoodItem } from '../food/types';
 import { MEAL_TYPE_LABELS, type Meal, type MealType } from '../meal/types';
 import { EditIconButton } from '../ui/EditIconButton';
+import { LoadError } from '../ui/LoadError';
 
 const MEAL_TYPES: MealType[] = ['BREAKFAST', 'LUNCH', 'DINNER', 'SNACK'];
 
@@ -54,6 +55,7 @@ interface DailyMealListProps {
   foodItems: FoodItem[];
   isLoading: boolean;
   loadError: string | null;
+  onRetry: () => void;
   onAdd: (mealType: MealType) => void;
   onEdit: (mealType: MealType) => void;
 }
@@ -63,6 +65,7 @@ export default function DailyMealList({
   foodItems,
   isLoading,
   loadError,
+  onRetry,
   onAdd,
   onEdit,
 }: DailyMealListProps) {
@@ -82,13 +85,12 @@ export default function DailyMealList({
         </span>
       )}
 
-      {loadError && (
-        <p className="border-b border-green-200 px-5 py-3 text-sm text-red-500">
-          {loadError}
-        </p>
-      )}
+      {loadError && <LoadError message={loadError} onRetry={onRetry} />}
 
-      <div aria-busy={isLoading} className="divide-y divide-green-200">
+      <div
+        aria-busy={isLoading}
+        className={`divide-y divide-green-200 ${loadError ? 'hidden' : ''}`}
+      >
         {MEAL_TYPES.map((mealType) => {
           const rows = rowsOf(
             meals

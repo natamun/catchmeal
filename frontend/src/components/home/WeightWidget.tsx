@@ -52,7 +52,7 @@ export default function WeightWidget({
       )}
       {hasError && (
         <p className="text-sm text-green-600">
-          Impossible de charger les pesées. Réessayez.
+          Impossible de charger les pesées.
         </p>
       )}
       {history !== null && current === null && (

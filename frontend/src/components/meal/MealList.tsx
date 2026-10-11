@@ -2,6 +2,7 @@ import { useState, type ReactNode } from 'react';
 import { ChevronRight, LoaderCircle } from 'lucide-react';
 
 import { MACROS } from '../../constants/macros';
+import { LoadError } from '../ui/LoadError';
 import { MacroBadge } from '../ui/MacroBadge';
 import MealSearchBar from './MealSearchBar';
 import {
@@ -16,6 +17,7 @@ interface MealListProps {
   meals: Meal[];
   isLoading: boolean;
   loadError: string | null;
+  onRetry?: () => void;
   headerAction?: ReactNode;
   renderAction?: (meal: Meal) => ReactNode;
 }
@@ -41,6 +43,7 @@ export default function MealList({
   meals,
   isLoading,
   loadError,
+  onRetry,
   headerAction,
   renderAction,
 }: MealListProps) {
@@ -102,9 +105,7 @@ export default function MealList({
         </div>
       )}
 
-      {loadError && (
-        <p className="px-5 pb-5 text-sm text-red-500">{loadError}</p>
-      )}
+      {loadError && <LoadError message={loadError} onRetry={onRetry} />}
 
       {!isLoading && !loadError && meals.length === 0 && (
         <p className="px-5 py-10 text-center text-sm text-green-400">
