@@ -71,6 +71,18 @@
   }
 }
 
+@keyframes breathe {
+  0%,
+  100% {
+    opacity: 0.6;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+}
+
 @theme {
   /* Animations */
   --animate-fade-in-up: fade-in-up 0.15s ease-out;
@@ -79,6 +91,7 @@
   --animate-pill-select: pill-select 0.15s cubic-bezier(0.4, 0, 0.2, 1);
   --animate-toast-in: toast-in 0.2s ease-out;
   --animate-toast-out: toast-out 0.15s ease-in;
+  --animate-breathe: breathe 4s ease-in-out infinite;
 
   /* Colors */
   --color-green-50: #d8f3dc;
@@ -213,4 +226,14 @@ body {
 
 .kcal-datepicker .react-datepicker__navigation:hover *::before {
   border-color: var(--color-green-500);
+}
+
+html:has(#landing-page) {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html:has(#landing-page) {
+    scroll-behavior: auto;
+  }
 }
