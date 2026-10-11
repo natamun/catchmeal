@@ -1,6 +1,20 @@
-import { Apple } from 'lucide-react';
+import { useState, type ReactNode } from 'react';
+import * as Popover from '@radix-ui/react-popover';
+import {
+  Apple,
+  ChartColumn,
+  House,
+  LogOut,
+  ShieldCheck,
+  User,
+  Users,
+  type LucideIcon,
+} from 'lucide-react';
 
+import { useAuth } from '../../auth/auth-context';
+import { Avatar } from '../ui/Avatar';
 import { Brand } from '../ui/Brand';
+import { DropdownPanel } from '../ui/DropdownPanel';
 
 export type Tab = 'home' | 'food' | 'stats' | 'friends' | 'profile' | 'admin';
 
@@ -14,145 +28,57 @@ interface TabDef {
   id: Tab;
   label: string;
   shortLabel?: string;
-  icon: React.ReactNode;
+  icon: LucideIcon;
 }
 
 interface NavButtonProps {
   tab: TabDef;
   isActive: boolean;
-  variant: 'sidebar' | 'bottom';
+  variant: 'top' | 'bottom';
   onClick: () => void;
+  icon?: ReactNode;
 }
 
-const TABS: TabDef[] = [
-  {
-    id: 'home',
-    label: 'Accueil',
-    icon: (
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        className="h-5 w-5 shrink-0"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke="currentColor"
-        strokeWidth={2}
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          d="M3 12l2-2m0 0l7-7 7 7m-9 2v8m4-8v8m-4 0h4"
-        />
-      </svg>
-    ),
-  },
-  {
-    id: 'food',
-    label: 'Alimentation',
-    shortLabel: 'Aliments',
-    icon: <Apple className="h-5 w-5 shrink-0" />,
-  },
+const MAIN_TABS: TabDef[] = [
+  { id: 'home', label: 'Accueil', icon: House },
+  { id: 'food', label: 'Alimentation', shortLabel: 'Aliments', icon: Apple },
   {
     id: 'stats',
     label: 'Statistiques',
     shortLabel: 'Stats',
-    icon: (
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        className="h-5 w-5 shrink-0"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke="currentColor"
-        strokeWidth={2}
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-        />
-      </svg>
-    ),
+    icon: ChartColumn,
   },
-  {
-    id: 'friends',
-    label: 'Amis',
-    icon: (
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        className="h-5 w-5 shrink-0"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke="currentColor"
-        strokeWidth={2}
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          d="M17 20h5v-2a4 4 0 00-5-3.87M9 20H4v-2a4 4 0 015-3.87m6-4.13a4 4 0 11-8 0 4 4 0 018 0z"
-        />
-      </svg>
-    ),
-  },
-  {
-    id: 'profile',
-    label: 'Profil',
-    icon: (
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        className="h-5 w-5 shrink-0"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke="currentColor"
-        strokeWidth={2}
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-        />
-      </svg>
-    ),
-  },
+  { id: 'friends', label: 'Amis', icon: Users },
 ];
 
-const ADMIN_TAB: TabDef = {
-  id: 'admin',
-  label: 'Admin',
-  icon: (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      className="h-5 w-5 shrink-0"
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke="currentColor"
-      strokeWidth={2}
-    >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
-      />
-    </svg>
-  ),
-};
+const PROFILE_TAB: TabDef = { id: 'profile', label: 'Profil', icon: User };
 
-function NavButton({ tab, isActive, variant, onClick }: NavButtonProps) {
+const ADMIN_TAB: TabDef = { id: 'admin', label: 'Admin', icon: ShieldCheck };
+
+const MENU_ITEM_CLASS =
+  'flex w-full cursor-pointer items-center gap-2 px-4 py-2.5 text-left text-sm transition-colors';
+
+function NavButton({ tab, isActive, variant, onClick, icon }: NavButtonProps) {
+  const Icon = tab.icon;
   const baseClass =
     'cursor-pointer transition-colors focus-visible:outline-2 focus-visible:outline-green-400 focus-visible:outline-offset-2';
 
-  if (variant === 'sidebar') {
+  if (variant === 'top') {
     return (
       <button
         type="button"
         onClick={onClick}
         aria-current={isActive ? 'page' : undefined}
-        className={`${baseClass} flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-medium ${
+        aria-label={tab.label}
+        title={tab.label}
+        className={`${baseClass} flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium ${
           isActive
-            ? 'bg-green-100 text-green-300'
-            : 'text-green-500 hover:bg-green-100 hover:text-green-800'
+            ? 'animate-pill-select bg-green-100 text-green-800'
+            : 'text-green-700 hover:bg-green-100'
         }`}
       >
-        <span aria-hidden="true">{tab.icon}</span>
-        {tab.label}
+        <Icon className="h-5 w-5 shrink-0" aria-hidden="true" />
+        <span className="hidden md:inline">{tab.label}</span>
       </button>
     );
   }
@@ -163,56 +89,140 @@ function NavButton({ tab, isActive, variant, onClick }: NavButtonProps) {
       onClick={onClick}
       aria-current={isActive ? 'page' : undefined}
       aria-label={tab.label}
-      className={`${baseClass} flex w-full flex-col items-center gap-1 py-3 text-xs font-medium ${
-        isActive ? 'text-green-300' : 'text-green-500 hover:text-green-600'
+      className={`${baseClass} w-full px-1 py-1.5 text-xs font-medium ${
+        isActive ? 'text-green-800' : 'text-green-600'
       }`}
     >
-      <span aria-hidden="true">{tab.icon}</span>
-      {tab.shortLabel ?? tab.label}
+      <span
+        className={`flex flex-col items-center gap-1 rounded-xl py-1.5 ${isActive ? 'animate-pill-select bg-green-100' : ''}`}
+      >
+        {icon ?? <Icon className="h-5 w-5 shrink-0" aria-hidden="true" />}
+        {tab.shortLabel ?? tab.label}
+      </span>
     </button>
   );
 }
 
 export default function Nav({ active, onChange, isAdmin = false }: Props) {
-  const tabs = isAdmin ? [...TABS, ADMIN_TAB] : TABS;
+  const { user, logout } = useAuth();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [menuContainer, setMenuContainer] = useState<HTMLDivElement | null>(
+    null,
+  );
+
+  if (!user) {
+    return null;
+  }
+
+  const bottomTabs = isAdmin
+    ? [...MAIN_TABS, ADMIN_TAB, PROFILE_TAB]
+    : [...MAIN_TABS, PROFILE_TAB];
+
+  const openFromMenu = (tab: Tab) => {
+    setMenuOpen(false);
+    onChange(tab);
+  };
 
   return (
     <>
-      {/* Sidebar — desktop */}
-      <aside
-        aria-label="Navigation principale"
-        className="fixed top-0 left-0 z-10 hidden h-full w-56 flex-col border-r border-green-200 bg-white py-6 md:flex"
-      >
-        <div className="mb-8 px-6">
-          <Brand />
+      <header className="sticky top-0 z-10 h-header border-b border-green-200 bg-white/75 backdrop-blur-md pointer-coarse:hidden">
+        <div className="mx-auto flex h-full max-w-6xl items-center justify-between px-6">
+          <div className="flex">
+            <Brand />
+          </div>
+          <nav aria-label="Navigation principale">
+            <ul className="flex items-center gap-1">
+              {MAIN_TABS.map((tab) => (
+                <li key={tab.id}>
+                  <NavButton
+                    tab={tab}
+                    isActive={tab.id === active}
+                    variant="top"
+                    onClick={() => onChange(tab.id)}
+                  />
+                </li>
+              ))}
+            </ul>
+          </nav>
+          <div ref={setMenuContainer} className="flex">
+            <Popover.Root open={menuOpen} onOpenChange={setMenuOpen}>
+              <Popover.Trigger asChild>
+                <button
+                  type="button"
+                  aria-label="Menu du compte"
+                  className={`cursor-pointer rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-400 ${
+                    active === 'profile' || active === 'admin'
+                      ? 'ring-2 ring-green-500 ring-offset-2'
+                      : ''
+                  }`}
+                >
+                  <Avatar
+                    username={user.username}
+                    avatarUrl={user.avatarUrl}
+                    size="sm"
+                  />
+                </button>
+              </Popover.Trigger>
+              <DropdownPanel container={menuContainer} align="end">
+                <button
+                  type="button"
+                  onClick={() => openFromMenu('profile')}
+                  className={`${MENU_ITEM_CLASS} text-green-800 hover:bg-green-50`}
+                >
+                  <User className="h-4 w-4 text-green-500" aria-hidden="true" />
+                  Profil
+                </button>
+                {isAdmin && (
+                  <button
+                    type="button"
+                    onClick={() => openFromMenu('admin')}
+                    className={`${MENU_ITEM_CLASS} text-green-800 hover:bg-green-50`}
+                  >
+                    <ShieldCheck
+                      className="h-4 w-4 text-green-500"
+                      aria-hidden="true"
+                    />
+                    Admin
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMenuOpen(false);
+                    void logout();
+                  }}
+                  className={`${MENU_ITEM_CLASS} border-t border-green-100 whitespace-nowrap text-red-500 hover:bg-red-50`}
+                >
+                  <LogOut className="h-4 w-4" aria-hidden="true" />
+                  Se déconnecter
+                </button>
+              </DropdownPanel>
+            </Popover.Root>
+          </div>
         </div>
-        <nav>
-          <ul className="flex flex-col gap-1 px-3">
-            {tabs.map((tab) => (
-              <li key={tab.id}>
-                <NavButton
-                  tab={tab}
-                  isActive={tab.id === active}
-                  variant="sidebar"
-                  onClick={() => onChange(tab.id)}
-                />
-              </li>
-            ))}
-          </ul>
-        </nav>
-      </aside>
+      </header>
 
-      {/* Bottom bar — mobile */}
-      <footer className="fixed right-0 bottom-0 left-0 z-10 border-t border-green-200 bg-white md:hidden">
+      <footer className="fixed right-0 bottom-0 left-0 z-10 hidden border-t border-green-200 bg-white pr-[max(0.5rem,env(safe-area-inset-right))] pb-[env(safe-area-inset-bottom)] pl-[max(0.5rem,env(safe-area-inset-left))] pointer-coarse:block">
         <nav aria-label="Navigation principale">
           <ul className="flex">
-            {tabs.map((tab) => (
+            {bottomTabs.map((tab) => (
               <li key={tab.id} className="flex-1">
                 <NavButton
                   tab={tab}
                   isActive={tab.id === active}
                   variant="bottom"
                   onClick={() => onChange(tab.id)}
+                  icon={
+                    tab.id === 'profile' ? (
+                      <span aria-hidden="true">
+                        <Avatar
+                          username={user.username}
+                          avatarUrl={user.avatarUrl}
+                          size="xs"
+                        />
+                      </span>
+                    ) : undefined
+                  }
                 />
               </li>
             ))}

@@ -31,14 +31,10 @@ interface SectionEdit {
 }
 
 interface HomePageProps {
-  onNavigateToProfile?: () => void;
   onReplyToActivity?: (activity: ActivityItem) => void;
 }
 
-export default function HomePage({
-  onNavigateToProfile,
-  onReplyToActivity,
-}: HomePageProps) {
+export default function HomePage({ onReplyToActivity }: HomePageProps) {
   const { user } = useAuth();
   const [selectedDate, setSelectedDate] = useState(() => new Date());
   const [addingMealType, setAddingMealType] = useState<MealType | null>(null);
@@ -115,11 +111,7 @@ export default function HomePage({
         />
       ) : (
         <div className="animate-fade-in-up">
-          <Header
-            username={user.username}
-            avatarUrl={user.avatarUrl ?? undefined}
-            onNavigateToProfile={onNavigateToProfile}
-          />
+          <Header username={user.username} />
           <div className="flex flex-col gap-4 md:gap-6">
             <div className="flex flex-wrap justify-between gap-3">
               <DateNavigator value={selectedDate} onChange={setSelectedDate} />

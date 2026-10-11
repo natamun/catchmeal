@@ -1,13 +1,14 @@
 interface AvatarProps {
   username: string;
   avatarUrl?: string | null;
-  size?: 'sm' | 'lg';
+  size?: 'xs' | 'sm' | 'lg';
   onClick?: () => void;
   disabled?: boolean;
   editable?: boolean;
 }
 
 const SIZE = {
+  xs: { container: 'h-5 w-5', text: 'text-xs', initials: 1 },
   sm: { container: 'h-10 w-10', text: 'text-sm', initials: 1 },
   lg: { container: 'h-16 w-16', text: 'text-2xl', initials: 2 },
 } as const;

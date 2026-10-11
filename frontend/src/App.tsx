@@ -122,7 +122,6 @@ function AppShell() {
   const pages: Record<Tab, React.ReactNode> = {
     home: (
       <HomePage
-        onNavigateToProfile={() => setActiveTab('profile')}
         onReplyToActivity={(activity) => {
           setPendingReply(activity);
           setActiveTab('friends');
@@ -137,19 +136,23 @@ function AppShell() {
         onPolitiqueConfidentialite={() => navigateTo('confidentialite')}
       />
     ),
-    admin: isAdmin ? (
-      <AdminPage />
-    ) : (
-      <HomePage onNavigateToProfile={() => setActiveTab('profile')} />
-    ),
+    admin: isAdmin ? <AdminPage /> : <HomePage />,
   };
 
   return (
-    <div className="min-h-screen bg-green-50 md:pl-56">
+    <div className="min-h-screen bg-green-50">
       <ConnectionBanner />
+      <Nav
+        active={activeTab}
+        onChange={(tab) => {
+          setPendingReply(null);
+          setActiveTab(tab);
+        }}
+        isAdmin={isAdmin}
+      />
       <main
         id="main-content"
-        className="mx-auto max-w-6xl px-6 pt-6 pb-24 md:pb-8"
+        className="mx-auto max-w-6xl px-6 pt-6 pb-8 pointer-coarse:pb-[calc(6rem+env(safe-area-inset-bottom))]"
       >
         <Suspense
           fallback={
@@ -161,14 +164,6 @@ function AppShell() {
           {pages[activeTab]}
         </Suspense>
       </main>
-      <Nav
-        active={activeTab}
-        onChange={(tab) => {
-          setPendingReply(null);
-          setActiveTab(tab);
-        }}
-        isAdmin={isAdmin}
-      />
       {(activeTab === 'stats' ||
         activeTab === 'home' ||
         activeTab === 'food') && (
