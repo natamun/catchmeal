@@ -46,7 +46,7 @@ export default function PublicHeader({ links, action, onBrandClick }: Props) {
   return (
     <header className="sticky top-0 z-10 h-header border-b border-green-200 bg-white/75 backdrop-blur-md">
       <div className="mx-auto flex h-full w-full max-w-6xl items-center justify-between px-8">
-        <div className="flex md:flex-1">
+        <div className="flex">
           <button
             type="button"
             onClick={closeMenuThen(onBrandClick)}
@@ -71,7 +71,7 @@ export default function PublicHeader({ links, action, onBrandClick }: Props) {
             ))}
           </ul>
         </nav>
-        <div className="flex items-center justify-end gap-4 md:flex-1">
+        <div className="flex items-center gap-4">
           <button
             type="button"
             onClick={action.onClick}
