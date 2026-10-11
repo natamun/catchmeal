@@ -1,4 +1,4 @@
-import { lazy, Suspense, useState } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 
 import { useAuth } from './auth/auth-context';
 import { AuthProvider } from './auth/AuthProvider';
@@ -14,12 +14,47 @@ import TermsOfServicePage from './pages/TermsOfServicePage';
 import { SocketProvider } from './socket/SocketProvider';
 import type { ChatMessage } from './types/ChatBotType';
 
-const AdminPage = lazy(() => import('./pages/AdminPage'));
-const HomePage = lazy(() => import('./pages/HomePage'));
-const StatsPage = lazy(() => import('./pages/StatsPage'));
-const FriendsPage = lazy(() => import('./pages/FriendsPage'));
-const FoodPage = lazy(() => import('./pages/FoodPage'));
-const ProfilePage = lazy(() => import('./pages/ProfilePage'));
+const SESSION_HINT_KEY = 'session-hint';
+const PRELOAD_DELAY_MS = 1000;
+
+const loaders = {
+  home: () => import('./pages/HomePage'),
+  food: () => import('./pages/FoodPage'),
+  stats: () => import('./pages/StatsPage'),
+  friends: () => import('./pages/FriendsPage'),
+  profile: () => import('./pages/ProfilePage'),
+  admin: () => import('./pages/AdminPage'),
+};
+
+const HomePage = lazy(loaders.home);
+const FoodPage = lazy(loaders.food);
+const StatsPage = lazy(loaders.stats);
+const FriendsPage = lazy(loaders.friends);
+const ProfilePage = lazy(loaders.profile);
+const AdminPage = lazy(loaders.admin);
+
+function preload(load: () => Promise<unknown>) {
+  load().catch(() => undefined);
+}
+
+function hasSessionHint() {
+  try {
+    return localStorage.getItem(SESSION_HINT_KEY) !== null;
+  } catch {
+    return false;
+  }
+}
+
+function saveSessionHint(connected: boolean) {
+  try {
+    if (connected) localStorage.setItem(SESSION_HINT_KEY, '1');
+    else localStorage.removeItem(SESSION_HINT_KEY);
+  } catch {
+    return;
+  }
+}
+
+if (hasSessionHint()) preload(loaders.home);
 
 type Page =
   | 'landing'
@@ -54,6 +89,24 @@ function AppShell() {
         "Salut ! Je peux t'aider à comprendre tes stats ou te conseiller sur tes repas 😊",
     },
   ]);
+
+  const role = user?.role;
+
+  useEffect(() => {
+    if (status === 'loading') return;
+    saveSessionHint(status === 'authenticated');
+    if (status !== 'authenticated') return;
+
+    const timer = window.setTimeout(() => {
+      preload(loaders.food);
+      preload(loaders.stats);
+      preload(loaders.friends);
+      preload(loaders.profile);
+      if (role === 'ADMIN') preload(loaders.admin);
+    }, PRELOAD_DELAY_MS);
+
+    return () => window.clearTimeout(timer);
+  }, [status, role]);
 
   const navigateTo = (dest: Page) => {
     setPreviousPage(page);
