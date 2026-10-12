@@ -10,6 +10,8 @@ import { Input } from '../ui/Input';
 import { deleteWeight, logWeight, updateWeight, type WeightEntry } from './api';
 import { COMPOSITION, MEASURES, type MeasureKey } from './measures';
 
+const [WEIGHT] = MEASURES;
+
 const LABEL_CLASS =
   'text-xs font-semibold tracking-wide text-green-500 uppercase';
 
@@ -126,13 +128,13 @@ function WeightForm({
     }
   };
 
-  const renderInput = (field: MeasureKey, placeholder?: string) => (
+  const renderInput = ({ key: field, example }: (typeof MEASURES)[number]) => (
     <>
       <Input
         id={`${formId}-${field}`}
         type="text"
         inputMode="decimal"
-        placeholder={placeholder}
+        placeholder={`Ex : ${example}`}
         value={form[field]}
         onChange={(e) => handleChange(field, e.target.value)}
         onFocus={() => setFocusedField(field)}
@@ -158,7 +160,7 @@ function WeightForm({
         <label htmlFor={`${formId}-weight`} className={LABEL_CLASS}>
           Poids <span className="normal-case">(kg)</span>
         </label>
-        {renderInput('weight', 'Ex : 72,5')}
+        {renderInput(WEIGHT)}
       </div>
 
       <fieldset className="min-w-0">
@@ -166,15 +168,15 @@ function WeightForm({
           Composition corporelle (optionnel)
         </legend>
         <div className="grid grid-cols-2 gap-3">
-          {COMPOSITION.map(({ key, label, unit }) => (
-            <div key={key} className="relative flex flex-col gap-1">
+          {COMPOSITION.map((measure) => (
+            <div key={measure.key} className="relative flex flex-col gap-1">
               <label
-                htmlFor={`${formId}-${key}`}
+                htmlFor={`${formId}-${measure.key}`}
                 className="text-xs text-green-500"
               >
-                {label} ({unit})
+                {measure.label} ({measure.unit})
               </label>
-              {renderInput(key)}
+              {renderInput(measure)}
             </div>
           ))}
         </div>

@@ -1,14 +1,49 @@
 import { formatKg } from '../../utils/format';
 
 export const COMPOSITION = [
-  { key: 'bodyFat', label: 'Masse grasse', unit: '%', min: 1, max: 100 },
-  { key: 'fatFreeMass', label: 'Masse maigre', unit: 'kg', min: 1, max: 300 },
-  { key: 'bodyWater', label: 'Eau', unit: '%', min: 1, max: 100 },
-  { key: 'muscleMass', label: 'Muscle', unit: 'kg', min: 1, max: 300 },
+  {
+    key: 'bodyFat',
+    label: 'Masse grasse',
+    unit: '%',
+    min: 1,
+    max: 100,
+    example: '18',
+  },
+  {
+    key: 'fatFreeMass',
+    label: 'Masse maigre',
+    unit: 'kg',
+    min: 1,
+    max: 300,
+    example: '59,5',
+  },
+  {
+    key: 'bodyWater',
+    label: 'Eau',
+    unit: '%',
+    min: 1,
+    max: 100,
+    example: '58',
+  },
+  {
+    key: 'muscleMass',
+    label: 'Muscle',
+    unit: 'kg',
+    min: 1,
+    max: 300,
+    example: '56,5',
+  },
 ] as const;
 
 export const MEASURES = [
-  { key: 'weight', label: 'Poids', unit: 'kg', min: 20, max: 500 },
+  {
+    key: 'weight',
+    label: 'Poids',
+    unit: 'kg',
+    min: 20,
+    max: 500,
+    example: '72,5',
+  },
   ...COMPOSITION,
 ] as const;
 

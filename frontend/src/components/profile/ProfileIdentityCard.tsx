@@ -409,6 +409,7 @@ export function ProfileIdentityCard({ user, onUpdate, currentWeight }: Props) {
             </label>
             <Input
               id="pf-username"
+              placeholder="Ex : jdupont"
               value={form.username}
               onChange={(e) => handleChange('username', e.target.value)}
               onFocus={() => setFocusedField('username')}
@@ -430,6 +431,7 @@ export function ProfileIdentityCard({ user, onUpdate, currentWeight }: Props) {
             </label>
             <Input
               id="pf-name"
+              placeholder="Nom Prénom"
               value={form.name}
               onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
               maxLength={80}
@@ -449,6 +451,7 @@ export function ProfileIdentityCard({ user, onUpdate, currentWeight }: Props) {
               options={GENDER_OPTIONS}
               onChange={(v) => setForm((p) => ({ ...p, gender: v }))}
               container={dialogNode}
+              placeholder="Sélectionner"
             />
           </div>
 
@@ -500,6 +503,7 @@ export function ProfileIdentityCard({ user, onUpdate, currentWeight }: Props) {
               options={ACTIVITY_OPTIONS}
               onChange={(v) => setForm((p) => ({ ...p, activityLevel: v }))}
               container={dialogNode}
+              placeholder="Sélectionner"
             />
           </div>
 
@@ -508,33 +512,43 @@ export function ProfileIdentityCard({ user, onUpdate, currentWeight }: Props) {
           </p>
 
           {[
-            { field: 'height' as Field, id: 'pf-height', label: 'Taille (cm)' },
+            {
+              field: 'height' as Field,
+              id: 'pf-height',
+              label: 'Taille (cm)',
+              example: '175',
+            },
             {
               field: 'targetWeight' as Field,
               id: 'pf-target-weight',
               label: 'Poids cible (kg)',
+              example: '70',
             },
             {
               field: 'dailyCalorieGoal' as Field,
               id: 'pf-calorie-goal',
               label: 'Objectif calorique (kcal/jour)',
+              example: '2000',
             },
             {
               field: 'dailyProteinGoal' as Field,
               id: 'pf-protein-goal',
               label: 'Objectif protéines (g/jour)',
+              example: '120',
             },
             {
               field: 'dailyCarbsGoal' as Field,
               id: 'pf-carbs-goal',
               label: 'Objectif glucides (g/jour)',
+              example: '230',
             },
             {
               field: 'dailyFatGoal' as Field,
               id: 'pf-fat-goal',
               label: 'Objectif lipides (g/jour)',
+              example: '65',
             },
-          ].map(({ field, id, label }) => (
+          ].map(({ field, id, label, example }) => (
             <div key={field} className="relative flex flex-col gap-1">
               <label
                 htmlFor={id}
@@ -546,6 +560,7 @@ export function ProfileIdentityCard({ user, onUpdate, currentWeight }: Props) {
                 id={id}
                 type="text"
                 inputMode="decimal"
+                placeholder={`Ex : ${example}`}
                 value={form[field]}
                 onChange={(e) => handleChange(field, e.target.value)}
                 onFocus={() => setFocusedField(field)}
