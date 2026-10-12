@@ -20,6 +20,24 @@ export class LogWeightDto {
   bodyFat?: number;
 
   @IsOptional()
+  @IsNumber()
+  @IsPositive()
+  @Max(500)
+  fatFreeMass?: number;
+
+  @IsOptional()
+  @IsNumber()
+  @IsPositive()
+  @Max(100)
+  bodyWater?: number;
+
+  @IsOptional()
+  @IsNumber()
+  @IsPositive()
+  @Max(500)
+  muscleMass?: number;
+
+  @IsOptional()
   @IsString()
   @MaxLength(255)
   note?: string;
