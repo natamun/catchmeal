@@ -78,51 +78,6 @@ export default function ProfilePage({
         onLatestWeight={handleLatestWeight}
       />
 
-      {/* Composition corporelle */}
-      {((user.bodyFat !== null && user.bodyFat !== undefined) ||
-        (user.fatFreeMass !== null && user.fatFreeMass !== undefined) ||
-        (user.bodyWater !== null && user.bodyWater !== undefined) ||
-        (user.muscleMass !== null && user.muscleMass !== undefined)) && (
-        <div className="overflow-hidden rounded-2xl border border-green-200 bg-white shadow-sm">
-          <p className="px-5 pt-5 pb-3 text-sm font-semibold tracking-wide text-green-500 uppercase">
-            Composition corporelle
-          </p>
-          {(
-            [
-              { label: 'Masse grasse', value: user.bodyFat, unit: '%' },
-              {
-                label: 'Masse maigre',
-                value: user.fatFreeMass,
-                unit: 'kg',
-              },
-              { label: 'Eau corporelle', value: user.bodyWater, unit: '%' },
-              { label: 'Masse musculaire', value: user.muscleMass, unit: 'kg' },
-            ] as {
-              label: string;
-              value: number | null | undefined;
-              unit: string;
-            }[]
-          )
-            .filter((r) => r.value !== null && r.value !== undefined)
-            .map((row, i, arr) => (
-              <div
-                key={row.label}
-                className={`flex items-center justify-between px-5 py-4 ${
-                  i < arr.length - 1 ? 'border-b border-green-200' : ''
-                }`}
-              >
-                <p className="text-sm font-semibold text-green-600">
-                  {row.label}
-                </p>
-                <p className="text-sm font-semibold text-green-800">
-                  {row.value}
-                  {row.unit ? ` ${row.unit}` : ''}
-                </p>
-              </div>
-            ))}
-        </div>
-      )}
-
       {/* Objectifs */}
       <div className="overflow-hidden rounded-2xl border border-green-200 bg-white shadow-sm">
         <p className="px-5 pt-5 pb-3 text-sm font-semibold tracking-wide text-green-500 uppercase">
