@@ -1,30 +1,19 @@
 import { useRef, useState } from 'react';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, ChevronRight, LoaderCircle } from 'lucide-react';
 
 import { useAuth } from '../../auth/auth-context';
 import { BaseDialog } from '../ui/BaseDialog';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
 import SummaryCard from '../ui/SummaryCard';
 import { Toast } from '../ui/Toast';
+import { deleteMyAccount, exportMyData, type DataExport } from './api';
 
-interface UserProfile {
-  id: number;
-  username: string;
-  name: string;
-  email: string;
-  role: string;
-  createAt: string;
-  meal: unknown[];
-  weightLogs: unknown[];
-  goalSettings: unknown[];
-  senderMessage: unknown[];
-  receiverMessage: unknown[];
-}
+const ROW_CLASS =
+  'flex w-full cursor-pointer items-center justify-between border-b border-green-200 px-6 py-4 text-left text-sm transition-colors last:border-b-0';
 
-interface ExportResponse {
-  exportedAt: string;
-  data: { profile: UserProfile };
-}
+const chevron = (
+  <ChevronRight className="h-4 w-4 opacity-40" aria-hidden="true" />
+);
 
 function escapeHtml(value: unknown): string {
   return String(value)
@@ -35,7 +24,7 @@ function escapeHtml(value: unknown): string {
     .replace(/'/g, '&#039;');
 }
 
-function buildExportHtml(data: ExportResponse): string {
+function buildExportHtml(data: DataExport): string {
   const p = data.data.profile;
   return `<!DOCTYPE html>
 <html lang="fr">
@@ -93,12 +82,7 @@ export function GdprSection({
     if (!user) return;
     setExportLoading(true);
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/gdpr/export`,
-        { credentials: 'include' },
-      );
-      if (!response.ok) throw new Error('Failed to fetch user data');
-      const data = (await response.json()) as ExportResponse;
+      const data = await exportMyData();
       const blob = new Blob([buildExportHtml(data)], { type: 'text/html' });
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -118,14 +102,9 @@ export function GdprSection({
     if (!user) return;
     setDeleteLoading(true);
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/gdpr/account`,
-        { method: 'DELETE', credentials: 'include' },
-      );
-      if (!response.ok) throw new Error('Failed to delete account');
+      await deleteMyAccount();
       deleteDialogRef.current?.close();
       deleteSuccessDialogRef.current?.showModal();
-      // Logout regardless of how the success dialog is closed
       deleteSuccessDialogRef.current?.addEventListener(
         'close',
         () => void logout(),
@@ -144,22 +123,6 @@ export function GdprSection({
     deleteDialogRef.current?.showModal();
   }
 
-  const ROW_CLASS =
-    'flex w-full cursor-pointer items-center justify-between border-b border-green-200 px-6 py-4 text-left text-sm transition-colors last:border-b-0';
-
-  const chevron = (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      className="h-4 w-4 opacity-40"
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke="currentColor"
-      strokeWidth={2}
-    >
-      <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-    </svg>
-  );
-
   return (
     <>
       <SummaryCard title="Compte" className="overflow-hidden">
@@ -175,10 +138,17 @@ export function GdprSection({
             type="button"
             onClick={() => void handleExport()}
             disabled={exportLoading}
-            className={`${ROW_CLASS} text-green-600 hover:bg-green-50 disabled:cursor-not-allowed disabled:opacity-50`}
+            className={`${ROW_CLASS} text-green-600 hover:bg-green-50 disabled:pointer-events-none`}
           >
-            {exportLoading ? 'Export en cours...' : 'Exporter mes données'}{' '}
-            {chevron}
+            {exportLoading ? 'Export en cours...' : 'Exporter mes données'}
+            {exportLoading ? (
+              <LoaderCircle
+                className="h-4 w-4 animate-spin text-green-400"
+                aria-hidden="true"
+              />
+            ) : (
+              chevron
+            )}
           </button>
           <button
             type="button"
@@ -197,7 +167,6 @@ export function GdprSection({
         </div>
       </SummaryCard>
 
-      {/* Export success */}
       <BaseDialog
         dialogRef={exportSuccessDialogRef}
         title="Export réussi"
@@ -217,7 +186,6 @@ export function GdprSection({
         </button>
       </BaseDialog>
 
-      {/* Export error */}
       <BaseDialog
         dialogRef={exportErrorDialogRef}
         title="Erreur d'export"
@@ -235,7 +203,6 @@ export function GdprSection({
         </button>
       </BaseDialog>
 
-      {/* Delete confirm */}
       <ConfirmDialog
         dialogRef={deleteDialogRef}
         title="Supprimer mon compte"
@@ -246,7 +213,6 @@ export function GdprSection({
         onConfirm={() => void handleDeleteAccount()}
       />
 
-      {/* Delete success — shown before logout */}
       <BaseDialog
         dialogRef={deleteSuccessDialogRef}
         title="Compte supprimé"
@@ -265,7 +231,6 @@ export function GdprSection({
         </button>
       </BaseDialog>
 
-      {/* Delete error toast */}
       <Toast message={deleteErrorToast} icon={AlertCircle} />
     </>
   );

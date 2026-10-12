@@ -88,6 +88,35 @@ export interface LogWeightInput {
   muscleMass: number | null;
 }
 
+export interface DataExport {
+  exportedAt: string;
+  data: {
+    profile: {
+      id: number;
+      username: string;
+      name: string;
+      email: string;
+      role: string;
+      createAt: string;
+      meal: unknown[];
+      weightLogs: unknown[];
+      goalSettings: unknown[];
+      senderMessage: unknown[];
+      receiverMessage: unknown[];
+    };
+  };
+}
+
+export function exportMyData() {
+  return request<DataExport>(`${BASE_URL}/gdpr/export`);
+}
+
+export function deleteMyAccount() {
+  return request<{ message: string }>(`${BASE_URL}/gdpr/account`, {
+    method: 'DELETE',
+  });
+}
+
 export function uploadAvatar(userId: number, file: File) {
   const form = new FormData();
   form.append('file', file);
