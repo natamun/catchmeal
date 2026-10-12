@@ -71,6 +71,9 @@ export interface WeightEntry {
   id: number;
   weight: number;
   bodyFat: number | null;
+  fatFreeMass: number | null;
+  bodyWater: number | null;
+  muscleMass: number | null;
   note: string | null;
   loggedAt: string;
 }
@@ -78,6 +81,9 @@ export interface WeightEntry {
 export interface LogWeightInput {
   weight: number;
   bodyFat?: number;
+  fatFreeMass?: number;
+  bodyWater?: number;
+  muscleMass?: number;
   note?: string;
 }
 
@@ -98,10 +104,10 @@ export function updateProfile(userId: number, input: UpdateProfileInput) {
   });
 }
 
-export function updateWeight(userId: number, entryId: number, weight: number) {
+export function updateWeight(userId: number, entryId: number, input: LogWeightInput) {
   return request<WeightEntry>(`${BASE_URL}/users/${userId}/weight/${entryId}`, {
     method: 'PATCH',
-    body: JSON.stringify({ weight }),
+    body: JSON.stringify(input),
   });
 }
 
