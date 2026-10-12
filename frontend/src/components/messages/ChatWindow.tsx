@@ -1,10 +1,4 @@
-import {
-  useEffect,
-  useRef,
-  useState,
-  type FormEvent,
-  type RefObject,
-} from 'react';
+import { useEffect, useRef, useState, type RefObject } from 'react';
 import { Send } from 'lucide-react';
 
 import { useAuth } from '../../auth/auth-context';
@@ -73,7 +67,7 @@ export default function ChatWindow({
     }
   }, [messages]);
 
-  const handleSend = async (event: FormEvent) => {
+  const handleSend = async (event: React.SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
     const content = draft.trim();
     if (!content) return;
