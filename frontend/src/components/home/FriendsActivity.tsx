@@ -3,6 +3,7 @@ import { MessageCircle } from 'lucide-react';
 import { formatRelativeTime } from '../../utils/formatRelativeTime';
 import { Avatar } from '../friends/Avatar';
 import type { ActivityItem, FriendPresence } from '../friends/types';
+import { ListCard } from '../ui/ListCard';
 
 interface FriendsActivityProps {
   activities: ActivityItem[];
@@ -16,7 +17,7 @@ export default function FriendsActivity({
   onReply,
 }: FriendsActivityProps) {
   return (
-    <div className="overflow-hidden rounded-2xl border border-green-200 bg-white shadow-sm">
+    <ListCard>
       <h2 className="px-5 pt-5 pb-3 text-sm font-semibold tracking-wide text-green-500 uppercase">
         Activité des amis
       </h2>
@@ -56,6 +57,6 @@ export default function FriendsActivity({
           ))}
         </ul>
       )}
-    </div>
+    </ListCard>
   );
 }

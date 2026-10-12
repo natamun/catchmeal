@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from 'react';
-import { LoaderCircle } from 'lucide-react';
 
 import { useAuth } from '../auth/auth-context';
 import AdminSearchBar from '../components/admin/AdminSearchBar';
@@ -17,6 +16,11 @@ import {
 } from '../components/admin/types';
 import { Avatar } from '../components/ui/Avatar';
 import { EditIconButton } from '../components/ui/EditIconButton';
+import {
+  ListCard,
+  ListCardEmpty,
+  ListCardLoading,
+} from '../components/ui/ListCard';
 import { LoadError } from '../components/ui/LoadError';
 import Skeleton from '../components/ui/Skeleton';
 import StatTile from '../components/ui/StatTile';
@@ -163,19 +167,14 @@ export default function AdminPage() {
           </dl>
         </SummaryCard>
 
-        <section
-          aria-label="Utilisateurs"
-          className="overflow-hidden rounded-2xl border border-green-200 bg-white shadow-sm"
-        >
-          <div className="flex items-center gap-3 border-b border-green-200 px-5 py-4">
+        <ListCard
+          label="Utilisateurs"
+          header={
             <AdminSearchBar criteria={criteria} onFilterChange={setCriteria} />
-          </div>
-
+          }
+        >
           {isLoading && (
-            <div role="status" className="flex justify-center py-10">
-              <LoaderCircle className="h-6 w-6 animate-spin text-green-400" />
-              <span className="sr-only">Chargement des utilisateurs...</span>
-            </div>
+            <ListCardLoading label="Chargement des utilisateurs..." />
           )}
 
           {users === null && hasError && (
@@ -186,9 +185,9 @@ export default function AdminPage() {
           )}
 
           {users !== null && visible.length === 0 && (
-            <p className="px-5 py-10 text-center text-sm text-green-400">
+            <ListCardEmpty>
               Aucun utilisateur ne correspond à cette recherche.
-            </p>
+            </ListCardEmpty>
           )}
 
           <ul className="divide-y divide-green-200">
@@ -225,7 +224,7 @@ export default function AdminPage() {
               </li>
             ))}
           </ul>
-        </section>
+        </ListCard>
       </div>
 
       <AdminUserDialog

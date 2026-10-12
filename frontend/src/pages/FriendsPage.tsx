@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { CheckCircle2, LoaderCircle } from 'lucide-react';
+import { CheckCircle2 } from 'lucide-react';
 
 import { useAuth } from '../auth/auth-context.ts';
 import AddFriendDialog from '../components/friends/AddFriendDialog.tsx';
@@ -18,6 +18,11 @@ import FriendsActivity from '../components/home/FriendsActivity.tsx';
 import ChatWindow from '../components/messages/ChatWindow.tsx';
 import { AddCircleButton } from '../components/ui/AddCircleButton';
 import { ConfirmDialog } from '../components/ui/ConfirmDialog.tsx';
+import {
+  ListCard,
+  ListCardEmpty,
+  ListCardLoading,
+} from '../components/ui/ListCard';
 import { LoadError } from '../components/ui/LoadError.tsx';
 import { Toast } from '../components/ui/Toast.tsx';
 import { useActivityFeed } from '../hooks/useActivityFeed.ts';
@@ -131,23 +136,13 @@ export default function FriendsPage({ pendingReply }: FriendsPageProps) {
 
         {actionError && <p className="text-sm text-red-500">{actionError}</p>}
 
-        <div
-          key={activeTab}
-          className="animate-fade-in-up overflow-hidden rounded-2xl border border-green-200 bg-white shadow-sm"
-        >
-          {isLoading && (
-            <div role="status" className="flex justify-center py-10">
-              <LoaderCircle className="h-6 w-6 animate-spin text-green-400" />
-              <span className="sr-only">Chargement...</span>
-            </div>
-          )}
+        <ListCard key={activeTab} className="animate-fade-in-up">
+          {isLoading && <ListCardLoading label="Chargement..." />}
 
           {loadError && <LoadError message={loadError} onRetry={retry} />}
 
           {!isLoading && !loadError && list.length === 0 && (
-            <p className="px-5 py-10 text-center text-sm text-green-400">
-              {emptyMessage}
-            </p>
+            <ListCardEmpty>{emptyMessage}</ListCardEmpty>
           )}
 
           <ul className={loadError ? 'hidden' : undefined}>
@@ -189,7 +184,7 @@ export default function FriendsPage({ pendingReply }: FriendsPageProps) {
                   />
                 ))}
           </ul>
-        </div>
+        </ListCard>
 
         <FriendsActivity
           activities={activities}

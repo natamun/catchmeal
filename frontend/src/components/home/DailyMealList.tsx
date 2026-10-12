@@ -5,6 +5,7 @@ import type { FoodItem } from '../food/types';
 import { MEAL_TYPE_LABELS, type Meal, type MealType } from '../meal/types';
 import { AddCircleButton } from '../ui/AddCircleButton';
 import { EditIconButton } from '../ui/EditIconButton';
+import { ListCard } from '../ui/ListCard';
 import { LoadError } from '../ui/LoadError';
 
 const MEAL_TYPES: MealType[] = ['BREAKFAST', 'LUNCH', 'DINNER', 'SNACK'];
@@ -79,7 +80,7 @@ export default function DailyMealList({
   const editableMeals = isLoading ? loadedMeals : meals;
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-green-200 bg-white shadow-sm">
+    <ListCard>
       {isLoading && (
         <span role="status" className="sr-only">
           Chargement du journal...
@@ -169,6 +170,6 @@ export default function DailyMealList({
           );
         })}
       </div>
-    </div>
+    </ListCard>
   );
 }
