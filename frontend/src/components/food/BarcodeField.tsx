@@ -143,7 +143,7 @@ export default function BarcodeField({
           >
             <span>
               via <span className="max-[400px]:hidden">Open Food Facts</span>
-              <span className="min-[401px]:hidden">OFF</span>
+              <span className="min-[400px]:hidden">OFF</span>
             </span>
             <ArrowUpRight className="h-3 w-3" />
           </a>
