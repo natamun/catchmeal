@@ -2,6 +2,7 @@ interface AvatarProps {
   username: string;
   avatarUrl?: string | null;
   size?: 'xs' | 'sm' | 'lg';
+  online?: boolean;
 }
 
 const SIZE = {
@@ -10,11 +11,20 @@ const SIZE = {
   lg: { container: 'h-16 w-16', text: 'text-2xl', initials: 2 },
 } as const;
 
-export function Avatar({ username, avatarUrl, size = 'sm' }: AvatarProps) {
+export function Avatar({
+  username,
+  avatarUrl,
+  size = 'sm',
+  online = false,
+}: AvatarProps) {
   const { container, text, initials } = SIZE[size];
 
   return (
-    <div role="img" aria-label={`Avatar de ${username}`} className="shrink-0">
+    <div
+      role="img"
+      aria-label={`Avatar de ${username}${online ? ', en ligne' : ''}`}
+      className="relative shrink-0"
+    >
       {avatarUrl ? (
         <img
           src={avatarUrl}
@@ -27,6 +37,9 @@ export function Avatar({ username, avatarUrl, size = 'sm' }: AvatarProps) {
         >
           {username.slice(0, initials).toUpperCase()}
         </div>
+      )}
+      {online && (
+        <span className="absolute right-0 bottom-0 h-2.5 w-2.5 rounded-full border-2 border-white bg-green-300" />
       )}
     </div>
   );

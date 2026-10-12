@@ -20,7 +20,7 @@ export interface AdminUser {
   createAt: string;
   deletedAt: string | null;
   lastSeenAt: string | null;
-  oauthProvider: string | null;
+  oauthProvider?: string | null;
   onlineStatus: boolean;
   _count?: { userFriend: number };
 }
@@ -32,7 +32,7 @@ export interface AdminStats {
 }
 
 export function getUserById(id: number) {
-  return request<AdminUser>(`${BASE_URL}/admin/users/${id}`);
+  return request<AdminUser | null>(`${BASE_URL}/admin/users/${id}`);
 }
 
 export function getUsers() {

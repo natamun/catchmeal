@@ -1,15 +1,15 @@
-export type AdminSortField = 'name' | 'createdAt' | 'role';
-export type AdminSortDirection = 'asc' | 'desc';
+type AdminSortField = 'name' | 'createdAt' | 'role';
+type AdminSortDirection = 'asc' | 'desc';
 
 export interface AdminSortOption {
   field: AdminSortField;
   direction: AdminSortDirection;
 }
 
-export type AdminRoleFilter = 'all' | 'USER' | 'ADMIN';
-export type AdminStatusFilter = 'all' | 'active' | 'deleted';
-export type AdminOnlineFilter = 'all' | 'online' | 'offline';
-export type AdminOAuthFilter = 'all' | 'local' | 'google' | 'github' | '42';
+type AdminRoleFilter = 'all' | 'USER' | 'ADMIN';
+type AdminStatusFilter = 'all' | 'active' | 'deleted';
+type AdminOnlineFilter = 'all' | 'online' | 'offline';
+type AdminOAuthFilter = 'all' | 'local' | 'google' | 'github' | '42';
 
 export interface AdminFilterCriteria {
   query: string;
