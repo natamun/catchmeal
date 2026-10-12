@@ -33,7 +33,7 @@ export function useFriends(userId: number) {
         if (controller.signal.aborted) return;
         if (err instanceof ApiError && err.status === 403) return;
         console.error(err);
-        setLoadError('Impossible de charger tes amis, réessaye.');
+        setLoadError('Impossible de charger les amis.');
       })
       .finally(() => {
         if (!controller.signal.aborted) {
@@ -50,5 +50,10 @@ export function useFriends(userId: number) {
     isLoading,
     loadError,
     reload: () => setReloadCount((count) => count + 1),
+    retry: () => {
+      setLoadError(null);
+      setIsLoading(true);
+      setReloadCount((count) => count + 1);
+    },
   };
 }

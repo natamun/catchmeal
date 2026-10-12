@@ -18,6 +18,7 @@ import type {
 import FriendsActivity from '../components/home/FriendsActivity.tsx';
 import ChatWindow from '../components/messages/ChatWindow.tsx';
 import { ConfirmDialog } from '../components/ui/ConfirmDialog.tsx';
+import { LoadError } from '../components/ui/LoadError.tsx';
 import { Toast } from '../components/ui/Toast.tsx';
 import { useActivityFeed } from '../hooks/useActivityFeed.ts';
 import { useFriends } from '../hooks/useFriends.ts';
@@ -38,8 +39,15 @@ interface FriendsPageProps {
 export default function FriendsPage({ pendingReply }: FriendsPageProps) {
   const { user } = useAuth();
   const userId = user!.userId;
-  const { friends, requests, sentRequestIds, isLoading, loadError, reload } =
-    useFriends(userId);
+  const {
+    friends,
+    requests,
+    sentRequestIds,
+    isLoading,
+    loadError,
+    reload,
+    retry,
+  } = useFriends(userId);
   const activities = useActivityFeed(userId);
   const [activeTab, setActiveTab] = useState<Tab>('friends');
   const [busyId, setBusyId] = useState<number | null>(null);
@@ -136,9 +144,7 @@ export default function FriendsPage({ pendingReply }: FriendsPageProps) {
             </div>
           )}
 
-          {loadError && (
-            <p className="px-5 py-5 text-sm text-red-500">{loadError}</p>
-          )}
+          {loadError && <LoadError message={loadError} onRetry={retry} />}
 
           {!isLoading && !loadError && list.length === 0 && (
             <p className="px-5 py-10 text-center text-sm text-green-400">
@@ -146,7 +152,7 @@ export default function FriendsPage({ pendingReply }: FriendsPageProps) {
             </p>
           )}
 
-          <ul>
+          <ul className={loadError ? 'hidden' : undefined}>
             {activeTab === 'friends'
               ? friends.map((f) => (
                   <FriendRow
