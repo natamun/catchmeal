@@ -176,7 +176,7 @@ export default function Nav({ active, onChange, isAdmin = false }: Props) {
                   <button
                     type="button"
                     onClick={() => openFromMenu('admin')}
-                    className={`${MENU_ITEM_CLASS} text-green-800 hover:bg-green-50`}
+                    className={`${MENU_ITEM_CLASS} border-t border-green-100 text-green-800 hover:bg-green-50`}
                   >
                     <ShieldCheck
                       className="h-4 w-4 text-green-500"
