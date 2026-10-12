@@ -72,11 +72,7 @@ export default function ProfilePage({
         currentWeight={latestWeight}
       />
 
-      <WeightCard
-        userId={user.userId}
-        targetWeight={user.targetWeight}
-        onLatestWeight={handleLatestWeight}
-      />
+      <WeightCard userId={user.userId} onLatestWeight={handleLatestWeight} />
 
       {/* Objectifs */}
       <div className="overflow-hidden rounded-2xl border border-green-200 bg-white shadow-sm">

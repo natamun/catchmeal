@@ -79,10 +79,10 @@ export interface WeightEntry {
 
 export interface LogWeightInput {
   weight: number;
-  bodyFat?: number;
-  fatFreeMass?: number;
-  bodyWater?: number;
-  muscleMass?: number;
+  bodyFat: number | null;
+  fatFreeMass: number | null;
+  bodyWater: number | null;
+  muscleMass: number | null;
 }
 
 export function uploadAvatar(userId: number, file: File) {
