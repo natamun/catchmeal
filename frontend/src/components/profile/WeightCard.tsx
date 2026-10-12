@@ -24,7 +24,7 @@ function formatDate(isoDate: string) {
 
 interface Props {
   userId: number;
-  onLatestWeight?: (weight: number) => void;
+  onLatestWeight?: (weight: number | null) => void;
 }
 
 export function WeightCard({ userId, onLatestWeight }: Props) {
@@ -43,13 +43,12 @@ export function WeightCard({ userId, onLatestWeight }: Props) {
     getWeightHistory(userId, controller.signal)
       .then((entries) => {
         setHistory(entries);
-        if (entries[0]) {
-          onLatestWeight?.(entries[0].weight);
-        }
+        onLatestWeight?.(entries[0]?.weight ?? null);
       })
       .catch(() => {
         if (!controller.signal.aborted) {
           setHasError(true);
+          onLatestWeight?.(null);
         }
       });
 
@@ -171,7 +170,7 @@ export function WeightCard({ userId, onLatestWeight }: Props) {
                         {formatMeasure(entry.weight, 'kg')}
                       </span>
                       <dl
-                        className={`col-span-full row-start-2 grid-cols-2 gap-x-3 gap-y-1 text-xs sm:grid-cols-4 md:contents md:text-sm ${
+                        className={`col-span-full row-start-2 grid-cols-2 gap-x-2 gap-y-1 text-xs sm:grid-cols-4 sm:gap-x-3 md:contents md:text-sm ${
                           COMPOSITION.some(({ key }) => entry[key] !== null)
                             ? 'grid'
                             : 'hidden'
@@ -180,7 +179,7 @@ export function WeightCard({ userId, onLatestWeight }: Props) {
                         {COMPOSITION.map(({ key, label, unit }) => (
                           <div
                             key={key}
-                            className="flex min-w-0 justify-between gap-1.5 md:block"
+                            className="flex min-w-0 justify-between gap-1 md:block"
                           >
                             <dt className="truncate text-green-600 md:sr-only">
                               {label}

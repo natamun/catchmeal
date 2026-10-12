@@ -15,5 +15,5 @@ export const MEASURES = [
 export type MeasureKey = (typeof MEASURES)[number]['key'];
 
 export function formatMeasure(value: number | null, unit: string) {
-  return value === null ? '–' : `${formatKg(value)} ${unit}`;
+  return value === null ? '–' : `${formatKg(value)}\u00a0${unit}`;
 }

@@ -1,22 +1,10 @@
-import { useCallback, useState } from 'react';
+import { useState } from 'react';
 
 import { useAuth } from '../auth/auth-context';
-import { DurationDropdown } from '../components/profile/DurationDropdown';
 import { GdprSection } from '../components/profile/GdprSection';
+import { GoalsCard } from '../components/profile/GoalsCard';
 import { ProfileIdentityCard } from '../components/profile/ProfileIdentityCard';
 import { WeightCard } from '../components/profile/WeightCard';
-import { calculateBMR, calculateTDEE } from '../utils/bmr';
-
-const DURATION_OPTIONS = [
-  { label: '2 semaines', days: 14 },
-  { label: '1 mois', days: 30 },
-  { label: '2 mois', days: 60 },
-  { label: '3 mois', days: 90 },
-  { label: '4 mois', days: 120 },
-  { label: '5 mois', days: 150 },
-  { label: '6 mois', days: 180 },
-  { label: '1 an', days: 365 },
-];
 
 export default function ProfilePage({
   onPolitiqueConfidentialite,
@@ -24,43 +12,9 @@ export default function ProfilePage({
   onPolitiqueConfidentialite: () => void;
 }) {
   const { user, updateUser } = useAuth();
-  const [latestWeight, setLatestWeight] = useState<number | null>(null);
-  const [durationDays, setDurationDays] = useState(90);
-  const handleLatestWeight = useCallback((w: number) => setLatestWeight(w), []);
+  const [latestWeight, setLatestWeight] = useState<number | null>();
 
   if (!user) return null;
-
-  const bmr =
-    latestWeight && user.height && user.birthDate && user.gender
-      ? calculateBMR(
-          latestWeight,
-          user.height,
-          user.birthDate,
-          user.gender,
-          user.muscleMass,
-        )
-      : null;
-
-  const tdee =
-    bmr && user.activityLevel ? calculateTDEE(bmr, user.activityLevel) : null;
-
-  const kcalToReachGoal = (() => {
-    if (!tdee || !latestWeight || !user.targetWeight) return null;
-    const diff = latestWeight - user.targetWeight;
-    const coefficient = diff > 0 ? 7700 : 4800;
-    return Math.round(tdee - (diff * coefficient) / durationDays);
-  })();
-
-  const recommendedMacros = (() => {
-    const kcal = kcalToReachGoal ?? tdee;
-    if (!kcal || !latestWeight) return null;
-    const protein = Math.round(
-      user.muscleMass ? 2.2 * user.muscleMass : 1.8 * latestWeight,
-    );
-    const fat = Math.round((kcal * 0.3) / 9);
-    const carbs = Math.round((kcal - protein * 4 - fat * 9) / 4);
-    return carbs > 0 ? { protein, fat, carbs } : null;
-  })();
 
   return (
     <div className="flex flex-col gap-6">
@@ -72,93 +26,10 @@ export default function ProfilePage({
         currentWeight={latestWeight}
       />
 
-      <WeightCard userId={user.userId} onLatestWeight={handleLatestWeight} />
+      <WeightCard userId={user.userId} onLatestWeight={setLatestWeight} />
 
-      {/* Objectifs */}
-      <div className="overflow-hidden rounded-2xl border border-green-200 bg-white shadow-sm">
-        <p className="px-5 pt-5 pb-3 text-sm font-semibold tracking-wide text-green-500 uppercase">
-          Mes objectifs
-        </p>
-        <div className="flex items-center justify-between border-b border-green-200 px-5 py-4">
-          <p className="text-sm font-semibold text-green-600">Poids cible</p>
-          <p className="text-sm font-semibold text-green-800">
-            {user.targetWeight ? `${user.targetWeight} kg` : '—'}
-          </p>
-        </div>
-        {kcalToReachGoal ? (
-          <div className="flex flex-col border-b border-green-200 px-5 py-4">
-            <div className="flex items-center justify-between">
-              <p className="text-sm font-semibold text-green-600">
-                Apport calorique recommandé
-              </p>
-              <p className="text-sm font-bold text-green-800">
-                {kcalToReachGoal} kcal / jour
-              </p>
-            </div>
-            <div className="mt-1 flex items-center gap-1.5 text-xs text-green-400">
-              <span>Pour atteindre {user.targetWeight} kg en</span>
-              <DurationDropdown
-                value={String(durationDays)}
-                options={DURATION_OPTIONS.map((o) => ({
-                  value: String(o.days),
-                  label: o.label,
-                }))}
-                onChange={(v) => setDurationDays(Number(v))}
-              />
-            </div>
-          </div>
-        ) : (
-          <div className="flex items-center justify-between border-b border-green-200 px-5 py-4">
-            <p className="text-sm font-semibold text-green-600">
-              Apport calorique recommandé
-            </p>
-            <p className="text-sm text-green-400">Données profil incomplètes</p>
-          </div>
-        )}
-        <div className="flex items-center justify-between border-b border-green-200 px-5 py-4">
-          <p className="text-sm font-semibold text-green-600">Protéines</p>
-          <div className="text-right">
-            <p className="text-sm font-semibold text-green-800">
-              {user.dailyProteinGoal
-                ? `${user.dailyProteinGoal} g / jour`
-                : '—'}
-            </p>
-            {recommendedMacros && (
-              <p className="text-xs text-green-400">
-                Recommandé : {recommendedMacros.protein} g
-              </p>
-            )}
-          </div>
-        </div>
-        <div className="flex items-center justify-between border-b border-green-200 px-5 py-4">
-          <p className="text-sm font-semibold text-green-600">Glucides</p>
-          <div className="text-right">
-            <p className="text-sm font-semibold text-green-800">
-              {user.dailyCarbsGoal ? `${user.dailyCarbsGoal} g / jour` : '—'}
-            </p>
-            {recommendedMacros && (
-              <p className="text-xs text-green-400">
-                Recommandé : {recommendedMacros.carbs} g
-              </p>
-            )}
-          </div>
-        </div>
-        <div className="flex items-center justify-between px-5 py-4">
-          <p className="text-sm font-semibold text-green-600">Lipides</p>
-          <div className="text-right">
-            <p className="text-sm font-semibold text-green-800">
-              {user.dailyFatGoal ? `${user.dailyFatGoal} g / jour` : '—'}
-            </p>
-            {recommendedMacros && (
-              <p className="text-xs text-green-400">
-                Recommandé : {recommendedMacros.fat} g
-              </p>
-            )}
-          </div>
-        </div>
-      </div>
+      <GoalsCard user={user} latestWeight={latestWeight} />
 
-      {/* Compte */}
       <GdprSection onPolitiqueConfidentialite={onPolitiqueConfidentialite} />
     </div>
   );
