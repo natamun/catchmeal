@@ -3,10 +3,10 @@ import { useState } from 'react';
 import type { AuthUser } from '../../auth/auth-context';
 import { calculateBMR, calculateTDEE } from '../../utils/bmr';
 import { formatKg } from '../../utils/format';
+import { SelectDropdown } from '../ui/SelectDropdown';
 import Skeleton from '../ui/Skeleton';
 import StatTile from '../ui/StatTile';
 import SummaryCard from '../ui/SummaryCard';
-import { DurationDropdown } from './DurationDropdown';
 import { formatMeasure } from './measures';
 
 const DURATION_OPTIONS = [
@@ -105,10 +105,12 @@ export function GoalsCard({ user, latestWeight }: Props) {
         Recommandé pour {formatMeasure(user.targetWeight ?? null, 'kg')}{' '}
         <span className="inline-flex items-center gap-1.5 align-middle whitespace-nowrap">
           en
-          <DurationDropdown
+          <SelectDropdown
+            size="sm"
             value={duration}
             options={DURATION_OPTIONS}
             onChange={setDuration}
+            container={document.body}
           />
         </span>
       </>

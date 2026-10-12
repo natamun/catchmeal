@@ -100,6 +100,7 @@ export default function FriendsPage({ pendingReply }: FriendsPageProps) {
   return (
     <>
       <div className="flex flex-col gap-6">
+        <h1 className="sr-only">Amis</h1>
         <div className="flex items-center justify-between">
           <div className="flex gap-1.5 self-start rounded-xl border border-green-200 bg-white p-1.5">
             {TAB_OPTIONS.map(({ value, label }) => (

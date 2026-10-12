@@ -436,24 +436,12 @@ export function ProfileIdentityCard({ user, onUpdate, currentWeight }: Props) {
             />
           </div>
 
-          <div
-            className="flex flex-col gap-1"
-            onClick={(e) => e.stopPropagation()}
-            onKeyDown={(e) => e.stopPropagation()}
-            role="presentation"
-          >
-            <label
-              htmlFor="pf-birthdate"
-              className="text-sm font-semibold text-green-600"
-            >
-              Date de naissance
-            </label>
-            <BirthDatePicker
-              id="pf-birthdate"
-              value={form.birthDate}
-              onChange={(birthDate) => setForm((p) => ({ ...p, birthDate }))}
-            />
-          </div>
+          <BirthDatePicker
+            id="pf-birthdate"
+            label="Date de naissance"
+            value={form.birthDate}
+            onChange={(birthDate) => setForm((p) => ({ ...p, birthDate }))}
+          />
 
           <div className="col-span-2 flex flex-col gap-1">
             <label
@@ -480,46 +468,60 @@ export function ProfileIdentityCard({ user, onUpdate, currentWeight }: Props) {
             {
               field: 'height' as Field,
               id: 'pf-height',
-              label: 'Taille (cm)',
+              label: 'Taille',
+              unit: 'cm',
               example: '175',
             },
             {
               field: 'targetWeight' as Field,
               id: 'pf-target-weight',
-              label: 'Poids cible (kg)',
+              label: 'Poids cible',
+              unit: 'kg',
               example: '70',
             },
             {
               field: 'dailyCalorieGoal' as Field,
               id: 'pf-calorie-goal',
-              label: 'Objectif calorique (kcal/jour)',
+              label: 'Objectif calorique',
+              unit: 'kcal/jour',
               example: '2000',
             },
             {
               field: 'dailyProteinGoal' as Field,
               id: 'pf-protein-goal',
-              label: 'Objectif protéines (g/jour)',
+              label: 'Objectif protéines',
+              unit: 'g/jour',
               example: '120',
             },
             {
               field: 'dailyCarbsGoal' as Field,
               id: 'pf-carbs-goal',
-              label: 'Objectif glucides (g/jour)',
+              label: 'Objectif glucides',
+              unit: 'g/jour',
               example: '230',
             },
             {
               field: 'dailyFatGoal' as Field,
               id: 'pf-fat-goal',
-              label: 'Objectif lipides (g/jour)',
+              label: 'Objectif lipides',
+              unit: 'g/jour',
               example: '65',
             },
-          ].map(({ field, id, label, example }) => (
-            <div key={field} className="relative flex flex-col gap-1">
+          ].map(({ field, id, label, unit, example }) => (
+            <div
+              key={field}
+              className="relative flex flex-col justify-end gap-1"
+            >
               <label
                 htmlFor={id}
                 className="text-sm font-semibold text-green-600"
               >
-                {label}
+                {label}{' '}
+                <span
+                  className={unit.endsWith('/jour') ? 'max-[500px]:block' : ''}
+                >
+                  ({unit})
+                </span>
               </label>
               <Input
                 id={id}

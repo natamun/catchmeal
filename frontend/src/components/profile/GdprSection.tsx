@@ -4,6 +4,7 @@ import { AlertCircle } from 'lucide-react';
 import { useAuth } from '../../auth/auth-context';
 import { BaseDialog } from '../ui/BaseDialog';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
+import SummaryCard from '../ui/SummaryCard';
 import { Toast } from '../ui/Toast';
 
 interface UserProfile {
@@ -144,7 +145,7 @@ export function GdprSection({
   }
 
   const ROW_CLASS =
-    'flex w-full cursor-pointer items-center justify-between border-b border-green-200 px-5 py-4 text-left text-sm transition-colors last:border-b-0';
+    'flex w-full cursor-pointer items-center justify-between border-b border-green-200 px-6 py-4 text-left text-sm transition-colors last:border-b-0';
 
   const chevron = (
     <svg
@@ -161,41 +162,40 @@ export function GdprSection({
 
   return (
     <>
-      <div className="overflow-hidden rounded-2xl border border-green-200 bg-white shadow-sm">
-        <p className="px-5 pt-5 pb-3 text-xs font-semibold tracking-wide text-green-500 uppercase">
-          Compte
-        </p>
-        <button
-          type="button"
-          onClick={() => void logout()}
-          className={`${ROW_CLASS} text-green-600 hover:bg-white`}
-        >
-          Se déconnecter {chevron}
-        </button>
-        <button
-          type="button"
-          onClick={() => void handleExport()}
-          disabled={exportLoading}
-          className={`${ROW_CLASS} text-green-600 hover:bg-white disabled:cursor-not-allowed disabled:opacity-50`}
-        >
-          {exportLoading ? 'Export en cours...' : 'Exporter mes données'}{' '}
-          {chevron}
-        </button>
-        <button
-          type="button"
-          onClick={onPolitiqueConfidentialite}
-          className={`${ROW_CLASS} text-green-600 hover:bg-white`}
-        >
-          Politique de confidentialité et RGPD {chevron}
-        </button>
-        <button
-          type="button"
-          onClick={openDeleteDialog}
-          className={`${ROW_CLASS} text-red-500 hover:bg-red-50`}
-        >
-          Supprimer mon compte {chevron}
-        </button>
-      </div>
+      <SummaryCard title="Compte" className="overflow-hidden">
+        <div className="-mx-6 -mb-6 border-t border-green-200">
+          <button
+            type="button"
+            onClick={() => void logout()}
+            className={`${ROW_CLASS} text-green-600 hover:bg-green-50`}
+          >
+            Se déconnecter {chevron}
+          </button>
+          <button
+            type="button"
+            onClick={() => void handleExport()}
+            disabled={exportLoading}
+            className={`${ROW_CLASS} text-green-600 hover:bg-green-50 disabled:cursor-not-allowed disabled:opacity-50`}
+          >
+            {exportLoading ? 'Export en cours...' : 'Exporter mes données'}{' '}
+            {chevron}
+          </button>
+          <button
+            type="button"
+            onClick={onPolitiqueConfidentialite}
+            className={`${ROW_CLASS} text-green-600 hover:bg-green-50`}
+          >
+            Politique de confidentialité et RGPD {chevron}
+          </button>
+          <button
+            type="button"
+            onClick={openDeleteDialog}
+            className={`${ROW_CLASS} text-red-500 hover:bg-red-50`}
+          >
+            Supprimer mon compte {chevron}
+          </button>
+        </div>
+      </SummaryCard>
 
       {/* Export success */}
       <BaseDialog

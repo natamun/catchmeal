@@ -150,7 +150,7 @@ export function WeightCard({ userId, onLatestWeight }: Props) {
             </div>
 
             <div className="mt-5 border-t border-green-100 pt-3">
-              <div className="max-h-72 overflow-y-auto md:pr-1">
+              <div className="relative max-h-72 overflow-x-hidden overflow-y-auto md:pr-1">
                 <div
                   aria-hidden="true"
                   className={`sticky top-0 hidden gap-x-3 bg-white pb-2 text-xs text-green-600 md:grid ${ROW_COLUMNS}`}

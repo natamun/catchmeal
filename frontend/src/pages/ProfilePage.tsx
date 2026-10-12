@@ -18,7 +18,7 @@ export default function ProfilePage({
 
   return (
     <div className="flex flex-col gap-6">
-      <h2 className="text-xl font-bold text-green-800">Profil</h2>
+      <h1 className="sr-only">Profil</h1>
 
       <ProfileIdentityCard
         user={user}
