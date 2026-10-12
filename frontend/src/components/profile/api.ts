@@ -21,7 +21,10 @@ async function request<T>(url: string, init?: RequestInit): Promise<T> {
   const response = await fetch(url, {
     ...init,
     credentials: 'include',
-    headers: { 'Content-Type': 'application/json', ...init?.headers },
+    headers:
+      init?.body instanceof FormData
+        ? init.headers
+        : { 'Content-Type': 'application/json', ...init?.headers },
   });
   if (!response.ok) {
     throw new ApiError(await parseErrorMessage(response));
@@ -94,6 +97,13 @@ export function uploadAvatar(userId: number, file: File) {
   });
 }
 
+// TODO: wire to the backend, DELETE /users/:userId/avatar does not exist yet
+export function removeAvatar(userId: number) {
+  return request<UserProfile>(`${BASE_URL}/users/${userId}/avatar`, {
+    method: 'DELETE',
+  });
+}
+
 export function updateProfile(userId: number, input: UpdateProfileInput) {
   return request<UserProfile>(`${BASE_URL}/users/${userId}`, {
     method: 'PATCH',
@@ -110,6 +120,13 @@ export function updateWeight(
   return request<WeightEntry>(`${BASE_URL}/users/${userId}/weight/${entryId}`, {
     method: 'PATCH',
     body: JSON.stringify(input),
+  });
+}
+
+// TODO: wire to the backend, DELETE /users/:userId/weight/:entryId does not exist yet
+export function deleteWeight(userId: number, entryId: number) {
+  return request<WeightEntry>(`${BASE_URL}/users/${userId}/weight/${entryId}`, {
+    method: 'DELETE',
   });
 }
 

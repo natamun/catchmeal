@@ -1,4 +1,5 @@
 import { forwardRef, useRef, useState } from 'react';
+import { Trash2 } from 'lucide-react';
 import DatePicker from 'react-datepicker';
 
 import { SelectDropdown } from '../ui/SelectDropdown';
@@ -14,7 +15,12 @@ import { BaseDialog } from '../ui/BaseDialog';
 import { EditIconButton } from '../ui/EditIconButton';
 import { FieldError } from '../ui/FieldError';
 import { Input } from '../ui/Input';
-import { updateProfile, uploadAvatar, type UserProfile } from './api';
+import {
+  removeAvatar,
+  updateProfile,
+  uploadAvatar,
+  type UserProfile,
+} from './api';
 import { BmiBadge } from './BmiBadge';
 import { WeightProgressBadge } from './WeightProgressBadge';
 
@@ -117,8 +123,8 @@ const BirthDateInput = forwardRef<
 BirthDateInput.displayName = 'BirthDateInput';
 
 export function ProfileIdentityCard({ user, onUpdate, currentWeight }: Props) {
-  const [uploading, setUploading] = useState(false);
-  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [avatarBusy, setAvatarBusy] = useState(false);
+  const [avatarError, setAvatarError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const dialogRef = useRef<HTMLDialogElement>(null);
   const [dialogNode, setDialogNode] = useState<HTMLDialogElement | null>(null);
@@ -171,23 +177,37 @@ export function ProfileIdentityCard({ user, onUpdate, currentWeight }: Props) {
     setFocusedField(null);
     setSubmitAttempted(false);
     setSaveError(null);
+    setAvatarError(null);
     setDialogNode(dialogRef.current);
     dialogRef.current?.showModal();
   }
 
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
+    if (fileInputRef.current) fileInputRef.current.value = '';
     if (!file) return;
-    setUploading(true);
-    setUploadError(null);
+    setAvatarBusy(true);
+    setAvatarError(null);
     try {
       const updated = await uploadAvatar(user.userId, file);
       onUpdate({ avatarUrl: updated.avatarUrl });
-    } catch (err) {
-      setUploadError(err instanceof Error ? err.message : "Échec de l'upload");
+    } catch {
+      setAvatarError("Impossible d'envoyer la photo. Réessayez.");
     } finally {
-      setUploading(false);
-      if (fileInputRef.current) fileInputRef.current.value = '';
+      setAvatarBusy(false);
+    }
+  }
+
+  async function handleAvatarRemove() {
+    setAvatarBusy(true);
+    setAvatarError(null);
+    try {
+      await removeAvatar(user.userId);
+      onUpdate({ avatarUrl: null });
+    } catch {
+      setAvatarError('Impossible de supprimer la photo. Réessayez.');
+    } finally {
+      setAvatarBusy(false);
     }
   }
 
@@ -305,28 +325,12 @@ export function ProfileIdentityCard({ user, onUpdate, currentWeight }: Props) {
             username={user.username}
             avatarUrl={user.avatarUrl}
             size="lg"
-            onClick={() => fileInputRef.current?.click()}
-            disabled={uploading}
-            editable
-          />
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            className="hidden"
-            onChange={(e) => void handleFileChange(e)}
           />
           <div className="min-w-0">
             <p className="text-base font-bold text-green-800">
               {user.username}
             </p>
             {user.name && <p className="text-xs text-green-500">{user.name}</p>}
-            {uploading && (
-              <p className="text-xs text-green-400">Upload en cours...</p>
-            )}
-            {uploadError && (
-              <p className="text-xs text-red-500">{uploadError}</p>
-            )}
           </div>
           {((currentWeight && user.height) ||
             (currentWeight && user.targetWeight)) && (
@@ -352,6 +356,50 @@ export function ProfileIdentityCard({ user, onUpdate, currentWeight }: Props) {
         onClose={() => setSaveError(null)}
       >
         <div className="grid grid-cols-2 gap-4">
+          <div className="col-span-2 flex items-center gap-3">
+            <Avatar username={user.username} avatarUrl={user.avatarUrl} />
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-semibold text-green-600">
+                Photo de profil
+              </p>
+              {avatarError ? (
+                <p role="alert" className="text-xs text-red-500">
+                  {avatarError}
+                </p>
+              ) : (
+                avatarBusy && (
+                  <p className="text-xs text-green-500">Envoi en cours...</p>
+                )
+              )}
+            </div>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => void handleFileChange(e)}
+            />
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={avatarBusy}
+              className="cursor-pointer rounded-xl border border-green-200 px-4 py-2.5 text-sm font-medium text-green-600 transition-colors hover:bg-green-50 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {user.avatarUrl ? 'Changer' : 'Ajouter'}
+            </button>
+            {user.avatarUrl && (
+              <button
+                type="button"
+                onClick={() => void handleAvatarRemove()}
+                disabled={avatarBusy}
+                aria-label="Supprimer la photo"
+                className="cursor-pointer text-green-400 transition-colors hover:text-red-500 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                <Trash2 className="h-5 w-5" />
+              </button>
+            )}
+          </div>
+
           <div className="relative col-span-2 flex flex-col gap-1">
             <label
               htmlFor="pf-username"
