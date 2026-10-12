@@ -32,6 +32,7 @@ import {
   X_TICK,
   Y_TICK,
 } from './chartStyle';
+import { legendLabel } from './legendLabel';
 import { MACRO_SERIES, UNSPLIT_SERIES } from './macroSeries';
 import MacroTooltip from './MacroTooltip';
 
@@ -204,9 +205,7 @@ export default function CalorieChart({ days, isLoading = false }: Props) {
           ))}
           <Legend
             itemSorter={(item) => SERIES_ORDER.indexOf(String(item.dataKey))}
-            formatter={(name: string) => (
-              <span className="text-sm text-green-700">{name}</span>
-            )}
+            formatter={legendLabel}
           />
         </BarChart>
       </ResponsiveContainer>

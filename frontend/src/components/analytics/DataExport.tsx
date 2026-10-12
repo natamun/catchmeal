@@ -2,7 +2,7 @@ import { isSameDay } from 'date-fns';
 import { Download } from 'lucide-react';
 
 import type { DashboardDay } from '../../types/dashboard-analytics';
-import { formatDayMonth, formatWeekday } from '../../utils/format';
+import { formatDayMonth } from '../../utils/format';
 import { toApiDate } from '../meal/api';
 import type { DateRange } from '../ui/CalendarButton';
 import SummaryCard from '../ui/SummaryCard';
@@ -28,53 +28,14 @@ function formatPeriod({ from, to }: DateRange) {
   return `Du ${formatDayMonth(from)} au ${formatDayMonth(to)}`;
 }
 
-function ExportButton({
-  label,
-  value,
-  disabled,
-  onClick,
-}: {
-  label: string;
-  value: string;
-  disabled: boolean;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      disabled={disabled}
-      onClick={onClick}
-      className="flex cursor-pointer items-center justify-between gap-3 rounded-xl bg-green-50 px-3 py-1.5 text-left transition-colors hover:bg-green-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-400 disabled:pointer-events-none disabled:opacity-50"
-    >
-      <span className="min-w-0">
-        <span className="block text-xs text-green-600">{label}</span>
-        <span className="block font-semibold text-green-800">{value}</span>
-      </span>
-      <Download
-        className="h-4 w-4 shrink-0 text-green-500"
-        aria-hidden="true"
-      />
-    </button>
-  );
-}
-
 interface Props {
-  day: Date;
-  dayData: DashboardDay | undefined;
   period: DateRange;
   days: DashboardDay[];
   isLoading?: boolean;
 }
 
-export default function DataExport({
-  day,
-  dayData,
-  period,
-  days,
-  isLoading = false,
-}: Props) {
-  const hasDay = isLoading || dayData !== undefined;
-  const hasPeriod = isLoading || days.length > 0;
+export default function DataExport({ period, days, isLoading = false }: Props) {
+  const isEmpty = !isLoading && days.length === 0;
 
   return (
     <SummaryCard
@@ -82,26 +43,24 @@ export default function DataExport({
       busy={isLoading}
       aside={<span className="text-sm text-green-600">Format JSON</span>}
     >
-      <div className="flex flex-col gap-3">
-        <ExportButton
-          label="Jour sélectionné"
-          value={hasDay ? formatWeekday(day) : 'Aucune donnée ce jour'}
-          disabled={isLoading || !dayData}
-          onClick={() =>
-            downloadJson(dayData, `catchmeal-${toApiDate(day)}.json`)
-          }
-        />
-        <ExportButton
-          label="Période affichée"
-          value={hasPeriod ? formatPeriod(period) : 'Aucune donnée'}
-          disabled={isLoading || days.length === 0}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <p className="font-semibold text-green-800">
+          {isEmpty ? 'Aucune donnée' : formatPeriod(period)}
+        </p>
+        <button
+          type="button"
+          disabled={isLoading || isEmpty}
           onClick={() =>
             downloadJson(
               days,
               `catchmeal-${toApiDate(period.from)}_${toApiDate(period.to)}.json`,
             )
           }
-        />
+          className="flex cursor-pointer items-center justify-center gap-2 rounded-xl bg-green-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-green-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-400 disabled:pointer-events-none disabled:opacity-50 max-xs:w-full"
+        >
+          <Download className="h-4 w-4" aria-hidden="true" />
+          Télécharger
+        </button>
       </div>
     </SummaryCard>
   );

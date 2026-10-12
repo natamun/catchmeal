@@ -1,10 +1,5 @@
 import { MACROS } from '../../constants/macros';
-
-const FILLS = {
-  protein: 'var(--color-green-600)',
-  carbs: 'var(--color-green-400)',
-  fat: 'var(--color-green-200)',
-} as const;
+import { SERIES_COLORS } from './chartStyle';
 
 export const MACRO_TOTAL_KEYS = {
   protein: 'totalProtein',
@@ -12,10 +7,10 @@ export const MACRO_TOTAL_KEYS = {
   fat: 'totalFat',
 } as const;
 
-export const MACRO_SERIES = MACROS.map(({ key, label }) => ({
+export const MACRO_SERIES = MACROS.map(({ key, label }, index) => ({
   key,
   label,
-  fill: FILLS[key],
+  fill: SERIES_COLORS[index],
   dataKey: `${key}Kcal` as const,
 }));
 
