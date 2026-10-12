@@ -104,7 +104,11 @@ export function updateProfile(userId: number, input: UpdateProfileInput) {
   });
 }
 
-export function updateWeight(userId: number, entryId: number, input: LogWeightInput) {
+export function updateWeight(
+  userId: number,
+  entryId: number,
+  input: LogWeightInput,
+) {
   return request<WeightEntry>(`${BASE_URL}/users/${userId}/weight/${entryId}`, {
     method: 'PATCH',
     body: JSON.stringify(input),
