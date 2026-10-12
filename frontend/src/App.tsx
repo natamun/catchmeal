@@ -82,6 +82,7 @@ function AppShell() {
     return null;
   });
   const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [isJournalPickerOpen, setIsJournalPickerOpen] = useState(false);
   const [message, setMessage] = useState<ChatMessage[]>([
     {
       role: 'assistant',
@@ -181,6 +182,7 @@ function AppShell() {
           setPendingReply(activity);
           setActiveTab('friends');
         }}
+        onPickerChange={setIsJournalPickerOpen}
       />
     ),
     food: <FoodPage />,
@@ -223,7 +225,7 @@ function AppShell() {
           {pages[activeTab]}
         </Suspense>
       </main>
-      {hasAssistant && (
+      {hasAssistant && !isJournalPickerOpen && (
         <ChatBotPopup
           isOpen={isOpen}
           onToggle={setIsOpen}

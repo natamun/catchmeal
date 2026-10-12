@@ -31,12 +31,17 @@ interface SectionEdit {
 
 interface HomePageProps {
   onReplyToActivity?: (activity: ActivityItem) => void;
+  onPickerChange?: (isOpen: boolean) => void;
 }
 
-export default function HomePage({ onReplyToActivity }: HomePageProps) {
+export default function HomePage({
+  onReplyToActivity,
+  onPickerChange,
+}: HomePageProps) {
   const { user } = useAuth();
   const [selectedDate, setSelectedDate] = useState(() => new Date());
   const [addingMealType, setAddingMealType] = useState<MealType | null>(null);
+  const isPickerOpen = addingMealType !== null;
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const { meals, foodItems, isReady, isLoading, loadError, reload, retry } =
     useDailyMeals(selectedDate);
@@ -56,6 +61,11 @@ export default function HomePage({ onReplyToActivity }: HomePageProps) {
       });
     return () => controller.abort();
   }, [user]);
+
+  useEffect(() => {
+    onPickerChange?.(isPickerOpen);
+    return () => onPickerChange?.(false);
+  }, [isPickerOpen, onPickerChange]);
 
   const dayTotals = meals.reduce(
     (acc, meal) => {
