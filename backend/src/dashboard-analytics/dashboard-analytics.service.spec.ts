@@ -9,7 +9,7 @@ describe('DashboardAnalyticsService', () => {
   const prismaMock = {
     meal: { findMany: jest.fn() },
     weightLog: { findMany: jest.fn() },
-    goalSetting: { findMany: jest.fn() },
+    goalSetting: { findMany: jest.fn(), findFirst: jest.fn() },
   };
 
   beforeEach(async () => {
@@ -31,10 +31,13 @@ describe('DashboardAnalyticsService', () => {
       totalProtein: null,
       totalCarbs: null,
       totalFat: null,
-      bodyFat: null,
-      objective: null,
       weight: null,
+      bodyFat: null,
+      fatFreeMass: null,
+      bodyWater: null,
+      muscleMass: null,
       goalKcal: null,
+      objective: null,
       ...overrides,
     };
   }
@@ -116,6 +119,10 @@ describe('DashboardAnalyticsService', () => {
         userId: 1,
         loggedAt: new Date('2026-08-17'),
         weight: 233,
+        bodyFat: 31,
+        fatFreeMass: 160.8,
+        bodyWater: 50.4,
+        muscleMass: 152,
       },
     ]);
     prismaMock.goalSetting.findMany.mockResolvedValue([]);
@@ -125,7 +132,15 @@ describe('DashboardAnalyticsService', () => {
       new Date('2026-08-01'),
       new Date('2026-08-31'),
     );
-    expect(dashboard).toEqual([expectDayEntry({ weight: 233 })]);
+    expect(dashboard).toEqual([
+      expectDayEntry({
+        weight: 233,
+        bodyFat: 31,
+        fatFreeMass: 160.8,
+        bodyWater: 50.4,
+        muscleMass: 152,
+      }),
+    ]);
   });
 
   it('should be return only goalSetting table', async () => {
@@ -148,6 +163,81 @@ describe('DashboardAnalyticsService', () => {
     );
     expect(dashboard).toEqual([
       expectDayEntry({ objective: 76, goalKcal: 2300 }),
+    ]);
+  });
+
+  it('should apply the goal set before the period to every day', async () => {
+    const from = new Date('2026-08-01');
+    prismaMock.meal.findMany.mockResolvedValue([]);
+    prismaMock.weightLog.findMany.mockResolvedValue([
+      { id: 1, userId: 1, loggedAt: new Date('2026-08-17'), weight: 80 },
+    ]);
+    prismaMock.goalSetting.findMany.mockResolvedValue([]);
+    prismaMock.goalSetting.findFirst.mockResolvedValue({
+      id: 1,
+      userId: 1,
+      startDate: new Date('2026-07-01'),
+      objective: 'lose',
+      dailyCalories: 2000,
+    });
+
+    const dashboard = await service.getDashboard(
+      1,
+      from,
+      new Date('2026-08-31'),
+    );
+
+    expect(prismaMock.goalSetting.findFirst).toHaveBeenCalledWith({
+      where: { userId: 1, startDate: { lt: from } },
+      orderBy: { startDate: 'desc' },
+    });
+    expect(dashboard).toEqual([
+      expectDayEntry({ weight: 80, goalKcal: 2000, objective: 'lose' }),
+    ]);
+  });
+
+  it('should replace the earlier goal from the day it changes', async () => {
+    prismaMock.meal.findMany.mockResolvedValue([]);
+    prismaMock.weightLog.findMany.mockResolvedValue([
+      { id: 1, userId: 1, loggedAt: new Date('2026-08-17'), weight: 80 },
+      { id: 2, userId: 1, loggedAt: new Date('2026-08-19'), weight: 79 },
+    ]);
+    prismaMock.goalSetting.findMany.mockResolvedValue([
+      {
+        id: 2,
+        userId: 1,
+        startDate: new Date('2026-08-18'),
+        objective: 'lose',
+        dailyCalories: 1600,
+      },
+    ]);
+    prismaMock.goalSetting.findFirst.mockResolvedValue({
+      id: 1,
+      userId: 1,
+      startDate: new Date('2026-07-01'),
+      objective: 'gain',
+      dailyCalories: 2000,
+    });
+
+    const dashboard = await service.getDashboard(
+      1,
+      new Date('2026-08-01'),
+      new Date('2026-08-31'),
+    );
+
+    expect(dashboard).toEqual([
+      expectDayEntry({ weight: 80, goalKcal: 2000, objective: 'gain' }),
+      expectDayEntry({
+        day: '2026-08-18',
+        goalKcal: 1600,
+        objective: 'lose',
+      }),
+      expectDayEntry({
+        day: '2026-08-19',
+        weight: 79,
+        goalKcal: 1600,
+        objective: 'lose',
+      }),
     ]);
   });
 

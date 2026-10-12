@@ -1,13 +1,16 @@
 export type DashboardDay = {
   day: string;
   totalKcal: number | null;
-  goalKcal: number | null;
-  weight: number | null;
   totalProtein: number | null;
   totalCarbs: number | null;
   totalFat: number | null;
-  objective: string | null;
+  weight: number | null;
   bodyFat: number | null;
+  fatFreeMass: number | null;
+  bodyWater: number | null;
+  muscleMass: number | null;
+  goalKcal: number | null;
+  objective: string | null;
 };
 
 export type DataGraph = {
