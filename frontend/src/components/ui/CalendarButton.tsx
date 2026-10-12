@@ -1,6 +1,7 @@
 import {
   useRef,
   useState,
+  type ComponentProps,
   type KeyboardEventHandler,
   type MouseEventHandler,
   type ReactNode,
@@ -66,6 +67,7 @@ interface SharedProps {
   wrapperClassName?: string;
   min?: Date;
   max?: Date;
+  placement?: ComponentProps<typeof DatePicker>['popperPlacement'];
 }
 
 interface DayProps extends SharedProps {
@@ -79,7 +81,7 @@ interface RangeProps extends SharedProps {
 }
 
 export default function CalendarButton(props: DayProps | RangeProps) {
-  const { children, className, wrapperClassName, min, max } = props;
+  const { children, className, wrapperClassName, min, max, placement } = props;
   const pickerRef = useRef<DatePicker>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [pendingStart, setPendingStart] = useState<Date | null>(null);
@@ -97,6 +99,7 @@ export default function CalendarButton(props: DayProps | RangeProps) {
     calendarClassName: 'kcal-datepicker',
     wrapperClassName,
     portalId: 'datepicker-portal',
+    popperPlacement: placement,
     customInput: (
       <CalendarTrigger
         isOpen={isOpen}

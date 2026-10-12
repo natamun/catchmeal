@@ -50,6 +50,7 @@ export default function PeriodSelector({
         onRangeChange={onChange}
         min={subDays(today, DAYS_AROUND_TODAY)}
         max={addDays(today, DAYS_AROUND_TODAY)}
+        placement="bottom-start"
         className="group flex rounded-xl border border-green-200 bg-white p-1.5 max-xs:w-full"
         wrapperClassName="max-xs:w-full"
       >
