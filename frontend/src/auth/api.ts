@@ -3,9 +3,12 @@ const AUTH_URL = `${import.meta.env.VITE_API_URL}/auth`;
 const JSON_HEADERS = { 'Content-Type': 'application/json' };
 
 export class ApiError extends Error {
-  constructor(message: string) {
+  readonly status: number;
+
+  constructor(message: string, status: number) {
     super(message);
     this.name = 'ApiError';
+    this.status = status;
   }
 }
 
@@ -27,7 +30,7 @@ async function request<T>(url: string, init?: RequestInit): Promise<T> {
   }
   const response = await fetch(url, { ...init, credentials: 'include' });
   if (!response.ok) {
-    throw new ApiError(await parseErrorMessage(response));
+    throw new ApiError(await parseErrorMessage(response), response.status);
   }
   return (await response.json()) as T;
 }

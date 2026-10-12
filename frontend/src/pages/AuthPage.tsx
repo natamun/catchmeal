@@ -38,7 +38,20 @@ const EMPTY_FORM: AuthFormState = {
 const LABEL_CLASS =
   'text-xs font-semibold tracking-wide text-green-500 uppercase';
 
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@.]{2,}$/;
+const MAX_LENGTH = { username: 30, name: 80, email: 255, password: 72 };
+const SUBMIT_ERRORS: Record<number, string> = {
+  400: 'Certaines informations ne sont pas valides. Vérifiez les champs.',
+  401: "Nom d'utilisateur ou mot de passe incorrect.",
+  409: "Ce nom d'utilisateur ou cet email est déjà pris.",
+};
+const UNKNOWN_ERROR = 'Une erreur est survenue, réessayez.';
+
+function submitErrorMessage(err: unknown) {
+  return err instanceof ApiError
+    ? (SUBMIT_ERRORS[err.status] ?? UNKNOWN_ERROR)
+    : UNKNOWN_ERROR;
+}
 
 function validateAuthForm(
   mode: Mode,
@@ -46,21 +59,33 @@ function validateAuthForm(
 ): Partial<Record<keyof AuthFormState, string>> {
   const errors: Partial<Record<keyof AuthFormState, string>> = {};
 
-  if (form.username.trim().length < 3) {
+  const username = form.username.trim();
+  const name = form.name.trim();
+  const email = form.email.trim();
+  const tooLong = (field: keyof AuthFormState, value: string) =>
+    mode === 'register' && value.length > MAX_LENGTH[field];
+
+  if (username.length < 3) {
     errors.username = 'Au moins 3 caractères';
+  } else if (tooLong('username', username)) {
+    errors.username = `${MAX_LENGTH.username} caractères maximum`;
   }
 
   if (mode === 'register') {
-    if (form.name.trim() === '') {
+    if (name === '') {
       errors.name = 'Nom requis';
+    } else if (tooLong('name', name)) {
+      errors.name = `${MAX_LENGTH.name} caractères maximum`;
     }
-    if (!EMAIL_PATTERN.test(form.email.trim())) {
+    if (!EMAIL_PATTERN.test(email) || tooLong('email', email)) {
       errors.email = 'Email invalide';
     }
   }
 
   if (form.password.length < 8) {
     errors.password = 'Au moins 8 caractères';
+  } else if (tooLong('password', form.password)) {
+    errors.password = `${MAX_LENGTH.password} caractères maximum`;
   }
 
   return errors;
@@ -140,12 +165,7 @@ export default function AuthPage({ initialMode, onCancel, oauthError }: Props) {
         });
       }
     } catch (err: unknown) {
-      console.error(err);
-      setError(
-        err instanceof ApiError
-          ? err.message
-          : 'Une erreur est survenue, réessayez.',
-      );
+      setError(submitErrorMessage(err));
     } finally {
       setIsSubmitting(false);
     }
