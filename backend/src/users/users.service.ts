@@ -240,7 +240,15 @@ export class UsersService {
       select: { weight: true },
     });
     const entry = await this.prisma.weightLog.create({
-      data: { userId, weight, bodyFat, fatFreeMass, bodyWater, muscleMass, note },
+      data: {
+        userId,
+        weight,
+        bodyFat,
+        fatFreeMass,
+        bodyWater,
+        muscleMass,
+        note,
+      },
       select: {
         id: true,
         weight: true,
