@@ -367,7 +367,9 @@ export default function AuthPage({ initialMode, onCancel, oauthError }: Props) {
         title="Conditions générales d'utilisation"
         maxWidth="lg"
       >
-        <TermsOfServiceContent />
+        <div className="legal-document legal-document-compact">
+          <TermsOfServiceContent heading="h3" />
+        </div>
       </BaseDialog>
 
       <BaseDialog
@@ -375,7 +377,9 @@ export default function AuthPage({ initialMode, onCancel, oauthError }: Props) {
         title="Politique de confidentialité et RGPD"
         maxWidth="xl"
       >
-        <PrivacyPolicyContent />
+        <div className="legal-document legal-document-compact">
+          <PrivacyPolicyContent heading="h3" />
+        </div>
       </BaseDialog>
     </>
   );
