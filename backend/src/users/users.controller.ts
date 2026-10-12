@@ -66,7 +66,6 @@ export class UsersController {
       dto.fatFreeMass,
       dto.bodyWater,
       dto.muscleMass,
-      dto.note,
     );
   }
 
@@ -88,7 +87,6 @@ export class UsersController {
       dto.fatFreeMass,
       dto.bodyWater,
       dto.muscleMass,
-      dto.note,
     );
   }
 

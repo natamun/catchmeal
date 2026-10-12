@@ -34,7 +34,6 @@ describe('DashboardAnalyticsService', () => {
       bodyFat: null,
       objective: null,
       weight: null,
-      noteWeight: null,
       goalKcal: null,
       ...overrides,
     };
@@ -117,7 +116,6 @@ describe('DashboardAnalyticsService', () => {
         userId: 1,
         loggedAt: new Date('2026-08-17'),
         weight: 233,
-        note: 'feel good',
       },
     ]);
     prismaMock.goalSetting.findMany.mockResolvedValue([]);
@@ -127,9 +125,7 @@ describe('DashboardAnalyticsService', () => {
       new Date('2026-08-01'),
       new Date('2026-08-31'),
     );
-    expect(dashboard).toEqual([
-      expectDayEntry({ weight: 233, noteWeight: 'feel good' }),
-    ]);
+    expect(dashboard).toEqual([expectDayEntry({ weight: 233 })]);
   });
 
   it('should be return only goalSetting table', async () => {
@@ -196,7 +192,6 @@ describe('DashboardAnalyticsService', () => {
         loggedAt: new Date('2026-08-17'),
         weight: 233,
         bodyFat: 12.3,
-        note: 'feel good',
       },
     ]);
     prismaMock.goalSetting.findMany.mockResolvedValue([
@@ -223,7 +218,6 @@ describe('DashboardAnalyticsService', () => {
         weight: 233,
         objective: 76,
         goalKcal: 2300,
-        noteWeight: 'feel good',
         bodyFat: 12.3,
       }),
     ]);
@@ -270,7 +264,6 @@ describe('DashboardAnalyticsService', () => {
         loggedAt: new Date('2026-08-17'),
         weight: 233,
         bodyFat: 12.3,
-        note: 'feel good',
       },
     ]);
     prismaMock.goalSetting.findMany.mockResolvedValue([
@@ -311,7 +304,6 @@ describe('DashboardAnalyticsService', () => {
         weight: 233,
         objective: 70,
         goalKcal: 2000,
-        noteWeight: 'feel good',
         bodyFat: 12.3,
       }),
     ]);
@@ -358,7 +350,6 @@ describe('DashboardAnalyticsService', () => {
         loggedAt: new Date('2026-08-16'),
         weight: 21,
         bodyFat: 11.9,
-        note: 'feel tired',
       },
       {
         id: 1,
@@ -366,7 +357,6 @@ describe('DashboardAnalyticsService', () => {
         loggedAt: new Date('2026-08-18'),
         weight: 233,
         bodyFat: 12.3,
-        note: 'feel good',
       },
     ]);
     prismaMock.goalSetting.findMany.mockResolvedValue([
@@ -394,7 +384,6 @@ describe('DashboardAnalyticsService', () => {
     expect(dashboard).toEqual([
       expectDayEntry({
         weight: 21,
-        noteWeight: 'feel tired',
         bodyFat: 11.9,
         day: '2026-08-16',
       }),
@@ -407,7 +396,6 @@ describe('DashboardAnalyticsService', () => {
       }),
       expectDayEntry({
         weight: 233,
-        noteWeight: 'feel good',
         bodyFat: 12.3,
         day: '2026-08-18',
         objective: 80,

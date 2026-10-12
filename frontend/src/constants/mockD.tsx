@@ -11,7 +11,6 @@ export const mockDashboard: DashboardDay[] = [
     totalFat: 62,
     objective: '2000',
     bodyFat: 22.1,
-    noteWeight: 'matin à jeun',
   },
   {
     day: '2026-07-05',
@@ -23,7 +22,6 @@ export const mockDashboard: DashboardDay[] = [
     totalFat: 70,
     objective: '2000',
     bodyFat: null,
-    noteWeight: null,
   },
   {
     day: '2026-07-06',
@@ -35,7 +33,6 @@ export const mockDashboard: DashboardDay[] = [
     totalFat: 58,
     objective: '2000',
     bodyFat: null,
-    noteWeight: null,
   },
   {
     day: '2026-07-07',
@@ -47,7 +44,6 @@ export const mockDashboard: DashboardDay[] = [
     totalFat: null,
     objective: '2000',
     bodyFat: null,
-    noteWeight: null,
   },
   {
     day: '2026-07-08',
@@ -59,7 +55,6 @@ export const mockDashboard: DashboardDay[] = [
     totalFat: 64,
     objective: '2000',
     bodyFat: null,
-    noteWeight: 'après sport',
   },
   {
     day: '2026-07-09',
@@ -71,7 +66,6 @@ export const mockDashboard: DashboardDay[] = [
     totalFat: 52,
     objective: '2000',
     bodyFat: null,
-    noteWeight: null,
   },
   {
     day: '2026-07-10',
@@ -83,7 +77,6 @@ export const mockDashboard: DashboardDay[] = [
     totalFat: 82,
     objective: '2000',
     bodyFat: 21.6,
-    noteWeight: null,
   },
   {
     day: '2026-07-11',
@@ -95,7 +88,6 @@ export const mockDashboard: DashboardDay[] = [
     totalFat: 60,
     objective: '1900',
     bodyFat: null,
-    noteWeight: null,
   },
   {
     day: '2026-07-12',
@@ -107,7 +99,6 @@ export const mockDashboard: DashboardDay[] = [
     totalFat: null,
     objective: '1900',
     bodyFat: null,
-    noteWeight: null,
   },
   {
     day: '2026-07-13',
@@ -119,7 +110,6 @@ export const mockDashboard: DashboardDay[] = [
     totalFat: 55,
     objective: '1900',
     bodyFat: null,
-    noteWeight: 'matin',
   },
   {
     day: '2026-07-14',
@@ -131,7 +121,6 @@ export const mockDashboard: DashboardDay[] = [
     totalFat: 68,
     objective: '1900',
     bodyFat: null,
-    noteWeight: null,
   },
   {
     day: '2026-07-15',
@@ -143,7 +132,6 @@ export const mockDashboard: DashboardDay[] = [
     totalFat: 61,
     objective: '1900',
     bodyFat: null,
-    noteWeight: null,
   },
   {
     day: '2026-07-16',
@@ -155,7 +143,6 @@ export const mockDashboard: DashboardDay[] = [
     totalFat: 74,
     objective: '1900',
     bodyFat: 21.0,
-    noteWeight: 'pesée hebdo',
   },
   {
     day: '2026-07-17',
@@ -167,7 +154,6 @@ export const mockDashboard: DashboardDay[] = [
     totalFat: 54,
     objective: '1900',
     bodyFat: null,
-    noteWeight: null,
   },
   {
     day: '2026-07-18',
@@ -179,7 +165,6 @@ export const mockDashboard: DashboardDay[] = [
     totalFat: null,
     objective: '1900',
     bodyFat: null,
-    noteWeight: null,
   },
   {
     day: '2026-07-19',
@@ -191,7 +176,6 @@ export const mockDashboard: DashboardDay[] = [
     totalFat: 59,
     objective: '2500',
     bodyFat: null,
-    noteWeight: null,
   },
   {
     day: '2026-07-20',
@@ -203,7 +187,6 @@ export const mockDashboard: DashboardDay[] = [
     totalFat: 66,
     objective: '2500',
     bodyFat: null,
-    noteWeight: null,
   },
   {
     day: '2026-07-21',
@@ -215,7 +198,6 @@ export const mockDashboard: DashboardDay[] = [
     totalFat: 56,
     objective: '1900',
     bodyFat: null,
-    noteWeight: null,
   },
   {
     day: '2026-07-22',
@@ -227,7 +209,6 @@ export const mockDashboard: DashboardDay[] = [
     totalFat: 88,
     objective: '1900',
     bodyFat: null,
-    noteWeight: 'resto 🍕',
   },
   {
     day: '2026-07-23',
@@ -239,7 +220,6 @@ export const mockDashboard: DashboardDay[] = [
     totalFat: 60,
     objective: '1900',
     bodyFat: 20.4,
-    noteWeight: 'matin à jeun',
   },
   {
     day: '2026-07-24',
@@ -251,7 +231,6 @@ export const mockDashboard: DashboardDay[] = [
     totalFat: null,
     objective: '1900',
     bodyFat: null,
-    noteWeight: null,
   },
   {
     day: '2026-07-25',
@@ -263,7 +242,6 @@ export const mockDashboard: DashboardDay[] = [
     totalFat: 50,
     objective: '1900',
     bodyFat: null,
-    noteWeight: null,
   },
   {
     day: '2026-07-26',
@@ -275,7 +253,6 @@ export const mockDashboard: DashboardDay[] = [
     totalFat: 62,
     objective: '1900',
     bodyFat: null,
-    noteWeight: null,
   },
   {
     day: '2026-07-27',
@@ -287,7 +264,6 @@ export const mockDashboard: DashboardDay[] = [
     totalFat: 57,
     objective: '1900',
     bodyFat: null,
-    noteWeight: null,
   },
   {
     day: '2026-07-28',
@@ -299,7 +275,6 @@ export const mockDashboard: DashboardDay[] = [
     totalFat: 69,
     objective: '1900',
     bodyFat: null,
-    noteWeight: null,
   },
   {
     day: '2026-07-29',
@@ -311,7 +286,6 @@ export const mockDashboard: DashboardDay[] = [
     totalFat: 53,
     objective: '1900',
     bodyFat: 19.8,
-    noteWeight: 'après sport',
   },
   {
     day: '2026-07-30',
@@ -323,7 +297,6 @@ export const mockDashboard: DashboardDay[] = [
     totalFat: null,
     objective: '1900',
     bodyFat: null,
-    noteWeight: null,
   },
   {
     day: '2026-07-31',
@@ -335,7 +308,6 @@ export const mockDashboard: DashboardDay[] = [
     totalFat: 60,
     objective: '1900',
     bodyFat: null,
-    noteWeight: null,
   },
   {
     day: '2026-08-04',
@@ -347,7 +319,6 @@ export const mockDashboard: DashboardDay[] = [
     totalFat: 62,
     objective: '2000',
     bodyFat: 22.1,
-    noteWeight: 'matin à jeun',
   },
   {
     day: '2026-08-05',
@@ -359,7 +330,6 @@ export const mockDashboard: DashboardDay[] = [
     totalFat: 70,
     objective: '2000',
     bodyFat: null,
-    noteWeight: null,
   },
   {
     day: '2026-08-06',
@@ -371,7 +341,6 @@ export const mockDashboard: DashboardDay[] = [
     totalFat: 58,
     objective: '2000',
     bodyFat: null,
-    noteWeight: null,
   },
   {
     day: '2026-08-07',
@@ -383,7 +352,6 @@ export const mockDashboard: DashboardDay[] = [
     totalFat: null,
     objective: '2000',
     bodyFat: null,
-    noteWeight: null,
   },
   {
     day: '2026-08-08',
@@ -395,7 +363,6 @@ export const mockDashboard: DashboardDay[] = [
     totalFat: 64,
     objective: '2000',
     bodyFat: null,
-    noteWeight: 'après sport',
   },
   {
     day: '2026-08-09',
@@ -407,7 +374,6 @@ export const mockDashboard: DashboardDay[] = [
     totalFat: 52,
     objective: '2000',
     bodyFat: null,
-    noteWeight: null,
   },
   {
     day: '2026-08-10',
@@ -419,7 +385,6 @@ export const mockDashboard: DashboardDay[] = [
     totalFat: 82,
     objective: '2000',
     bodyFat: 21.6,
-    noteWeight: null,
   },
   {
     day: '2026-08-11',
@@ -431,7 +396,6 @@ export const mockDashboard: DashboardDay[] = [
     totalFat: 60,
     objective: '1900',
     bodyFat: null,
-    noteWeight: null,
   },
   {
     day: '2026-08-12',
@@ -443,7 +407,6 @@ export const mockDashboard: DashboardDay[] = [
     totalFat: null,
     objective: '1900',
     bodyFat: null,
-    noteWeight: null,
   },
   {
     day: '2026-08-13',
@@ -455,7 +418,6 @@ export const mockDashboard: DashboardDay[] = [
     totalFat: 55,
     objective: '1900',
     bodyFat: null,
-    noteWeight: 'matin',
   },
   {
     day: '2026-08-14',
@@ -467,7 +429,6 @@ export const mockDashboard: DashboardDay[] = [
     totalFat: 68,
     objective: '1900',
     bodyFat: null,
-    noteWeight: null,
   },
   {
     day: '2026-08-15',
@@ -479,7 +440,6 @@ export const mockDashboard: DashboardDay[] = [
     totalFat: 61,
     objective: '1900',
     bodyFat: null,
-    noteWeight: null,
   },
   {
     day: '2026-08-16',
@@ -491,7 +451,6 @@ export const mockDashboard: DashboardDay[] = [
     totalFat: 74,
     objective: '1900',
     bodyFat: 21.0,
-    noteWeight: 'pesée hebdo',
   },
   {
     day: '2026-08-17',
@@ -503,7 +462,6 @@ export const mockDashboard: DashboardDay[] = [
     totalFat: 54,
     objective: '1900',
     bodyFat: null,
-    noteWeight: null,
   },
   {
     day: '2026-08-18',
@@ -515,7 +473,6 @@ export const mockDashboard: DashboardDay[] = [
     totalFat: null,
     objective: '1900',
     bodyFat: null,
-    noteWeight: null,
   },
   {
     day: '2026-08-19',
@@ -527,7 +484,6 @@ export const mockDashboard: DashboardDay[] = [
     totalFat: 59,
     objective: '2500',
     bodyFat: null,
-    noteWeight: null,
   },
   {
     day: '2026-08-20',
@@ -539,7 +495,6 @@ export const mockDashboard: DashboardDay[] = [
     totalFat: 66,
     objective: '2500',
     bodyFat: null,
-    noteWeight: null,
   },
   {
     day: '2026-08-21',
@@ -551,7 +506,6 @@ export const mockDashboard: DashboardDay[] = [
     totalFat: 56,
     objective: '1900',
     bodyFat: null,
-    noteWeight: null,
   },
   {
     day: '2026-08-22',
@@ -563,7 +517,6 @@ export const mockDashboard: DashboardDay[] = [
     totalFat: 88,
     objective: '1900',
     bodyFat: null,
-    noteWeight: 'resto 🍕',
   },
   {
     day: '2026-08-23',
@@ -575,7 +528,6 @@ export const mockDashboard: DashboardDay[] = [
     totalFat: 60,
     objective: '1900',
     bodyFat: 20.4,
-    noteWeight: 'matin à jeun',
   },
   {
     day: '2026-08-24',
@@ -587,7 +539,6 @@ export const mockDashboard: DashboardDay[] = [
     totalFat: null,
     objective: '1900',
     bodyFat: null,
-    noteWeight: null,
   },
   {
     day: '2026-08-25',
@@ -599,7 +550,6 @@ export const mockDashboard: DashboardDay[] = [
     totalFat: 50,
     objective: '1900',
     bodyFat: null,
-    noteWeight: null,
   },
   {
     day: '2026-08-26',
@@ -611,7 +561,6 @@ export const mockDashboard: DashboardDay[] = [
     totalFat: 62,
     objective: '1900',
     bodyFat: null,
-    noteWeight: null,
   },
   {
     day: '2026-08-27',
@@ -623,7 +572,6 @@ export const mockDashboard: DashboardDay[] = [
     totalFat: 57,
     objective: '1900',
     bodyFat: null,
-    noteWeight: null,
   },
   {
     day: '2026-08-28',
@@ -635,7 +583,6 @@ export const mockDashboard: DashboardDay[] = [
     totalFat: 69,
     objective: '1900',
     bodyFat: null,
-    noteWeight: null,
   },
   {
     day: '2026-08-29',
@@ -647,7 +594,6 @@ export const mockDashboard: DashboardDay[] = [
     totalFat: 53,
     objective: '1900',
     bodyFat: 19.8,
-    noteWeight: 'après sport',
   },
   {
     day: '2026-08-30',
@@ -659,7 +605,6 @@ export const mockDashboard: DashboardDay[] = [
     totalFat: null,
     objective: '1900',
     bodyFat: null,
-    noteWeight: null,
   },
   {
     day: '2026-08-31',
@@ -671,7 +616,6 @@ export const mockDashboard: DashboardDay[] = [
     totalFat: 60,
     objective: '1900',
     bodyFat: null,
-    noteWeight: null,
   },
   {
     day: '2026-09-01',
@@ -683,7 +627,6 @@ export const mockDashboard: DashboardDay[] = [
     totalFat: 65,
     objective: '1900',
     bodyFat: null,
-    noteWeight: 'matin',
   },
   {
     day: '2026-09-02',
@@ -695,7 +638,6 @@ export const mockDashboard: DashboardDay[] = [
     totalFat: 56,
     objective: '1900',
     bodyFat: 19.5,
-    noteWeight: null,
   },
   {
     day: '2026-09-03',
@@ -707,7 +649,6 @@ export const mockDashboard: DashboardDay[] = [
     totalFat: 56,
     objective: '1900',
     bodyFat: 19.5,
-    noteWeight: null,
   },
   {
     day: '2026-09-04',
@@ -719,7 +660,6 @@ export const mockDashboard: DashboardDay[] = [
     totalFat: 56,
     objective: '1900',
     bodyFat: 19.5,
-    noteWeight: null,
   },
   {
     day: '2026-09-05',
@@ -731,7 +671,6 @@ export const mockDashboard: DashboardDay[] = [
     totalFat: 56,
     objective: '1900',
     bodyFat: 19.5,
-    noteWeight: null,
   },
   {
     day: '2026-09-06',
@@ -743,7 +682,6 @@ export const mockDashboard: DashboardDay[] = [
     totalFat: 56,
     objective: '1900',
     bodyFat: 19.5,
-    noteWeight: null,
   },
   {
     day: '2026-09-07',
@@ -755,7 +693,6 @@ export const mockDashboard: DashboardDay[] = [
     totalFat: 56,
     objective: '1900',
     bodyFat: 19.5,
-    noteWeight: null,
   },
   {
     day: '2026-09-08',
@@ -767,7 +704,6 @@ export const mockDashboard: DashboardDay[] = [
     totalFat: 56,
     objective: '1900',
     bodyFat: 19.5,
-    noteWeight: null,
   },
   {
     day: '2026-09-09',
@@ -779,7 +715,6 @@ export const mockDashboard: DashboardDay[] = [
     totalFat: 56,
     objective: '1900',
     bodyFat: 19.5,
-    noteWeight: null,
   },
   {
     day: '2026-09-10',
@@ -791,7 +726,6 @@ export const mockDashboard: DashboardDay[] = [
     totalFat: 56,
     objective: '1900',
     bodyFat: 19.5,
-    noteWeight: null,
   },
   {
     day: '2026-09-11',
@@ -803,7 +737,6 @@ export const mockDashboard: DashboardDay[] = [
     totalFat: 56,
     objective: '1900',
     bodyFat: 19.5,
-    noteWeight: null,
   },
   {
     day: '2026-09-12',
@@ -815,7 +748,6 @@ export const mockDashboard: DashboardDay[] = [
     totalFat: null,
     objective: '1900',
     bodyFat: null,
-    noteWeight: null,
   },
   {
     day: '2026-09-13',
@@ -827,7 +759,6 @@ export const mockDashboard: DashboardDay[] = [
     totalFat: 55,
     objective: '1900',
     bodyFat: null,
-    noteWeight: 'matin',
   },
   {
     day: '2026-09-14',
@@ -839,7 +770,6 @@ export const mockDashboard: DashboardDay[] = [
     totalFat: 68,
     objective: '1900',
     bodyFat: null,
-    noteWeight: null,
   },
   {
     day: '2026-09-15',
@@ -851,7 +781,6 @@ export const mockDashboard: DashboardDay[] = [
     totalFat: 61,
     objective: '1900',
     bodyFat: null,
-    noteWeight: null,
   },
   {
     day: '2026-09-16',
@@ -863,7 +792,6 @@ export const mockDashboard: DashboardDay[] = [
     totalFat: 74,
     objective: '1900',
     bodyFat: 21.0,
-    noteWeight: 'pesée hebdo',
   },
   {
     day: '2026-09-17',
@@ -875,7 +803,6 @@ export const mockDashboard: DashboardDay[] = [
     totalFat: 54,
     objective: '1900',
     bodyFat: null,
-    noteWeight: null,
   },
   {
     day: '2026-09-18',
@@ -887,7 +814,6 @@ export const mockDashboard: DashboardDay[] = [
     totalFat: null,
     objective: '1900',
     bodyFat: null,
-    noteWeight: null,
   },
   {
     day: '2026-09-19',
@@ -899,7 +825,6 @@ export const mockDashboard: DashboardDay[] = [
     totalFat: 59,
     objective: '2500',
     bodyFat: null,
-    noteWeight: null,
   },
   {
     day: '2026-09-20',
@@ -911,7 +836,6 @@ export const mockDashboard: DashboardDay[] = [
     totalFat: 66,
     objective: '2500',
     bodyFat: null,
-    noteWeight: null,
   },
   {
     day: '2026-09-21',
@@ -923,7 +847,6 @@ export const mockDashboard: DashboardDay[] = [
     totalFat: 56,
     objective: '1900',
     bodyFat: null,
-    noteWeight: null,
   },
   {
     day: '2026-09-22',
@@ -935,7 +858,6 @@ export const mockDashboard: DashboardDay[] = [
     totalFat: 88,
     objective: '1900',
     bodyFat: null,
-    noteWeight: 'resto 🍕',
   },
   {
     day: '2026-09-23',
@@ -947,7 +869,6 @@ export const mockDashboard: DashboardDay[] = [
     totalFat: 60,
     objective: '1900',
     bodyFat: 20.4,
-    noteWeight: 'matin à jeun',
   },
   {
     day: '2026-09-24',
@@ -959,7 +880,6 @@ export const mockDashboard: DashboardDay[] = [
     totalFat: null,
     objective: '1900',
     bodyFat: null,
-    noteWeight: null,
   },
   {
     day: '2026-09-25',
@@ -971,7 +891,6 @@ export const mockDashboard: DashboardDay[] = [
     totalFat: 50,
     objective: '1900',
     bodyFat: null,
-    noteWeight: null,
   },
   {
     day: '2026-09-26',
@@ -983,7 +902,6 @@ export const mockDashboard: DashboardDay[] = [
     totalFat: 62,
     objective: '1900',
     bodyFat: null,
-    noteWeight: null,
   },
   {
     day: '2026-09-27',
@@ -995,7 +913,6 @@ export const mockDashboard: DashboardDay[] = [
     totalFat: 57,
     objective: '1900',
     bodyFat: null,
-    noteWeight: null,
   },
   {
     day: '2026-09-28',
@@ -1007,7 +924,6 @@ export const mockDashboard: DashboardDay[] = [
     totalFat: 69,
     objective: '1900',
     bodyFat: null,
-    noteWeight: null,
   },
   {
     day: '2026-09-29',
@@ -1019,7 +935,6 @@ export const mockDashboard: DashboardDay[] = [
     totalFat: 53,
     objective: '1900',
     bodyFat: 19.8,
-    noteWeight: 'après sport',
   },
   {
     day: '2026-09-30',
@@ -1031,6 +946,5 @@ export const mockDashboard: DashboardDay[] = [
     totalFat: null,
     objective: '1900',
     bodyFat: null,
-    noteWeight: null,
   },
 ];

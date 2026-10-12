@@ -1,11 +1,4 @@
-import {
-  IsNumber,
-  IsOptional,
-  IsPositive,
-  IsString,
-  Max,
-  MaxLength,
-} from 'class-validator';
+import { IsNumber, IsOptional, IsPositive, Max } from 'class-validator';
 
 export class LogWeightDto {
   @IsNumber()
@@ -36,9 +29,4 @@ export class LogWeightDto {
   @IsPositive()
   @Max(500)
   muscleMass?: number;
-
-  @IsOptional()
-  @IsString()
-  @MaxLength(255)
-  note?: string;
 }

@@ -8,7 +8,6 @@ export type DashboardDay = {
   totalFat: number | null;
   objective: string | null;
   bodyFat: number | null;
-  noteWeight: string | null;
 };
 
 export type DataGraph = {

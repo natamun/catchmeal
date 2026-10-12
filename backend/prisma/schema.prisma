@@ -79,7 +79,6 @@ model Friend {
   userId            Int
   friendId          Int
   status            FriendStatus @default(PENDING)
-  note              String? @db.VarChar(255)
   lastTimeConnected DateTime?
   user              User    @relation("UserFriends", fields: [userId], references: [id])
   friendUser        User    @relation("FriendOf", fields: [friendId], references: [id])
@@ -113,7 +112,6 @@ model WeightLog {
   bodyWater   Float?
   muscleMass  Float?
   loggedAt  DateTime @default(now())
-  note      String?  @db.VarChar(255)
   @@index([userId, loggedAt])
 }
 

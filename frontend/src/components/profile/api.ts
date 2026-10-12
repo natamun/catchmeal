@@ -74,7 +74,6 @@ export interface WeightEntry {
   fatFreeMass: number | null;
   bodyWater: number | null;
   muscleMass: number | null;
-  note: string | null;
   loggedAt: string;
 }
 
@@ -84,7 +83,6 @@ export interface LogWeightInput {
   fatFreeMass?: number;
   bodyWater?: number;
   muscleMass?: number;
-  note?: string;
 }
 
 export function uploadAvatar(userId: number, file: File) {

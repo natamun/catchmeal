@@ -80,7 +80,7 @@ export function WeightCard({ userId, targetWeight, onLatestWeight }: Props) {
     const input: LogWeightInput = { weight };
     for (const f of FIELDS.slice(1)) {
       const v = parseFloat(draft[f.key] ?? '');
-      if (!isNaN(v) && v > 0) (input as Record<string, number>)[f.key] = v;
+      if (!isNaN(v) && v > 0) input[f.key] = v;
     }
 
     setSaving(true);
@@ -116,7 +116,6 @@ export function WeightCard({ userId, targetWeight, onLatestWeight }: Props) {
         fatFreeMass: entry.fatFreeMass ?? undefined,
         bodyWater: entry.bodyWater ?? undefined,
         muscleMass: entry.muscleMass ?? undefined,
-        note: entry.note ?? undefined,
       });
       setHistory((prev) => prev.map((e) => (e.id === entry.id ? updated : e)));
       if (history[0]?.id === entry.id) onLatestWeight?.(updated.weight);

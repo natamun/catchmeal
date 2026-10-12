@@ -22,7 +22,6 @@ export class DashboardAnalyticsService {
    *  - totalFat: the total amount of fat consumed per day
    *  - objective: lose or gain weight
    *  - bodyFat: the value of body fat
-   *  - noteWeight: the comment about your weight
    */
   async getDashboard(userId: number, from: Date, to: Date) {
     const [meals, weightLogs, goals] = await Promise.all([
@@ -108,7 +107,6 @@ export class DashboardAnalyticsService {
         totalFat: totalsByDay[day]?.fat ?? null,
         objective: goal?.objective ?? null,
         bodyFat: weightLogsDay[day]?.bodyFat ?? null,
-        noteWeight: weightLogsDay[day]?.note ?? null,
       };
     });
     return dashboard;
