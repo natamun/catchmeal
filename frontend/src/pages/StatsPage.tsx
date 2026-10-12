@@ -1,9 +1,10 @@
 import { useState } from 'react';
 
+import { useAuth } from '../auth/auth-context';
 import CalorieChart from '../components/analytics/CalorieChart';
 import DataExport from '../components/analytics/DataExport';
 import MeasureChart, {
-  type MeasureSeries,
+  type MeasureKey,
 } from '../components/analytics/MeasureChart';
 import NutritionAverages from '../components/analytics/NutritionAverages';
 import { lastDays } from '../components/analytics/period';
@@ -13,18 +14,10 @@ import { toApiDate } from '../components/meal/api';
 import { LoadError } from '../components/ui/LoadError';
 import useDashboard from '../hooks/useDashboard';
 
-const BODY_SERIES: MeasureSeries[] = [
-  { key: 'weight', label: 'Poids' },
-  { key: 'fatFreeMass', label: 'Masse maigre' },
-  { key: 'muscleMass', label: 'Muscle' },
-];
-const RATE_SERIES: MeasureSeries[] = [
-  { key: 'bodyFat', label: 'Masse grasse' },
-  { key: 'bodyWater', label: 'Eau corporelle' },
-];
-
 export default function StatsPage() {
+  const { user } = useAuth();
   const [period, setPeriod] = useState(() => lastDays(7));
+  const [measure, setMeasure] = useState<MeasureKey>('weight');
   const from = toApiDate(period.from);
   const to = toApiDate(period.to);
   const { days, isLoading, hasError, retry } = useDashboard(from, to);
@@ -57,19 +50,9 @@ export default function StatsPage() {
 
           <CalorieChart days={days} isLoading={isLoading} />
           <MeasureChart
-            title="Évolution corporelle"
-            unit="kg"
-            series={BODY_SERIES}
-            emptyMessage="Aucune pesée sur cette période."
-            days={days}
-            period={period}
-            isLoading={isLoading}
-          />
-          <MeasureChart
-            title="Masse grasse et eau corporelle"
-            unit="%"
-            series={RATE_SERIES}
-            emptyMessage="Aucune mesure sur cette période."
+            measure={measure}
+            onMeasureChange={setMeasure}
+            targetWeight={user?.targetWeight ?? null}
             days={days}
             period={period}
             isLoading={isLoading}

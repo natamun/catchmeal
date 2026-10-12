@@ -11,12 +11,14 @@ interface Option {
 
 const SIZE = {
   md: {
-    trigger: 'w-full rounded-xl px-4 py-2.5 text-sm',
+    trigger: 'rounded-xl px-4 py-2.5 text-sm',
+    width: 'w-full',
     icon: 'h-4 w-4',
     option: 'px-4 py-2 text-sm',
   },
   sm: {
-    trigger: 'w-28 gap-1 rounded-lg px-2 py-0.5 text-xs',
+    trigger: 'gap-1 rounded-lg px-2 py-0.5 text-xs',
+    width: 'w-28',
     icon: 'h-3 w-3',
     option: 'px-3 py-1.5 text-xs',
   },
@@ -41,7 +43,7 @@ export function SelectDropdown({
   container,
   placeholder = '—',
   size = 'md',
-  className = '',
+  className = SIZE[size].width,
 }: SelectDropdownProps) {
   const [open, setOpen] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
