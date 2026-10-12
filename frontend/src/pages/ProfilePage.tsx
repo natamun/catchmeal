@@ -20,13 +20,13 @@ export default function ProfilePage({
     <div className="flex animate-fade-in-up flex-col gap-6">
       <h1 className="sr-only">Profil</h1>
 
-      <ProfileIdentityCard
-        user={user}
-        onUpdate={updateUser}
-        currentWeight={latestWeight}
-      />
+      <ProfileIdentityCard user={user} onUpdate={updateUser} />
 
-      <WeightCard userId={user.userId} onLatestWeight={setLatestWeight} />
+      <WeightCard
+        userId={user.userId}
+        height={user.height}
+        onLatestWeight={setLatestWeight}
+      />
 
       <GoalsCard user={user} latestWeight={latestWeight} />
 

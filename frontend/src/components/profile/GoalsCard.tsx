@@ -89,6 +89,15 @@ export function GoalsCard({ user, latestWeight }: Props) {
     },
   ];
 
+  const gap =
+    latestWeight && user.targetWeight ? latestWeight - user.targetWeight : null;
+  const remaining =
+    gap === null
+      ? null
+      : Math.abs(gap) < 0.05
+        ? 'Poids cible atteint'
+        : `${formatMeasure(Math.abs(gap), 'kg')} ${gap > 0 ? 'à perdre' : 'à prendre'}`;
+
   const renderBasis = () => {
     if (isLoading) {
       return <Skeleton className="h-5 w-48" />;
@@ -121,7 +130,17 @@ export function GoalsCard({ user, latestWeight }: Props) {
     <SummaryCard
       title="Mes objectifs"
       busy={isLoading}
-      aside={<p className="text-sm text-green-600">{renderBasis()}</p>}
+      aside={
+        <p className="text-sm text-green-600">
+          {remaining && (
+            <>
+              <span className="font-semibold text-green-800">{remaining}</span>
+              {' · '}
+            </>
+          )}
+          {renderBasis()}
+        </p>
+      }
     >
       <dl className="grid grid-cols-1 gap-3 xs:grid-cols-2 lg:grid-cols-4">
         {rows.map(({ label, unit, goal, recommended }) => (

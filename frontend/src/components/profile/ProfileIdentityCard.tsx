@@ -16,13 +16,10 @@ import {
   type UserProfile,
 } from './api';
 import { BirthDatePicker } from './BirthDatePicker';
-import { BmiBadge } from './BmiBadge';
-import { WeightProgressBadge } from './WeightProgressBadge';
 
 interface Props {
   user: AuthUser;
   onUpdate: (partial: Partial<AuthUser>) => void;
-  currentWeight?: number | null;
 }
 
 type Field =
@@ -101,7 +98,7 @@ const ACTIVITY_OPTIONS = [
   { value: 'EXTRA_ACTIVE', label: 'Extrêmement actif' },
 ];
 
-export function ProfileIdentityCard({ user, onUpdate, currentWeight }: Props) {
+export function ProfileIdentityCard({ user, onUpdate }: Props) {
   const [avatarBusy, setAvatarBusy] = useState(false);
   const [avatarError, setAvatarError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -305,29 +302,15 @@ export function ProfileIdentityCard({ user, onUpdate, currentWeight }: Props) {
             avatarUrl={user.avatarUrl}
             size="lg"
           />
-          <div className="min-w-0">
-            <p className="text-base font-bold text-green-800">
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-base font-bold text-green-800">
               {user.username}
             </p>
-            {user.name && <p className="text-xs text-green-500">{user.name}</p>}
+            {user.name && (
+              <p className="truncate text-xs text-green-500">{user.name}</p>
+            )}
           </div>
-          {((currentWeight && user.height) ||
-            (currentWeight && user.targetWeight)) && (
-            <div className="flex flex-1 items-center justify-center gap-2">
-              {currentWeight && user.height && (
-                <BmiBadge weight={currentWeight} height={user.height} />
-              )}
-              {currentWeight && user.targetWeight && (
-                <WeightProgressBadge
-                  current={currentWeight}
-                  target={user.targetWeight}
-                />
-              )}
-            </div>
-          )}
-          <div className="ml-auto">
-            <EditIconButton label="Modifier le profil" onClick={handleEdit} />
-          </div>
+          <EditIconButton label="Modifier le profil" onClick={handleEdit} />
         </div>
       </div>
 

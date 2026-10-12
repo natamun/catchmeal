@@ -22,12 +22,27 @@ function formatDate(isoDate: string) {
   });
 }
 
+function describeBmi(weight: number, height: number) {
+  const bmi = weight / (height / 100) ** 2;
+  const category =
+    bmi < 18.5
+      ? 'Insuffisance pondérale'
+      : bmi < 25
+        ? 'Poids normal'
+        : bmi < 30
+          ? 'Surpoids'
+          : 'Obésité';
+
+  return `IMC ${formatKg(bmi)} · ${category}`;
+}
+
 interface Props {
   userId: number;
+  height?: number | null;
   onLatestWeight?: (weight: number | null) => void;
 }
 
-export function WeightCard({ userId, onLatestWeight }: Props) {
+export function WeightCard({ userId, height, onLatestWeight }: Props) {
   const [history, setHistory] = useState<WeightEntry[] | null>(null);
   const [hasError, setHasError] = useState(false);
   const [attempt, setAttempt] = useState(0);
@@ -135,6 +150,11 @@ export function WeightCard({ userId, onLatestWeight }: Props) {
                 <p className="mt-1 text-sm text-green-600">
                   Dernière pesée le {formatDate(latest.loggedAt)}
                 </p>
+                {height ? (
+                  <p className="text-sm text-green-600">
+                    {describeBmi(latest.weight, height)}
+                  </p>
+                ) : null}
               </div>
               <dl className="grid flex-1 grid-cols-2 gap-3 sm:grid-cols-4">
                 {COMPOSITION.map(({ key, label, unit }) => (
