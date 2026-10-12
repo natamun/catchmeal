@@ -171,6 +171,8 @@ function AppShell() {
   }
 
   const isAdmin = user?.role === 'ADMIN';
+  const hasAssistant =
+    activeTab === 'stats' || activeTab === 'home' || activeTab === 'food';
 
   const pages: Record<Tab, React.ReactNode> = {
     home: (
@@ -205,7 +207,11 @@ function AppShell() {
       />
       <main
         id="main-content"
-        className="mx-auto max-w-6xl px-6 pt-6 pb-8 pointer-coarse:pb-[calc(6rem+env(safe-area-inset-bottom))]"
+        className={`mx-auto max-w-6xl px-6 pt-6 ${
+          hasAssistant
+            ? 'pb-24 pointer-coarse:pb-[calc(10rem+env(safe-area-inset-bottom))]'
+            : 'pb-8 pointer-coarse:pb-[calc(6rem+env(safe-area-inset-bottom))]'
+        }`}
       >
         <Suspense
           fallback={
@@ -217,9 +223,7 @@ function AppShell() {
           {pages[activeTab]}
         </Suspense>
       </main>
-      {(activeTab === 'stats' ||
-        activeTab === 'home' ||
-        activeTab === 'food') && (
+      {hasAssistant && (
         <ChatBotPopup
           isOpen={isOpen}
           onToggle={setIsOpen}

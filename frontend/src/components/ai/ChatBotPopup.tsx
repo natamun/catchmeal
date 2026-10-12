@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Bot, Forward, Loader, X } from 'lucide-react';
+import { ArrowUp, Bot, LoaderCircle, X } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 
 import { useAuth } from '../../auth/auth-context';
@@ -104,36 +104,32 @@ export default function ChatBotPopup({
   }
 
   return (
-    <div>
-      {isOpen === false && (
-        <button
-          type="button"
-          className="fixed right-3 bottom-20 h-14 w-14 rounded-full bg-green-500 text-sm font-semibold text-white ring-1 ring-green-500 hover:bg-emerald-400/80"
-          onClick={() => onToggle(true)}
+    <div className="fixed right-6 bottom-6 z-20 pointer-coarse:bottom-[calc(5rem+env(safe-area-inset-bottom))]">
+      {isOpen && (
+        <div
+          role="dialog"
+          aria-label="Assistant CatCHMeal"
+          className="relative flex h-[32rem] max-h-[calc(100dvh-8rem-env(safe-area-inset-bottom))] w-[min(24rem,calc(100vw-3rem))] animate-fade-in-up flex-col overflow-hidden rounded-2xl border border-green-200 bg-white shadow-lg"
         >
-          <Bot height={30} width={30} className="ml-3.5" />
-        </button>
-      )}
-      {isOpen === true && (
-        <div className="fixed right-2 bottom-25 flex h-125 w-75 flex-col rounded-xl border border-green-400 bg-white shadow-xl sm:right-5 sm:w-100 md:bottom-10">
-          {disclamer === true && (
-            <div className="absolute inset-0 z-10 flex rounded-xl bg-black/30 p-3">
+          {disclamer && (
+            <div className="absolute inset-0 z-10 flex items-center bg-black/30 p-4 backdrop-blur-sm">
               <DisclamerPopup setDisclamer={setDisclamer} />
             </div>
           )}
-          <div className="flex justify-between rounded-t-xl bg-green-400 shadow-sm">
-            <p className="m-1.5 ml-5 p-1 text-xl font-semibold text-white">
-              Chat Assistant
-            </p>
+          <div className="flex items-center justify-between px-4 pt-4 pb-3">
+            <h2 className="text-lg font-bold text-green-800">
+              Assistant CatCHMeal
+            </h2>
             <button
               type="button"
-              className="m-3 flex justify-end font-semibold text-white hover:text-gray-200"
               onClick={() => onToggle(false)}
+              aria-label="Fermer"
+              className="cursor-pointer text-green-400 transition-colors hover:text-green-600"
             >
-              <X height={20} width={20} />
+              <X className="h-5 w-5" />
             </button>
           </div>
-          <div className="flex-1 overflow-auto">
+          <div className="flex flex-1 flex-col gap-3 overflow-y-auto px-4 pb-3">
             {messages.map((msg, key) => (
               <div
                 key={key}
@@ -142,21 +138,20 @@ export default function ChatBotPopup({
                     ? lastAssistantRef
                     : null
                 }
-                className={`m-3 flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} `}
+                className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
               >
                 <div
-                  className={`max-w-[85%] rounded-2xl px-3 py-2 text-sm wrap-break-word ${msg.role === 'user' ? 'bg-green-400 text-white' : 'border border-green-50 bg-gray-100 text-black'}`}
+                  className={`max-w-[85%] rounded-2xl px-3 py-2 text-sm wrap-break-word ${msg.role === 'user' ? 'bg-green-500 text-white' : 'bg-green-50 text-green-800'}`}
                 >
-                  {' '}
                   <ReactMarkdown>{msg.content}</ReactMarkdown>
                 </div>
               </div>
             ))}
             <div ref={messagesEndRef} />
           </div>
-          <div className="m-1 flex shrink-0 items-end rounded-2xl bg-green-50">
+          <div className="mx-4 flex items-end gap-2 rounded-xl border border-green-200 px-3 py-2 focus-within:border-green-400">
             <textarea
-              className="m-2 max-h-20 min-w-0 flex-1 resize-none overflow-y-auto outline-none focus:outline-none"
+              className="max-h-20 min-w-0 flex-1 resize-none self-center overflow-y-auto text-sm text-green-800 outline-none"
               value={input}
               maxLength={250}
               disabled={disclamer}
@@ -172,41 +167,51 @@ export default function ChatBotPopup({
               onChange={handleInputChange}
               placeholder="Écrivez un message..."
             />
-            <div className="m-2 flex min-h-5 min-w-5 shrink-0 flex-col">
+            <div className="flex shrink-0 flex-col items-center gap-1">
               {input.length > 200 && (
                 <span
-                  className={`self-center text-[9px] ${input.length >= 250 ? 'text-red-500' : 'text-gray-400'}`}
+                  className={`text-xs ${input.length >= 250 ? 'text-red-500' : 'text-green-500'}`}
                 >
                   {input.length}/250
                 </span>
               )}
-              {loading === false && (
-                <button
-                  type="button"
-                  className="shrink-0 rounded-3xl hover:bg-green-100/80"
-                  onClick={() => void handleSend()}
-                >
-                  <Forward />
-                </button>
-              )}
-              {loading === true && (
-                <Loader height={20} width={20} className="animate-spin" />
-              )}
+              <button
+                type="button"
+                onClick={() => void handleSend()}
+                disabled={loading}
+                aria-label="Envoyer"
+                className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-green-500 text-white transition-colors hover:bg-green-600 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {loading ? (
+                  <LoaderCircle className="h-4 w-4 animate-spin" />
+                ) : (
+                  <ArrowUp className="h-4 w-4" />
+                )}
+              </button>
             </div>
           </div>
-          <div className="m-0.5 flex flex-col">
-            <p className="flex justify-center text-[10px] sm:text-[11px]">
-              Par votre utilisation du chat, vous acceptez cette
-            </p>
+          <p className="px-4 pt-2 pb-3 text-center text-xs text-green-500">
+            Par votre utilisation du chat, vous acceptez cette{' '}
             <button
-              className="flex self-center text-[10px] text-green-400 hover:text-green-100/80"
               type="button"
               onClick={() => setDisclamer(true)}
+              className="cursor-pointer font-medium text-green-600 underline underline-offset-2 transition-colors hover:text-green-800"
             >
-              <span>clause de non-responsabilité.</span>
+              clause de non-responsabilité
             </button>
-          </div>
+            .
+          </p>
         </div>
+      )}
+      {!isOpen && (
+        <button
+          type="button"
+          onClick={() => onToggle(true)}
+          aria-label="Ouvrir l'assistant"
+          className="flex h-12 w-12 cursor-pointer items-center justify-center rounded-full bg-green-500 text-white shadow-lg ring-2 ring-white transition-colors hover:bg-green-600 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-green-400"
+        >
+          <Bot className="h-6 w-6" />
+        </button>
       )}
     </div>
   );
