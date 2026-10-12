@@ -79,7 +79,6 @@ export default function ChatWindow({
       setDraft('');
       setQuote(null);
     } catch (err) {
-      console.error(err);
       setSendError(
         err instanceof Error ? err.message : 'Message non envoyé, réessaye.',
       );

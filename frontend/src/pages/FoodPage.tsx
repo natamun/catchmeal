@@ -112,7 +112,6 @@ export default function FoodPage() {
           (err as { status?: number }).status === 403
         )
           return;
-        console.error(err);
         setLoadError('Impossible de charger les aliments.');
       })
       .finally(() => {
@@ -135,7 +134,6 @@ export default function FoodPage() {
           (err as { status?: number }).status === 403
         )
           return;
-        console.error(err);
         setMealsLoadError('Impossible de charger les repas.');
       })
       .finally(() => {

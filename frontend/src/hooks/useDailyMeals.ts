@@ -32,9 +32,8 @@ export function useDailyMeals(date: Date) {
     const controller = new AbortController();
     listFoodItems(userId, controller.signal)
       .then(setFoodItems)
-      .catch((err: unknown) => {
+      .catch(() => {
         if (controller.signal.aborted) return;
-        console.error(err);
         setFoodsError('Impossible de charger les aliments.');
       });
     return () => controller.abort();
@@ -68,9 +67,8 @@ export function useDailyMeals(date: Date) {
             return next;
           });
         })
-        .catch((err: unknown) => {
+        .catch(() => {
           if (signal?.aborted) return;
-          console.error(err);
           setErrors((prev) => ({
             ...prev,
             [cacheKey]: 'Impossible de charger le journal.',

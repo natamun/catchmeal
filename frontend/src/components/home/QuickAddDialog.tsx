@@ -123,7 +123,6 @@ export default function QuickAddDialog({
       dialogRef.current?.close();
       onSaved();
     } catch (err: unknown) {
-      console.error(err);
       setError(requestErrorMessage(err, 'Une erreur est survenue, réessayez.'));
     } finally {
       setIsSubmitting(false);

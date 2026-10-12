@@ -269,7 +269,6 @@ export default function FoodItemForm({
           : 'Produit enregistré avec succès',
       );
     } catch (err: unknown) {
-      console.error(err);
       setError(requestErrorMessage(err, 'Une erreur est survenue, réessayez.'));
     } finally {
       setIsSubmitting(false);
@@ -288,8 +287,7 @@ export default function FoodItemForm({
       onItemDeleted(editingItem.id);
       closeDialog();
       setSuccessMessage('Produit supprimé');
-    } catch (err: unknown) {
-      console.error(err);
+    } catch {
       setError('Suppression impossible, réessayez.');
     } finally {
       setIsSubmitting(false);

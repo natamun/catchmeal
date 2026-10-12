@@ -87,5 +87,7 @@ export function logout() {
 }
 
 export function getMe() {
-  return request<AuthUser>(`${AUTH_URL}/me`);
+  return request<{ user: AuthUser | null }>(`${AUTH_URL}/me`).then(
+    ({ user }) => user,
+  );
 }

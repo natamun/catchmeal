@@ -10,7 +10,9 @@ export function useActivityFeed(userId: number) {
 
   useEffect(() => {
     const loadActivities = () => {
-      getFriendsActivity(userId).then(setActivities).catch(console.error);
+      getFriendsActivity(userId)
+        .then(setActivities)
+        .catch(() => undefined);
     };
 
     loadActivities();

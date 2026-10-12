@@ -4,8 +4,18 @@ import ReactMarkdown from 'react-markdown';
 
 import { useAuth } from '../../auth/auth-context';
 import type { ChatMessage, ResponseMistral } from '../../types/ChatBotType';
+import { requestErrorMessage } from '../../utils/requestErrorMessage';
 import type { Tab } from '../layout/Nav';
 import DisclamerPopup from './DisclamerPopup';
+
+class ChatError extends Error {
+  readonly status: number;
+
+  constructor(status: number) {
+    super(`HTTP ${status}`);
+    this.status = status;
+  }
+}
 
 interface ChatBotPopupProps {
   isOpen: boolean;
@@ -28,6 +38,7 @@ export default function ChatBotPopup({
   const lastAssistantRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [disclamer, setDisclamer] = useState<boolean>(false);
+  const [sendError, setSendError] = useState<string | null>(null);
   const { user } = useAuth();
   const CURRENT_USER_ID = user?.userId;
   const API_URL = import.meta.env.VITE_API_URL;
@@ -58,6 +69,7 @@ export default function ChatBotPopup({
     const updateWithUser = [...messages, addMessage];
     onMessagesChange(updateWithUser);
     setLoading(true);
+    setSendError(null);
     setInput('');
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto';
@@ -75,7 +87,7 @@ export default function ChatBotPopup({
         }),
       });
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        throw new ChatError(response.status);
       }
       const data = (await response.json()) as ResponseMistral;
       if (data) {
@@ -87,11 +99,13 @@ export default function ChatBotPopup({
         onMessagesChange([...updateWithUser, addResponse]);
       }
     } catch (err) {
-      console.error('Error : ', err);
-      setInput('');
-      setLoading(false);
-      onToggle(false);
-      onMessagesChange([]);
+      onMessagesChange(messages);
+      setInput(addMessage.content);
+      setSendError(
+        requestErrorMessage(err, "L'assistant est indisponible, réessayez.", {
+          400: "Ce message n'est pas valide.",
+        }),
+      );
     } finally {
       setLoading(false);
     }
@@ -149,6 +163,11 @@ export default function ChatBotPopup({
             ))}
             <div ref={messagesEndRef} />
           </div>
+          {sendError && (
+            <p role="alert" className="mx-4 mb-2 text-sm text-red-500">
+              {sendError}
+            </p>
+          )}
           <div className="mx-4 flex items-end gap-2 rounded-xl border border-green-200 px-3 py-2 focus-within:border-green-400">
             <textarea
               className="max-h-20 min-w-0 flex-1 resize-none self-center overflow-y-auto text-sm text-green-800 outline-none"

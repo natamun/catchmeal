@@ -32,7 +32,6 @@ export function useFriends(userId: number) {
       .catch((err: unknown) => {
         if (controller.signal.aborted) return;
         if (err instanceof ApiError && err.status === 403) return;
-        console.error(err);
         setLoadError('Impossible de charger les amis.');
       })
       .finally(() => {

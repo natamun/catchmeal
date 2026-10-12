@@ -50,11 +50,10 @@ export default function AddFriendDialog({
           setResults(users);
           setError(null);
         })
-        .catch((err: unknown) => {
+        .catch(() => {
           if (controller.signal.aborted) {
             return;
           }
-          console.error(err);
           setError('Recherche impossible, réessaye.');
         })
         .finally(() => {
@@ -86,7 +85,6 @@ export default function AddFriendDialog({
       setSentIds((prev) => new Set(prev).add(user.id));
       onSent(user.username);
     } catch (err: unknown) {
-      console.error(err);
       setError(requestErrorMessage(err, 'Une erreur est survenue, réessayez.'));
     } finally {
       setPendingId(null);

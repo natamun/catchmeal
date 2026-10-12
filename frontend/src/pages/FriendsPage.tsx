@@ -80,7 +80,6 @@ export default function FriendsPage({ pendingReply }: FriendsPageProps) {
       setSuccessMessage(message);
       reload();
     } catch (err: unknown) {
-      console.error(err);
       setActionError(
         requestErrorMessage(err, 'Une erreur est survenue, réessayez.'),
       );

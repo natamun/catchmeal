@@ -233,7 +233,6 @@ export default function MealForm({
           : 'Repas enregistré avec succès',
       );
     } catch (err: unknown) {
-      console.error(err);
       setError(requestErrorMessage(err, 'Une erreur est survenue, réessayez.'));
     } finally {
       setIsSubmitting(false);
@@ -251,8 +250,7 @@ export default function MealForm({
       onMealDeleted(editingMeal.id);
       closeDialog();
       setSuccessMessage('Repas supprimé');
-    } catch (err: unknown) {
-      console.error(err);
+    } catch {
       setError('Suppression impossible, réessayez.');
     } finally {
       setIsSubmitting(false);

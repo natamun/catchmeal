@@ -13,7 +13,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .getMe()
       .then((me) => {
         setUser(me);
-        setStatus('authenticated');
+        setStatus(me ? 'authenticated' : 'unauthenticated');
       })
       .catch(() => {
         setStatus('unauthenticated');

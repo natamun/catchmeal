@@ -72,11 +72,10 @@ export default function DailyMealPicker({
         setFoodItems(foods);
         setTemplates(meals);
       })
-      .catch((err: unknown) => {
+      .catch(() => {
         if (controller.signal.aborted) {
           return;
         }
-        console.error(err);
         setLoadError('Impossible de charger la bibliothèque. Réessayez.');
       })
       .finally(() => {

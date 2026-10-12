@@ -84,7 +84,6 @@ export default function BarcodeField({
       setIsTouched(false);
       onProduct(product);
     } catch (err: unknown) {
-      console.error(err);
       if (lookupId !== lookupIdRef.current) {
         return;
       }
