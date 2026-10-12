@@ -191,7 +191,10 @@ export function AdminUserDialog({
             user={user}
             container={dialogNode}
             hasDeleteFailed={hasDeleteFailed}
-            onUpdated={onUpdated}
+            onUpdated={(changes) => {
+              dialogRef.current?.close();
+              onUpdated(changes);
+            }}
           />
         )}
       </BaseDialog>
