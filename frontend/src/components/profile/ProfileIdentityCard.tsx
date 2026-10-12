@@ -310,7 +310,11 @@ export function ProfileIdentityCard({ user, onUpdate }: Props) {
               <p className="truncate text-xs text-green-500">{user.name}</p>
             )}
           </div>
-          <EditIconButton label="Modifier le profil" onClick={handleEdit} />
+          <EditIconButton
+            label="Modifier le profil"
+            onClick={handleEdit}
+            size="lg"
+          />
         </div>
       </div>
 
