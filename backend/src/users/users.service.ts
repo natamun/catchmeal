@@ -189,7 +189,16 @@ export class UsersService {
     }
   }
 
-  async updateWeight(userId: number, entryId: number, weight: number) {
+  async updateWeight(
+    userId: number,
+    entryId: number,
+    weight: number,
+    bodyFat?: number,
+    fatFreeMass?: number,
+    bodyWater?: number,
+    muscleMass?: number,
+    note?: string,
+  ) {
     const entry = await this.prisma.weightLog.findUnique({
       where: { id: entryId },
     });
@@ -197,11 +206,14 @@ export class UsersService {
       throw new NotFoundException('Entry not found');
     return this.prisma.weightLog.update({
       where: { id: entryId },
-      data: { weight },
+      data: { weight, bodyFat, fatFreeMass, bodyWater, muscleMass, note },
       select: {
         id: true,
         weight: true,
         bodyFat: true,
+        fatFreeMass: true,
+        bodyWater: true,
+        muscleMass: true,
         note: true,
         loggedAt: true,
       },
@@ -212,6 +224,9 @@ export class UsersService {
     userId: number,
     weight: number,
     bodyFat?: number,
+    fatFreeMass?: number,
+    bodyWater?: number,
+    muscleMass?: number,
     note?: string,
   ) {
     const user = await this.prisma.user
@@ -225,11 +240,14 @@ export class UsersService {
       select: { weight: true },
     });
     const entry = await this.prisma.weightLog.create({
-      data: { userId, weight, bodyFat, note },
+      data: { userId, weight, bodyFat, fatFreeMass, bodyWater, muscleMass, note },
       select: {
         id: true,
         weight: true,
         bodyFat: true,
+        fatFreeMass: true,
+        bodyWater: true,
+        muscleMass: true,
         note: true,
         loggedAt: true,
       },
@@ -260,6 +278,9 @@ export class UsersService {
         id: true,
         weight: true,
         bodyFat: true,
+        fatFreeMass: true,
+        bodyWater: true,
+        muscleMass: true,
         note: true,
         loggedAt: true,
       },
