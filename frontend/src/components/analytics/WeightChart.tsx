@@ -12,6 +12,7 @@ import {
 } from 'recharts';
 
 import type { DashboardDay } from '../../types/dashboard-analytics';
+import { formatWeekday } from '../../utils/format';
 import type { DateRange } from '../ui/CalendarButton';
 import SummaryCard from '../ui/SummaryCard';
 import {
@@ -55,16 +56,6 @@ function formatTick(time: number) {
   return new Date(time)
     .toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' })
     .replace('/', '-');
-}
-
-function formatDay(time: number) {
-  const day = new Date(time).toLocaleDateString('fr-FR', {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long',
-  });
-
-  return day.charAt(0).toUpperCase() + day.slice(1);
 }
 
 interface Props {
@@ -126,7 +117,10 @@ export default function WeightChart({ days, period }: Props) {
           <Tooltip
             cursor={false}
             content={(props: TooltipContentProps) => (
-              <ChartTooltip {...props} label={formatDay(Number(props.label))} />
+              <ChartTooltip
+                {...props}
+                label={formatWeekday(new Date(Number(props.label)))}
+              />
             )}
           />
           <Line

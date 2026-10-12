@@ -5,12 +5,7 @@ import type { DashboardDay } from '../../types/dashboard-analytics';
 import { averageOf } from '../../utils/buildDataGraph';
 import StatTile from '../ui/StatTile';
 import SummaryCard from '../ui/SummaryCard';
-
-const TOTAL_KEYS = {
-  protein: 'totalProtein',
-  carbs: 'totalCarbs',
-  fat: 'totalFat',
-} as const;
+import { MACRO_TOTAL_KEYS } from './macroSeries';
 
 interface Props {
   days: DashboardDay[];
@@ -60,7 +55,7 @@ export default function NutritionAverages({
         <dl className="grid grid-cols-3 gap-3 max-2xs:grid-cols-1 sm:flex-1">
           {MACROS.map(({ key, label }) => (
             <StatTile key={key} label={label}>
-              {hasData ? `${averageOf(logged, TOTAL_KEYS[key])} g` : '–'}
+              {hasData ? `${averageOf(logged, MACRO_TOTAL_KEYS[key])} g` : '–'}
             </StatTile>
           ))}
         </dl>

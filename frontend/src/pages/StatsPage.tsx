@@ -1,10 +1,12 @@
 import { useState } from 'react';
+import { clamp } from 'date-fns';
 
 import CalorieChart from '../components/analytics/CalorieChart';
+import DataExport from '../components/analytics/DataExport';
+import DayDetail from '../components/analytics/DayDetail';
 import NutritionAverages from '../components/analytics/NutritionAverages';
 import { lastDays } from '../components/analytics/period';
 import PeriodSelector from '../components/analytics/PeriodSelector';
-import ShowDataDay from '../components/analytics/ShowDataDay';
 import WeightChart from '../components/analytics/WeightChart';
 import WeightVariation from '../components/analytics/WeightVariation';
 import { toApiDate } from '../components/meal/api';
@@ -12,6 +14,7 @@ import useDashboard from '../hooks/useDashboard';
 
 export default function StatsPage() {
   const [period, setPeriod] = useState(() => lastDays(7));
+  const [selectedDay, setSelectedDay] = useState(() => new Date());
   const from = toApiDate(period.from);
   const to = toApiDate(period.to);
   const [error, setError] = useState(false);
@@ -20,6 +23,9 @@ export default function StatsPage() {
     toStr: to,
     onError: setError,
   });
+
+  const day = clamp(selectedDay, { start: period.from, end: period.to });
+  const dayData = dashboard.find((entry) => entry.day === toApiDate(day));
 
   return (
     <div className="flex flex-col gap-4 md:gap-6">
@@ -43,8 +49,20 @@ export default function StatsPage() {
       <CalorieChart days={dashboard} />
       <WeightChart days={dashboard} period={period} />
 
-      <div className="flex flex-col flex-wrap justify-between rounded-2xl border border-green-200 bg-white">
-        <ShowDataDay dashboard={dashboard} to={to} from={from}></ShowDataDay>
+      <div className="grid grid-cols-1 gap-4 md:gap-6 lg:grid-cols-3">
+        <DayDetail
+          day={day}
+          onDayChange={setSelectedDay}
+          period={period}
+          data={dayData}
+          className="lg:col-span-2"
+        />
+        <DataExport
+          day={day}
+          dayData={dayData}
+          period={period}
+          days={dashboard}
+        />
       </div>
     </div>
   );

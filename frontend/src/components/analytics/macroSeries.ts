@@ -6,6 +6,12 @@ const FILLS = {
   fat: 'var(--color-green-200)',
 } as const;
 
+export const MACRO_TOTAL_KEYS = {
+  protein: 'totalProtein',
+  carbs: 'totalCarbs',
+  fat: 'totalFat',
+} as const;
+
 export const MACRO_SERIES = MACROS.map(({ key, label }) => ({
   key,
   label,
