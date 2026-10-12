@@ -1,39 +1,6 @@
+import { JSON_HEADERS, request } from '../../utils/request';
+
 const BASE_URL = import.meta.env.VITE_API_URL;
-
-export class ApiError extends Error {
-  readonly status: number;
-
-  constructor(message: string, status: number) {
-    super(message);
-    this.name = 'ApiError';
-    this.status = status;
-  }
-}
-
-async function parseErrorMessage(response: Response): Promise<string> {
-  const body = (await response.json().catch(() => null)) as {
-    message?: string | string[];
-  } | null;
-  const message = body?.message;
-  return Array.isArray(message)
-    ? message.join(', ')
-    : (message ?? `HTTP ${response.status}`);
-}
-
-async function request<T>(url: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(url, {
-    ...init,
-    credentials: 'include',
-    headers:
-      init?.body instanceof FormData
-        ? init.headers
-        : { 'Content-Type': 'application/json', ...init?.headers },
-  });
-  if (!response.ok) {
-    throw new ApiError(await parseErrorMessage(response), response.status);
-  }
-  return (await response.json()) as T;
-}
 
 export interface UserProfile {
   id: number;
@@ -139,7 +106,7 @@ export function removeAvatar(userId: number) {
 export function updateProfile(userId: number, input: UpdateProfileInput) {
   return request<UserProfile>(`${BASE_URL}/users/${userId}`, {
     method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
+    headers: JSON_HEADERS,
     body: JSON.stringify(input),
   });
 }
@@ -151,6 +118,7 @@ export function updateWeight(
 ) {
   return request<WeightEntry>(`${BASE_URL}/users/${userId}/weight/${entryId}`, {
     method: 'PATCH',
+    headers: JSON_HEADERS,
     body: JSON.stringify(input),
   });
 }
@@ -165,7 +133,7 @@ export function deleteWeight(userId: number, entryId: number) {
 export function logWeight(userId: number, input: LogWeightInput) {
   return request<WeightEntry>(`${BASE_URL}/users/${userId}/weight`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: JSON_HEADERS,
     body: JSON.stringify(input),
   });
 }

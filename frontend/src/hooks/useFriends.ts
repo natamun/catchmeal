@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
 
 import {
-  ApiError,
   listFriends,
   listPendingRequests,
   listSentRequests,
 } from '../components/friends/api';
 import type { Friend, FriendRequest } from '../components/friends/types';
+import { ApiError } from '../utils/request';
 
 export function useFriends(userId: number) {
   const [friends, setFriends] = useState<Friend[]>([]);

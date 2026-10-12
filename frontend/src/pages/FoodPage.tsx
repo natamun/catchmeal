@@ -14,6 +14,7 @@ import { EditIconButton } from '../components/ui/EditIconButton';
 import { PillTabs } from '../components/ui/PillTabs';
 import { MACROS } from '../constants/macros';
 import { useDelayedUnmount } from '../hooks/useDelayedUnmount';
+import { ApiError } from '../utils/request';
 
 type Tab = 'food' | 'meal';
 
@@ -106,12 +107,7 @@ export default function FoodPage() {
       .then(setFoodItems)
       .catch((err: unknown) => {
         if (controller.signal.aborted) return;
-        if (
-          err instanceof Error &&
-          'status' in err &&
-          (err as { status?: number }).status === 403
-        )
-          return;
+        if (err instanceof ApiError && err.status === 403) return;
         setLoadError('Impossible de charger les aliments.');
       })
       .finally(() => {
@@ -128,12 +124,7 @@ export default function FoodPage() {
       .then(setMeals)
       .catch((err: unknown) => {
         if (controller.signal.aborted) return;
-        if (
-          err instanceof Error &&
-          'status' in err &&
-          (err as { status?: number }).status === 403
-        )
-          return;
+        if (err instanceof ApiError && err.status === 403) return;
         setMealsLoadError('Impossible de charger les repas.');
       })
       .finally(() => {

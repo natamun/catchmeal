@@ -1,3 +1,5 @@
+import { ApiError } from './request';
+
 const MESSAGES: Record<number, string> = {
   400: 'Certaines informations ne sont pas valides. Vérifiez les champs.',
   401: 'Votre session a expiré. Reconnectez-vous.',
@@ -13,11 +15,11 @@ export function requestErrorMessage(
   fallback: string,
   overrides: Record<number, string> = {},
 ) {
-  if (!(error instanceof Error) || !('status' in error)) {
+  if (!(error instanceof ApiError)) {
     return fallback;
   }
 
-  const status = Number(error.status);
+  const { status } = error;
 
   return (
     overrides[status] ??

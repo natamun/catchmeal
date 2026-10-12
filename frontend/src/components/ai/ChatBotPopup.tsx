@@ -4,18 +4,10 @@ import ReactMarkdown from 'react-markdown';
 
 import { useAuth } from '../../auth/auth-context';
 import type { ChatMessage, ResponseMistral } from '../../types/ChatBotType';
+import { JSON_HEADERS, request } from '../../utils/request';
 import { requestErrorMessage } from '../../utils/requestErrorMessage';
 import type { Tab } from '../layout/Nav';
 import DisclamerPopup from './DisclamerPopup';
-
-class ChatError extends Error {
-  readonly status: number;
-
-  constructor(status: number) {
-    super(`HTTP ${status}`);
-    this.status = status;
-  }
-}
 
 interface ChatBotPopupProps {
   isOpen: boolean;
@@ -78,18 +70,16 @@ export default function ChatBotPopup({
       if (!CURRENT_USER_ID) {
         throw new Error('UID is not defined');
       }
-      const response = await fetch(`${API_URL}/users/${CURRENT_USER_ID}/chat`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({
-          message: addMessage.content,
-        }),
-      });
-      if (!response.ok) {
-        throw new ChatError(response.status);
-      }
-      const data = (await response.json()) as ResponseMistral;
+      const data = await request<ResponseMistral>(
+        `${API_URL}/users/${CURRENT_USER_ID}/chat`,
+        {
+          method: 'POST',
+          headers: JSON_HEADERS,
+          body: JSON.stringify({
+            message: addMessage.content,
+          }),
+        },
+      );
       if (data) {
         const addResponse: ChatMessage = {
           role: 'assistant',

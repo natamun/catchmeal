@@ -1,14 +1,6 @@
-const BASE_URL = import.meta.env.VITE_API_URL;
+import { JSON_HEADERS, request } from '../../utils/request';
 
-async function request<T>(url: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(url, {
-    ...init,
-    credentials: 'include',
-    headers: { 'Content-Type': 'application/json', ...init?.headers },
-  });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  return res.json() as Promise<T>;
-}
+const BASE_URL = import.meta.env.VITE_API_URL;
 
 export interface AdminUser {
   id: number;
@@ -46,6 +38,7 @@ export function getStats() {
 export function updateUserRole(id: number, role: 'USER' | 'ADMIN') {
   return request<AdminUser>(`${BASE_URL}/admin/users/${id}/role`, {
     method: 'PATCH',
+    headers: JSON_HEADERS,
     body: JSON.stringify({ role }),
   });
 }

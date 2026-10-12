@@ -4,9 +4,10 @@ import { ArrowUpRight, LoaderCircle, ScanBarcode, Search } from 'lucide-react';
 import { useAuth } from '../../auth/auth-context';
 import { useHasCamera } from '../../hooks/useHasCamera';
 import { useTimeout } from '../../hooks/useTimeout';
+import { ApiError } from '../../utils/request';
 import { FieldError } from '../ui/FieldError';
 import { Input } from '../ui/Input';
-import { ApiError, lookupOffProduct } from './api';
+import { lookupOffProduct } from './api';
 import type { OffProduct } from './types';
 
 const BarcodeScannerDialog = lazy(() => import('./BarcodeScannerDialog'));
@@ -87,7 +88,7 @@ export default function BarcodeField({
       if (lookupId !== lookupIdRef.current) {
         return;
       }
-      const status = err instanceof ApiError ? (err.status ?? 0) : 0;
+      const status = err instanceof ApiError ? err.status : 0;
       setLookupError({
         message: LOOKUP_ERRORS[status] ?? 'Une erreur est survenue',
         onField: status === 400,
