@@ -153,7 +153,7 @@ export default function DailyMealPicker({
           )}
         </div>
 
-        <div className="sticky bottom-20 z-20 mx-3 flex items-center justify-between gap-3 rounded-2xl border border-green-200 bg-white p-3 shadow-lg md:bottom-4 md:mx-auto md:w-full md:max-w-md">
+        <div className="sticky bottom-[calc(var(--spacing-bottom-nav)+1rem+env(safe-area-inset-bottom))] z-20 mx-3 flex items-center justify-between gap-3 rounded-2xl border border-green-200 bg-white p-3 shadow-lg md:mx-auto md:w-full md:max-w-md md:pointer-fine:bottom-4">
           <span className="text-sm text-green-600">
             {selectedCount === 0
               ? 'Aucune sélection'
