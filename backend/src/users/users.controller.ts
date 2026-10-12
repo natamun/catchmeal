@@ -63,6 +63,9 @@ export class UsersController {
       userId,
       dto.weight,
       dto.bodyFat,
+      dto.fatFreeMass,
+      dto.bodyWater,
+      dto.muscleMass,
       dto.note,
     );
   }
@@ -77,7 +80,16 @@ export class UsersController {
     if (req.user.userId !== userId) {
       throw new ForbiddenException('You can only update your own weight');
     }
-    return this.usersService.updateWeight(userId, entryId, dto.weight);
+    return this.usersService.updateWeight(
+      userId,
+      entryId,
+      dto.weight,
+      dto.bodyFat,
+      dto.fatFreeMass,
+      dto.bodyWater,
+      dto.muscleMass,
+      dto.note,
+    );
   }
 
   @Get('weight')
