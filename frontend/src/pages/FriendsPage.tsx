@@ -137,7 +137,10 @@ export default function FriendsPage({ pendingReply }: FriendsPageProps) {
 
         {actionError && <p className="text-sm text-red-500">{actionError}</p>}
 
-        <div className="overflow-hidden rounded-2xl border border-green-200 bg-white shadow-sm">
+        <div
+          key={activeTab}
+          className="animate-fade-in-up overflow-hidden rounded-2xl border border-green-200 bg-white shadow-sm"
+        >
           {isLoading && (
             <div role="status" className="flex justify-center py-10">
               <LoaderCircle className="h-6 w-6 animate-spin text-green-400" />

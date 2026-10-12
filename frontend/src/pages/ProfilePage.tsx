@@ -17,7 +17,7 @@ export default function ProfilePage({
   if (!user) return null;
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex animate-fade-in-up flex-col gap-6">
       <h1 className="sr-only">Profil</h1>
 
       <ProfileIdentityCard
