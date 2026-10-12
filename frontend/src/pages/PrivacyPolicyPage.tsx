@@ -14,7 +14,7 @@ export default function PrivacyPolicyPage({ onBack, onNavigate }: Props) {
     >
       <h1>Politique de confidentialité et RGPD</h1>
       <p className="text-sm text-green-600">
-        Dernière mise à jour : 11 octobre 2026
+        Dernière mise à jour : 12 octobre 2026
       </p>
       <p>
         La présente Politique de confidentialité explique comment nous
@@ -139,8 +139,9 @@ export default function PrivacyPolicyPage({ onBack, onNavigate }: Props) {
         </li>
         <li>
           L'historique de la conversation est conservé sur les serveurs de
-          Mistral AI. Les données envoyées ne sont pas utilisées pour
-          réentraîner des modèles publics.
+          Mistral AI. Les données envoyées ne sont pas utilisées pour entraîner
+          les modèles de Mistral AI : cette option est désactivée sur notre
+          compte.
         </li>
         <li>
           Les données de santé ne sont jamais vendues ni transmises à des fins

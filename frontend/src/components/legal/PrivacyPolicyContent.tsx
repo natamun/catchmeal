@@ -2,7 +2,7 @@ export function PrivacyPolicyContent() {
   return (
     <div className="flex flex-col gap-5 text-xs leading-relaxed text-green-600">
       <p className="text-green-500 italic">
-        Dernière mise à jour : 11 octobre 2026
+        Dernière mise à jour : 12 octobre 2026
       </p>
       <p>
         La présente Politique de confidentialité explique comment nous
@@ -148,8 +148,9 @@ export function PrivacyPolicyContent() {
         </p>
         <p className="mb-1">
           L'historique de la conversation est conservé sur les serveurs de
-          Mistral AI. Les données envoyées ne sont pas utilisées pour
-          réentraîner des modèles publics.
+          Mistral AI. Les données envoyées ne sont pas utilisées pour entraîner
+          les modèles de Mistral AI : cette option est désactivée sur notre
+          compte.
         </p>
         <p className="mb-2">
           Les données de santé ne sont jamais vendues ni transmises à des fins
