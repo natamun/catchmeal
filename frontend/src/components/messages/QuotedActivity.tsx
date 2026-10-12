@@ -27,7 +27,7 @@ export default function QuotedActivity({
       className={`flex items-start gap-2 rounded-lg border-l-4 px-3 py-2 text-xs ${VARIANT_CLASS[variant]}`}
     >
       <div className="min-w-0 flex-1">
-        <p className="break-words">
+        <p className="wrap-break-word">
           <span className="font-semibold">{activity.user.username}</span>{' '}
           {activity.message}
         </p>

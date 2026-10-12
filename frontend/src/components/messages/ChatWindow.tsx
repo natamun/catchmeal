@@ -111,7 +111,7 @@ export default function ChatWindow({
             >
               <div
                 aria-label={m.senderId === userId ? 'Vous' : friend.name}
-                className={`max-w-[75%] rounded-2xl px-3 py-2 text-sm break-words ${
+                className={`max-w-[75%] rounded-2xl px-3 py-2 text-sm wrap-break-word ${
                   m.senderId === userId
                     ? 'rounded-br-sm bg-green-500 text-white'
                     : 'rounded-bl-sm border border-green-200 bg-white text-green-800'

@@ -123,7 +123,7 @@ export default function ChatBotPopup({
         <div
           role="dialog"
           aria-label="Assistant CatCHMeal"
-          className="relative flex h-[32rem] max-h-[calc(100dvh-8rem-env(safe-area-inset-bottom))] w-[min(24rem,calc(100vw-3rem))] animate-fade-in-up flex-col overflow-hidden rounded-2xl border border-green-200 bg-white shadow-lg"
+          className="relative flex h-128 max-h-[calc(100dvh-8rem-env(safe-area-inset-bottom))] w-[min(24rem,calc(100vw-3rem))] animate-fade-in-up flex-col overflow-hidden rounded-2xl border border-green-200 bg-white shadow-lg"
         >
           {disclamer && (
             <div className="absolute inset-0 z-10 flex items-center bg-black/30 p-4 backdrop-blur-sm">
