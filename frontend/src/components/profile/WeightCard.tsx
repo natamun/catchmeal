@@ -80,6 +80,13 @@ export function WeightCard({ userId, onLatestWeight }: Props) {
     onLatestWeight?.(next[0].weight);
   };
 
+  const handleDeleted = (entryId: number) => {
+    const next = (history ?? []).filter((entry) => entry.id !== entryId);
+
+    setHistory(next);
+    onLatestWeight?.(next[0]?.weight ?? null);
+  };
+
   const latest = history?.[0];
   const isLoading = history === null && !hasError;
 
@@ -209,6 +216,7 @@ export function WeightCard({ userId, onLatestWeight }: Props) {
         userId={userId}
         entry={dialog.entry}
         onSaved={handleSaved}
+        onDeleted={handleDeleted}
       />
     </>
   );

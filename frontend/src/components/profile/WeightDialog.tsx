@@ -1,11 +1,13 @@
-import { useId, useState, type RefObject } from 'react';
+import { useId, useRef, useState, type RefObject } from 'react';
+import { Trash2 } from 'lucide-react';
 
 import { useTimeout } from '../../hooks/useTimeout';
 import { formatDayMonth } from '../../utils/format';
 import { BaseDialog } from '../ui/BaseDialog';
+import { ConfirmDialog } from '../ui/ConfirmDialog';
 import { FieldError } from '../ui/FieldError';
 import { Input } from '../ui/Input';
-import { logWeight, updateWeight, type WeightEntry } from './api';
+import { deleteWeight, logWeight, updateWeight, type WeightEntry } from './api';
 import { COMPOSITION, MEASURES, type MeasureKey } from './measures';
 
 const LABEL_CLASS =
@@ -55,7 +57,12 @@ interface WeightFormProps {
   onSaved: (entry: WeightEntry) => void;
 }
 
-function WeightForm({ userId, entry, onSaved }: WeightFormProps) {
+function WeightForm({
+  userId,
+  entry,
+  onSaved,
+  hasDeleteFailed,
+}: WeightFormProps & { hasDeleteFailed: boolean }) {
   const formId = useId();
   const [form, setForm] = useState(() => toForm(entry));
   const [touched, setTouched] = useState<Partial<Record<MeasureKey, boolean>>>(
@@ -178,6 +185,11 @@ function WeightForm({ userId, entry, onSaved }: WeightFormProps) {
           Impossible d&apos;enregistrer la pesée. Réessayez.
         </p>
       )}
+      {hasDeleteFailed && (
+        <p role="alert" className="text-sm text-red-500">
+          Impossible de supprimer la pesée. Réessayez.
+        </p>
+      )}
 
       <button
         type="submit"
@@ -193,6 +205,7 @@ function WeightForm({ userId, entry, onSaved }: WeightFormProps) {
 interface Props extends WeightFormProps {
   dialogRef: RefObject<HTMLDialogElement | null>;
   openCount: number;
+  onDeleted: (entryId: number) => void;
 }
 
 export function WeightDialog({
@@ -201,26 +214,73 @@ export function WeightDialog({
   userId,
   entry,
   onSaved,
+  onDeleted,
 }: Props) {
+  const confirmDialogRef = useRef<HTMLDialogElement>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [hasDeleteFailed, setHasDeleteFailed] = useState(false);
+  const day = entry ? formatDayMonth(new Date(entry.loggedAt)) : '';
+
+  const handleDelete = async () => {
+    if (!entry) {
+      return;
+    }
+
+    setHasDeleteFailed(false);
+    setIsDeleting(true);
+    try {
+      await deleteWeight(userId, entry.id);
+      dialogRef.current?.close();
+      onDeleted(entry.id);
+    } catch {
+      setHasDeleteFailed(true);
+    } finally {
+      setIsDeleting(false);
+      confirmDialogRef.current?.close();
+    }
+  };
+
   return (
-    <BaseDialog
-      dialogRef={dialogRef}
-      title={
-        entry
-          ? `Pesée du ${formatDayMonth(new Date(entry.loggedAt))}`
-          : 'Nouvelle pesée'
-      }
-      maxWidth="sm"
-    >
-      <WeightForm
-        key={openCount}
-        userId={userId}
-        entry={entry}
-        onSaved={(saved) => {
-          dialogRef.current?.close();
-          onSaved(saved);
-        }}
+    <>
+      <BaseDialog
+        dialogRef={dialogRef}
+        title={entry ? `Pesée du ${day}` : 'Nouvelle pesée'}
+        maxWidth="sm"
+        onClose={() => setHasDeleteFailed(false)}
+        headerActions={
+          entry && (
+            <button
+              type="button"
+              onClick={() => confirmDialogRef.current?.showModal()}
+              aria-label="Supprimer la pesée"
+              className="cursor-pointer text-green-400 transition-colors hover:text-red-500"
+            >
+              <Trash2 className="h-5 w-5" />
+            </button>
+          )
+        }
+      >
+        <WeightForm
+          key={openCount}
+          userId={userId}
+          entry={entry}
+          hasDeleteFailed={hasDeleteFailed}
+          onSaved={(saved) => {
+            dialogRef.current?.close();
+            onSaved(saved);
+          }}
+        />
+      </BaseDialog>
+
+      <ConfirmDialog
+        dialogRef={confirmDialogRef}
+        title="Supprimer cette pesée ?"
+        description={`La pesée du ${day} sera retirée de l'historique.`}
+        confirmLabel="Supprimer"
+        pendingLabel="Suppression..."
+        isPending={isDeleting}
+        onConfirm={() => void handleDelete()}
       />
-    </BaseDialog>
+    </>
   );
 }
