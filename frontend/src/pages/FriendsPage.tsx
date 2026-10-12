@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { CheckCircle2, LoaderCircle, Plus } from 'lucide-react';
+import { CheckCircle2, LoaderCircle } from 'lucide-react';
 
 import { useAuth } from '../auth/auth-context.ts';
 import AddFriendDialog from '../components/friends/AddFriendDialog.tsx';
@@ -17,6 +17,7 @@ import type {
 } from '../components/friends/types.ts';
 import FriendsActivity from '../components/home/FriendsActivity.tsx';
 import ChatWindow from '../components/messages/ChatWindow.tsx';
+import { AddCircleButton } from '../components/ui/AddCircleButton';
 import { ConfirmDialog } from '../components/ui/ConfirmDialog.tsx';
 import { LoadError } from '../components/ui/LoadError.tsx';
 import { Toast } from '../components/ui/Toast.tsx';
@@ -125,14 +126,10 @@ export default function FriendsPage({ pendingReply }: FriendsPageProps) {
               </label>
             ))}
           </div>
-          <button
-            type="button"
+          <AddCircleButton
+            label="Ajouter un ami"
             onClick={() => addDialogRef.current?.showModal()}
-            aria-label="Ajouter un ami"
-            className="flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-full bg-green-500 text-white transition-colors hover:bg-green-600"
-          >
-            <Plus className="h-4 w-4" />
-          </button>
+          />
         </div>
 
         {actionError && <p className="text-sm text-red-500">{actionError}</p>}

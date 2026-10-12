@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { LoaderCircle, Plus } from 'lucide-react';
+import { LoaderCircle } from 'lucide-react';
 
 import type { FoodItem } from '../food/types';
 import { MEAL_TYPE_LABELS, type Meal, type MealType } from '../meal/types';
+import { AddCircleButton } from '../ui/AddCircleButton';
 import { EditIconButton } from '../ui/EditIconButton';
 import { LoadError } from '../ui/LoadError';
 
@@ -131,14 +132,10 @@ export default function DailyMealList({
                       {Math.round(total)} kcal
                     </span>
                   )}
-                  <button
-                    type="button"
+                  <AddCircleButton
+                    label={`Ajouter à la catégorie ${MEAL_TYPE_LABELS[mealType]}`}
                     onClick={() => onAdd(mealType)}
-                    aria-label={`Ajouter à la catégorie ${MEAL_TYPE_LABELS[mealType]}`}
-                    className="flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-full bg-green-500 text-white transition-colors hover:bg-green-600"
-                  >
-                    <Plus className="h-4 w-4" />
-                  </button>
+                  />
                 </div>
               </div>
 
