@@ -20,7 +20,7 @@ const BODY_SERIES: MeasureSeries[] = [
 ];
 const RATE_SERIES: MeasureSeries[] = [
   { key: 'bodyFat', label: 'Masse grasse' },
-  { key: 'bodyWater', label: 'Eau' },
+  { key: 'bodyWater', label: 'Eau corporelle' },
 ];
 
 export default function StatsPage() {
@@ -66,7 +66,7 @@ export default function StatsPage() {
             isLoading={isLoading}
           />
           <MeasureChart
-            title="Masse grasse et eau"
+            title="Masse grasse et eau corporelle"
             unit="%"
             series={RATE_SERIES}
             emptyMessage="Aucune mesure sur cette période."
