@@ -209,8 +209,8 @@ function AppShell() {
         id="main-content"
         className={`mx-auto max-w-6xl px-6 pt-6 ${
           hasAssistant
-            ? 'pb-24 pointer-coarse:pb-[calc(10rem+env(safe-area-inset-bottom))]'
-            : 'pb-8 pointer-coarse:pb-[calc(6rem+env(safe-area-inset-bottom))]'
+            ? 'pb-24 pointer-coarse:pb-[calc(var(--spacing-bottom-nav)+6rem+env(safe-area-inset-bottom))]'
+            : 'pb-8 pointer-coarse:pb-[calc(var(--spacing-bottom-nav)+2rem+env(safe-area-inset-bottom))]'
         }`}
       >
         <Suspense

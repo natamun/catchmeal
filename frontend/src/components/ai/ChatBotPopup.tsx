@@ -108,12 +108,12 @@ export default function ChatBotPopup({
   }
 
   return (
-    <div className="fixed right-6 bottom-6 z-20 pointer-coarse:bottom-[calc(5rem+env(safe-area-inset-bottom))]">
+    <div className="fixed right-6 bottom-6 z-20 pointer-coarse:bottom-[calc(var(--spacing-bottom-nav)+1rem+env(safe-area-inset-bottom))]">
       {isOpen && (
         <div
           role="dialog"
           aria-label="Assistant CatCHMeal"
-          className="relative flex h-128 max-h-[calc(100dvh-8rem-env(safe-area-inset-bottom))] w-[min(24rem,calc(100vw-3rem))] animate-fade-in-up flex-col overflow-hidden rounded-2xl border border-green-200 bg-white shadow-lg"
+          className="relative flex h-128 max-h-[calc(100dvh-var(--spacing-header)-4rem-env(safe-area-inset-bottom))] w-[min(24rem,calc(100vw-3rem))] animate-fade-in-up flex-col overflow-hidden rounded-2xl border border-green-200 bg-white shadow-lg pointer-coarse:max-h-[calc(100dvh-var(--spacing-bottom-nav)-4rem-env(safe-area-inset-bottom))]"
         >
           {disclamer && (
             <div className="absolute inset-0 z-10 flex items-center bg-black/30 p-4 backdrop-blur-sm">

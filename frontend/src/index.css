@@ -94,6 +94,7 @@
   --animate-breathe: breathe 4s ease-in-out infinite;
 
   --spacing-header: 4rem;
+  --spacing-bottom-nav: 4rem;
 
   --breakpoint-2xs: 21.875rem;
   --breakpoint-xs: 28.75rem;
