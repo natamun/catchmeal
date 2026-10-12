@@ -1,10 +1,11 @@
 import { useEffect, useState, type RefObject } from 'react';
 import * as Popover from '@radix-ui/react-popover';
 
+import { requestErrorMessage } from '../../utils/requestErrorMessage';
 import { BaseDialog } from '../ui/BaseDialog';
 import { DropdownPanel } from '../ui/DropdownPanel';
 import { Input } from '../ui/Input';
-import { ApiError, searchUsers, sendFriendRequest } from './api';
+import { searchUsers, sendFriendRequest } from './api';
 import type { UserSummary } from './types';
 
 const MIN_QUERY_LENGTH = 2;
@@ -86,11 +87,7 @@ export default function AddFriendDialog({
       onSent(user.username);
     } catch (err: unknown) {
       console.error(err);
-      setError(
-        err instanceof ApiError
-          ? err.message
-          : 'Une erreur est survenue, réessaye.',
-      );
+      setError(requestErrorMessage(err, 'Une erreur est survenue, réessayez.'));
     } finally {
       setPendingId(null);
     }

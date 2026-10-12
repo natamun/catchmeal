@@ -4,6 +4,7 @@ import { CheckCircle2, Trash2 } from 'lucide-react';
 
 import { useAuth } from '../../auth/auth-context';
 import { useTimeout } from '../../hooks/useTimeout';
+import { requestErrorMessage } from '../../utils/requestErrorMessage';
 import type { FoodItem } from '../food/types';
 import { BaseDialog } from '../ui/BaseDialog';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
@@ -12,7 +13,7 @@ import { FieldError } from '../ui/FieldError';
 import { Input } from '../ui/Input';
 import { MacroSummary } from '../ui/MacroSummary';
 import { Toast } from '../ui/Toast';
-import { ApiError, createMeal, deleteMeal, updateMeal } from './api';
+import { createMeal, deleteMeal, updateMeal } from './api';
 import {
   draftsToInput,
   draftTotals,
@@ -233,11 +234,7 @@ export default function MealForm({
       );
     } catch (err: unknown) {
       console.error(err);
-      setError(
-        err instanceof ApiError
-          ? err.message
-          : 'Une erreur est survenue, réessayez.',
-      );
+      setError(requestErrorMessage(err, 'Une erreur est survenue, réessayez.'));
     } finally {
       setIsSubmitting(false);
     }

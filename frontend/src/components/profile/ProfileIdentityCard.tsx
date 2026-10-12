@@ -3,6 +3,7 @@ import { Trash2 } from 'lucide-react';
 
 import type { AuthUser } from '../../auth/auth-context';
 import { useTimeout } from '../../hooks/useTimeout';
+import { requestErrorMessage } from '../../utils/requestErrorMessage';
 import { Avatar } from '../ui/Avatar';
 import { BaseDialog } from '../ui/BaseDialog';
 import { EditIconButton } from '../ui/EditIconButton';
@@ -285,9 +286,7 @@ export function ProfileIdentityCard({ user, onUpdate }: Props) {
       });
       dialogRef.current?.close();
     } catch (err) {
-      setSaveError(
-        err instanceof Error ? err.message : 'Erreur lors de la sauvegarde',
-      );
+      setSaveError(requestErrorMessage(err, 'Erreur lors de la sauvegarde'));
     } finally {
       setSaving(false);
     }

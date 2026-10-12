@@ -4,7 +4,8 @@ import { ChevronRight } from 'lucide-react';
 
 import { useAuth } from '../../auth/auth-context';
 import { useTimeout } from '../../hooks/useTimeout';
-import { ApiError, createMeal, toApiDate } from '../meal/api';
+import { requestErrorMessage } from '../../utils/requestErrorMessage';
+import { createMeal, toApiDate } from '../meal/api';
 import {
   EMPTY_QUICK_ADD_FORM,
   QUICK_ADD_FIELDS,
@@ -123,11 +124,7 @@ export default function QuickAddDialog({
       onSaved();
     } catch (err: unknown) {
       console.error(err);
-      setError(
-        err instanceof ApiError
-          ? err.message
-          : 'Une erreur est survenue, réessayez.',
-      );
+      setError(requestErrorMessage(err, 'Une erreur est survenue, réessayez.'));
     } finally {
       setIsSubmitting(false);
     }

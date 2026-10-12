@@ -1,7 +1,6 @@
-import { useRef, useState, type FormEvent } from 'react';
+import { useRef, useState } from 'react';
 import { ArrowLeft } from 'lucide-react';
 
-import { ApiError } from '../auth/api';
 import { useAuth } from '../auth/auth-context';
 import AuthBrandPanel from '../components/auth/AuthBrandPanel';
 import OAuthButtons from '../components/auth/OAuthButtons';
@@ -12,6 +11,7 @@ import { Brand } from '../components/ui/Brand';
 import { FieldError } from '../components/ui/FieldError';
 import { Input } from '../components/ui/Input';
 import { useTimeout } from '../hooks/useTimeout';
+import { requestErrorMessage } from '../utils/requestErrorMessage';
 
 type Mode = 'login' | 'register';
 
@@ -41,17 +41,9 @@ const LABEL_CLASS =
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@.]{2,}$/;
 const MAX_LENGTH = { username: 30, name: 80, email: 255, password: 72 };
 const SUBMIT_ERRORS: Record<number, string> = {
-  400: 'Certaines informations ne sont pas valides. Vérifiez les champs.',
   401: "Nom d'utilisateur ou mot de passe incorrect.",
   409: "Ce nom d'utilisateur ou cet email est déjà pris.",
 };
-const UNKNOWN_ERROR = 'Une erreur est survenue, réessayez.';
-
-function submitErrorMessage(err: unknown) {
-  return err instanceof ApiError
-    ? (SUBMIT_ERRORS[err.status] ?? UNKNOWN_ERROR)
-    : UNKNOWN_ERROR;
-}
 
 function validateAuthForm(
   mode: Mode,
@@ -138,7 +130,7 @@ export default function AuthPage({ initialMode, onCancel, oauthError }: Props) {
     setError(null);
   };
 
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
     setError(null);
 
@@ -165,7 +157,13 @@ export default function AuthPage({ initialMode, onCancel, oauthError }: Props) {
         });
       }
     } catch (err: unknown) {
-      setError(submitErrorMessage(err));
+      setError(
+        requestErrorMessage(
+          err,
+          'Une erreur est survenue, réessayez.',
+          SUBMIT_ERRORS,
+        ),
+      );
     } finally {
       setIsSubmitting(false);
     }

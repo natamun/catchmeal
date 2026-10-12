@@ -1,13 +1,8 @@
 import { useState, type RefObject } from 'react';
 
 import { useAuth } from '../../auth/auth-context';
-import {
-  ApiError,
-  createMeal,
-  deleteMeal,
-  toApiDate,
-  updateMeal,
-} from '../meal/api';
+import { requestErrorMessage } from '../../utils/requestErrorMessage';
+import { createMeal, deleteMeal, toApiDate, updateMeal } from '../meal/api';
 import { draftsToInput, draftTotals, type MealItemDraft } from '../meal/draft';
 import DraftItemList from '../meal/DraftItemList';
 import { MEAL_TYPE_LABELS, type Meal, type MealType } from '../meal/types';
@@ -88,11 +83,7 @@ export default function DailyMealForm({
       onSaved();
     } catch (err: unknown) {
       console.error(err);
-      setError(
-        err instanceof ApiError
-          ? err.message
-          : 'Une erreur est survenue, réessayez.',
-      );
+      setError(requestErrorMessage(err, 'Une erreur est survenue, réessayez.'));
     } finally {
       setIsSubmitting(false);
     }

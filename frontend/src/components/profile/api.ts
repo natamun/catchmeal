@@ -1,9 +1,12 @@
 const BASE_URL = import.meta.env.VITE_API_URL;
 
 export class ApiError extends Error {
-  constructor(message: string) {
+  readonly status: number;
+
+  constructor(message: string, status: number) {
     super(message);
     this.name = 'ApiError';
+    this.status = status;
   }
 }
 
@@ -27,7 +30,7 @@ async function request<T>(url: string, init?: RequestInit): Promise<T> {
         : { 'Content-Type': 'application/json', ...init?.headers },
   });
   if (!response.ok) {
-    throw new ApiError(await parseErrorMessage(response));
+    throw new ApiError(await parseErrorMessage(response), response.status);
   }
   return (await response.json()) as T;
 }

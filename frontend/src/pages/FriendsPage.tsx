@@ -5,7 +5,6 @@ import { useAuth } from '../auth/auth-context.ts';
 import AddFriendDialog from '../components/friends/AddFriendDialog.tsx';
 import {
   acceptFriendRequest,
-  ApiError,
   removeFriendship,
 } from '../components/friends/api.ts';
 import FriendRow from '../components/friends/FriendRow.tsx';
@@ -25,6 +24,7 @@ import { useActivityFeed } from '../hooks/useActivityFeed.ts';
 import { useFriends } from '../hooks/useFriends.ts';
 import { usePresence } from '../hooks/usePresence.ts';
 import { useTimeout } from '../hooks/useTimeout.ts';
+import { requestErrorMessage } from '../utils/requestErrorMessage';
 
 type Tab = 'friends' | 'requests';
 
@@ -82,9 +82,7 @@ export default function FriendsPage({ pendingReply }: FriendsPageProps) {
     } catch (err: unknown) {
       console.error(err);
       setActionError(
-        err instanceof ApiError
-          ? err.message
-          : 'Une erreur est survenue, réessaye.',
+        requestErrorMessage(err, 'Une erreur est survenue, réessayez.'),
       );
     } finally {
       setBusyId(null);
