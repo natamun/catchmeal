@@ -1,12 +1,5 @@
-import { forwardRef, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { Trash2 } from 'lucide-react';
-import DatePicker from 'react-datepicker';
-
-import { SelectDropdown } from '../ui/SelectDropdown';
-
-import 'react-datepicker/dist/react-datepicker.css';
-
-import { fr } from 'date-fns/locale/fr';
 
 import type { AuthUser } from '../../auth/auth-context';
 import { useTimeout } from '../../hooks/useTimeout';
@@ -15,12 +8,14 @@ import { BaseDialog } from '../ui/BaseDialog';
 import { EditIconButton } from '../ui/EditIconButton';
 import { FieldError } from '../ui/FieldError';
 import { Input } from '../ui/Input';
+import { SelectDropdown } from '../ui/SelectDropdown';
 import {
   removeAvatar,
   updateProfile,
   uploadAvatar,
   type UserProfile,
 } from './api';
+import { BirthDatePicker } from './BirthDatePicker';
 import { BmiBadge } from './BmiBadge';
 import { WeightProgressBadge } from './WeightProgressBadge';
 
@@ -105,22 +100,6 @@ const ACTIVITY_OPTIONS = [
   { value: 'VERY_ACTIVE', label: 'Très actif' },
   { value: 'EXTRA_ACTIVE', label: 'Extrêmement actif' },
 ];
-
-const BirthDateInput = forwardRef<
-  HTMLButtonElement,
-  { id?: string; value?: string; onClick?: () => void }
->(({ id, value, onClick }, ref) => (
-  <button
-    id={id}
-    type="button"
-    ref={ref}
-    onClick={onClick}
-    className="w-full rounded-xl border border-green-200 bg-white px-4 py-2.5 text-left text-sm text-green-800 outline-none focus:border-green-400 focus-visible:ring-2 focus-visible:ring-green-400 focus-visible:ring-offset-1"
-  >
-    {value || <span className="text-green-400">Sélectionner une date</span>}
-  </button>
-));
-BirthDateInput.displayName = 'BirthDateInput';
 
 export function ProfileIdentityCard({ user, onUpdate, currentWeight }: Props) {
   const [avatarBusy, setAvatarBusy] = useState(false);
@@ -346,7 +325,9 @@ export function ProfileIdentityCard({ user, onUpdate, currentWeight }: Props) {
               )}
             </div>
           )}
-          <EditIconButton label="Modifier le profil" onClick={handleEdit} />
+          <div className="ml-auto">
+            <EditIconButton label="Modifier le profil" onClick={handleEdit} />
+          </div>
         </div>
       </div>
 
@@ -467,26 +448,10 @@ export function ProfileIdentityCard({ user, onUpdate, currentWeight }: Props) {
             >
               Date de naissance
             </label>
-            <DatePicker
-              selected={
-                form.birthDate ? new Date(`${form.birthDate}T12:00:00`) : null
-              }
-              onChange={(d: Date | null) => {
-                if (!d) return;
-                const y = d.getFullYear();
-                const m = String(d.getMonth() + 1).padStart(2, '0');
-                const day = String(d.getDate()).padStart(2, '0');
-                setForm((p) => ({ ...p, birthDate: `${y}-${m}-${day}` }));
-              }}
-              locale={fr}
-              calendarStartDay={1}
-              calendarClassName="kcal-datepicker"
-              dateFormat="dd/MM/yyyy"
-              maxDate={new Date()}
-              showYearDropdown
-              scrollableYearDropdown
-              yearDropdownItemNumber={100}
-              customInput={<BirthDateInput id="pf-birthdate" />}
+            <BirthDatePicker
+              id="pf-birthdate"
+              value={form.birthDate}
+              onChange={(birthDate) => setForm((p) => ({ ...p, birthDate }))}
             />
           </div>
 

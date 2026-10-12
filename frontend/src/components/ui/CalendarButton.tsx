@@ -20,16 +20,18 @@ interface TriggerProps {
   children: ReactNode;
   isOpen: boolean;
   onClose: () => void;
+  id?: string;
   className?: string;
   onClick?: MouseEventHandler<HTMLButtonElement>;
   onKeyDown?: KeyboardEventHandler<HTMLButtonElement>;
   ref?: Ref<HTMLButtonElement>;
 }
 
-function Trigger({
+export function CalendarTrigger({
   children,
   isOpen,
   onClose,
+  id,
   className,
   onClick,
   onKeyDown,
@@ -38,6 +40,7 @@ function Trigger({
   return (
     <button
       type="button"
+      id={id}
       ref={ref}
       onClick={(event) => {
         if (isOpen) {
@@ -95,13 +98,13 @@ export default function CalendarButton(props: DayProps | RangeProps) {
     wrapperClassName,
     portalId: 'datepicker-portal',
     customInput: (
-      <Trigger
+      <CalendarTrigger
         isOpen={isOpen}
         onClose={() => pickerRef.current?.setOpen(false)}
         className={className}
       >
         {children}
-      </Trigger>
+      </CalendarTrigger>
     ),
   } as const;
 

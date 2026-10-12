@@ -275,6 +275,49 @@ body {
   font-weight: 700;
 }
 
+.kcal-datepicker .react-datepicker__year-wrapper,
+.kcal-datepicker .react-datepicker__monthPicker {
+  width: 14.2rem;
+  max-width: none;
+}
+
+.kcal-datepicker .react-datepicker__year .react-datepicker__year-text {
+  width: calc(25% - 4px);
+  line-height: 2rem;
+}
+
+.kcal-datepicker .react-datepicker__month .react-datepicker__month-text {
+  width: calc(100% / 3 - 4px);
+  line-height: 2.6rem;
+}
+
+.kcal-datepicker
+  :is(.react-datepicker__year-text, .react-datepicker__month-text):not(
+    [aria-disabled='true']
+  ):hover,
+.kcal-datepicker
+  :is(
+    .react-datepicker__year-text--keyboard-selected,
+    .react-datepicker__month-text--keyboard-selected
+  ) {
+  border-radius: 0.3rem;
+  background-color: var(--color-green-100);
+  color: var(--color-green-800);
+}
+
+.kcal-datepicker
+  :is(
+    .react-datepicker__year-text--selected,
+    .react-datepicker__month-text--selected
+  ) {
+  &,
+  &:not([aria-disabled='true']):hover {
+    border-radius: 0.3rem;
+    background-color: var(--color-green-500);
+    color: white;
+  }
+}
+
 .kcal-datepicker .react-datepicker__navigation:hover *::before {
   border-color: var(--color-green-500);
 }
