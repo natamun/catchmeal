@@ -97,7 +97,7 @@ export default function FriendsPage({ pendingReply }: FriendsPageProps) {
             {TAB_OPTIONS.map(({ value, label }) => (
               <label
                 key={value}
-                className="flex cursor-pointer items-center justify-center rounded-lg px-3 py-1.5 text-sm font-medium text-green-500 transition-colors has-checked:animate-pill-select has-checked:bg-green-500 has-checked:text-white has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-green-400"
+                className="relative flex cursor-pointer items-center justify-center rounded-lg px-3 py-1.5 text-sm font-medium text-green-500 transition-colors has-checked:animate-pill-select has-checked:bg-green-500 has-checked:text-white has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-green-400"
               >
                 <input
                   type="radio"
@@ -109,7 +109,7 @@ export default function FriendsPage({ pendingReply }: FriendsPageProps) {
                 />
                 {label}
                 {value === 'requests' && requests.length > 0 && (
-                  <span className="ml-1.5 rounded-full bg-amber-100 px-1.5 text-xs font-bold text-amber-700">
+                  <span className="absolute -top-2 -right-2 flex h-5 min-w-5 items-center justify-center rounded-full bg-green-100 px-1 text-xs font-bold text-green-700 ring-2 ring-white">
                     {requests.length}
                   </span>
                 )}
