@@ -3,31 +3,39 @@ import { CalendarDays } from 'lucide-react';
 import { MACROS } from '../../constants/macros';
 import type { DashboardDay } from '../../types/dashboard-analytics';
 import { averageOf } from '../../utils/buildDataGraph';
+import Skeleton from '../ui/Skeleton';
 import StatTile from '../ui/StatTile';
 import SummaryCard from '../ui/SummaryCard';
 import { MACRO_TOTAL_KEYS } from './macroSeries';
 
 interface Props {
   days: DashboardDay[];
-  unavailable?: boolean;
+  isLoading?: boolean;
   className?: string;
 }
 
 export default function NutritionAverages({
   days,
-  unavailable = false,
+  isLoading = false,
   className,
 }: Props) {
-  const logged = unavailable
-    ? []
-    : days.filter((day) => day.totalKcal !== null);
+  const logged = days.filter((day) => day.totalKcal !== null);
   const hasData = logged.length > 0;
   const kcal = averageOf(logged, 'totalKcal');
 
   return (
-    <SummaryCard title="Moyennes par jour" className={className}>
+    <SummaryCard
+      title="Moyennes par jour"
+      busy={isLoading}
+      className={className}
+    >
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-6">
-        {hasData ? (
+        {isLoading ? (
+          <div className="flex flex-col gap-2">
+            <Skeleton className="h-10 w-24" />
+            <Skeleton className="h-4 w-36" />
+          </div>
+        ) : hasData ? (
           <div>
             <div className="flex items-end gap-2">
               <span
@@ -47,15 +55,19 @@ export default function NutritionAverages({
           </div>
         ) : (
           <p className="text-sm text-green-600">
-            {unavailable
-              ? 'Données indisponibles.'
-              : 'Aucun repas enregistré sur cette période.'}
+            Aucun repas enregistré sur cette période.
           </p>
         )}
         <dl className="grid grid-cols-3 gap-3 max-2xs:grid-cols-1 sm:flex-1">
           {MACROS.map(({ key, label }) => (
             <StatTile key={key} label={label}>
-              {hasData ? `${averageOf(logged, MACRO_TOTAL_KEYS[key])} g` : '–'}
+              {isLoading ? (
+                <Skeleton className="h-6 w-12" />
+              ) : hasData ? (
+                `${averageOf(logged, MACRO_TOTAL_KEYS[key])} g`
+              ) : (
+                '–'
+              )}
             </StatTile>
           ))}
         </dl>

@@ -2,29 +2,39 @@ import { Minus, TrendingDown, TrendingUp } from 'lucide-react';
 
 import type { DashboardDay } from '../../types/dashboard-analytics';
 import { formatKg } from '../../utils/format';
+import Skeleton from '../ui/Skeleton';
 import SummaryCard from '../ui/SummaryCard';
 
 interface Props {
   days: DashboardDay[];
-  unavailable?: boolean;
+  isLoading?: boolean;
 }
 
-export default function WeightVariation({ days, unavailable = false }: Props) {
-  const weights = unavailable
-    ? []
-    : days.flatMap(({ weight }) => (weight === null ? [] : [weight]));
+export default function WeightVariation({ days, isLoading = false }: Props) {
+  const weights = days.flatMap(({ weight }) =>
+    weight === null ? [] : [weight],
+  );
   const first = weights.at(0);
   const last = weights.at(-1);
+
+  if (isLoading) {
+    return (
+      <SummaryCard title="Variation de poids" busy>
+        <div className="flex flex-col gap-2">
+          <Skeleton className="h-10 w-24" />
+          <Skeleton className="h-4 w-36" />
+        </div>
+      </SummaryCard>
+    );
+  }
 
   if (first === undefined || last === undefined || weights.length < 2) {
     return (
       <SummaryCard title="Variation de poids">
         <p className="text-sm text-green-600">
-          {unavailable
-            ? 'Données indisponibles.'
-            : first === undefined
-              ? 'Aucune pesée sur cette période.'
-              : `Une seule pesée sur cette période : ${formatKg(first)} kg.`}
+          {first === undefined
+            ? 'Aucune pesée sur cette période.'
+            : `Une seule pesée sur cette période : ${formatKg(first)} kg.`}
         </p>
       </SummaryCard>
     );

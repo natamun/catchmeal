@@ -23,6 +23,7 @@ import type {
 } from '../../types/dashboard-analytics';
 import buildDataGraph from '../../utils/buildDataGraph';
 import SummaryCard from '../ui/SummaryCard';
+import ChartSkeleton from './ChartSkeleton';
 import {
   AXIS_WIDTH,
   CHART_HEIGHT,
@@ -121,7 +122,12 @@ function MacroSegment(props: BarShapeProps) {
 
 const renderSegment = (props: BarShapeProps) => <MacroSegment {...props} />;
 
-export default function CalorieChart({ days }: { days: DashboardDay[] }) {
+interface Props {
+  days: DashboardDay[];
+  isLoading?: boolean;
+}
+
+export default function CalorieChart({ days, isLoading = false }: Props) {
   const [width, setWidth] = useState(INITIAL_WIDTH);
 
   const dataLength = days.length;
@@ -147,6 +153,14 @@ export default function CalorieChart({ days }: { days: DashboardDay[] }) {
     ? ALL_SERIES
     : MACRO_SERIES;
   const averaged = grain !== 'day';
+
+  if (isLoading) {
+    return (
+      <SummaryCard title="Calories et macronutriments" busy>
+        <ChartSkeleton />
+      </SummaryCard>
+    );
+  }
 
   return (
     <SummaryCard

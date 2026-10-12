@@ -63,27 +63,38 @@ interface Props {
   dayData: DashboardDay | undefined;
   period: DateRange;
   days: DashboardDay[];
+  isLoading?: boolean;
 }
 
-export default function DataExport({ day, dayData, period, days }: Props) {
+export default function DataExport({
+  day,
+  dayData,
+  period,
+  days,
+  isLoading = false,
+}: Props) {
+  const hasDay = isLoading || dayData !== undefined;
+  const hasPeriod = isLoading || days.length > 0;
+
   return (
     <SummaryCard
       title="Exporter mes données"
+      busy={isLoading}
       aside={<span className="text-sm text-green-600">Format JSON</span>}
     >
       <div className="flex flex-col gap-3">
         <ExportButton
           label="Jour sélectionné"
-          value={dayData ? formatWeekday(day) : 'Aucune donnée ce jour'}
-          disabled={!dayData}
+          value={hasDay ? formatWeekday(day) : 'Aucune donnée ce jour'}
+          disabled={isLoading || !dayData}
           onClick={() =>
             downloadJson(dayData, `catchmeal-${toApiDate(day)}.json`)
           }
         />
         <ExportButton
           label="Période affichée"
-          value={days.length > 0 ? formatPeriod(period) : 'Aucune donnée'}
-          disabled={days.length === 0}
+          value={hasPeriod ? formatPeriod(period) : 'Aucune donnée'}
+          disabled={isLoading || days.length === 0}
           onClick={() =>
             downloadJson(
               days,

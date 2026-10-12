@@ -4,34 +4,40 @@ import { useAuth } from '../auth/auth-context';
 import { getDashboard } from '../components/analytics/api';
 import type { DashboardDay } from '../types/dashboard-analytics';
 
-export default function useDashboard({
-  fromStr,
-  toStr,
-  onError,
-}: {
-  fromStr: string;
-  toStr: string;
-  onError: (x: boolean) => void;
-}) {
+const NO_DAYS: DashboardDay[] = [];
+
+export default function useDashboard(from: string, to: string) {
   const { user } = useAuth();
   const userId = user?.userId;
-  const [dashboard, setDashboard] = useState<DashboardDay[]>([]);
+  const key = `${userId}:${from}:${to}`;
+  const [loaded, setLoaded] = useState<Record<string, DashboardDay[]>>({});
+  const [failedKey, setFailedKey] = useState<string | null>(null);
+  const [attempt, setAttempt] = useState(0);
+  const days = loaded[key] as DashboardDay[] | undefined;
+  const isCached = days !== undefined;
 
   useEffect(() => {
-    if (!fromStr || !toStr || !userId) return;
+    if (!userId || isCached) return;
     const controller = new AbortController();
 
-    getDashboard(userId, fromStr, toStr, controller.signal)
-      .then((data) => {
-        setDashboard(data);
-        onError(false);
-      })
+    getDashboard(userId, from, to, controller.signal)
+      .then((data) => setLoaded((previous) => ({ ...previous, [key]: data })))
       .catch(() => {
-        if (!controller.signal.aborted) onError(true);
+        if (!controller.signal.aborted) setFailedKey(key);
       });
 
     return () => controller.abort();
-  }, [userId, fromStr, toStr, onError]);
+  }, [userId, from, to, key, isCached, attempt]);
 
-  return { dashboard };
+  const hasError = !isCached && failedKey === key;
+
+  return {
+    days: days ?? NO_DAYS,
+    isLoading: !isCached && !hasError,
+    hasError,
+    retry: () => {
+      setFailedKey(null);
+      setAttempt((count) => count + 1);
+    },
+  };
 }

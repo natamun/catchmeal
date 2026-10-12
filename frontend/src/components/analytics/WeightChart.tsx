@@ -15,6 +15,7 @@ import type { DashboardDay } from '../../types/dashboard-analytics';
 import { formatWeekday } from '../../utils/format';
 import type { DateRange } from '../ui/CalendarButton';
 import SummaryCard from '../ui/SummaryCard';
+import ChartSkeleton from './ChartSkeleton';
 import {
   AXIS_WIDTH,
   CHART_HEIGHT,
@@ -61,9 +62,14 @@ function formatTick(time: number) {
 interface Props {
   days: DashboardDay[];
   period: DateRange;
+  isLoading?: boolean;
 }
 
-export default function WeightChart({ days, period }: Props) {
+export default function WeightChart({
+  days,
+  period,
+  isLoading = false,
+}: Props) {
   const points = useMemo(
     () =>
       days.flatMap(({ day, weight }) =>
@@ -73,6 +79,14 @@ export default function WeightChart({ days, period }: Props) {
       ),
     [days],
   );
+
+  if (isLoading) {
+    return (
+      <SummaryCard title="Évolution du poids" busy>
+        <ChartSkeleton />
+      </SummaryCard>
+    );
+  }
 
   if (points.length === 0) {
     return (
