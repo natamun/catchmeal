@@ -45,9 +45,15 @@ export default function LegalNoticePage({ onBack, onNavigate }: Props) {
 
       <h2>3. Propriété intellectuelle</h2>
       <p>
-        L'ensemble des contenus, logos, interfaces et codes sources développés
-        dans le cadre de ce projet sont la propriété exclusive de l'équipe de
-        développement, sauf mention contraire.
+        Les contenus, les interfaces et le code source développés dans le cadre
+        de ce projet sont la propriété de l'équipe de développement, sauf
+        mention contraire.
+      </p>
+      <p>
+        Les icônes de l'interface proviennent de la bibliothèque Lucide,
+        distribuée sous licence ISC. Les autres bibliothèques tierces utilisées
+        restent la propriété de leurs auteurs et sont soumises à leurs licences
+        respectives.
       </p>
 
       <h2>4. Non-responsabilité médicale</h2>
