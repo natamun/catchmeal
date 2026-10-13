@@ -59,6 +59,15 @@ export class UsersService {
     return this.prisma.user.findFirst({ where: { email, deletedAt: null } });
   }
 
+  async deleteAvatar(userId: number) {
+    await this.supabase.deleteAvatar(userId);
+    return this.prisma.user.update({
+      where: { id: userId },
+      data: { avatarUrl: null },
+      select: { id: true, username: true, name: true, avatarUrl: true },
+    });
+  }
+
   async updateAvatar(userId: number, file: Express.Multer.File) {
     const avatarUrl = await this.supabase.uploadAvatar(userId, file);
     return this.prisma.user.update({
