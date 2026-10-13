@@ -185,7 +185,8 @@ export default function Nav({ active, onChange, isAdmin = false }: Props) {
                 <button
                   type="button"
                   onClick={() => openFromMenu('profile')}
-                  className={`${MENU_ITEM_CLASS} text-green-800 hover:bg-green-50 max-[450px]:border-t max-[450px]:border-green-100`}
+                  aria-current={active === 'profile' ? 'page' : undefined}
+                  className={`${MENU_ITEM_CLASS} text-green-800 hover:bg-green-50 max-[450px]:border-t max-[450px]:border-green-100 ${active === 'profile' ? 'font-semibold' : ''}`}
                 >
                   <User className="h-4 w-4 text-green-500" aria-hidden="true" />
                   Profil
@@ -194,7 +195,8 @@ export default function Nav({ active, onChange, isAdmin = false }: Props) {
                   <button
                     type="button"
                     onClick={() => openFromMenu('admin')}
-                    className={`${MENU_ITEM_CLASS} border-t border-green-100 text-green-800 hover:bg-green-50`}
+                    aria-current={active === 'admin' ? 'page' : undefined}
+                    className={`${MENU_ITEM_CLASS} border-t border-green-100 text-green-800 hover:bg-green-50 ${active === 'admin' ? 'font-semibold' : ''}`}
                   >
                     <ShieldCheck
                       className="h-4 w-4 text-green-500"
