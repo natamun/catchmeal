@@ -155,6 +155,7 @@ export function ChatBotPopup({
           )}
           <div className="mx-4 flex items-end gap-2 rounded-xl border border-green-200 px-3 py-2 focus-within:border-green-400">
             <textarea
+              aria-label="Message à l'assistant"
               className="max-h-20 min-w-0 flex-1 resize-none self-center overflow-y-auto text-sm text-green-800 outline-none"
               value={input}
               maxLength={250}
