@@ -130,7 +130,10 @@ export default function Nav({ active, onChange, isAdmin = false }: Props) {
           <div className="flex">
             <Brand />
           </div>
-          <nav aria-label="Navigation principale">
+          <nav
+            aria-label="Navigation principale"
+            className="max-[450px]:hidden"
+          >
             <ul className="flex items-center gap-1">
               {MAIN_TABS.map((tab) => (
                 <li key={tab.id}>
@@ -163,11 +166,26 @@ export default function Nav({ active, onChange, isAdmin = false }: Props) {
                   />
                 </button>
               </Popover.Trigger>
-              <DropdownPanel container={menuContainer} align="end">
+              <DropdownPanel container={menuContainer} align="end" fitViewport>
+                {MAIN_TABS.map((tab, index) => (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    onClick={() => openFromMenu(tab.id)}
+                    aria-current={tab.id === active ? 'page' : undefined}
+                    className={`${MENU_ITEM_CLASS} text-green-800 hover:bg-green-50 min-[450px]:hidden ${index > 0 ? 'border-t border-green-100' : ''} ${tab.id === active ? 'font-semibold' : ''}`}
+                  >
+                    <tab.icon
+                      className="h-4 w-4 text-green-500"
+                      aria-hidden="true"
+                    />
+                    {tab.label}
+                  </button>
+                ))}
                 <button
                   type="button"
                   onClick={() => openFromMenu('profile')}
-                  className={`${MENU_ITEM_CLASS} text-green-800 hover:bg-green-50`}
+                  className={`${MENU_ITEM_CLASS} text-green-800 hover:bg-green-50 max-[450px]:border-t max-[450px]:border-green-100`}
                 >
                   <User className="h-4 w-4 text-green-500" aria-hidden="true" />
                   Profil
