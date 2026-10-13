@@ -294,7 +294,9 @@ export function ProfileIdentityCard({ user, onUpdate }: Props) {
                 </p>
               ) : (
                 avatarBusy && (
-                  <p className="text-xs text-green-500">Envoi en cours...</p>
+                  <p role="status" className="text-xs text-green-500">
+                    Envoi en cours...
+                  </p>
                 )
               )}
             </div>
