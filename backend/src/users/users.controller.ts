@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Body,
   Controller,
+  Delete,
   ForbiddenException,
   Get,
   Param,
@@ -99,6 +100,17 @@ export class UsersController {
       throw new ForbiddenException('You can only view your own weight history');
     }
     return this.usersService.getWeightHistory(userId);
+  }
+
+  @Delete('avatar')
+  deleteAvatar(
+    @Param('userId', ParseIntPipe) userId: number,
+    @Request() req: RequestWithUser,
+  ) {
+    if (req.user.userId !== userId) {
+      throw new ForbiddenException('You can only delete your own avatar');
+    }
+    return this.usersService.deleteAvatar(userId);
   }
 
   @Patch('avatar')
