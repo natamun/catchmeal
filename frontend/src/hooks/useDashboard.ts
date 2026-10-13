@@ -1,48 +1,43 @@
 import { useEffect, useState } from 'react';
 
 import { useAuth } from '../auth/auth-context';
+import { getDashboard } from '../components/analytics/api';
 import type { DashboardDay } from '../types/dashboard-analytics';
 
-const API_URL = `${import.meta.env.VITE_API_URL}`;
+const NO_DAYS: DashboardDay[] = [];
 
-export default function useDashboard({
-  fromStr,
-  toStr,
-  onError,
-}: {
-  fromStr: string;
-  toStr: string;
-  onError: (x: boolean) => void;
-}) {
+export default function useDashboard(from: string, to: string) {
   const { user } = useAuth();
   const userId = user?.userId;
-  const [dashboard, setDashboardState] = useState<DashboardDay[]>([]);
+  const key = `${userId}:${from}:${to}`;
+  const [loaded, setLoaded] = useState<Record<string, DashboardDay[]>>({});
+  const [failedKey, setFailedKey] = useState<string | null>(null);
+  const [attempt, setAttempt] = useState(0);
+  const days = loaded[key] as DashboardDay[] | undefined;
+  const isCached = days !== undefined;
 
   useEffect(() => {
-    if (!fromStr || !toStr || !userId) return;
+    if (!userId || isCached) return;
     const controller = new AbortController();
 
-    const load = async () => {
-      try {
-        const param = new URLSearchParams({ from: fromStr, to: toStr });
-        const res = await fetch(
-          `${API_URL}/users/${userId}/dashboard?${param}`,
-          { signal: controller.signal, credentials: 'include' },
-        );
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const data = (await res.json()) as DashboardDay[];
-        setDashboardState(data);
-        onError(false);
-      } catch (error) {
-        onError(true);
-        console.error('useDashboard: ', error);
-        if ((error as Error).name === 'AbortError') return;
-      }
-    };
+    getDashboard(userId, from, to, controller.signal)
+      .then((data) => setLoaded((previous) => ({ ...previous, [key]: data })))
+      .catch(() => {
+        if (!controller.signal.aborted) setFailedKey(key);
+      });
 
-    void load();
     return () => controller.abort();
-  }, [userId, fromStr, toStr, onError]);
+  }, [userId, from, to, key, isCached, attempt]);
 
-  return { dashboard, setDashboard: setDashboardState };
+  const hasError = !isCached && failedKey === key;
+
+  return {
+    days: days ?? NO_DAYS,
+    isLoading: !isCached && !hasError,
+    hasError,
+    retry: () => {
+      setFailedKey(null);
+      setAttempt((count) => count + 1);
+    },
+  };
 }

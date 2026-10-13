@@ -1,7 +1,9 @@
 import { useState, type ReactNode } from 'react';
-import { ChevronRight, LoaderCircle } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 
 import { MACROS } from '../../constants/macros';
+import { ListCard, ListCardEmpty, ListCardLoading } from '../ui/ListCard';
+import { LoadError } from '../ui/LoadError';
 import { MacroBadge } from '../ui/MacroBadge';
 import MealSearchBar from './MealSearchBar';
 import {
@@ -16,6 +18,7 @@ interface MealListProps {
   meals: Meal[];
   isLoading: boolean;
   loadError: string | null;
+  onRetry?: () => void;
   headerAction?: ReactNode;
   renderAction?: (meal: Meal) => ReactNode;
 }
@@ -41,6 +44,7 @@ export default function MealList({
   meals,
   isLoading,
   loadError,
+  onRetry,
   headerAction,
   renderAction,
 }: MealListProps) {
@@ -85,40 +89,34 @@ export default function MealList({
   };
 
   return (
-    <div className="@container overflow-hidden rounded-2xl border border-green-200 bg-white shadow-sm">
-      <div className="flex items-center gap-3 border-b border-green-200 px-5 py-4">
-        <MealSearchBar
-          meals={meals}
-          criteria={criteria}
-          onFilterChange={setCriteria}
-        />
-        {headerAction}
-      </div>
+    <ListCard
+      className="@container"
+      header={
+        <>
+          <MealSearchBar
+            meals={meals}
+            criteria={criteria}
+            onFilterChange={setCriteria}
+          />
+          {headerAction}
+        </>
+      }
+    >
+      {isLoading && <ListCardLoading label="Chargement des repas..." />}
 
-      {isLoading && (
-        <div role="status" className="flex justify-center py-10">
-          <LoaderCircle className="h-6 w-6 animate-spin text-green-400" />
-          <span className="sr-only">Chargement des repas...</span>
-        </div>
-      )}
-
-      {loadError && (
-        <p className="px-5 pb-5 text-sm text-red-500">{loadError}</p>
-      )}
+      {loadError && <LoadError message={loadError} onRetry={onRetry} />}
 
       {!isLoading && !loadError && meals.length === 0 && (
-        <p className="px-5 py-10 text-center text-sm text-green-400">
-          Aucun repas enregistré.
-        </p>
+        <ListCardEmpty>Aucun repas enregistré.</ListCardEmpty>
       )}
 
       {!isLoading &&
         !loadError &&
         meals.length > 0 &&
         visibleMeals.length === 0 && (
-          <p className="px-5 py-10 text-center text-sm text-green-400">
+          <ListCardEmpty>
             Aucun repas ne correspond à cette recherche.
-          </p>
+          </ListCardEmpty>
         )}
 
       <ul className="divide-y divide-green-200">
@@ -167,6 +165,6 @@ export default function MealList({
           );
         })}
       </ul>
-    </div>
+    </ListCard>
   );
 }

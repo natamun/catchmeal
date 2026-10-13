@@ -1,3 +1,6 @@
+import SummaryCard from '../ui/SummaryCard';
+import { progressLaps } from './progress';
+
 interface Macros {
   protein: number;
   carbs: number;
@@ -5,39 +8,65 @@ interface Macros {
   proteinGoal: number;
   carbsGoal: number;
   fatGoal: number;
+  isLoading?: boolean;
+  unavailable?: boolean;
 }
 
 function Bar({
   label,
   value,
   goal,
-  color,
+  isLoading,
+  unavailable,
 }: {
   label: string;
   value: number;
   goal: number;
-  color: string;
+  isLoading: boolean;
+  unavailable: boolean;
 }) {
-  const pct = Math.min((value / goal) * 100, 100);
+  const { lap, extraLap } = progressLaps(
+    isLoading || unavailable ? 0 : value,
+    goal,
+  );
+
   return (
     <div>
       <div className="mb-1 flex justify-between text-sm">
         <span className="font-medium text-green-600">{label}</span>
-        <span className="text-green-500">
-          {value}g / {goal}g
+        <span className="flex items-center gap-1 text-green-500">
+          {isLoading ? (
+            <span
+              className="h-4 w-8 animate-pulse rounded bg-green-100"
+              aria-hidden="true"
+            />
+          ) : unavailable ? (
+            '–'
+          ) : (
+            `${value}g`
+          )}
+          <span>/ {goal}g</span>
         </span>
       </div>
       <div
-        className="h-2 overflow-hidden rounded-full bg-green-100"
+        className="relative h-2 overflow-hidden rounded-full bg-green-100"
         role="progressbar"
-        aria-valuenow={value}
+        aria-valuenow={isLoading ? undefined : Math.min(value, goal)}
         aria-valuemin={0}
         aria-valuemax={goal}
-        aria-label={`${label} : ${value}g sur ${goal}g`}
+        aria-label={
+          isLoading
+            ? `${label} : chargement`
+            : `${label} : ${value}g sur ${goal}g`
+        }
       >
         <div
-          className={`h-full rounded-full ${color}`}
-          style={{ width: `${pct}%` }}
+          className="h-full bg-green-400"
+          style={{ width: `${lap * 100}%` }}
+        />
+        <div
+          className="absolute inset-y-0 left-0 bg-green-500"
+          style={{ width: `${extraLap * 100}%` }}
         />
       </div>
     </div>
@@ -51,27 +80,34 @@ export default function MacroBreakdown({
   proteinGoal,
   carbsGoal,
   fatGoal,
+  isLoading = false,
+  unavailable = false,
 }: Macros) {
   return (
-    <div className="rounded-2xl border border-green-200 bg-white p-6 shadow-sm">
-      <h2 className="mb-4 text-sm font-semibold tracking-wide text-green-500 uppercase">
-        Macronutriments
-      </h2>
-      <div className="flex flex-col gap-4">
+    <SummaryCard title="Macronutriments" busy={isLoading}>
+      <div className="flex flex-1 flex-col justify-between gap-4">
         <Bar
           label="Protéines"
           value={protein}
           goal={proteinGoal}
-          color="bg-green-1000"
+          isLoading={isLoading}
+          unavailable={unavailable}
         />
         <Bar
           label="Glucides"
           value={carbs}
           goal={carbsGoal}
-          color="bg-green-300"
+          isLoading={isLoading}
+          unavailable={unavailable}
         />
-        <Bar label="Lipides" value={fat} goal={fatGoal} color="bg-green-300" />
+        <Bar
+          label="Lipides"
+          value={fat}
+          goal={fatGoal}
+          isLoading={isLoading}
+          unavailable={unavailable}
+        />
       </div>
-    </div>
+    </SummaryCard>
   );
 }

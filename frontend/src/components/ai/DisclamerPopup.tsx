@@ -6,20 +6,21 @@ type DisclamerPopupProps = {
 
 export default function DisclamerPopup({ setDisclamer }: DisclamerPopupProps) {
   return (
-    <div className="mt-15 h-75 flex-1 overflow-y-auto rounded-xl bg-gray-100 sm:mx-4">
-      <div className="m-3 flex flex-row justify-between pt-2">
-        <h3 className="flex justify-center font-bold">
+    <div className="max-h-full w-full overflow-y-auto rounded-2xl bg-white p-5 shadow-lg">
+      <div className="flex items-center justify-between gap-3">
+        <h3 className="text-lg font-bold text-green-800">
           Avertissement important
         </h3>
         <button
           type="button"
-          className="flex font-bold hover:text-gray-500"
           onClick={() => setDisclamer(false)}
+          aria-label="Fermer"
+          className="cursor-pointer text-green-400 transition-colors hover:text-green-600"
         >
-          <X height={20} width={20} />
+          <X className="h-5 w-5" />
         </button>
       </div>
-      <p className="p-3 text-sm">
+      <p className="mt-2 text-sm text-green-600">
         Cet assistant utilise l'intelligence artificielle à des fins
         d'information et d'éducation en matière de nutrition. Il n'est ni un
         professionnel de santé ni un médecin, et ne fournit ni diagnostics, ni

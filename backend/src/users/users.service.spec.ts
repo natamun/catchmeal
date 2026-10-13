@@ -89,7 +89,9 @@ describe('UsersService', () => {
       id: 1,
       weight: 75.5,
       bodyFat: null,
-      note: null,
+      fatFreeMass: null,
+      bodyWater: null,
+      muscleMass: null,
       loggedAt: new Date(),
     };
     prismaMock.user.findFirstOrThrow.mockResolvedValue({
@@ -101,12 +103,21 @@ describe('UsersService', () => {
     const result = await service.logWeight(1, 75.5);
 
     expect(prismaMock.weightLog.create).toHaveBeenCalledWith({
-      data: { userId: 1, weight: 75.5, bodyFat: undefined, note: undefined },
+      data: {
+        userId: 1,
+        weight: 75.5,
+        bodyFat: undefined,
+        fatFreeMass: undefined,
+        bodyWater: undefined,
+        muscleMass: undefined,
+      },
       select: {
         id: true,
         weight: true,
         bodyFat: true,
-        note: true,
+        fatFreeMass: true,
+        bodyWater: true,
+        muscleMass: true,
         loggedAt: true,
       },
     });
@@ -164,8 +175,8 @@ describe('UsersService', () => {
 
   it('should return weight history for a user', async () => {
     const entries = [
-      { id: 2, weight: 76, bodyFat: null, note: null, loggedAt: new Date() },
-      { id: 1, weight: 75.5, bodyFat: null, note: null, loggedAt: new Date() },
+      { id: 2, weight: 76, bodyFat: null, loggedAt: new Date() },
+      { id: 1, weight: 75.5, bodyFat: null, loggedAt: new Date() },
     ];
     prismaMock.user.findUnique.mockResolvedValue({ id: 1 });
     prismaMock.weightLog.findMany.mockResolvedValue(entries);
@@ -179,7 +190,9 @@ describe('UsersService', () => {
         id: true,
         weight: true,
         bodyFat: true,
-        note: true,
+        fatFreeMass: true,
+        bodyWater: true,
+        muscleMass: true,
         loggedAt: true,
       },
     });

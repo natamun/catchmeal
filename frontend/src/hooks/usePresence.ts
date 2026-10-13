@@ -14,7 +14,7 @@ export function usePresence(userId: number) {
     const loadPresence = () => {
       getFriendsPresence()
         .then((list) => setPresence(new Map(list.map((p) => [p.userId, p]))))
-        .catch(console.error);
+        .catch(() => undefined);
     };
 
     loadPresence();

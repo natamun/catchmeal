@@ -1,7 +1,7 @@
 interface PillTabsProps<T extends string> {
   name: string;
   options: readonly { value: T; label: string }[];
-  value: T;
+  value: T | null;
   onChange: (value: T) => void;
   className?: string;
 }

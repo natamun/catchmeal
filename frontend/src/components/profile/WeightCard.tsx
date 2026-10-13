@@ -1,211 +1,243 @@
 import { useEffect, useRef, useState } from 'react';
-import { Plus, X } from 'lucide-react';
 
-import { Input } from '../ui/Input';
-import {
-  getWeightHistory,
-  logWeight,
-  updateWeight,
-  type WeightEntry,
-} from './api';
+import { formatKg } from '../../utils/format';
+import { AddCircleButton } from '../ui/AddCircleButton';
+import { EditIconButton } from '../ui/EditIconButton';
+import { LoadError } from '../ui/LoadError';
+import Skeleton from '../ui/Skeleton';
+import StatTile from '../ui/StatTile';
+import SummaryCard from '../ui/SummaryCard';
+import { getWeightHistory, type WeightEntry } from './api';
+import { COMPOSITION, formatMeasure } from './measures';
+import { WeightDialog } from './WeightDialog';
+
+const ROW_COLUMNS =
+  'md:grid-cols-[minmax(0,1.5fr)_repeat(5,minmax(0,1fr))_1.5rem]';
+
+function formatDate(isoDate: string) {
+  return new Date(isoDate).toLocaleDateString('fr-FR', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  });
+}
+
+function describeBmi(weight: number, height: number) {
+  const bmi = weight / (height / 100) ** 2;
+  const category =
+    bmi < 18.5
+      ? 'Insuffisance pondérale'
+      : bmi < 25
+        ? 'Poids normal'
+        : bmi < 30
+          ? 'Surpoids'
+          : 'Obésité';
+
+  return `IMC ${formatKg(bmi)} · ${category}`;
+}
 
 interface Props {
   userId: number;
-  targetWeight?: number | null;
-  onLatestWeight?: (weight: number) => void;
+  height?: number | null;
+  onLatestWeight?: (weight: number | null) => void;
 }
 
-export function WeightCard({ userId, targetWeight, onLatestWeight }: Props) {
-  const [history, setHistory] = useState<WeightEntry[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [loadError, setLoadError] = useState<string | null>(null);
-  const [logging, setLogging] = useState(false);
-  const [draft, setDraft] = useState('');
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [editingId, setEditingId] = useState<number | null>(null);
-  const [editDraft, setEditDraft] = useState('');
-  const editInputRef = useRef<HTMLInputElement>(null);
+export function WeightCard({ userId, height, onLatestWeight }: Props) {
+  const [history, setHistory] = useState<WeightEntry[] | null>(null);
+  const [hasError, setHasError] = useState(false);
+  const [attempt, setAttempt] = useState(0);
+  const [dialog, setDialog] = useState<{
+    entry: WeightEntry | null;
+    openCount: number;
+  }>({ entry: null, openCount: 0 });
+  const dialogRef = useRef<HTMLDialogElement>(null);
 
   useEffect(() => {
-    getWeightHistory(userId)
+    const controller = new AbortController();
+
+    getWeightHistory(userId, controller.signal)
       .then((entries) => {
         setHistory(entries);
-        if (entries[0]) onLatestWeight?.(entries[0].weight);
+        onLatestWeight?.(entries[0]?.weight ?? null);
       })
-      .catch(() => setLoadError("Impossible de charger l'historique"))
-      .finally(() => setLoading(false));
-  }, [userId, onLatestWeight]);
+      .catch(() => {
+        if (!controller.signal.aborted) {
+          setHasError(true);
+          onLatestWeight?.(null);
+        }
+      });
 
-  async function handleSave() {
-    const weight = parseFloat(draft);
-    if (!weight || weight <= 0) return;
+    return () => controller.abort();
+  }, [userId, onLatestWeight, attempt]);
 
-    setSaving(true);
-    setError(null);
-    try {
-      const entry = await logWeight(userId, { weight });
-      setHistory((prev) => [entry, ...prev]);
-      onLatestWeight?.(entry.weight);
-      setDraft('');
-      setLogging(false);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erreur');
-    } finally {
-      setSaving(false);
-    }
-  }
+  const retry = () => {
+    setHasError(false);
+    setAttempt((count) => count + 1);
+  };
 
-  function handleCancel() {
-    setDraft('');
-    setError(null);
-    setLogging(false);
-  }
+  const openDialog = (entry: WeightEntry | null) => {
+    setDialog(({ openCount }) => ({ entry, openCount: openCount + 1 }));
+    dialogRef.current?.showModal();
+  };
 
-  function startEdit(entry: WeightEntry) {
-    setEditingId(entry.id);
-    setEditDraft(String(entry.weight));
-    setTimeout(() => editInputRef.current?.select(), 0);
-  }
-
-  async function handleEditSave(entryId: number) {
-    const weight = parseFloat(editDraft);
-    if (!weight || weight <= 0) {
-      setEditingId(null);
+  const handleSaved = (saved: WeightEntry) => {
+    if (history === null) {
+      retry();
       return;
     }
-    try {
-      const updated = await updateWeight(userId, entryId, weight);
-      setHistory((prev) => prev.map((e) => (e.id === entryId ? updated : e)));
-      if (history[0]?.id === entryId) onLatestWeight?.(updated.weight);
-    } catch {
-      // revert silently
-    } finally {
-      setEditingId(null);
-    }
-  }
 
-  const latest = history[0];
+    const next = [
+      saved,
+      ...history.filter((entry) => entry.id !== saved.id),
+    ].sort((a, b) => b.loggedAt.localeCompare(a.loggedAt));
+
+    setHistory(next);
+    onLatestWeight?.(next[0].weight);
+  };
+
+  const handleDeleted = (entryId: number) => {
+    const next = (history ?? []).filter((entry) => entry.id !== entryId);
+
+    setHistory(next);
+    onLatestWeight?.(next[0]?.weight ?? null);
+  };
+
+  const latest = history?.[0];
+  const isLoading = history === null && !hasError;
 
   return (
-    <div className="rounded-2xl border border-green-200 bg-white p-5 shadow-sm">
-      <div className="mb-4 flex items-center justify-between">
-        <p className="text-sm font-semibold tracking-wide text-green-500 uppercase">
-          Poids
-        </p>
-        {logging ? (
-          <div className="flex items-center gap-1.5">
-            <Input
-              type="number"
-              min={20}
-              max={500}
-              step={0.1}
-              placeholder="kg"
-              value={draft}
-              onChange={(e) => setDraft(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') void handleSave();
-                if (e.key === 'Escape') handleCancel();
-              }}
-              className="w-20 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-            />
-            <button
-              onClick={() => void handleSave()}
-              disabled={saving || !draft}
-              className="rounded-lg bg-green-400 px-2.5 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-green-500 disabled:opacity-50"
-            >
-              {saving ? '...' : 'OK'}
-            </button>
-            <button
-              onClick={handleCancel}
-              disabled={saving}
-              className="text-xs font-medium text-green-400 transition-colors hover:text-green-500"
-            >
-              <X className="h-3.5 w-3.5" />
-            </button>
+    <>
+      <SummaryCard
+        title="Composition corporelle"
+        busy={isLoading}
+        aside={
+          <AddCircleButton
+            label="Ajouter une pesée"
+            onClick={() => openDialog(null)}
+          />
+        }
+      >
+        {isLoading && (
+          <div className="flex flex-col gap-2">
+            <Skeleton className="h-10 w-24" />
+            <Skeleton className="h-4 w-40" />
           </div>
-        ) : (
-          <button
-            onClick={() => setLogging(true)}
-            className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-green-500 text-white transition-colors hover:bg-green-600"
-            aria-label="Logger le poids"
-          >
-            <Plus className="h-4 w-4" />
-          </button>
         )}
-      </div>
-      {error && logging && <p className="mb-2 text-xs text-red-500">{error}</p>}
-
-      {loadError && <p className="text-sm text-red-500">{loadError}</p>}
-      {!loading && !loadError && !latest && (
-        <p className="text-sm text-green-400">Aucune entrée pour l'instant</p>
-      )}
-
-      {latest && (
-        <div className="mb-3 flex flex-col gap-0.5">
-          <p className="text-3xl font-bold text-green-800">
-            {latest.weight.toFixed(1)}
-            <span className="ml-1 text-lg font-semibold text-green-600">
-              kg
-            </span>
-          </p>
-          <span className="text-sm text-green-500">
-            {new Date(latest.loggedAt).toLocaleDateString('fr-FR')}
-          </span>
-          {targetWeight && (
-            <span className="text-sm text-green-400">
-              objectif {targetWeight} kg
-            </span>
-          )}
-        </div>
-      )}
-
-      {history.length > 1 && (
-        <div className="flex max-h-48 flex-col gap-2 overflow-y-auto border-t border-green-100 pt-3">
-          {history.slice(1).map((entry) => (
-            <div
-              key={entry.id}
-              className="flex items-center justify-between rounded-xl bg-green-50 px-3 py-2"
-            >
-              <span className="text-xs text-green-500">
-                {new Date(entry.loggedAt).toLocaleDateString('fr-FR', {
-                  day: '2-digit',
-                  month: 'short',
-                  year: 'numeric',
-                })}
-              </span>
-              {editingId === entry.id ? (
-                <div className="w-16">
-                  <Input
-                    ref={editInputRef}
-                    type="number"
-                    min={20}
-                    max={500}
-                    step={0.1}
-                    value={editDraft}
-                    onChange={(e) => setEditDraft(e.target.value)}
-                    onBlur={() => void handleEditSave(entry.id)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') void handleEditSave(entry.id);
-                      if (e.key === 'Escape') setEditingId(null);
-                    }}
-                    className="[appearance:textfield] py-0.5 text-right [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-                  />
+        {history === null && hasError && (
+          <LoadError
+            message="Impossible de charger les pesées."
+            onRetry={retry}
+          />
+        )}
+        {history !== null && !latest && (
+          <p className="text-sm text-green-600">Aucune pesée enregistrée.</p>
+        )}
+        {history && latest && (
+          <>
+            <div className="flex flex-col gap-4 md:flex-row md:items-center md:gap-8">
+              <div className="shrink-0">
+                <div className="flex items-end gap-2">
+                  <span
+                    className="text-4xl font-bold text-green-800"
+                    aria-label={`Poids actuel : ${formatKg(latest.weight)} kilogrammes`}
+                  >
+                    {formatKg(latest.weight)}
+                  </span>
+                  <span className="mb-1 text-green-500" aria-hidden="true">
+                    kg
+                  </span>
                 </div>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => startEdit(entry)}
-                  className="text-sm font-semibold text-green-800 hover:text-green-600"
-                >
-                  {entry.weight.toFixed(1)}{' '}
-                  <span className="text-xs font-normal text-green-400">kg</span>
-                </button>
-              )}
+                <p className="mt-1 text-sm text-green-600">
+                  Dernière pesée le {formatDate(latest.loggedAt)}
+                </p>
+                {height ? (
+                  <p className="text-sm text-green-600">
+                    {describeBmi(latest.weight, height)}
+                  </p>
+                ) : null}
+              </div>
+              <dl className="grid flex-1 grid-cols-2 gap-3 sm:grid-cols-4">
+                {COMPOSITION.map(({ key, label, unit }) => (
+                  <StatTile key={key} label={label}>
+                    {formatMeasure(
+                      history.find((entry) => entry[key] !== null)?.[key] ??
+                        null,
+                      unit,
+                    )}
+                  </StatTile>
+                ))}
+              </dl>
             </div>
-          ))}
-        </div>
-      )}
-    </div>
+
+            <div className="mt-5 border-t border-green-100 pt-3">
+              <div className="relative max-h-72 overflow-x-hidden overflow-y-auto md:pr-1">
+                <div
+                  aria-hidden="true"
+                  className={`sticky top-0 hidden gap-x-3 bg-white pb-2 text-xs text-green-600 md:grid ${ROW_COLUMNS}`}
+                >
+                  <span>Date</span>
+                  <span>Poids</span>
+                  {COMPOSITION.map(({ key, label }) => (
+                    <span key={key}>{label}</span>
+                  ))}
+                </div>
+                <ul
+                  aria-label="Historique des pesées"
+                  className="divide-y divide-green-100"
+                >
+                  {history.map((entry) => (
+                    <li
+                      key={entry.id}
+                      className={`grid grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-x-3 gap-y-1.5 py-2.5 text-sm ${ROW_COLUMNS}`}
+                    >
+                      <span className="text-green-600">
+                        {formatDate(entry.loggedAt)}
+                      </span>
+                      <span className="font-semibold whitespace-nowrap text-green-800 tabular-nums">
+                        {formatMeasure(entry.weight, 'kg')}
+                      </span>
+                      <dl
+                        className={`col-span-full row-start-2 grid-cols-2 gap-x-2 gap-y-1 text-xs sm:grid-cols-4 sm:gap-x-3 md:contents md:text-sm ${
+                          COMPOSITION.some(({ key }) => entry[key] !== null)
+                            ? 'grid'
+                            : 'hidden'
+                        }`}
+                      >
+                        {COMPOSITION.map(({ key, label, unit }) => (
+                          <div
+                            key={key}
+                            className="flex min-w-0 justify-between gap-1 md:block"
+                          >
+                            <dt className="truncate text-green-600 md:sr-only">
+                              {label}
+                            </dt>
+                            <dd className="whitespace-nowrap text-green-800 tabular-nums">
+                              {formatMeasure(entry[key], unit)}
+                            </dd>
+                          </div>
+                        ))}
+                      </dl>
+                      <EditIconButton
+                        label={`Modifier la pesée du ${formatDate(entry.loggedAt)}`}
+                        onClick={() => openDialog(entry)}
+                      />
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </>
+        )}
+      </SummaryCard>
+
+      <WeightDialog
+        dialogRef={dialogRef}
+        openCount={dialog.openCount}
+        userId={userId}
+        entry={dialog.entry}
+        onSaved={handleSaved}
+        onDeleted={handleDeleted}
+      />
+    </>
   );
 }

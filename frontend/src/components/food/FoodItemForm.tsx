@@ -3,18 +3,14 @@ import { CheckCircle2, Trash2 } from 'lucide-react';
 
 import { useAuth } from '../../auth/auth-context';
 import { useTimeout } from '../../hooks/useTimeout';
+import { requestErrorMessage } from '../../utils/requestErrorMessage';
 import { BaseDialog } from '../ui/BaseDialog';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
 import { FieldError } from '../ui/FieldError';
 import { Input } from '../ui/Input';
 import { PillTabs } from '../ui/PillTabs';
 import { Toast } from '../ui/Toast';
-import {
-  ApiError,
-  createFoodItem,
-  deleteFoodItem,
-  updateFoodItem,
-} from './api';
+import { createFoodItem, deleteFoodItem, updateFoodItem } from './api';
 import BarcodeField from './BarcodeField';
 import type { FoodItem, OffProduct, QuantityUnit } from './types';
 
@@ -273,12 +269,7 @@ export default function FoodItemForm({
           : 'Produit enregistré avec succès',
       );
     } catch (err: unknown) {
-      console.error(err);
-      setError(
-        err instanceof ApiError
-          ? err.message
-          : 'Une erreur est survenue, réessayez.',
-      );
+      setError(requestErrorMessage(err, 'Une erreur est survenue, réessayez.'));
     } finally {
       setIsSubmitting(false);
       duplicateDialogRef.current?.close();
@@ -296,8 +287,7 @@ export default function FoodItemForm({
       onItemDeleted(editingItem.id);
       closeDialog();
       setSuccessMessage('Produit supprimé');
-    } catch (err: unknown) {
-      console.error(err);
+    } catch {
       setError('Suppression impossible, réessayez.');
     } finally {
       setIsSubmitting(false);

@@ -1,11 +1,10 @@
 import { useRef, useState } from 'react';
-import { CheckCircle2, LoaderCircle, Plus } from 'lucide-react';
+import { CheckCircle2 } from 'lucide-react';
 
 import { useAuth } from '../auth/auth-context.ts';
 import AddFriendDialog from '../components/friends/AddFriendDialog.tsx';
 import {
   acceptFriendRequest,
-  ApiError,
   removeFriendship,
 } from '../components/friends/api.ts';
 import FriendRow from '../components/friends/FriendRow.tsx';
@@ -17,12 +16,20 @@ import type {
 } from '../components/friends/types.ts';
 import FriendsActivity from '../components/home/FriendsActivity.tsx';
 import ChatWindow from '../components/messages/ChatWindow.tsx';
+import { AddCircleButton } from '../components/ui/AddCircleButton';
 import { ConfirmDialog } from '../components/ui/ConfirmDialog.tsx';
+import {
+  ListCard,
+  ListCardEmpty,
+  ListCardLoading,
+} from '../components/ui/ListCard';
+import { LoadError } from '../components/ui/LoadError.tsx';
 import { Toast } from '../components/ui/Toast.tsx';
 import { useActivityFeed } from '../hooks/useActivityFeed.ts';
 import { useFriends } from '../hooks/useFriends.ts';
 import { usePresence } from '../hooks/usePresence.ts';
 import { useTimeout } from '../hooks/useTimeout.ts';
+import { requestErrorMessage } from '../utils/requestErrorMessage';
 
 type Tab = 'friends' | 'requests';
 
@@ -38,8 +45,15 @@ interface FriendsPageProps {
 export default function FriendsPage({ pendingReply }: FriendsPageProps) {
   const { user } = useAuth();
   const userId = user!.userId;
-  const { friends, requests, sentRequestIds, isLoading, loadError, reload } =
-    useFriends(userId);
+  const {
+    friends,
+    requests,
+    sentRequestIds,
+    isLoading,
+    loadError,
+    reload,
+    retry,
+  } = useFriends(userId);
   const activities = useActivityFeed(userId);
   const [activeTab, setActiveTab] = useState<Tab>('friends');
   const [busyId, setBusyId] = useState<number | null>(null);
@@ -71,11 +85,8 @@ export default function FriendsPage({ pendingReply }: FriendsPageProps) {
       setSuccessMessage(message);
       reload();
     } catch (err: unknown) {
-      console.error(err);
       setActionError(
-        err instanceof ApiError
-          ? err.message
-          : 'Une erreur est survenue, réessaye.',
+        requestErrorMessage(err, 'Une erreur est survenue, réessayez.'),
       );
     } finally {
       setBusyId(null);
@@ -92,12 +103,13 @@ export default function FriendsPage({ pendingReply }: FriendsPageProps) {
   return (
     <>
       <div className="flex flex-col gap-6">
+        <h1 className="sr-only">Amis</h1>
         <div className="flex items-center justify-between">
           <div className="flex gap-1.5 self-start rounded-xl border border-green-200 bg-white p-1.5">
             {TAB_OPTIONS.map(({ value, label }) => (
               <label
                 key={value}
-                className="flex cursor-pointer items-center justify-center rounded-lg px-3 py-1.5 text-sm font-medium text-green-500 transition-colors has-checked:animate-pill-select has-checked:bg-green-500 has-checked:text-white has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-green-400"
+                className="relative flex cursor-pointer items-center justify-center rounded-lg px-3 py-1.5 text-sm font-medium text-green-500 transition-colors has-checked:animate-pill-select has-checked:bg-green-500 has-checked:text-white has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-green-400"
               >
                 <input
                   type="radio"
@@ -109,44 +121,31 @@ export default function FriendsPage({ pendingReply }: FriendsPageProps) {
                 />
                 {label}
                 {value === 'requests' && requests.length > 0 && (
-                  <span className="ml-1.5 rounded-full bg-amber-100 px-1.5 text-xs font-bold text-amber-700">
+                  <span className="absolute -top-2 -right-2 flex h-5 min-w-5 items-center justify-center rounded-full bg-green-100 px-1 text-xs font-bold text-green-700 ring-2 ring-white">
                     {requests.length}
                   </span>
                 )}
               </label>
             ))}
           </div>
-          <button
-            type="button"
+          <AddCircleButton
+            label="Ajouter un ami"
             onClick={() => addDialogRef.current?.showModal()}
-            aria-label="Ajouter un ami"
-            className="flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-full bg-green-500 text-white transition-colors hover:bg-green-600"
-          >
-            <Plus className="h-4 w-4" />
-          </button>
+          />
         </div>
 
         {actionError && <p className="text-sm text-red-500">{actionError}</p>}
 
-        <div className="overflow-hidden rounded-2xl border border-green-200 bg-white shadow-sm">
-          {isLoading && (
-            <div role="status" className="flex justify-center py-10">
-              <LoaderCircle className="h-6 w-6 animate-spin text-green-400" />
-              <span className="sr-only">Chargement...</span>
-            </div>
-          )}
+        <ListCard key={activeTab} className="animate-fade-in-up">
+          {isLoading && <ListCardLoading label="Chargement..." />}
 
-          {loadError && (
-            <p className="px-5 py-5 text-sm text-red-500">{loadError}</p>
-          )}
+          {loadError && <LoadError message={loadError} onRetry={retry} />}
 
           {!isLoading && !loadError && list.length === 0 && (
-            <p className="px-5 py-10 text-center text-sm text-green-400">
-              {emptyMessage}
-            </p>
+            <ListCardEmpty>{emptyMessage}</ListCardEmpty>
           )}
 
-          <ul>
+          <ul className={loadError ? 'hidden' : undefined}>
             {activeTab === 'friends'
               ? friends.map((f) => (
                   <FriendRow
@@ -185,7 +184,7 @@ export default function FriendsPage({ pendingReply }: FriendsPageProps) {
                   />
                 ))}
           </ul>
-        </div>
+        </ListCard>
 
         <FriendsActivity
           activities={activities}

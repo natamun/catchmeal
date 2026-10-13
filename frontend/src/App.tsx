@@ -1,4 +1,4 @@
-import { lazy, Suspense, useState } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 
 import { useAuth } from './auth/auth-context';
 import { AuthProvider } from './auth/AuthProvider';
@@ -6,24 +6,55 @@ import ChatBotPopup from './components/ai/ChatBotPopup';
 import type { ActivityItem } from './components/friends/types';
 import { ConnectionBanner } from './components/layout/ConnectionBanner';
 import Nav, { type Tab } from './components/layout/Nav';
+import AuthPage from './pages/AuthPage';
+import LandingPage from './pages/LandingPage';
+import LegalNoticePage from './pages/LegalNoticePage';
+import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
+import TermsOfServicePage from './pages/TermsOfServicePage';
 import { SocketProvider } from './socket/SocketProvider';
 import type { ChatMessage } from './types/ChatBotType';
 
-const LandingPage = lazy(() => import('./pages/LandingPage'));
-const AuthPage = lazy(() => import('./pages/AuthPage'));
-const AdminPage = lazy(() => import('./pages/AdminPage'));
-const MentionsLegalesPage = lazy(() => import('./pages/MentionsLegalesPage'));
-const PolitiqueConfidentialitePage = lazy(
-  () => import('./pages/PolitiqueConfidentialitePage'),
-);
-const ConditionsUtilisationPage = lazy(
-  () => import('./pages/ConditionsUtilisationPage'),
-);
-const HomePage = lazy(() => import('./pages/HomePage'));
-const StatsPage = lazy(() => import('./pages/StatsPage'));
-const FriendsPage = lazy(() => import('./pages/FriendsPage'));
-const FoodPage = lazy(() => import('./pages/FoodPage'));
-const ProfilePage = lazy(() => import('./pages/ProfilePage'));
+const SESSION_HINT_KEY = 'session-hint';
+const PRELOAD_DELAY_MS = 1000;
+
+const loaders = {
+  home: () => import('./pages/HomePage'),
+  food: () => import('./pages/FoodPage'),
+  stats: () => import('./pages/StatsPage'),
+  friends: () => import('./pages/FriendsPage'),
+  profile: () => import('./pages/ProfilePage'),
+  admin: () => import('./pages/AdminPage'),
+};
+
+const HomePage = lazy(loaders.home);
+const FoodPage = lazy(loaders.food);
+const StatsPage = lazy(loaders.stats);
+const FriendsPage = lazy(loaders.friends);
+const ProfilePage = lazy(loaders.profile);
+const AdminPage = lazy(loaders.admin);
+
+function preload(load: () => Promise<unknown>) {
+  load().catch(() => undefined);
+}
+
+function hasSessionHint() {
+  try {
+    return localStorage.getItem(SESSION_HINT_KEY) !== null;
+  } catch {
+    return false;
+  }
+}
+
+function saveSessionHint(connected: boolean) {
+  try {
+    if (connected) localStorage.setItem(SESSION_HINT_KEY, '1');
+    else localStorage.removeItem(SESSION_HINT_KEY);
+  } catch {
+    return;
+  }
+}
+
+if (hasSessionHint()) preload(loaders.home);
 
 type Page =
   | 'landing'
@@ -46,11 +77,12 @@ function AppShell() {
     const params = new URLSearchParams(window.location.search);
     if (params.get('error') === 'oauth_failed') {
       window.history.replaceState({}, '', window.location.pathname);
-      return 'La connexion a échoué. Réessaye.';
+      return 'La connexion a échoué. Réessayez.';
     }
     return null;
   });
   const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [isJournalPickerOpen, setIsJournalPickerOpen] = useState(false);
   const [message, setMessage] = useState<ChatMessage[]>([
     {
       role: 'assistant',
@@ -58,6 +90,24 @@ function AppShell() {
         "Salut ! Je peux t'aider à comprendre tes stats ou te conseiller sur tes repas 😊",
     },
   ]);
+
+  const role = user?.role;
+
+  useEffect(() => {
+    if (status === 'loading') return;
+    saveSessionHint(status === 'authenticated');
+    if (status !== 'authenticated') return;
+
+    const timer = window.setTimeout(() => {
+      preload(loaders.food);
+      preload(loaders.stats);
+      preload(loaders.friends);
+      preload(loaders.profile);
+      if (role === 'ADMIN') preload(loaders.admin);
+    }, PRELOAD_DELAY_MS);
+
+    return () => window.clearTimeout(timer);
+  }, [status, role]);
 
   const navigateTo = (dest: Page) => {
     setPreviousPage(page);
@@ -74,64 +124,65 @@ function AppShell() {
 
   if (page === 'mentions-legales') {
     return (
-      <Suspense fallback={null}>
-        <MentionsLegalesPage onBack={() => setPage(previousPage)} />
-      </Suspense>
+      <LegalNoticePage
+        onBack={() => setPage(previousPage)}
+        onNavigate={setPage}
+      />
     );
   }
 
   if (page === 'confidentialite') {
     return (
-      <Suspense fallback={null}>
-        <PolitiqueConfidentialitePage onBack={() => setPage(previousPage)} />
-      </Suspense>
+      <PrivacyPolicyPage
+        onBack={() => setPage(previousPage)}
+        onNavigate={setPage}
+      />
     );
   }
 
   if (page === 'conditions') {
     return (
-      <Suspense fallback={null}>
-        <ConditionsUtilisationPage onBack={() => setPage(previousPage)} />
-      </Suspense>
+      <TermsOfServicePage
+        onBack={() => setPage(previousPage)}
+        onNavigate={setPage}
+      />
     );
   }
 
   if (status === 'unauthenticated') {
     if (page === 'login' || page === 'register') {
       return (
-        <Suspense fallback={null}>
-          <AuthPage
-            initialMode={page}
-            onCancel={() => setPage('landing')}
-            oauthError={oauthError}
-          />
-        </Suspense>
+        <AuthPage
+          initialMode={page}
+          onCancel={() => setPage('landing')}
+          oauthError={oauthError}
+        />
       );
     }
 
     return (
-      <Suspense fallback={null}>
-        <LandingPage
-          onLogin={() => navigateTo('login')}
-          onRegister={() => navigateTo('register')}
-          onMentionsLegales={() => navigateTo('mentions-legales')}
-          onConfidentialite={() => navigateTo('confidentialite')}
-          onConditions={() => navigateTo('conditions')}
-        />
-      </Suspense>
+      <LandingPage
+        onLogin={() => navigateTo('login')}
+        onRegister={() => navigateTo('register')}
+        onMentionsLegales={() => navigateTo('mentions-legales')}
+        onConfidentialite={() => navigateTo('confidentialite')}
+        onConditions={() => navigateTo('conditions')}
+      />
     );
   }
 
   const isAdmin = user?.role === 'ADMIN';
+  const hasAssistant =
+    activeTab === 'stats' || activeTab === 'home' || activeTab === 'food';
 
   const pages: Record<Tab, React.ReactNode> = {
     home: (
       <HomePage
-        onNavigateToProfile={() => setActiveTab('profile')}
         onReplyToActivity={(activity) => {
           setPendingReply(activity);
           setActiveTab('friends');
         }}
+        onPickerChange={setIsJournalPickerOpen}
       />
     ),
     food: <FoodPage />,
@@ -142,19 +193,27 @@ function AppShell() {
         onPolitiqueConfidentialite={() => navigateTo('confidentialite')}
       />
     ),
-    admin: isAdmin ? (
-      <AdminPage />
-    ) : (
-      <HomePage onNavigateToProfile={() => setActiveTab('profile')} />
-    ),
+    admin: isAdmin ? <AdminPage /> : <HomePage />,
   };
 
   return (
-    <div className="min-h-screen bg-green-50 md:pl-56">
+    <div className="min-h-screen bg-green-50">
       <ConnectionBanner />
+      <Nav
+        active={activeTab}
+        onChange={(tab) => {
+          setPendingReply(null);
+          setActiveTab(tab);
+        }}
+        isAdmin={isAdmin}
+      />
       <main
         id="main-content"
-        className="mx-auto max-w-6xl px-6 pt-6 pb-24 md:pb-8"
+        className={`mx-auto max-w-6xl px-6 pt-6 ${
+          hasAssistant
+            ? 'pb-24 pointer-coarse:pb-[calc(var(--spacing-bottom-nav)+6rem+env(safe-area-inset-bottom))]'
+            : 'pb-8 pointer-coarse:pb-[calc(var(--spacing-bottom-nav)+2rem+env(safe-area-inset-bottom))]'
+        }`}
       >
         <Suspense
           fallback={
@@ -166,17 +225,7 @@ function AppShell() {
           {pages[activeTab]}
         </Suspense>
       </main>
-      <Nav
-        active={activeTab}
-        onChange={(tab) => {
-          setPendingReply(null);
-          setActiveTab(tab);
-        }}
-        isAdmin={isAdmin}
-      />
-      {(activeTab === 'stats' ||
-        activeTab === 'home' ||
-        activeTab === 'food') && (
+      {hasAssistant && !isJournalPickerOpen && (
         <ChatBotPopup
           isOpen={isOpen}
           onToggle={setIsOpen}

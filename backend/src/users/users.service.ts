@@ -189,7 +189,15 @@ export class UsersService {
     }
   }
 
-  async updateWeight(userId: number, entryId: number, weight: number) {
+  async updateWeight(
+    userId: number,
+    entryId: number,
+    weight: number,
+    bodyFat?: number,
+    fatFreeMass?: number,
+    bodyWater?: number,
+    muscleMass?: number,
+  ) {
     const entry = await this.prisma.weightLog.findUnique({
       where: { id: entryId },
     });
@@ -197,12 +205,14 @@ export class UsersService {
       throw new NotFoundException('Entry not found');
     return this.prisma.weightLog.update({
       where: { id: entryId },
-      data: { weight },
+      data: { weight, bodyFat, fatFreeMass, bodyWater, muscleMass },
       select: {
         id: true,
         weight: true,
         bodyFat: true,
-        note: true,
+        fatFreeMass: true,
+        bodyWater: true,
+        muscleMass: true,
         loggedAt: true,
       },
     });
@@ -212,7 +222,9 @@ export class UsersService {
     userId: number,
     weight: number,
     bodyFat?: number,
-    note?: string,
+    fatFreeMass?: number,
+    bodyWater?: number,
+    muscleMass?: number,
   ) {
     const user = await this.prisma.user
       .findFirstOrThrow({ where: { id: userId } })
@@ -225,12 +237,21 @@ export class UsersService {
       select: { weight: true },
     });
     const entry = await this.prisma.weightLog.create({
-      data: { userId, weight, bodyFat, note },
+      data: {
+        userId,
+        weight,
+        bodyFat,
+        fatFreeMass,
+        bodyWater,
+        muscleMass,
+      },
       select: {
         id: true,
         weight: true,
         bodyFat: true,
-        note: true,
+        fatFreeMass: true,
+        bodyWater: true,
+        muscleMass: true,
         loggedAt: true,
       },
     });
@@ -260,7 +281,9 @@ export class UsersService {
         id: true,
         weight: true,
         bodyFat: true,
-        note: true,
+        fatFreeMass: true,
+        bodyWater: true,
+        muscleMass: true,
         loggedAt: true,
       },
     });

@@ -14,6 +14,7 @@ import { EditIconButton } from '../components/ui/EditIconButton';
 import { PillTabs } from '../components/ui/PillTabs';
 import { MACROS } from '../constants/macros';
 import { useDelayedUnmount } from '../hooks/useDelayedUnmount';
+import { ApiError } from '../utils/request';
 
 type Tab = 'food' | 'meal';
 
@@ -73,10 +74,12 @@ export default function FoodPage() {
   const [editingItem, setEditingItem] = useState<FoodItem | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [foodsAttempt, setFoodsAttempt] = useState(0);
   const [meals, setMeals] = useState<Meal[]>([]);
   const [editingMeal, setEditingMeal] = useState<Meal | null>(null);
   const [isMealsLoading, setIsMealsLoading] = useState(true);
   const [mealsLoadError, setMealsLoadError] = useState<string | null>(null);
+  const [mealsAttempt, setMealsAttempt] = useState(0);
   const dialogRef = useRef<HTMLDialogElement>(null);
   const mealDialogRef = useRef<HTMLDialogElement>(null);
   const legendRef = useRef<HTMLDivElement>(null);
@@ -104,14 +107,8 @@ export default function FoodPage() {
       .then(setFoodItems)
       .catch((err: unknown) => {
         if (controller.signal.aborted) return;
-        if (
-          err instanceof Error &&
-          'status' in err &&
-          (err as { status?: number }).status === 403
-        )
-          return;
-        console.error(err);
-        setLoadError('Impossible de charger tes aliments, réessaye.');
+        if (err instanceof ApiError && err.status === 403) return;
+        setLoadError('Impossible de charger les aliments.');
       })
       .finally(() => {
         if (!controller.signal.aborted) {
@@ -119,7 +116,7 @@ export default function FoodPage() {
         }
       });
     return () => controller.abort();
-  }, [userId]);
+  }, [userId, foodsAttempt]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -127,14 +124,8 @@ export default function FoodPage() {
       .then(setMeals)
       .catch((err: unknown) => {
         if (controller.signal.aborted) return;
-        if (
-          err instanceof Error &&
-          'status' in err &&
-          (err as { status?: number }).status === 403
-        )
-          return;
-        console.error(err);
-        setMealsLoadError('Impossible de charger tes repas, réessaye.');
+        if (err instanceof ApiError && err.status === 403) return;
+        setMealsLoadError('Impossible de charger les repas.');
       })
       .finally(() => {
         if (!controller.signal.aborted) {
@@ -142,7 +133,7 @@ export default function FoodPage() {
         }
       });
     return () => controller.abort();
-  }, [userId]);
+  }, [userId, mealsAttempt]);
 
   const openDialog = (item: FoodItem | null) => {
     setEditingItem(item);
@@ -156,6 +147,7 @@ export default function FoodPage() {
 
   return (
     <div className="flex flex-col gap-6">
+      <h1 className="sr-only">Alimentation</h1>
       <div className="flex items-center justify-between gap-3">
         <PillTabs
           name="foodPageTab"
@@ -218,6 +210,11 @@ export default function FoodPage() {
             items={foodItems}
             isLoading={isLoading}
             loadError={loadError}
+            onRetry={() => {
+              setLoadError(null);
+              setIsLoading(true);
+              setFoodsAttempt((attempt) => attempt + 1);
+            }}
             headerAction={
               <AddCircleButton
                 label="Ajouter un aliment"
@@ -236,6 +233,11 @@ export default function FoodPage() {
             meals={meals}
             isLoading={isMealsLoading}
             loadError={mealsLoadError}
+            onRetry={() => {
+              setMealsLoadError(null);
+              setIsMealsLoading(true);
+              setMealsAttempt((attempt) => attempt + 1);
+            }}
             headerAction={
               <AddCircleButton
                 label="Ajouter un repas"

@@ -15,17 +15,19 @@ export class DashboardAnalyticsService {
    * @returns Array of daily stats
    *  - day: date string(YYY-MM-DD)
    *  - totalKcal: sum of calories logged at day
-   *  - goalKcal: the calorie goal or null if none was set
-   *  - weight: the weight logged that day or null if none was set
    *  - totalProtein: the total amount of protein consumed per day
    *  - totalCarbs: the total amount of carbs consumed per day
    *  - totalFat: the total amount of fat consumed per day
-   *  - objective: lose or gain weight
+   *  - weight: the weight logged that day or null if none was set
    *  - bodyFat: the value of body fat
-   *  - noteWeight: the comment about your weight
+   *  - fatFreeMass: the fat free mass logged that day
+   *  - bodyWater: the body water logged that day
+   *  - muscleMass: the muscle mass logged that day
+   *  - goalKcal: the calorie goal or null if none was set
+   *  - objective: lose or gain weight
    */
   async getDashboard(userId: number, from: Date, to: Date) {
-    const [meals, weightLogs, goals] = await Promise.all([
+    const [meals, weightLogs, goals, previousGoal] = await Promise.all([
       this.prisma.meal.findMany({
         where: { userId: userId, loggedAt: { gte: from, lte: to } },
         include: {
@@ -46,6 +48,11 @@ export class DashboardAnalyticsService {
       this.prisma.goalSetting.findMany({
         where: { userId: userId, startDate: { gte: from, lte: to } },
         orderBy: { startDate: 'asc' },
+      }),
+
+      this.prisma.goalSetting.findFirst({
+        where: { userId: userId, startDate: { lt: from } },
+        orderBy: { startDate: 'desc' },
       }),
     ]);
 
@@ -83,7 +90,7 @@ export class DashboardAnalyticsService {
       const newDate = new Date(date);
       newDate.setHours(23, 59, 59, 999);
       const applicable = goals.filter((g) => g.startDate <= newDate);
-      return applicable[applicable.length - 1] ?? null;
+      return applicable[applicable.length - 1] ?? previousGoal ?? null;
     };
 
     const allDays = Array.from(
@@ -101,14 +108,16 @@ export class DashboardAnalyticsService {
       return {
         day,
         totalKcal: totalsByDay[day]?.kcal ?? null,
-        goalKcal: goal?.dailyCalories ?? null,
-        weight: weightLogsDay[day]?.weight ?? null,
         totalProtein: totalsByDay[day]?.protein ?? null,
         totalCarbs: totalsByDay[day]?.carbs ?? null,
         totalFat: totalsByDay[day]?.fat ?? null,
-        objective: goal?.objective ?? null,
+        weight: weightLogsDay[day]?.weight ?? null,
         bodyFat: weightLogsDay[day]?.bodyFat ?? null,
-        noteWeight: weightLogsDay[day]?.note ?? null,
+        fatFreeMass: weightLogsDay[day]?.fatFreeMass ?? null,
+        bodyWater: weightLogsDay[day]?.bodyWater ?? null,
+        muscleMass: weightLogsDay[day]?.muscleMass ?? null,
+        goalKcal: goal?.dailyCalories ?? null,
+        objective: goal?.objective ?? null,
       };
     });
     return dashboard;

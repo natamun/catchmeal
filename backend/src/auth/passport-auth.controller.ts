@@ -14,10 +14,11 @@ import type { Request as ExpressRequest, Response } from 'express';
 
 import { AuthService, type SignInData } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
-import { PassportJwtAuthGuard } from './guards/passport-jwt.guard';
+import { OptionalJwtAuthGuard } from './guards/optional-jwt.guard';
 import { PassportLocalGuard } from './guards/passport-local.guard';
 
 type RequestWithUser = ExpressRequest & { user: SignInData };
+type RequestWithOptionalUser = ExpressRequest & { user: SignInData | null };
 
 type UserResponse = Omit<SignInData, 'userId'> & { userId: number };
 
@@ -93,9 +94,9 @@ export class PassportAuthController {
   }
 
   @Get('me')
-  @UseGuards(PassportJwtAuthGuard)
-  getUserInfo(@Request() request: RequestWithUser) {
-    return toUserResponse(request.user);
+  @UseGuards(OptionalJwtAuthGuard)
+  getUserInfo(@Request() request: RequestWithOptionalUser) {
+    return { user: request.user ? toUserResponse(request.user) : null };
   }
 
   @Get('google')

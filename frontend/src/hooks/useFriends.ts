@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
 
 import {
-  ApiError,
   listFriends,
   listPendingRequests,
   listSentRequests,
 } from '../components/friends/api';
 import type { Friend, FriendRequest } from '../components/friends/types';
+import { ApiError } from '../utils/request';
 
 export function useFriends(userId: number) {
   const [friends, setFriends] = useState<Friend[]>([]);
@@ -32,8 +32,7 @@ export function useFriends(userId: number) {
       .catch((err: unknown) => {
         if (controller.signal.aborted) return;
         if (err instanceof ApiError && err.status === 403) return;
-        console.error(err);
-        setLoadError('Impossible de charger tes amis, réessaye.');
+        setLoadError('Impossible de charger les amis.');
       })
       .finally(() => {
         if (!controller.signal.aborted) {
@@ -50,5 +49,10 @@ export function useFriends(userId: number) {
     isLoading,
     loadError,
     reload: () => setReloadCount((count) => count + 1),
+    retry: () => {
+      setLoadError(null);
+      setIsLoading(true);
+      setReloadCount((count) => count + 1);
+    },
   };
 }

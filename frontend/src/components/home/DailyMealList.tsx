@@ -1,9 +1,12 @@
 import { useState } from 'react';
-import { LoaderCircle, Plus } from 'lucide-react';
+import { LoaderCircle } from 'lucide-react';
 
 import type { FoodItem } from '../food/types';
 import { MEAL_TYPE_LABELS, type Meal, type MealType } from '../meal/types';
+import { AddCircleButton } from '../ui/AddCircleButton';
 import { EditIconButton } from '../ui/EditIconButton';
+import { ListCard } from '../ui/ListCard';
+import { LoadError } from '../ui/LoadError';
 
 const MEAL_TYPES: MealType[] = ['BREAKFAST', 'LUNCH', 'DINNER', 'SNACK'];
 
@@ -54,6 +57,7 @@ interface DailyMealListProps {
   foodItems: FoodItem[];
   isLoading: boolean;
   loadError: string | null;
+  onRetry: () => void;
   onAdd: (mealType: MealType) => void;
   onEdit: (mealType: MealType) => void;
 }
@@ -63,6 +67,7 @@ export default function DailyMealList({
   foodItems,
   isLoading,
   loadError,
+  onRetry,
   onAdd,
   onEdit,
 }: DailyMealListProps) {
@@ -75,20 +80,19 @@ export default function DailyMealList({
   const editableMeals = isLoading ? loadedMeals : meals;
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-green-200 bg-white shadow-sm">
+    <ListCard>
       {isLoading && (
         <span role="status" className="sr-only">
           Chargement du journal...
         </span>
       )}
 
-      {loadError && (
-        <p className="border-b border-green-200 px-5 py-3 text-sm text-red-500">
-          {loadError}
-        </p>
-      )}
+      {loadError && <LoadError message={loadError} onRetry={onRetry} />}
 
-      <div aria-busy={isLoading} className="divide-y divide-green-200">
+      <div
+        aria-busy={isLoading}
+        className={`divide-y divide-green-200 ${loadError ? 'hidden' : ''}`}
+      >
         {MEAL_TYPES.map((mealType) => {
           const rows = rowsOf(
             meals
@@ -125,18 +129,14 @@ export default function DailyMealList({
                 </div>
                 <div className="flex items-center gap-3">
                   {rows.length > 0 && (
-                    <span className="animate-fade-in-up text-sm font-semibold text-green-800 max-[350px]:hidden">
+                    <span className="animate-fade-in-up text-sm font-semibold text-green-800 max-2xs:hidden">
                       {Math.round(total)} kcal
                     </span>
                   )}
-                  <button
-                    type="button"
+                  <AddCircleButton
+                    label={`Ajouter à la catégorie ${MEAL_TYPE_LABELS[mealType]}`}
                     onClick={() => onAdd(mealType)}
-                    aria-label={`Ajouter à la catégorie ${MEAL_TYPE_LABELS[mealType]}`}
-                    className="flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-full bg-green-500 text-white transition-colors hover:bg-green-600"
-                  >
-                    <Plus className="h-4 w-4" />
-                  </button>
+                  />
                 </div>
               </div>
 
@@ -170,6 +170,6 @@ export default function DailyMealList({
           );
         })}
       </div>
-    </div>
+    </ListCard>
   );
 }

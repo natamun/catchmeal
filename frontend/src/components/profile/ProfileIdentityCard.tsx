@@ -1,27 +1,26 @@
-import { forwardRef, useRef, useState } from 'react';
-import DatePicker from 'react-datepicker';
-
-import { SelectDropdown } from '../ui/SelectDropdown';
-
-import 'react-datepicker/dist/react-datepicker.css';
-
-import { fr } from 'date-fns/locale/fr';
+import { useRef, useState } from 'react';
+import { Trash2 } from 'lucide-react';
 
 import type { AuthUser } from '../../auth/auth-context';
 import { useTimeout } from '../../hooks/useTimeout';
+import { requestErrorMessage } from '../../utils/requestErrorMessage';
 import { Avatar } from '../ui/Avatar';
 import { BaseDialog } from '../ui/BaseDialog';
 import { EditIconButton } from '../ui/EditIconButton';
 import { FieldError } from '../ui/FieldError';
 import { Input } from '../ui/Input';
-import { updateProfile, uploadAvatar, type UserProfile } from './api';
-import { BmiBadge } from './BmiBadge';
-import { WeightProgressBadge } from './WeightProgressBadge';
+import { SelectDropdown } from '../ui/SelectDropdown';
+import {
+  removeAvatar,
+  updateProfile,
+  uploadAvatar,
+  type UserProfile,
+} from './api';
+import { BirthDatePicker } from './BirthDatePicker';
 
 interface Props {
   user: AuthUser;
   onUpdate: (partial: Partial<AuthUser>) => void;
-  currentWeight?: number | null;
 }
 
 type Field =
@@ -31,11 +30,7 @@ type Field =
   | 'dailyCalorieGoal'
   | 'dailyProteinGoal'
   | 'dailyCarbsGoal'
-  | 'dailyFatGoal'
-  | 'bodyFat'
-  | 'fatFreeMass'
-  | 'bodyWater'
-  | 'muscleMass';
+  | 'dailyFatGoal';
 
 interface FormState {
   username: string;
@@ -49,10 +44,6 @@ interface FormState {
   gender: string;
   birthDate: string;
   activityLevel: string;
-  bodyFat: string;
-  fatFreeMass: string;
-  bodyWater: string;
-  muscleMass: string;
 }
 
 function validate(form: FormState): Partial<Record<Field, string>> {
@@ -91,26 +82,6 @@ function validate(form: FormState): Partial<Record<Field, string>> {
     if (isNaN(f)) errors.dailyFatGoal = 'Valeur invalide';
     else if (f < 10 || f > 1000) errors.dailyFatGoal = 'Entre 10 et 1000 g';
   }
-  if (form.bodyFat) {
-    const v = parseFloat(form.bodyFat);
-    if (isNaN(v)) errors.bodyFat = 'Valeur invalide';
-    else if (v < 1 || v > 100) errors.bodyFat = 'Entre 1 et 100 %';
-  }
-  if (form.fatFreeMass) {
-    const v = parseFloat(form.fatFreeMass);
-    if (isNaN(v)) errors.fatFreeMass = 'Valeur invalide';
-    else if (v < 1 || v > 500) errors.fatFreeMass = 'Entre 1 et 500 kg';
-  }
-  if (form.bodyWater) {
-    const v = parseFloat(form.bodyWater);
-    if (isNaN(v)) errors.bodyWater = 'Valeur invalide';
-    else if (v < 1 || v > 100) errors.bodyWater = 'Entre 1 et 100 %';
-  }
-  if (form.muscleMass) {
-    const v = parseFloat(form.muscleMass);
-    if (isNaN(v)) errors.muscleMass = 'Valeur invalide';
-    else if (v < 1 || v > 500) errors.muscleMass = 'Entre 1 et 500 kg';
-  }
   return errors;
 }
 
@@ -128,25 +99,9 @@ const ACTIVITY_OPTIONS = [
   { value: 'EXTRA_ACTIVE', label: 'Extrêmement actif' },
 ];
 
-const BirthDateInput = forwardRef<
-  HTMLButtonElement,
-  { id?: string; value?: string; onClick?: () => void }
->(({ id, value, onClick }, ref) => (
-  <button
-    id={id}
-    type="button"
-    ref={ref}
-    onClick={onClick}
-    className="w-full rounded-xl border border-green-200 bg-white px-4 py-2.5 text-left text-sm text-green-800 outline-none focus:border-green-400 focus-visible:ring-2 focus-visible:ring-green-400 focus-visible:ring-offset-1"
-  >
-    {value || <span className="text-green-400">Sélectionner une date</span>}
-  </button>
-));
-BirthDateInput.displayName = 'BirthDateInput';
-
-export function ProfileIdentityCard({ user, onUpdate, currentWeight }: Props) {
-  const [uploading, setUploading] = useState(false);
-  const [uploadError, setUploadError] = useState<string | null>(null);
+export function ProfileIdentityCard({ user, onUpdate }: Props) {
+  const [avatarBusy, setAvatarBusy] = useState(false);
+  const [avatarError, setAvatarError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const dialogRef = useRef<HTMLDialogElement>(null);
   const [dialogNode, setDialogNode] = useState<HTMLDialogElement | null>(null);
@@ -163,10 +118,6 @@ export function ProfileIdentityCard({ user, onUpdate, currentWeight }: Props) {
     gender: user.gender ?? '',
     birthDate: user.birthDate ? user.birthDate.slice(0, 10) : '',
     activityLevel: user.activityLevel ?? '',
-    bodyFat: user.bodyFat?.toString() ?? '',
-    fatFreeMass: user.fatFreeMass?.toString() ?? '',
-    bodyWater: user.bodyWater?.toString() ?? '',
-    muscleMass: user.muscleMass?.toString() ?? '',
   });
 
   const [form, setForm] = useState<FormState>(initForm);
@@ -203,23 +154,37 @@ export function ProfileIdentityCard({ user, onUpdate, currentWeight }: Props) {
     setFocusedField(null);
     setSubmitAttempted(false);
     setSaveError(null);
+    setAvatarError(null);
     setDialogNode(dialogRef.current);
     dialogRef.current?.showModal();
   }
 
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
+    if (fileInputRef.current) fileInputRef.current.value = '';
     if (!file) return;
-    setUploading(true);
-    setUploadError(null);
+    setAvatarBusy(true);
+    setAvatarError(null);
     try {
       const updated = await uploadAvatar(user.userId, file);
       onUpdate({ avatarUrl: updated.avatarUrl });
-    } catch (err) {
-      setUploadError(err instanceof Error ? err.message : "Échec de l'upload");
+    } catch {
+      setAvatarError("Impossible d'envoyer la photo. Réessayez.");
     } finally {
-      setUploading(false);
-      if (fileInputRef.current) fileInputRef.current.value = '';
+      setAvatarBusy(false);
+    }
+  }
+
+  async function handleAvatarRemove() {
+    setAvatarBusy(true);
+    setAvatarError(null);
+    try {
+      await removeAvatar(user.userId);
+      onUpdate({ avatarUrl: null });
+    } catch {
+      setAvatarError('Impossible de supprimer la photo. Réessayez.');
+    } finally {
+      setAvatarBusy(false);
     }
   }
 
@@ -297,18 +262,6 @@ export function ProfileIdentityCard({ user, onUpdate, currentWeight }: Props) {
     if (form.activityLevel !== (user.activityLevel ?? ''))
       input.activityLevel = form.activityLevel || undefined;
 
-    const bodyCompFields = [
-      'bodyFat',
-      'fatFreeMass',
-      'bodyWater',
-      'muscleMass',
-    ] as const;
-    for (const f of bodyCompFields) {
-      const parsed = form[f] ? parseFloat(form[f]) : undefined;
-      if (parsed !== (user[f] ?? undefined))
-        (input as Record<string, number | undefined>)[f] = parsed;
-    }
-
     if (Object.keys(input).length === 0) {
       dialogRef.current?.close();
       return;
@@ -330,16 +283,10 @@ export function ProfileIdentityCard({ user, onUpdate, currentWeight }: Props) {
         gender: updated.gender ?? undefined,
         birthDate: updated.birthDate ?? undefined,
         activityLevel: updated.activityLevel ?? undefined,
-        bodyFat: updated.bodyFat ?? undefined,
-        fatFreeMass: updated.fatFreeMass ?? undefined,
-        bodyWater: updated.bodyWater ?? undefined,
-        muscleMass: updated.muscleMass ?? undefined,
       });
       dialogRef.current?.close();
     } catch (err) {
-      setSaveError(
-        err instanceof Error ? err.message : 'Erreur lors de la sauvegarde',
-      );
+      setSaveError(requestErrorMessage(err, 'Erreur lors de la sauvegarde'));
     } finally {
       setSaving(false);
     }
@@ -353,44 +300,20 @@ export function ProfileIdentityCard({ user, onUpdate, currentWeight }: Props) {
             username={user.username}
             avatarUrl={user.avatarUrl}
             size="lg"
-            onClick={() => fileInputRef.current?.click()}
-            disabled={uploading}
-            editable
           />
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            className="hidden"
-            onChange={(e) => void handleFileChange(e)}
-          />
-          <div className="min-w-0">
-            <p className="text-base font-bold text-green-800">
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-base font-bold text-green-800">
               {user.username}
             </p>
-            {user.name && <p className="text-xs text-green-500">{user.name}</p>}
-            {uploading && (
-              <p className="text-xs text-green-400">Upload en cours...</p>
-            )}
-            {uploadError && (
-              <p className="text-xs text-red-500">{uploadError}</p>
+            {user.name && (
+              <p className="truncate text-xs text-green-500">{user.name}</p>
             )}
           </div>
-          {((currentWeight && user.height) ||
-            (currentWeight && user.targetWeight)) && (
-            <div className="flex flex-1 items-center justify-center gap-2">
-              {currentWeight && user.height && (
-                <BmiBadge weight={currentWeight} height={user.height} />
-              )}
-              {currentWeight && user.targetWeight && (
-                <WeightProgressBadge
-                  current={currentWeight}
-                  target={user.targetWeight}
-                />
-              )}
-            </div>
-          )}
-          <EditIconButton label="Modifier le profil" onClick={handleEdit} />
+          <EditIconButton
+            label="Modifier le profil"
+            onClick={handleEdit}
+            size="lg"
+          />
         </div>
       </div>
 
@@ -400,6 +323,50 @@ export function ProfileIdentityCard({ user, onUpdate, currentWeight }: Props) {
         onClose={() => setSaveError(null)}
       >
         <div className="grid grid-cols-2 gap-4">
+          <div className="col-span-2 flex items-center gap-3">
+            <Avatar username={user.username} avatarUrl={user.avatarUrl} />
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-semibold text-green-600">
+                Photo de profil
+              </p>
+              {avatarError ? (
+                <p role="alert" className="text-xs text-red-500">
+                  {avatarError}
+                </p>
+              ) : (
+                avatarBusy && (
+                  <p className="text-xs text-green-500">Envoi en cours...</p>
+                )
+              )}
+            </div>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => void handleFileChange(e)}
+            />
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={avatarBusy}
+              className="cursor-pointer rounded-xl border border-green-200 px-4 py-2.5 text-sm font-medium text-green-600 transition-colors hover:bg-green-50 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {user.avatarUrl ? 'Changer' : 'Ajouter'}
+            </button>
+            {user.avatarUrl && (
+              <button
+                type="button"
+                onClick={() => void handleAvatarRemove()}
+                disabled={avatarBusy}
+                aria-label="Supprimer la photo"
+                className="cursor-pointer text-green-400 transition-colors hover:text-red-500 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                <Trash2 className="h-5 w-5" />
+              </button>
+            )}
+          </div>
+
           <div className="relative col-span-2 flex flex-col gap-1">
             <label
               htmlFor="pf-username"
@@ -409,6 +376,7 @@ export function ProfileIdentityCard({ user, onUpdate, currentWeight }: Props) {
             </label>
             <Input
               id="pf-username"
+              placeholder="Ex : jdupont"
               value={form.username}
               onChange={(e) => handleChange('username', e.target.value)}
               onFocus={() => setFocusedField('username')}
@@ -430,6 +398,7 @@ export function ProfileIdentityCard({ user, onUpdate, currentWeight }: Props) {
             </label>
             <Input
               id="pf-name"
+              placeholder="Nom Prénom"
               value={form.name}
               onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
               maxLength={80}
@@ -449,43 +418,16 @@ export function ProfileIdentityCard({ user, onUpdate, currentWeight }: Props) {
               options={GENDER_OPTIONS}
               onChange={(v) => setForm((p) => ({ ...p, gender: v }))}
               container={dialogNode}
+              placeholder="Sélectionner"
             />
           </div>
 
-          <div
-            className="flex flex-col gap-1"
-            onClick={(e) => e.stopPropagation()}
-            onKeyDown={(e) => e.stopPropagation()}
-            role="presentation"
-          >
-            <label
-              htmlFor="pf-birthdate"
-              className="text-sm font-semibold text-green-600"
-            >
-              Date de naissance
-            </label>
-            <DatePicker
-              selected={
-                form.birthDate ? new Date(`${form.birthDate}T12:00:00`) : null
-              }
-              onChange={(d: Date | null) => {
-                if (!d) return;
-                const y = d.getFullYear();
-                const m = String(d.getMonth() + 1).padStart(2, '0');
-                const day = String(d.getDate()).padStart(2, '0');
-                setForm((p) => ({ ...p, birthDate: `${y}-${m}-${day}` }));
-              }}
-              locale={fr}
-              calendarStartDay={1}
-              calendarClassName="kcal-datepicker"
-              dateFormat="dd/MM/yyyy"
-              maxDate={new Date()}
-              showYearDropdown
-              scrollableYearDropdown
-              yearDropdownItemNumber={100}
-              customInput={<BirthDateInput id="pf-birthdate" />}
-            />
-          </div>
+          <BirthDatePicker
+            id="pf-birthdate"
+            label="Date de naissance"
+            value={form.birthDate}
+            onChange={(birthDate) => setForm((p) => ({ ...p, birthDate }))}
+          />
 
           <div className="col-span-2 flex flex-col gap-1">
             <label
@@ -500,99 +442,78 @@ export function ProfileIdentityCard({ user, onUpdate, currentWeight }: Props) {
               options={ACTIVITY_OPTIONS}
               onChange={(v) => setForm((p) => ({ ...p, activityLevel: v }))}
               container={dialogNode}
+              placeholder="Sélectionner"
             />
           </div>
-
-          <p className="col-span-2 pt-2 text-xs font-semibold tracking-wide text-green-400 uppercase">
-            Composition corporelle
-          </p>
-
-          {[
-            {
-              field: 'bodyFat' as Field,
-              id: 'pf-body-fat',
-              label: 'Masse grasse (%)',
-            },
-            {
-              field: 'fatFreeMass' as Field,
-              id: 'pf-fat-free-mass',
-              label: 'Masse maigre (kg)',
-            },
-            {
-              field: 'bodyWater' as Field,
-              id: 'pf-body-water',
-              label: 'Eau corporelle (%)',
-            },
-            {
-              field: 'muscleMass' as Field,
-              id: 'pf-muscle-mass',
-              label: 'Masse musculaire (kg)',
-            },
-          ].map(({ field, id, label }) => (
-            <div key={field} className="relative flex flex-col gap-1">
-              <label
-                htmlFor={id}
-                className="text-sm font-semibold text-green-600"
-              >
-                {label}
-              </label>
-              <Input
-                id={id}
-                type="text"
-                inputMode="decimal"
-                value={form[field]}
-                onChange={(e) => handleChange(field, e.target.value)}
-                onFocus={() => setFocusedField(field)}
-                onBlur={() => handleBlur(field)}
-                aria-invalid={isInvalid(field)}
-              />
-              <FieldError id={`${id}-error`} message={errorMessage(field)} />
-            </div>
-          ))}
 
           <p className="col-span-2 pt-2 text-xs font-semibold tracking-wide text-green-400 uppercase">
             Objectifs
           </p>
 
           {[
-            { field: 'height' as Field, id: 'pf-height', label: 'Taille (cm)' },
+            {
+              field: 'height' as Field,
+              id: 'pf-height',
+              label: 'Taille',
+              unit: 'cm',
+              example: '175',
+            },
             {
               field: 'targetWeight' as Field,
               id: 'pf-target-weight',
-              label: 'Poids cible (kg)',
+              label: 'Poids cible',
+              unit: 'kg',
+              example: '70',
             },
             {
               field: 'dailyCalorieGoal' as Field,
               id: 'pf-calorie-goal',
-              label: 'Objectif calorique (kcal/jour)',
+              label: 'Objectif calorique',
+              unit: 'kcal/jour',
+              example: '2000',
             },
             {
               field: 'dailyProteinGoal' as Field,
               id: 'pf-protein-goal',
-              label: 'Objectif protéines (g/jour)',
+              label: 'Objectif protéines',
+              unit: 'g/jour',
+              example: '120',
             },
             {
               field: 'dailyCarbsGoal' as Field,
               id: 'pf-carbs-goal',
-              label: 'Objectif glucides (g/jour)',
+              label: 'Objectif glucides',
+              unit: 'g/jour',
+              example: '230',
             },
             {
               field: 'dailyFatGoal' as Field,
               id: 'pf-fat-goal',
-              label: 'Objectif lipides (g/jour)',
+              label: 'Objectif lipides',
+              unit: 'g/jour',
+              example: '65',
             },
-          ].map(({ field, id, label }) => (
-            <div key={field} className="relative flex flex-col gap-1">
+          ].map(({ field, id, label, unit, example }) => (
+            <div
+              key={field}
+              className="relative flex flex-col justify-end gap-1"
+            >
               <label
                 htmlFor={id}
                 className="text-sm font-semibold text-green-600"
               >
-                {label}
+                {label}{' '}
+                <span
+                  className={unit.endsWith('/jour') ? 'max-[500px]:block' : ''}
+                >
+                  ({unit})
+                </span>
               </label>
               <Input
                 id={id}
                 type="text"
                 inputMode="decimal"
+                placeholder={`Ex : ${example}`}
                 value={form[field]}
                 onChange={(e) => handleChange(field, e.target.value)}
                 onFocus={() => setFocusedField(field)}

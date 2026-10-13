@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { useAuth } from '../auth/auth-context';
 import { listFoodItems } from '../components/food/api';
@@ -6,57 +6,117 @@ import type { FoodItem } from '../components/food/types';
 import { listMealsOnDate, toApiDate } from '../components/meal/api';
 import type { Meal } from '../components/meal/types';
 
-interface DayResult {
-  requestKey: string;
-  meals: Meal[];
-  error: string | null;
+const PREFETCH_DELAY_MS = 200;
+const NO_MEALS: Meal[] = [];
+
+function neighbourKey(dateKey: string, offset: number) {
+  const day = new Date(`${dateKey}T12:00:00`);
+  day.setDate(day.getDate() + offset);
+  return toApiDate(day);
 }
 
 export function useDailyMeals(date: Date) {
   const { user } = useAuth();
   const userId = user!.userId;
   const dateKey = toApiDate(date);
-  const [reloadCount, setReloadCount] = useState(0);
   const [foodItems, setFoodItems] = useState<FoodItem[]>([]);
   const [foodsError, setFoodsError] = useState<string | null>(null);
-  const [result, setResult] = useState<DayResult | null>(null);
-  const requestKey = `${dateKey}:${reloadCount}`;
+  const [foodsAttempt, setFoodsAttempt] = useState(0);
+  const [days, setDays] = useState<Record<string, Meal[]>>({});
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const loaded = useRef(new Set<string>());
+  const pending = useRef(new Set<string>());
+  const lifetime = useRef<AbortController | null>(null);
 
   useEffect(() => {
     const controller = new AbortController();
     listFoodItems(userId, controller.signal)
       .then(setFoodItems)
-      .catch((err: unknown) => {
+      .catch(() => {
         if (controller.signal.aborted) return;
-        console.error(err);
-        setFoodsError('Impossible de charger tes aliments, réessaye.');
+        setFoodsError('Impossible de charger les aliments.');
       });
     return () => controller.abort();
-  }, [userId]);
+  }, [userId, foodsAttempt]);
 
   useEffect(() => {
     const controller = new AbortController();
-    listMealsOnDate(userId, dateKey, controller.signal)
-      .then((meals) => setResult({ requestKey, meals, error: null }))
-      .catch((err: unknown) => {
-        if (controller.signal.aborted) return;
-        console.error(err);
-        setResult({
-          requestKey,
-          meals: [],
-          error: 'Impossible de charger ton journal, réessaye.',
-        });
-      });
-    return () => controller.abort();
-  }, [userId, dateKey, requestKey]);
+    const inFlight = pending.current;
+    lifetime.current = controller;
+    return () => {
+      controller.abort();
+      inFlight.clear();
+    };
+  }, []);
 
-  const current = result && result.requestKey === requestKey ? result : null;
+  const loadDay = useCallback(
+    (dayKey: string) => {
+      const cacheKey = `${userId}:${dayKey}`;
+      if (pending.current.has(cacheKey)) return;
+      pending.current.add(cacheKey);
+      const signal = lifetime.current?.signal;
+
+      listMealsOnDate(userId, dayKey, signal)
+        .then((meals) => {
+          loaded.current.add(cacheKey);
+          setDays((prev) => ({ ...prev, [cacheKey]: meals }));
+          setErrors((prev) => {
+            if (!(cacheKey in prev)) return prev;
+            const next = { ...prev };
+            delete next[cacheKey];
+            return next;
+          });
+        })
+        .catch(() => {
+          if (signal?.aborted) return;
+          setErrors((prev) => ({
+            ...prev,
+            [cacheKey]: 'Impossible de charger le journal.',
+          }));
+        })
+        .finally(() => {
+          if (!signal?.aborted) pending.current.delete(cacheKey);
+        });
+    },
+    [userId],
+  );
+
+  useEffect(() => {
+    if (!loaded.current.has(`${userId}:${dateKey}`)) loadDay(dateKey);
+
+    const timer = setTimeout(() => {
+      [-1, 1].forEach((offset) => {
+        const neighbour = neighbourKey(dateKey, offset);
+        if (!loaded.current.has(`${userId}:${neighbour}`)) loadDay(neighbour);
+      });
+    }, PREFETCH_DELAY_MS);
+
+    return () => clearTimeout(timer);
+  }, [userId, dateKey, loadDay]);
+
+  const cacheKey = `${userId}:${dateKey}`;
+  const meals = days[cacheKey];
+  const dayError = errors[cacheKey];
 
   return {
-    meals: current?.meals ?? [],
+    meals: meals ?? NO_MEALS,
     foodItems,
-    isLoading: current === null,
-    loadError: current?.error ?? foodsError,
-    reload: () => setReloadCount((count) => count + 1),
+    isReady: meals !== undefined,
+    isLoading: meals === undefined && dayError === undefined,
+    loadError: dayError ?? foodsError,
+    reload: () => loadDay(dateKey),
+    retry: () => {
+      if (foodsError !== null) {
+        setFoodsError(null);
+        setFoodsAttempt((attempt) => attempt + 1);
+      }
+      setErrors((prev) => {
+        if (!(cacheKey in prev)) return prev;
+        const next = { ...prev };
+        delete next[cacheKey];
+        return next;
+      });
+      loadDay(dateKey);
+    },
   };
 }

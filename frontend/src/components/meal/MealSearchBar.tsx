@@ -214,7 +214,7 @@ export default function MealSearchBar({
             <button
               type="button"
               aria-label="Trier par"
-              className="flex w-full cursor-pointer items-center justify-between rounded-xl border border-green-200 bg-white px-4 py-2.5 text-sm text-green-800 transition-colors hover:bg-green-50"
+              className="flex w-full cursor-pointer items-center justify-between rounded-xl border border-green-200 bg-white px-4 py-2.5 text-sm text-green-800 transition-colors hover:bg-green-50 aria-expanded:bg-green-50"
             >
               {SORT_OPTIONS.find((o) => o.value === currentSortValue)?.label}
               <ChevronRight

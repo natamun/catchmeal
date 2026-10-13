@@ -4,9 +4,10 @@ import { ArrowUpRight, LoaderCircle, ScanBarcode, Search } from 'lucide-react';
 import { useAuth } from '../../auth/auth-context';
 import { useHasCamera } from '../../hooks/useHasCamera';
 import { useTimeout } from '../../hooks/useTimeout';
+import { ApiError } from '../../utils/request';
 import { FieldError } from '../ui/FieldError';
 import { Input } from '../ui/Input';
-import { ApiError, lookupOffProduct } from './api';
+import { lookupOffProduct } from './api';
 import type { OffProduct } from './types';
 
 const BarcodeScannerDialog = lazy(() => import('./BarcodeScannerDialog'));
@@ -84,11 +85,10 @@ export default function BarcodeField({
       setIsTouched(false);
       onProduct(product);
     } catch (err: unknown) {
-      console.error(err);
       if (lookupId !== lookupIdRef.current) {
         return;
       }
-      const status = err instanceof ApiError ? (err.status ?? 0) : 0;
+      const status = err instanceof ApiError ? err.status : 0;
       setLookupError({
         message: LOOKUP_ERRORS[status] ?? 'Une erreur est survenue',
         onField: status === 400,
@@ -143,7 +143,7 @@ export default function BarcodeField({
           >
             <span>
               via <span className="max-[400px]:hidden">Open Food Facts</span>
-              <span className="min-[401px]:hidden">OFF</span>
+              <span className="min-[400px]:hidden">OFF</span>
             </span>
             <ArrowUpRight className="h-3 w-3" />
           </a>

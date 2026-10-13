@@ -1,10 +1,4 @@
-import {
-  useEffect,
-  useRef,
-  useState,
-  type FormEvent,
-  type RefObject,
-} from 'react';
+import { useEffect, useRef, useState, type RefObject } from 'react';
 import { Send } from 'lucide-react';
 
 import { useAuth } from '../../auth/auth-context';
@@ -73,7 +67,7 @@ export default function ChatWindow({
     }
   }, [messages]);
 
-  const handleSend = async (event: FormEvent) => {
+  const handleSend = async (event: React.SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
     const content = draft.trim();
     if (!content) return;
@@ -85,7 +79,6 @@ export default function ChatWindow({
       setDraft('');
       setQuote(null);
     } catch (err) {
-      console.error(err);
       setSendError(
         err instanceof Error ? err.message : 'Message non envoyé, réessaye.',
       );
@@ -118,7 +111,7 @@ export default function ChatWindow({
             >
               <div
                 aria-label={m.senderId === userId ? 'Vous' : friend.name}
-                className={`max-w-[75%] rounded-2xl px-3 py-2 text-sm break-words ${
+                className={`max-w-[75%] rounded-2xl px-3 py-2 text-sm wrap-break-word ${
                   m.senderId === userId
                     ? 'rounded-br-sm bg-green-500 text-white'
                     : 'rounded-bl-sm border border-green-200 bg-white text-green-800'

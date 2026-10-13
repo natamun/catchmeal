@@ -1,7 +1,9 @@
 import { useState, type ReactNode } from 'react';
-import { ChevronRight, LoaderCircle } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 
 import { MACROS } from '../../constants/macros';
+import { ListCard, ListCardEmpty, ListCardLoading } from '../ui/ListCard';
+import { LoadError } from '../ui/LoadError';
 import { MacroBadge } from '../ui/MacroBadge';
 import FoodItemSearchBar from './FoodItemSearchBar';
 import {
@@ -20,6 +22,7 @@ interface FoodItemListProps {
   items: FoodItem[];
   isLoading: boolean;
   loadError: string | null;
+  onRetry?: () => void;
   headerAction?: ReactNode;
   renderAction?: (item: FoodItem) => ReactNode;
 }
@@ -40,6 +43,7 @@ export default function FoodItemList({
   items,
   isLoading,
   loadError,
+  onRetry,
   headerAction,
   renderAction,
 }: FoodItemListProps) {
@@ -87,39 +91,34 @@ export default function FoodItemList({
   };
 
   return (
-    <div className="@container overflow-hidden rounded-2xl border border-green-200 bg-white shadow-sm">
-      <div className="flex items-center gap-3 border-b border-green-200 px-5 py-4">
-        <FoodItemSearchBar
-          items={activeItems}
-          criteria={criteria}
-          onFilterChange={setCriteria}
-        />
-        {headerAction}
-      </div>
-      {isLoading && (
-        <div role="status" className="flex justify-center py-10">
-          <LoaderCircle className="h-6 w-6 animate-spin text-green-400" />
-          <span className="sr-only">Chargement des aliments...</span>
-        </div>
-      )}
+    <ListCard
+      className="@container"
+      header={
+        <>
+          <FoodItemSearchBar
+            items={activeItems}
+            criteria={criteria}
+            onFilterChange={setCriteria}
+          />
+          {headerAction}
+        </>
+      }
+    >
+      {isLoading && <ListCardLoading label="Chargement des aliments..." />}
 
-      {loadError && (
-        <p className="px-5 pb-5 text-sm text-red-500">{loadError}</p>
-      )}
+      {loadError && <LoadError message={loadError} onRetry={onRetry} />}
 
       {!isLoading && !loadError && activeItems.length === 0 && (
-        <p className="px-5 py-10 text-center text-sm text-green-400">
-          Aucun aliment enregistré.
-        </p>
+        <ListCardEmpty>Aucun aliment enregistré.</ListCardEmpty>
       )}
 
       {!isLoading &&
         !loadError &&
         activeItems.length > 0 &&
         visibleItems.length === 0 && (
-          <p className="px-5 py-10 text-center text-sm text-green-400">
+          <ListCardEmpty>
             Aucun aliment ne correspond à cette recherche.
-          </p>
+          </ListCardEmpty>
         )}
 
       <ul className="divide-y divide-green-200">
@@ -182,6 +181,6 @@ export default function FoodItemList({
           );
         })}
       </ul>
-    </div>
+    </ListCard>
   );
 }
