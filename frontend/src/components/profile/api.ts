@@ -96,7 +96,6 @@ export function uploadAvatar(userId: number, file: File) {
   });
 }
 
-// TODO: wire to the backend, DELETE /users/:userId/avatar does not exist yet
 export function removeAvatar(userId: number) {
   return request<UserProfile>(`${BASE_URL}/users/${userId}/avatar`, {
     method: 'DELETE',
