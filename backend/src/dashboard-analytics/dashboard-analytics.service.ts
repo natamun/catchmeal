@@ -3,6 +3,21 @@ import { Injectable } from '@nestjs/common';
 import { GoalSetting, WeightLog } from '../generated/prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 
+type DashboardDay = {
+  day: string;
+  totalKcal: number | null;
+  totalProtein: number | null;
+  totalCarbs: number | null;
+  totalFat: number | null;
+  weight: number | null;
+  bodyFat: number | null;
+  fatFreeMass: number | null;
+  bodyWater: number | null;
+  muscleMass: number | null;
+  goalKcal: number | null;
+  objective: string | null;
+};
+
 @Injectable()
 export class DashboardAnalyticsService {
   constructor(private readonly prisma: PrismaService) {}
@@ -26,14 +41,30 @@ export class DashboardAnalyticsService {
    *  - goalKcal: the calorie goal or null if none was set
    *  - objective: lose or gain weight
    */
-  async getDashboard(userId: number, from: Date, to: Date) {
-    const [meals, weightLogs, goals, previousGoal] = await Promise.all([
+  async getDashboard(
+    userId: number,
+    from: Date,
+    to: Date,
+  ): Promise<DashboardDay[]> {
+    const [
+      meals,
+      weightLogs,
+      goals,
+      previousGoal,
+      previousWeight,
+      previousBodyFat,
+      previousFatFreeMass,
+      previousBodyWater,
+      previousMuscleMass,
+    ] = await Promise.all([
       this.prisma.meal.findMany({
         where: { userId: userId, loggedAt: { gte: from, lte: to } },
         include: {
           items: {
             include: {
-              foodItem: { select: { name: true, brand: true, baseUnit: true } },
+              foodItem: {
+                select: { name: true, brand: true, baseUnit: true },
+              },
             },
           },
         },
@@ -53,6 +84,52 @@ export class DashboardAnalyticsService {
       this.prisma.goalSetting.findFirst({
         where: { userId: userId, startDate: { lt: from } },
         orderBy: { startDate: 'desc' },
+      }),
+
+      this.prisma.weightLog.findFirst({
+        where: { userId: userId, loggedAt: { lte: from } },
+        orderBy: { loggedAt: 'desc' },
+        select: { weight: true },
+      }),
+
+      this.prisma.weightLog.findFirst({
+        where: {
+          userId: userId,
+          loggedAt: { lte: from },
+          bodyFat: { not: null },
+        },
+        orderBy: { loggedAt: 'desc' },
+        select: { bodyFat: true },
+      }),
+
+      this.prisma.weightLog.findFirst({
+        where: {
+          userId: userId,
+          loggedAt: { lte: from },
+          fatFreeMass: { not: null },
+        },
+        orderBy: { loggedAt: 'desc' },
+        select: { fatFreeMass: true },
+      }),
+
+      this.prisma.weightLog.findFirst({
+        where: {
+          userId: userId,
+          loggedAt: { lte: from },
+          bodyWater: { not: null },
+        },
+        orderBy: { loggedAt: 'desc' },
+        select: { bodyWater: true },
+      }),
+
+      this.prisma.weightLog.findFirst({
+        where: {
+          userId: userId,
+          loggedAt: { lte: from },
+          muscleMass: { not: null },
+        },
+        orderBy: { loggedAt: 'desc' },
+        select: { muscleMass: true },
       }),
     ]);
 
@@ -103,23 +180,42 @@ export class DashboardAnalyticsService {
       ]),
     ).sort();
 
+    let lastWeight: number | null = previousWeight?.weight ?? null;
+    let lastBodyFat: number | null = previousBodyFat?.bodyFat ?? null;
+    let lastFatFreeMass: number | null =
+      previousFatFreeMass?.fatFreeMass ?? null;
+    let lastBodyWater: number | null = previousBodyWater?.bodyWater ?? null;
+    let lastMuscleMass: number | null = previousMuscleMass?.muscleMass ?? null;
+
     const dashboard = allDays.map((day) => {
       const goal = getGoalDate(new Date(day));
+      const log = weightLogsDay[day];
+      if (log) {
+        lastWeight = log.weight ?? lastWeight;
+        lastBodyFat = log.bodyFat ?? lastBodyFat;
+        lastFatFreeMass = log.fatFreeMass ?? lastFatFreeMass;
+        lastBodyWater = log.bodyWater ?? lastBodyWater;
+        lastMuscleMass = log.muscleMass ?? lastMuscleMass;
+      }
       return {
         day,
-        totalKcal: totalsByDay[day]?.kcal ?? null,
-        totalProtein: totalsByDay[day]?.protein ?? null,
-        totalCarbs: totalsByDay[day]?.carbs ?? null,
-        totalFat: totalsByDay[day]?.fat ?? null,
-        weight: weightLogsDay[day]?.weight ?? null,
-        bodyFat: weightLogsDay[day]?.bodyFat ?? null,
-        fatFreeMass: weightLogsDay[day]?.fatFreeMass ?? null,
-        bodyWater: weightLogsDay[day]?.bodyWater ?? null,
-        muscleMass: weightLogsDay[day]?.muscleMass ?? null,
+        totalKcal: totalsByDay[day] ? Math.round(totalsByDay[day].kcal) : null,
+        totalProtein: totalsByDay[day]
+          ? Math.round(totalsByDay[day].protein)
+          : null,
+        totalCarbs: totalsByDay[day]
+          ? Math.round(totalsByDay[day].carbs)
+          : null,
+        totalFat: totalsByDay[day] ? Math.round(totalsByDay[day].fat) : null,
+        weight: lastWeight,
+        bodyFat: lastBodyFat,
+        fatFreeMass: lastFatFreeMass,
+        bodyWater: lastBodyWater,
+        muscleMass: lastMuscleMass,
         goalKcal: goal?.dailyCalories ?? null,
         objective: goal?.objective ?? null,
       };
     });
-    return dashboard;
+    return dashboard.reverse();
   }
 }
