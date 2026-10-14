@@ -35,8 +35,7 @@ export class DashboardAnalyticsService {
    *  - totalProtein: the total amount of protein consumed per day, or null if no meal was logged that day
    *  - totalCarbs: the total amount of carbs consumed per day, or null if no meal was logged that day
    *  - totalFat: the total amount of fat consumed per day, or null if no meal was logged that day
-   *  - weight: the weight logged that day, or the last known weight carried
-   *    forward if none was logged that day, or null if there is no prior value
+   *  - weight: the weight logged that day, or null if none was logged that day
    *  - bodyFat: the body fat logged that day, or the last known value carried
    *    forward if none was logged that day, or null if there is no prior value
    *  - fatFreeMass: the fat free mass logged that day, or the last known value
@@ -58,7 +57,6 @@ export class DashboardAnalyticsService {
       weightLogs,
       goals,
       previousGoal,
-      previousWeight,
       previousBodyFat,
       previousFatFreeMass,
       previousBodyWater,
@@ -91,12 +89,6 @@ export class DashboardAnalyticsService {
       this.prisma.goalSetting.findFirst({
         where: { userId: userId, startDate: { lt: from } },
         orderBy: { startDate: 'desc' },
-      }),
-
-      this.prisma.weightLog.findFirst({
-        where: { userId: userId, loggedAt: { lte: from } },
-        orderBy: { loggedAt: 'desc' },
-        select: { weight: true },
       }),
 
       this.prisma.weightLog.findFirst({
@@ -187,7 +179,6 @@ export class DashboardAnalyticsService {
       ]),
     ).sort();
 
-    let lastWeight: number | null = previousWeight?.weight ?? null;
     let lastBodyFat: number | null = previousBodyFat?.bodyFat ?? null;
     let lastFatFreeMass: number | null =
       previousFatFreeMass?.fatFreeMass ?? null;
@@ -198,7 +189,6 @@ export class DashboardAnalyticsService {
       const goal = getGoalDate(new Date(day));
       const log = weightLogsDay[day];
       if (log) {
-        lastWeight = log.weight ?? lastWeight;
         lastBodyFat = log.bodyFat ?? lastBodyFat;
         lastFatFreeMass = log.fatFreeMass ?? lastFatFreeMass;
         lastBodyWater = log.bodyWater ?? lastBodyWater;
@@ -214,7 +204,7 @@ export class DashboardAnalyticsService {
           ? Math.round(totalsByDay[day].carbs)
           : null,
         totalFat: totalsByDay[day] ? Math.round(totalsByDay[day].fat) : null,
-        weight: lastWeight,
+        weight: log?.weight ?? null,
         bodyFat: lastBodyFat,
         fatFreeMass: lastFatFreeMass,
         bodyWater: lastBodyWater,
@@ -223,6 +213,6 @@ export class DashboardAnalyticsService {
         objective: goal?.objective ?? null,
       };
     });
-    return dashboard.reverse();
+    return dashboard;
   }
 }

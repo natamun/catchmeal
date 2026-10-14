@@ -228,19 +228,19 @@ describe('DashboardAnalyticsService', () => {
     );
 
     expect(dashboard).toEqual([
+      expectDayEntry({ weight: 80, goalKcal: 2000, objective: 'gain' }),
+      expectDayEntry({
+        day: '2026-08-18',
+        weight: null,
+        goalKcal: 1600,
+        objective: 'lose',
+      }),
       expectDayEntry({
         day: '2026-08-19',
         weight: 79,
         goalKcal: 1600,
         objective: 'lose',
       }),
-      expectDayEntry({
-        day: '2026-08-18',
-        weight: 80,
-        goalKcal: 1600,
-        objective: 'lose',
-      }),
-      expectDayEntry({ weight: 80, goalKcal: 2000, objective: 'gain' }),
     ]);
   });
 
@@ -476,11 +476,18 @@ describe('DashboardAnalyticsService', () => {
     );
     expect(dashboard).toEqual([
       expectDayEntry({
-        weight: 233,
-        bodyFat: 12.3,
-        objective: 84,
-        goalKcal: 1280,
-        day: '2026-08-22',
+        weight: 21,
+        bodyFat: 11.9,
+        day: '2026-08-16',
+      }),
+      expectDayEntry({
+        totalKcal: 600,
+        totalProtein: 60,
+        totalCarbs: 60,
+        totalFat: 60,
+        weight: null,
+        bodyFat: 11.9,
+        day: '2026-08-17',
       }),
       expectDayEntry({
         weight: 233,
@@ -490,18 +497,11 @@ describe('DashboardAnalyticsService', () => {
         goalKcal: 2222,
       }),
       expectDayEntry({
-        totalKcal: 600,
-        totalProtein: 60,
-        totalCarbs: 60,
-        totalFat: 60,
-        weight: 21,
-        bodyFat: 11.9,
-        day: '2026-08-17',
-      }),
-      expectDayEntry({
-        weight: 21,
-        bodyFat: 11.9,
-        day: '2026-08-16',
+        weight: null,
+        bodyFat: 12.3,
+        objective: 84,
+        goalKcal: 1280,
+        day: '2026-08-22',
       }),
     ]);
   });

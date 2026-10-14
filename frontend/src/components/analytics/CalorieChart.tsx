@@ -177,12 +177,7 @@ export default function CalorieChart({ days, isLoading = false }: Props) {
       >
         <BarChart data={kcalData} margin={KCAL_MARGIN}>
           <CartesianGrid stroke={GRID_STROKE} vertical={false} />
-          <XAxis
-            dataKey="from"
-            tick={X_TICK}
-            minTickGap={MIN_TICK_GAP}
-            reversed
-          />
+          <XAxis dataKey="from" tick={X_TICK} minTickGap={MIN_TICK_GAP} />
           <YAxis
             width={AXIS_WIDTH}
             interval={0}
