@@ -76,7 +76,10 @@ export class PassportAuthController {
     return toUserResponse(result);
   }
 
-  @Throttle({ default: { limit: 5, ttl: 60_000 } })
+  @Throttle({
+    short: { limit: 5, ttl: 60_000 },
+    long: { limit: 20, ttl: 3_600_000 },
+  })
   @HttpCode(HttpStatus.OK)
   @Post('login')
   @UseGuards(PassportLocalGuard)
