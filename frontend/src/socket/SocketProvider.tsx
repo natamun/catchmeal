@@ -13,7 +13,7 @@ export function SocketProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (status !== 'authenticated') return;
 
-    const instance = io(import.meta.env.VITE_API_URL, {
+    const instance = io(import.meta.env.VITE_SOCKET_URL || undefined, {
       withCredentials: true,
     });
     instance.on('connect', () => {
