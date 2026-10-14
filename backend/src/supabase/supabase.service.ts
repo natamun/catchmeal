@@ -28,9 +28,15 @@ export class SupabaseService {
   }
 
   async deleteAvatar(userId: number): Promise<void> {
-    const { data: files } = await this.client.storage
+    const { data: files, error: listError } = await this.client.storage
       .from(BUCKET)
       .list(`${userId}`);
+
+    if (listError) {
+      throw new InternalServerErrorException(
+        `Storage list failed: ${listError.message}`,
+      );
+    }
 
     if (!files?.length) return;
 
