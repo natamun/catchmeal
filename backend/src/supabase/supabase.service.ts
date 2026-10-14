@@ -27,6 +27,29 @@ export class SupabaseService {
     this.client = createClient(url, key);
   }
 
+  async deleteAvatar(userId: number): Promise<void> {
+    const { data: files, error: listError } = await this.client.storage
+      .from(BUCKET)
+      .list(`${userId}`);
+
+    if (listError) {
+      throw new InternalServerErrorException(
+        `Storage list failed: ${listError.message}`,
+      );
+    }
+
+    if (!files?.length) return;
+
+    const paths = files.map((f) => `${userId}/${f.name}`);
+    const { error } = await this.client.storage.from(BUCKET).remove(paths);
+
+    if (error) {
+      throw new InternalServerErrorException(
+        `Storage delete failed: ${error.message}`,
+      );
+    }
+  }
+
   async uploadAvatar(
     userId: number,
     file: Express.Multer.File,
