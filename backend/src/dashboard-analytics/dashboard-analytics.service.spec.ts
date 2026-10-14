@@ -8,13 +8,12 @@ describe('DashboardAnalyticsService', () => {
 
   const prismaMock = {
     meal: { findMany: jest.fn() },
-    weightLog: { findMany: jest.fn(), findFirst: jest.fn() },
+    weightLog: { findMany: jest.fn() },
     goalSetting: { findMany: jest.fn(), findFirst: jest.fn() },
   };
 
   beforeEach(async () => {
     jest.resetAllMocks();
-    prismaMock.weightLog.findFirst.mockResolvedValue(null);
     prismaMock.goalSetting.findFirst.mockResolvedValue(null);
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -198,7 +197,7 @@ describe('DashboardAnalyticsService', () => {
     ]);
   });
 
-  it('should replace the earlier goal from the day it changes and carry the weight forward', async () => {
+  it('should replace the earlier goal from the day it changes without carrying the weight forward', async () => {
     prismaMock.meal.findMany.mockResolvedValue([]);
     prismaMock.weightLog.findMany.mockResolvedValue([
       { id: 1, userId: 1, loggedAt: new Date('2026-08-17'), weight: 80 },
@@ -402,7 +401,7 @@ describe('DashboardAnalyticsService', () => {
     ]);
   });
 
-  it('should be return multiple day entries, from the most recent day to the oldest, carrying weight and bodyFat forward', async () => {
+  it('should be return multiple day entries without carrying weight or bodyFat forward', async () => {
     prismaMock.meal.findMany.mockResolvedValue([
       {
         id: 1,
@@ -486,7 +485,7 @@ describe('DashboardAnalyticsService', () => {
         totalCarbs: 60,
         totalFat: 60,
         weight: null,
-        bodyFat: 11.9,
+        bodyFat: null,
         day: '2026-08-17',
       }),
       expectDayEntry({
@@ -498,7 +497,7 @@ describe('DashboardAnalyticsService', () => {
       }),
       expectDayEntry({
         weight: null,
-        bodyFat: 12.3,
+        bodyFat: null,
         objective: 84,
         goalKcal: 1280,
         day: '2026-08-22',
@@ -506,27 +505,22 @@ describe('DashboardAnalyticsService', () => {
     ]);
   });
 
-  it('should seed each of the 5 body measure fields independently from its own last entry before the period', async () => {
+  it('should keep each body measure independent per day with no carry-forward across days', async () => {
     prismaMock.meal.findMany.mockResolvedValue([]);
     prismaMock.weightLog.findMany.mockResolvedValue([
-      { id: 2, userId: 1, loggedAt: new Date('2026-08-17'), weight: 90 },
+      {
+        id: 1,
+        userId: 1,
+        loggedAt: new Date('2026-08-16'),
+        weight: 80,
+        bodyFat: 20,
+        fatFreeMass: 64,
+        bodyWater: 50,
+        muscleMass: 55,
+      },
+      { id: 2, userId: 1, loggedAt: new Date('2026-08-18'), weight: 79 },
     ]);
     prismaMock.goalSetting.findMany.mockResolvedValue([]);
-    prismaMock.weightLog.findFirst.mockImplementation(
-      ({
-        select,
-      }: {
-        select: Partial<
-          Record<'bodyFat' | 'fatFreeMass' | 'bodyWater' | 'muscleMass', true>
-        >;
-      }) => {
-        if (select.bodyFat) return Promise.resolve({ bodyFat: 15 });
-        if (select.fatFreeMass) return Promise.resolve({ fatFreeMass: 70 });
-        if (select.bodyWater) return Promise.resolve({ bodyWater: 55 });
-        if (select.muscleMass) return Promise.resolve({ muscleMass: 60 });
-        return Promise.resolve(null);
-      },
-    );
 
     const dashboard = await service.getDashboard(
       1,
@@ -536,12 +530,14 @@ describe('DashboardAnalyticsService', () => {
 
     expect(dashboard).toEqual([
       expectDayEntry({
-        weight: 90,
-        bodyFat: 15,
-        fatFreeMass: 70,
-        bodyWater: 55,
-        muscleMass: 60,
+        day: '2026-08-16',
+        weight: 80,
+        bodyFat: 20,
+        fatFreeMass: 64,
+        bodyWater: 50,
+        muscleMass: 55,
       }),
+      expectDayEntry({ day: '2026-08-18', weight: 79 }),
     ]);
   });
 });

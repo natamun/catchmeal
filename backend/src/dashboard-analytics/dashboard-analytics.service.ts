@@ -36,14 +36,10 @@ export class DashboardAnalyticsService {
    *  - totalCarbs: the total amount of carbs consumed per day, or null if no meal was logged that day
    *  - totalFat: the total amount of fat consumed per day, or null if no meal was logged that day
    *  - weight: the weight logged that day, or null if none was logged that day
-   *  - bodyFat: the body fat logged that day, or the last known value carried
-   *    forward if none was logged that day, or null if there is no prior value
-   *  - fatFreeMass: the fat free mass logged that day, or the last known value
-   *    carried forward if none was logged that day, or null if there is no prior value
-   *  - bodyWater: the body water logged that day, or the last known value
-   *    carried forward if none was logged that day, or null if there is no prior value
-   *  - muscleMass: the muscle mass logged that day, or the last known value
-   *    carried forward if none was logged that day, or null if there is no prior value
+   *  - bodyFat: the body fat logged that day, or null if none was logged that day
+   *  - fatFreeMass: the fat free mass logged that day, or null if none was logged that day
+   *  - bodyWater: the body water logged that day, or null if none was logged that day
+   *  - muscleMass: the muscle mass logged that day, or null if none was logged that day
    *  - goalKcal: the calorie goal applicable that day, or null if none was set
    *  - objective: lose or gain weight, applicable that day, or null if none was set
    */
@@ -52,16 +48,7 @@ export class DashboardAnalyticsService {
     from: Date,
     to: Date,
   ): Promise<DashboardDay[]> {
-    const [
-      meals,
-      weightLogs,
-      goals,
-      previousGoal,
-      previousBodyFat,
-      previousFatFreeMass,
-      previousBodyWater,
-      previousMuscleMass,
-    ] = await Promise.all([
+    const [meals, weightLogs, goals, previousGoal] = await Promise.all([
       this.prisma.meal.findMany({
         where: { userId: userId, loggedAt: { gte: from, lte: to } },
         include: {
@@ -89,46 +76,6 @@ export class DashboardAnalyticsService {
       this.prisma.goalSetting.findFirst({
         where: { userId: userId, startDate: { lt: from } },
         orderBy: { startDate: 'desc' },
-      }),
-
-      this.prisma.weightLog.findFirst({
-        where: {
-          userId: userId,
-          loggedAt: { lte: from },
-          bodyFat: { not: null },
-        },
-        orderBy: { loggedAt: 'desc' },
-        select: { bodyFat: true },
-      }),
-
-      this.prisma.weightLog.findFirst({
-        where: {
-          userId: userId,
-          loggedAt: { lte: from },
-          fatFreeMass: { not: null },
-        },
-        orderBy: { loggedAt: 'desc' },
-        select: { fatFreeMass: true },
-      }),
-
-      this.prisma.weightLog.findFirst({
-        where: {
-          userId: userId,
-          loggedAt: { lte: from },
-          bodyWater: { not: null },
-        },
-        orderBy: { loggedAt: 'desc' },
-        select: { bodyWater: true },
-      }),
-
-      this.prisma.weightLog.findFirst({
-        where: {
-          userId: userId,
-          loggedAt: { lte: from },
-          muscleMass: { not: null },
-        },
-        orderBy: { loggedAt: 'desc' },
-        select: { muscleMass: true },
       }),
     ]);
 
@@ -179,21 +126,9 @@ export class DashboardAnalyticsService {
       ]),
     ).sort();
 
-    let lastBodyFat: number | null = previousBodyFat?.bodyFat ?? null;
-    let lastFatFreeMass: number | null =
-      previousFatFreeMass?.fatFreeMass ?? null;
-    let lastBodyWater: number | null = previousBodyWater?.bodyWater ?? null;
-    let lastMuscleMass: number | null = previousMuscleMass?.muscleMass ?? null;
-
     const dashboard = allDays.map((day) => {
       const goal = getGoalDate(new Date(day));
       const log = weightLogsDay[day];
-      if (log) {
-        lastBodyFat = log.bodyFat ?? lastBodyFat;
-        lastFatFreeMass = log.fatFreeMass ?? lastFatFreeMass;
-        lastBodyWater = log.bodyWater ?? lastBodyWater;
-        lastMuscleMass = log.muscleMass ?? lastMuscleMass;
-      }
       return {
         day,
         totalKcal: totalsByDay[day] ? Math.round(totalsByDay[day].kcal) : null,
@@ -205,10 +140,10 @@ export class DashboardAnalyticsService {
           : null,
         totalFat: totalsByDay[day] ? Math.round(totalsByDay[day].fat) : null,
         weight: log?.weight ?? null,
-        bodyFat: lastBodyFat,
-        fatFreeMass: lastFatFreeMass,
-        bodyWater: lastBodyWater,
-        muscleMass: lastMuscleMass,
+        bodyFat: log?.bodyFat ?? null,
+        fatFreeMass: log?.fatFreeMass ?? null,
+        bodyWater: log?.bodyWater ?? null,
+        muscleMass: log?.muscleMass ?? null,
         goalKcal: goal?.dailyCalories ?? null,
         objective: goal?.objective ?? null,
       };
