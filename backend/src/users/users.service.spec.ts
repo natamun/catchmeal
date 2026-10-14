@@ -26,6 +26,7 @@ describe('UsersService', () => {
 
   const supabaseMock = {
     uploadAvatar: jest.fn(),
+    deleteAvatar: jest.fn(),
   };
 
   const activityServiceMock = {
@@ -205,5 +206,28 @@ describe('UsersService', () => {
     await expect(service.getWeightHistory(99)).rejects.toThrow(
       'User not found',
     );
+  });
+
+  describe('deleteAvatar', () => {
+    it('should delete the file from storage and clear avatarUrl', async () => {
+      supabaseMock.deleteAvatar.mockResolvedValue(undefined);
+      prismaMock.user.update.mockResolvedValue({ id: 1, avatarUrl: null });
+
+      await service.deleteAvatar(1);
+
+      expect(supabaseMock.deleteAvatar).toHaveBeenCalledWith(1);
+      expect(prismaMock.user.update).toHaveBeenCalledWith({
+        where: { id: 1 },
+        data: { avatarUrl: null },
+        select: { id: true, username: true, name: true, avatarUrl: true },
+      });
+    });
+
+    it('should not clear avatarUrl if storage deletion throws', async () => {
+      supabaseMock.deleteAvatar.mockRejectedValue(new Error('Storage error'));
+
+      await expect(service.deleteAvatar(1)).rejects.toThrow('Storage error');
+      expect(prismaMock.user.update).not.toHaveBeenCalled();
+    });
   });
 });
