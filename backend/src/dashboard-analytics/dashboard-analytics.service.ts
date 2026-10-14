@@ -27,19 +27,26 @@ export class DashboardAnalyticsService {
    * @param userId - Id of a user to get data
    * @param from - Start date of the period to analyze
    * @param to - End date of hte period to analyze
-   * @returns Array of daily stats
+   * @returns Array of daily stats, one entry per day that has at least one
+   * meal, weight log or goal setting in the period, ordered from the most
+   * recent day to the oldest
    *  - day: date string(YYY-MM-DD)
-   *  - totalKcal: sum of calories logged at day
-   *  - totalProtein: the total amount of protein consumed per day
-   *  - totalCarbs: the total amount of carbs consumed per day
-   *  - totalFat: the total amount of fat consumed per day
-   *  - weight: the weight logged that day or null if none was set
-   *  - bodyFat: the value of body fat
-   *  - fatFreeMass: the fat free mass logged that day
-   *  - bodyWater: the body water logged that day
-   *  - muscleMass: the muscle mass logged that day
-   *  - goalKcal: the calorie goal or null if none was set
-   *  - objective: lose or gain weight
+   *  - totalKcal: sum of calories logged at day, or null if no meal was logged that day
+   *  - totalProtein: the total amount of protein consumed per day, or null if no meal was logged that day
+   *  - totalCarbs: the total amount of carbs consumed per day, or null if no meal was logged that day
+   *  - totalFat: the total amount of fat consumed per day, or null if no meal was logged that day
+   *  - weight: the weight logged that day, or the last known weight carried
+   *    forward if none was logged that day, or null if there is no prior value
+   *  - bodyFat: the body fat logged that day, or the last known value carried
+   *    forward if none was logged that day, or null if there is no prior value
+   *  - fatFreeMass: the fat free mass logged that day, or the last known value
+   *    carried forward if none was logged that day, or null if there is no prior value
+   *  - bodyWater: the body water logged that day, or the last known value
+   *    carried forward if none was logged that day, or null if there is no prior value
+   *  - muscleMass: the muscle mass logged that day, or the last known value
+   *    carried forward if none was logged that day, or null if there is no prior value
+   *  - goalKcal: the calorie goal applicable that day, or null if none was set
+   *  - objective: lose or gain weight, applicable that day, or null if none was set
    */
   async getDashboard(
     userId: number,
