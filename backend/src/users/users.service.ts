@@ -152,12 +152,26 @@ export class UsersService {
           currentGoalCalories !== null &&
           currentGoalCalories !== beforeUpdate?.dailyCalorieGoal
         ) {
+          const latestWeightLog = await tsc.weightLog.findFirst({
+            where: { userId },
+            orderBy: { loggedAt: 'desc' },
+            select: { weight: true },
+          });
+          const currentWeight = latestWeightLog?.weight;
+          const targetWeight = user.targetWeight;
+
           let objective: string | null = null;
-          if (beforeUpdate?.dailyCalorieGoal) {
-            objective =
-              currentGoalCalories > beforeUpdate?.dailyCalorieGoal
-                ? 'gain'
-                : 'lose';
+          if (
+            currentWeight !== null &&
+            currentWeight !== undefined &&
+            targetWeight !== null &&
+            targetWeight !== undefined
+          ) {
+            if (targetWeight < currentWeight) {
+              objective = 'lose';
+            } else if (targetWeight > currentWeight) {
+              objective = 'gain';
+            }
           }
           await tsc.goalSetting.create({
             data: {
