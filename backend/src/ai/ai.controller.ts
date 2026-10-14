@@ -8,7 +8,7 @@ import {
   Request,
   UseGuards,
 } from '@nestjs/common';
-import { ThrottlerGuard } from '@nestjs/throttler';
+import { Throttle } from '@nestjs/throttler';
 
 import { PassportJwtAuthGuard } from '../auth/guards/passport-jwt.guard';
 import { AiService } from './ai.service';
@@ -19,10 +19,11 @@ interface RequestWithUser extends Express.Request {
 }
 
 @Controller('users/:userId')
-@UseGuards(PassportJwtAuthGuard, ThrottlerGuard)
+@UseGuards(PassportJwtAuthGuard)
 export class AiController {
   constructor(private aiService: AiService) {}
 
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
   @Post('chat')
   chat(
     @Param('userId', ParseIntPipe) userId: number,
