@@ -6,8 +6,8 @@ import {
   listSentRequests,
 } from '../components/friends/api';
 import type { Friend, FriendRequest } from '../components/friends/types';
-import { ApiError } from '../utils/request';
 import { useSocket } from '../socket/socket-context';
+import { ApiError } from '../utils/request';
 
 export function useFriends(userId: number) {
   const [friends, setFriends] = useState<Friend[]>([]);

@@ -29,8 +29,8 @@ import { useActivityFeed } from '../hooks/useActivityFeed.ts';
 import { useFriends } from '../hooks/useFriends.ts';
 import { usePresence } from '../hooks/usePresence.ts';
 import { useTimeout } from '../hooks/useTimeout.ts';
-import { requestErrorMessage } from '../utils/requestErrorMessage';
 import { useUnreadMessages } from '../hooks/useUnreadMessages.ts';
+import { requestErrorMessage } from '../utils/requestErrorMessage';
 
 type Tab = 'friends' | 'requests';
 
