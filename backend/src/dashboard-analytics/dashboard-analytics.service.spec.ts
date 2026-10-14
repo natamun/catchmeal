@@ -8,12 +8,14 @@ describe('DashboardAnalyticsService', () => {
 
   const prismaMock = {
     meal: { findMany: jest.fn() },
-    weightLog: { findMany: jest.fn() },
+    weightLog: { findMany: jest.fn(), findFirst: jest.fn() },
     goalSetting: { findMany: jest.fn(), findFirst: jest.fn() },
   };
 
   beforeEach(async () => {
     jest.resetAllMocks();
+    prismaMock.weightLog.findFirst.mockResolvedValue(null);
+    prismaMock.goalSetting.findFirst.mockResolvedValue(null);
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         DashboardAnalyticsService,
@@ -196,7 +198,7 @@ describe('DashboardAnalyticsService', () => {
     ]);
   });
 
-  it('should replace the earlier goal from the day it changes', async () => {
+  it('should replace the earlier goal from the day it changes and carry the weight forward', async () => {
     prismaMock.meal.findMany.mockResolvedValue([]);
     prismaMock.weightLog.findMany.mockResolvedValue([
       { id: 1, userId: 1, loggedAt: new Date('2026-08-17'), weight: 80 },
@@ -226,18 +228,19 @@ describe('DashboardAnalyticsService', () => {
     );
 
     expect(dashboard).toEqual([
-      expectDayEntry({ weight: 80, goalKcal: 2000, objective: 'gain' }),
-      expectDayEntry({
-        day: '2026-08-18',
-        goalKcal: 1600,
-        objective: 'lose',
-      }),
       expectDayEntry({
         day: '2026-08-19',
         weight: 79,
         goalKcal: 1600,
         objective: 'lose',
       }),
+      expectDayEntry({
+        day: '2026-08-18',
+        weight: 80,
+        goalKcal: 1600,
+        objective: 'lose',
+      }),
+      expectDayEntry({ weight: 80, goalKcal: 2000, objective: 'gain' }),
     ]);
   });
 
@@ -399,7 +402,7 @@ describe('DashboardAnalyticsService', () => {
     ]);
   });
 
-  it('should be return multiple day entry', async () => {
+  it('should be return multiple day entries, from the most recent day to the oldest, carrying weight and bodyFat forward', async () => {
     prismaMock.meal.findMany.mockResolvedValue([
       {
         id: 1,
@@ -473,16 +476,11 @@ describe('DashboardAnalyticsService', () => {
     );
     expect(dashboard).toEqual([
       expectDayEntry({
-        weight: 21,
-        bodyFat: 11.9,
-        day: '2026-08-16',
-      }),
-      expectDayEntry({
-        totalKcal: 600,
-        totalProtein: 60,
-        totalCarbs: 60,
-        totalFat: 60,
-        day: '2026-08-17',
+        weight: 233,
+        bodyFat: 12.3,
+        objective: 84,
+        goalKcal: 1280,
+        day: '2026-08-22',
       }),
       expectDayEntry({
         weight: 233,
@@ -491,7 +489,59 @@ describe('DashboardAnalyticsService', () => {
         objective: 80,
         goalKcal: 2222,
       }),
-      expectDayEntry({ objective: 84, goalKcal: 1280, day: '2026-08-22' }),
+      expectDayEntry({
+        totalKcal: 600,
+        totalProtein: 60,
+        totalCarbs: 60,
+        totalFat: 60,
+        weight: 21,
+        bodyFat: 11.9,
+        day: '2026-08-17',
+      }),
+      expectDayEntry({
+        weight: 21,
+        bodyFat: 11.9,
+        day: '2026-08-16',
+      }),
+    ]);
+  });
+
+  it('should seed each of the 5 body measure fields independently from its own last entry before the period', async () => {
+    prismaMock.meal.findMany.mockResolvedValue([]);
+    prismaMock.weightLog.findMany.mockResolvedValue([
+      { id: 2, userId: 1, loggedAt: new Date('2026-08-17'), weight: 90 },
+    ]);
+    prismaMock.goalSetting.findMany.mockResolvedValue([]);
+    prismaMock.weightLog.findFirst.mockImplementation(
+      ({
+        select,
+      }: {
+        select: Partial<
+          Record<'bodyFat' | 'fatFreeMass' | 'bodyWater' | 'muscleMass', true>
+        >;
+      }) => {
+        if (select.bodyFat) return Promise.resolve({ bodyFat: 15 });
+        if (select.fatFreeMass) return Promise.resolve({ fatFreeMass: 70 });
+        if (select.bodyWater) return Promise.resolve({ bodyWater: 55 });
+        if (select.muscleMass) return Promise.resolve({ muscleMass: 60 });
+        return Promise.resolve(null);
+      },
+    );
+
+    const dashboard = await service.getDashboard(
+      1,
+      new Date('2026-08-01'),
+      new Date('2026-08-31'),
+    );
+
+    expect(dashboard).toEqual([
+      expectDayEntry({
+        weight: 90,
+        bodyFat: 15,
+        fatFreeMass: 70,
+        bodyWater: 55,
+        muscleMass: 60,
+      }),
     ]);
   });
 });
