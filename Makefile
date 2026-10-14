@@ -6,9 +6,6 @@ all: dev
 dev:
 	$(DEV) up --build -V -d
 
-prod:
-	$(PROD) up --build -V -d
-
 logsBackend:
 	$(DEV) logs -f backend
 
@@ -24,6 +21,21 @@ fclean: clean
 	$(PROD) down --rmi all --volumes
 
 re: fclean all
+
+#-----	Prod	-----#
+prod:
+	$(PROD) up --build -V -d
+
+prodDown:
+	$(PROD) down
+
+prodLogs:
+	$(PROD) logs -f
+
+deploy:
+	git pull
+	$(PROD) up --build -d
+#-----	Prod	-----#
 
 format:
 	npm run format --prefix frontend
