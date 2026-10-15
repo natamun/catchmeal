@@ -4,6 +4,7 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Patch,
   Post,
   Request,
   Res,
@@ -14,8 +15,10 @@ import { Throttle } from '@nestjs/throttler';
 import type { Request as ExpressRequest, Response } from 'express';
 
 import { AuthService, type SignInData } from './auth.service';
+import { ChangePasswordDto } from './dto/change-password.dto';
 import { RegisterDto } from './dto/register.dto';
 import { OptionalJwtAuthGuard } from './guards/optional-jwt.guard';
+import { PassportJwtAuthGuard } from './guards/passport-jwt.guard';
 import { PassportLocalGuard } from './guards/passport-local.guard';
 
 type RequestWithUser = ExpressRequest & { user: SignInData };
@@ -163,6 +166,20 @@ export class PassportAuthController {
       console.error('[OAuth 42] signIn failed:', err);
       res.redirect(safeRedirectUrl('?error=oauth_failed'));
     }
+  }
+
+  @Throttle({ default: { limit: 5, ttl: 900_000 } })
+  @Patch('password')
+  @UseGuards(PassportJwtAuthGuard)
+  changePassword(
+    @Request() request: RequestWithUser,
+    @Body() dto: ChangePasswordDto,
+  ) {
+    return this.authService.changePassword(
+      request.user.userId,
+      dto.currentPassword,
+      dto.newPassword,
+    );
   }
 
   private setAuthCookie(res: Response, token: string) {

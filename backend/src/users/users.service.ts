@@ -59,6 +59,14 @@ export class UsersService {
     return this.prisma.user.findFirst({ where: { email, deletedAt: null } });
   }
 
+  updatePasswordHash(userId: number, passwordHash: string) {
+    return this.prisma.user.update({
+      where: { id: userId },
+      data: { passwordHash },
+      select: { id: true },
+    });
+  }
+
   async deleteAvatar(userId: number) {
     await this.supabase.deleteAvatar(userId);
     return this.prisma.user.update({
