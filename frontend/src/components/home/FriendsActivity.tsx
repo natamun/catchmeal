@@ -1,8 +1,8 @@
 import { MessageCircle } from 'lucide-react';
 
 import { formatRelativeTime } from '../../utils/formatRelativeTime';
-import { Avatar } from '../friends/Avatar';
 import type { ActivityItem, FriendPresence } from '../friends/types';
+import { Avatar } from '../ui/Avatar';
 import { ListCard } from '../ui/ListCard';
 
 interface FriendsActivityProps {
@@ -34,6 +34,7 @@ export default function FriendsActivity({
             >
               <Avatar
                 username={a.user.username}
+                avatarUrl={a.user.avatarUrl}
                 online={presence.get(a.user.id)?.online ?? false}
               />
               <div className="min-w-0 flex-1">

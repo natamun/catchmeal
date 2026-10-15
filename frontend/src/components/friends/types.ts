@@ -2,6 +2,7 @@ export interface UserSummary {
   id: number;
   username: string;
   name: string;
+  avatarUrl: string | null;
 }
 
 export interface Friend {
