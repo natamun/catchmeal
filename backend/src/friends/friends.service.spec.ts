@@ -7,6 +7,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 
 import { Prisma } from '../generated/prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
+import { FriendsGateway } from './friends.gateway';
 import { FriendsService } from './friends.service';
 
 describe('FriendsService', () => {
@@ -23,12 +24,19 @@ describe('FriendsService', () => {
     },
   };
 
+  const friendsGatewayMock = {
+    notifyRequestReceived: jest.fn(),
+    notifyRequestAccepted: jest.fn(),
+    notifyFriendshipRemoved: jest.fn(),
+  };
+
   beforeEach(async () => {
     jest.resetAllMocks();
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         FriendsService,
         { provide: PrismaService, useValue: prismaMock },
+        { provide: FriendsGateway, useValue: friendsGatewayMock },
       ],
     }).compile();
 
@@ -47,12 +55,14 @@ describe('FriendsService', () => {
       expect(prismaMock.friend.findFirst).not.toHaveBeenCalled();
     });
 
-    it('should create a pending request when none exists yet', async () => {
+    it('should create a pending request and notify the recipient', async () => {
+      const sender = { id: 1, username: 'alice', name: 'Alice' };
       prismaMock.friend.findFirst.mockResolvedValue(null);
       prismaMock.friend.create.mockResolvedValue({
-        id: 1,
+        id: 7,
         userId: 1,
         friendId: 2,
+        user: sender,
       });
 
       await service.sendRequest(1, 2);
@@ -67,6 +77,15 @@ describe('FriendsService', () => {
       });
       expect(prismaMock.friend.create).toHaveBeenCalledWith({
         data: { userId: 1, friendId: 2, status: 'PENDING' },
+        include: {
+          user: {
+            select: { id: true, username: true, name: true, avatarUrl: true },
+          },
+        },
+      });
+      expect(friendsGatewayMock.notifyRequestReceived).toHaveBeenCalledWith(2, {
+        requestId: 7,
+        from: sender,
       });
     });
 
@@ -81,6 +100,7 @@ describe('FriendsService', () => {
         ConflictException,
       );
       expect(prismaMock.friend.create).not.toHaveBeenCalled();
+      expect(friendsGatewayMock.notifyRequestReceived).not.toHaveBeenCalled();
     });
 
     it('should reject on a duplicate-key race condition', async () => {
@@ -95,16 +115,24 @@ describe('FriendsService', () => {
       await expect(service.sendRequest(1, 2)).rejects.toBeInstanceOf(
         ConflictException,
       );
+      expect(friendsGatewayMock.notifyRequestReceived).not.toHaveBeenCalled();
     });
   });
 
   describe('acceptRequest', () => {
-    it('should accept a pending request addressed to the current user', async () => {
+    it('should accept a pending request and notify the sender', async () => {
+      const acceptor = { id: 2, username: 'bob', name: 'Bob' };
       prismaMock.friend.findFirstOrThrow.mockResolvedValue({
         id: 5,
         status: 'PENDING',
       });
-      prismaMock.friend.update.mockResolvedValue({ id: 5, status: 'ACCEPTED' });
+      prismaMock.friend.update.mockResolvedValue({
+        id: 5,
+        userId: 1,
+        friendId: 2,
+        status: 'ACCEPTED',
+        friendUser: acceptor,
+      });
 
       await service.acceptRequest(2, 5);
 
@@ -114,6 +142,15 @@ describe('FriendsService', () => {
       expect(prismaMock.friend.update).toHaveBeenCalledWith({
         where: { id: 5 },
         data: { status: 'ACCEPTED' },
+        include: {
+          friendUser: {
+            select: { id: true, username: true, name: true, avatarUrl: true },
+          },
+        },
+      });
+      expect(friendsGatewayMock.notifyRequestAccepted).toHaveBeenCalledWith(1, {
+        friendshipId: 5,
+        friend: acceptor,
       });
     });
 
@@ -124,11 +161,12 @@ describe('FriendsService', () => {
 
       await expect(service.acceptRequest(2, 5)).rejects.toThrow('not found');
       expect(prismaMock.friend.update).not.toHaveBeenCalled();
+      expect(friendsGatewayMock.notifyRequestAccepted).not.toHaveBeenCalled();
     });
   });
 
   describe('removeOrDecline', () => {
-    it('should delete a friendship the user is part of', async () => {
+    it('should delete a friendship the user is part of and notify the other', async () => {
       prismaMock.friend.findFirst.mockResolvedValue({
         id: 5,
         userId: 1,
@@ -137,6 +175,20 @@ describe('FriendsService', () => {
       prismaMock.friend.delete.mockResolvedValue({ id: 5 });
 
       await service.removeOrDecline(1, 5);
+
+      expect(
+        friendsGatewayMock.notifyFriendshipRemoved,
+      ).toHaveBeenLastCalledWith(2, {
+        friendshipId: 5,
+      });
+
+      await service.removeOrDecline(2, 5);
+
+      expect(
+        friendsGatewayMock.notifyFriendshipRemoved,
+      ).toHaveBeenLastCalledWith(1, {
+        friendshipId: 5,
+      });
 
       expect(prismaMock.friend.delete).toHaveBeenCalledWith({
         where: {
@@ -152,6 +204,7 @@ describe('FriendsService', () => {
         NotFoundException,
       );
       expect(prismaMock.friend.delete).not.toHaveBeenCalled();
+      expect(friendsGatewayMock.notifyFriendshipRemoved).not.toHaveBeenCalled();
     });
   });
 

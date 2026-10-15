@@ -19,6 +19,8 @@ describe('MessagesService', () => {
     message: {
       create: jest.fn(),
       findMany: jest.fn(),
+      groupBy: jest.fn(),
+      updateMany: jest.fn(),
     },
     activity: {
       findFirst: jest.fn(),
@@ -174,6 +176,48 @@ describe('MessagesService', () => {
         { id: 1, activity: null },
         { id: 2, activity: null },
       ]);
+    });
+  });
+
+  describe('getUnreadSenderIds', () => {
+    it('should return the ids of the friends who sent unread messages', async () => {
+      prismaMock.message.groupBy.mockResolvedValue([
+        { senderId: 2 },
+        { senderId: 3 },
+      ]);
+
+      const result = await service.getUnreadSenderIds(1);
+
+      expect(prismaMock.message.groupBy).toHaveBeenCalledWith({
+        by: ['senderId'],
+        where: { receiverId: 1, readAt: null },
+      });
+      expect(result).toEqual([2, 3]);
+    });
+
+    it('should return an empty list when nothing is unread', async () => {
+      prismaMock.message.groupBy.mockResolvedValue(null);
+
+      await expect(service.markConversationRead(1, 2)).rejects.toBeInstanceOf(
+        ForbiddenException,
+      );
+      expect(prismaMock.message.updateMany).not.toHaveBeenCalled();
+    });
+
+    it('should only mark the unread messages received from that friend', async () => {
+      prismaMock.friend.findFirst.mockResolvedValue({
+        id: 5,
+        status: 'ACCEPTED',
+      });
+      prismaMock.message.updateMany.mockResolvedValue({ count: 3 });
+
+      const result = await service.markConversationRead(1, 2);
+
+      expect(prismaMock.message.updateMany).toHaveBeenCalledWith({
+        where: { receiverId: 1, senderId: 2, readAt: null },
+        data: { readAt: expect.any(Date) as Date },
+      });
+      expect(result).toEqual({ count: 3 });
     });
   });
 });

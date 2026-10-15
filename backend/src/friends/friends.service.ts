@@ -7,6 +7,7 @@ import {
 
 import { Prisma } from '../generated/prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
+import { FriendsGateway } from './friends.gateway';
 
 const SAFE_USER_SELECT = {
   id: true,
@@ -17,7 +18,10 @@ const SAFE_USER_SELECT = {
 
 @Injectable()
 export class FriendsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly friendsGateway: FriendsGateway,
+  ) {}
 
   async sendRequest(userId: number, friendId: number) {
     if (userId === friendId) {
@@ -47,9 +51,15 @@ export class FriendsService {
     }
 
     try {
-      return await this.prisma.friend.create({
+      const request = await this.prisma.friend.create({
         data: { userId, friendId, status: 'PENDING' },
+        include: { user: { select: SAFE_USER_SELECT } },
       });
+      this.friendsGateway.notifyRequestReceived(friendId, {
+        requestId: request.id,
+        from: request.user,
+      });
+      return request;
     } catch (error) {
       if (
         error instanceof Prisma.PrismaClientKnownRequestError &&
@@ -66,10 +76,16 @@ export class FriendsService {
       where: { id, friendId: userId, status: 'PENDING' },
     });
 
-    return this.prisma.friend.update({
+    const friendship = await this.prisma.friend.update({
       where: { id },
       data: { status: 'ACCEPTED' },
+      include: { friendUser: { select: SAFE_USER_SELECT } },
     });
+    this.friendsGateway.notifyRequestAccepted(friendship.userId, {
+      friendshipId: friendship.id,
+      friend: friendship.friendUser,
+    });
+    return friendship;
   }
 
   async removeOrDecline(userId: number, id: number) {
@@ -80,7 +96,13 @@ export class FriendsService {
       throw new NotFoundException();
     }
 
-    return this.prisma.friend.delete({ where: { id } });
+    const removed = await this.prisma.friend.delete({ where: { id } });
+    const otherUserId =
+      friendship.userId === userId ? friendship.friendId : friendship.userId;
+    this.friendsGateway.notifyFriendshipRemoved(otherUserId, {
+      friendshipId: id,
+    });
+    return removed;
   }
 
   async listFriends(userId: number) {

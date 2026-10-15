@@ -93,6 +93,7 @@ model Message {
   senderId    Int
   content     String
   sentAt      DateTime  @default(now())
+  readAt      DateTime?
   activityId  Int?
   activity    Activity?    @relation(fields: [activityId], references: [id])
   sender      User      @relation("SenderMessage", fields: [senderId], references: [id])

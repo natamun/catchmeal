@@ -5,6 +5,7 @@ import {
   Get,
   Param,
   ParseIntPipe,
+  Patch,
   Post,
   Request,
   UseGuards,
@@ -40,6 +41,17 @@ export class MessagesController {
     );
   }
 
+  @Get('messages/unread')
+  getUnread(
+    @Param('userId', ParseIntPipe) userId: number,
+    @Request() req: RequestWithUser,
+  ) {
+    if (req.user.userId !== userId) {
+      throw new ForbiddenException('You can only view your own messages');
+    }
+    return this.messagesService.getUnreadSenderIds(userId);
+  }
+
   @Get('messages/:otherUserId')
   getConversation(
     @Param('userId', ParseIntPipe) userId: number,
@@ -50,5 +62,17 @@ export class MessagesController {
       throw new ForbiddenException('You can only view your own conversations');
     }
     return this.messagesService.getConversation(userId, otherUserId);
+  }
+
+  @Patch('messages/:otherUserId/read')
+  markRead(
+    @Param('userId', ParseIntPipe) userId: number,
+    @Param('otherUserId', ParseIntPipe) otherUserId: number,
+    @Request() req: RequestWithUser,
+  ) {
+    if (req.user.userId !== userId) {
+      throw new ForbiddenException('You can only update your own messages');
+    }
+    return this.messagesService.markConversationRead(userId, otherUserId);
   }
 }
