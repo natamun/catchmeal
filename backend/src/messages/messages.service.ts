@@ -11,7 +11,11 @@ import { PrismaService } from '../prisma/prisma.service';
 
 const WITH_ACTIVITY = {
   activity: {
-    include: { user: { select: { id: true, username: true, name: true } } },
+    include: {
+      user: {
+        select: { id: true, username: true, name: true, avatarUrl: true },
+      },
+    },
   },
 } satisfies Prisma.MessageInclude;
 

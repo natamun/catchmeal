@@ -7,7 +7,12 @@ import { PrismaService } from '../prisma/prisma.service';
 import { ActivityGateway } from './activity.gateway';
 
 const STREAK_MILESTONES = [7, 30];
-const SAFE_USER_SELECT = { id: true, username: true, name: true } as const;
+const SAFE_USER_SELECT = {
+  id: true,
+  username: true,
+  name: true,
+  avatarUrl: true,
+} as const;
 
 function formatMessage(type: ActivityType, metadata: Prisma.JsonValue): string {
   switch (type) {
@@ -51,7 +56,12 @@ export class ActivityService {
     type: ActivityType;
     metadata: Prisma.JsonValue;
     createdAt: Date;
-    user: { id: number; username: string; name: string };
+    user: {
+      id: number;
+      username: string;
+      name: string;
+      avatarUrl: string | null;
+    };
   }) {
     return {
       id: activity.id,

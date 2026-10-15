@@ -1,6 +1,6 @@
 import { X } from 'lucide-react';
 
-import { Avatar } from './Avatar';
+import { Avatar } from '../ui/Avatar';
 import type { UserSummary } from './types';
 
 interface RequestRowProps {
@@ -18,7 +18,7 @@ export default function RequestRow({
 }: RequestRowProps) {
   return (
     <li className="flex items-center gap-3 border-b border-green-200 px-5 py-4 last:border-b-0">
-      <Avatar username={from.username} />
+      <Avatar username={from.username} avatarUrl={from.avatarUrl} />
       <div className="min-w-0 flex-1">
         <p className="truncate text-sm font-semibold text-green-800">
           {from.name}

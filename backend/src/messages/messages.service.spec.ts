@@ -91,7 +91,14 @@ describe('MessagesService', () => {
         include: {
           activity: {
             include: {
-              user: { select: { id: true, username: true, name: true } },
+              user: {
+                select: {
+                  id: true,
+                  username: true,
+                  name: true,
+                  avatarUrl: true,
+                },
+              },
             },
           },
         },
@@ -167,7 +174,14 @@ describe('MessagesService', () => {
         include: {
           activity: {
             include: {
-              user: { select: { id: true, username: true, name: true } },
+              user: {
+                select: {
+                  id: true,
+                  username: true,
+                  name: true,
+                  avatarUrl: true,
+                },
+              },
             },
           },
         },

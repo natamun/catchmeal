@@ -1,7 +1,7 @@
 import { MessageCircle, X } from 'lucide-react';
 
 import { formatRelativeTime } from '../../utils/formatRelativeTime';
-import { Avatar } from './Avatar';
+import { Avatar } from '../ui/Avatar';
 import type { UserSummary } from './types';
 
 interface FriendRowProps {
@@ -23,7 +23,11 @@ export default function FriendRow({
 }: FriendRowProps) {
   return (
     <li className="flex items-center gap-4 border-b border-green-200 px-5 py-4 last:border-b-0">
-      <Avatar username={friend.username} online={online} />
+      <Avatar
+        username={friend.username}
+        avatarUrl={friend.avatarUrl}
+        online={online}
+      />
       <div className="min-w-0 flex-1">
         <p className="truncate text-sm font-semibold text-green-800">
           {friend.name}
