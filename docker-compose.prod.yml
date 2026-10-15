@@ -18,6 +18,8 @@ services:
 
   caddy:
     image: caddy:2
+    environment:
+      DOMAIN: ${DOMAIN:-localhost}
     ports:
       - "80:80"
       - "443:443"

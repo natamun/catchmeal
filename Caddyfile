@@ -1,4 +1,4 @@
-localhost {
+{$DOMAIN:localhost} {
     handle /socket.io/* {
         reverse_proxy backend:3000
     }
