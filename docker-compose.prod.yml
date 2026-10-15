@@ -1,22 +1,20 @@
 services:
   frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile.prod
-      args:
-        #VITE_API_URL: ${VITE_API_URL}
-        VITE_API_URL: /api
+    image: ghcr.io/natamun/catchmeal-frontend:latest
     restart: unless-stopped
+    networks:
+      - proxy
 
   backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile.prod
+    image: ghcr.io/natamun/catchmeal-backend:latest
     env_file:
       - ./backend/.env
     environment:
       FRONTEND_URL: ${FRONTEND_URL}
     restart: unless-stopped
+    networks:
+      - proxy
+      - internal
 
   caddy:
     image: caddy:2
@@ -31,7 +29,13 @@ services:
       - frontend
       - backend
     restart: unless-stopped
+    networks:
+      - proxy
 
+networks:
+  proxy:
+  internal:
+    internal: true
 
 volumes:
   caddy_data:
