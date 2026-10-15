@@ -14,9 +14,8 @@ import { AuthGuard } from '@nestjs/passport';
 import { Throttle } from '@nestjs/throttler';
 import type { Request as ExpressRequest, Response } from 'express';
 
-import { AuthService, type SignInData } from './auth.service';
+import { CompleteOAuthProfileDto } from './dto/complete-oauth-profile.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
-import { RegisterDto } from './dto/register.dto';
 import { OptionalJwtAuthGuard } from './guards/optional-jwt.guard';
 import { PassportJwtAuthGuard } from './guards/passport-jwt.guard';
 import { PassportLocalGuard } from './guards/passport-local.guard';
@@ -67,7 +66,10 @@ function safeRedirectUrl(path: string = ''): string {
 
 @Controller('auth')
 export class PassportAuthController {
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    private usersService: UsersService,
+  ) {}
 
   @Throttle({ default: { limit: 5, ttl: 3_600_000 } })
   @Post('register')
@@ -109,6 +111,15 @@ export class PassportAuthController {
     return { user: request.user ? toUserResponse(request.user) : null };
   }
 
+  @Patch('complete-profile')
+  @UseGuards(PassportJwtAuthGuard)
+  async completeOAuthProfile(
+    @Request() request: RequestWithUser,
+    @Body() dto: CompleteOAuthProfileDto,
+  ) {
+    return this.usersService.completeOAuthProfile(request.user.userId, dto);
+  }
+
   @Get('google')
   @UseGuards(AuthGuard('google'))
   redirectToGoogle() {}
@@ -122,7 +133,8 @@ export class PassportAuthController {
     try {
       const { accessToken } = await this.authService.signIn(request.user);
       this.setAuthCookie(res, accessToken);
-      res.redirect(safeRedirectUrl());
+      const path = request.user.isNewUser ? '?onboarding=1' : '';
+      res.redirect(safeRedirectUrl(path));
     } catch (err) {
       console.error('[OAuth Google] signIn failed:', err);
       res.redirect(safeRedirectUrl('?error=oauth_failed'));
@@ -142,7 +154,8 @@ export class PassportAuthController {
     try {
       const { accessToken } = await this.authService.signIn(request.user);
       this.setAuthCookie(res, accessToken);
-      res.redirect(safeRedirectUrl());
+      const path = request.user.isNewUser ? '?onboarding=1' : '';
+      res.redirect(safeRedirectUrl(path));
     } catch (err) {
       console.error('[OAuth GitHub] signIn failed:', err);
       res.redirect(safeRedirectUrl('?error=oauth_failed'));
@@ -162,7 +175,8 @@ export class PassportAuthController {
     try {
       const { accessToken } = await this.authService.signIn(request.user);
       this.setAuthCookie(res, accessToken);
-      res.redirect(safeRedirectUrl());
+      const path = request.user.isNewUser ? '?onboarding=1' : '';
+      res.redirect(safeRedirectUrl(path));
     } catch (err) {
       console.error('[OAuth 42] signIn failed:', err);
       res.redirect(safeRedirectUrl('?error=oauth_failed'));

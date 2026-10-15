@@ -35,6 +35,7 @@ export type SignInData = {
   bodyWater?: number | null;
   muscleMass?: number | null;
   hasPassword?: boolean;
+  isNewUser?: boolean;
 };
 
 type AuthResult = {
@@ -131,6 +132,7 @@ export class AuthService {
         fatFreeMass: existingUser.fatFreeMass,
         bodyWater: existingUser.bodyWater,
         muscleMass: existingUser.muscleMass,
+        isNewUser: false,
       };
     }
 
@@ -142,7 +144,7 @@ export class AuthService {
         passwordHash: '',
       });
 
-      return { userId: newUser.id, username: newUser.username };
+      return { userId: newUser.id, username: newUser.username, isNewUser: true };
     } catch (error) {
       if (
         error instanceof Prisma.PrismaClientKnownRequestError &&
@@ -150,7 +152,12 @@ export class AuthService {
       ) {
         // Race condition: user was created between our check and insert
         const retried = await this.usersService.findUserByEmail(email);
-        if (retried) return { userId: retried.id, username: retried.username };
+        if (retried)
+          return {
+            userId: retried.id,
+            username: retried.username,
+            isNewUser: false,
+          };
       }
       throw error;
     }
