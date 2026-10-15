@@ -15,10 +15,15 @@ export class GdprService {
       where: { id: userId },
       include: {
         meal: { include: { items: true } },
+        foodItems: true,
         weightLogs: true,
         goalSettings: true,
         senderMessage: true,
         receiverMessage: true,
+        activities: true,
+        userFriend: {
+          include: { friendUser: { select: { username: true, name: true } } },
+        },
       },
     });
 
@@ -28,9 +33,15 @@ export class GdprService {
 
     await this.emailService.sendDataExportConfirmation(user.email);
 
-    // Exclude password hash from the export
+    // Exclude sensitive internal fields from the export
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { passwordHash: _passwordHash, ...safeProfile } = user;
+    const {
+      passwordHash: _passwordHash,
+      id: _id,
+      role: _role,
+      deletedAt: _deletedAt,
+      ...safeProfile
+    } = user;
 
     return {
       exportedAt: new Date().toISOString(),

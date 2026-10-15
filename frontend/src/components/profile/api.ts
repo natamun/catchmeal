@@ -58,21 +58,87 @@ export interface LogWeightInput {
   muscleMass: number | null;
 }
 
+interface ExportMeal {
+  name: string | null;
+  typeMeal: string | null;
+  loggedAt: string | null;
+  items: { kcal: number; protein: number; carbs: number; fat: number }[];
+}
+
+interface ExportFoodItem {
+  name: string;
+  brand: string | null;
+  kcal: number;
+  protein: number;
+  carbs: number;
+  fat: number;
+}
+
+interface ExportWeightLog {
+  weight: number;
+  bodyFat: number | null;
+  muscleMass: number | null;
+  loggedAt: string;
+}
+
+interface ExportGoalSetting {
+  startDate: string;
+  dailyCalories: number;
+  dailyProtein: number | null;
+  dailyCarbs: number | null;
+  dailyFat: number | null;
+  objective: string | null;
+}
+
+interface ExportMessage {
+  content: string;
+  sentAt: string;
+  readAt: string | null;
+}
+
+interface ExportActivity {
+  type: string;
+  createdAt: string;
+  metadata: unknown;
+}
+
+interface ExportFriend {
+  friendUser: { username: string; name: string };
+  status: string;
+  lastTimeConnected: string | null;
+}
+
 export interface DataExport {
   exportedAt: string;
   data: {
     profile: {
-      id: number;
       username: string;
       name: string;
       email: string;
-      role: string;
+      avatarUrl: string | null;
       createAt: string;
-      meal: unknown[];
-      weightLogs: unknown[];
-      goalSettings: unknown[];
-      senderMessage: unknown[];
-      receiverMessage: unknown[];
+      lastSeenAt: string | null;
+      height: number | null;
+      targetWeight: number | null;
+      dailyCalorieGoal: number | null;
+      dailyProteinGoal: number | null;
+      dailyCarbsGoal: number | null;
+      dailyFatGoal: number | null;
+      gender: string | null;
+      birthDate: string | null;
+      activityLevel: string | null;
+      bodyFat: number | null;
+      fatFreeMass: number | null;
+      bodyWater: number | null;
+      muscleMass: number | null;
+      meal: ExportMeal[];
+      foodItems: ExportFoodItem[];
+      weightLogs: ExportWeightLog[];
+      goalSettings: ExportGoalSetting[];
+      senderMessage: ExportMessage[];
+      receiverMessage: ExportMessage[];
+      activities: ExportActivity[];
+      userFriend: ExportFriend[];
     };
   };
 }
