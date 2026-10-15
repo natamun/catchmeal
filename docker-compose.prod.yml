@@ -1,43 +1,44 @@
 services:
   frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile.prod
-      args:
-        VITE_API_URL: ${VITE_API_URL}
-    ports:
-      - "8080:80"
+    image: ghcr.io/natamun/catchmeal-frontend:latest
     restart: unless-stopped
+    networks:
+      - proxy
 
   backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile.prod
-    ports:
-      - "3000:3000"
+    image: ghcr.io/natamun/catchmeal-backend:latest
+    env_file:
+      - ./backend/.env
     environment:
       FRONTEND_URL: ${FRONTEND_URL}
-      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
-    depends_on:
-      postgres:
-        condition: service_healthy
     restart: unless-stopped
-    command: sh -c "npx prisma migrate deploy && npm run start:prod"
+    networks:
+      - proxy
+      - internal
 
-  postgres:
-    image: postgres:16-alpine
+  caddy:
+    image: caddy:2
     environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
+      DOMAIN: ${DOMAIN:-localhost}
+    ports:
+      - "80:80"
+      - "443:443"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - frontend
+      - backend
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
-      interval: 2s
-      timeout: 3s
-      retries: 10
+    networks:
+      - proxy
+
+networks:
+  proxy:
+  internal:
+    internal: true
 
 volumes:
-  postgres_data:
+  caddy_data:
+  caddy_config:

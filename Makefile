@@ -6,9 +6,6 @@ all: dev
 dev:
 	$(DEV) up --build -V -d
 
-prod:
-	$(PROD) up --build -V -d
-
 logsBackend:
 	$(DEV) logs -f backend
 
@@ -24,6 +21,23 @@ fclean: clean
 	$(PROD) down --rmi all --volumes
 
 re: fclean all
+
+#-----	Prod	-----#
+
+prod:
+	$(PROD) -f docker-compose.build.yml up -d --build
+
+prodDown:
+	$(PROD) down
+
+prodLogs:
+	$(PROD) logs -f
+
+deploy:
+	$(PROD) pull
+	$(PROD) up -d
+
+#-----	Prod	-----#
 
 format:
 	npm run format --prefix frontend
