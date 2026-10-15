@@ -22,7 +22,7 @@ describe('ActivityService', () => {
   const to = jest.fn(() => ({ emit }));
   const activityGatewayMock = { server: { to } };
 
-  const user = { id: 1, username: 'alice', name: 'Alice' };
+  const user = { id: 1, username: 'alice', name: 'Alice', avatarUrl: null };
   const createdAt = new Date('2026-10-08T10:00:00.000Z');
 
   beforeEach(async () => {
@@ -119,7 +119,11 @@ describe('ActivityService', () => {
           type: ActivityType.MEAL_LOGGED,
           metadata: { name: 'Oeuf fromage', kcal: 350 },
         },
-        include: { user: { select: { id: true, username: true, name: true } } },
+        include: {
+          user: {
+            select: { id: true, username: true, name: true, avatarUrl: true },
+          },
+        },
       });
       expect(to).toHaveBeenCalledTimes(2);
       expect(to).toHaveBeenCalledWith('user:2');
@@ -257,7 +261,11 @@ describe('ActivityService', () => {
 
       expect(prismaMock.activity.findMany).toHaveBeenCalledWith({
         where: { userId: { in: [2, 3] }, user: { deletedAt: null } },
-        include: { user: { select: { id: true, username: true, name: true } } },
+        include: {
+          user: {
+            select: { id: true, username: true, name: true, avatarUrl: true },
+          },
+        },
         orderBy: { createdAt: 'desc' },
         take: 30,
       });
