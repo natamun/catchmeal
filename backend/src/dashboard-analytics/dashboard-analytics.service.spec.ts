@@ -14,6 +14,7 @@ describe('DashboardAnalyticsService', () => {
 
   beforeEach(async () => {
     jest.resetAllMocks();
+    prismaMock.goalSetting.findFirst.mockResolvedValue(null);
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         DashboardAnalyticsService,
@@ -196,7 +197,7 @@ describe('DashboardAnalyticsService', () => {
     ]);
   });
 
-  it('should replace the earlier goal from the day it changes', async () => {
+  it('should replace the earlier goal from the day it changes without carrying the weight forward', async () => {
     prismaMock.meal.findMany.mockResolvedValue([]);
     prismaMock.weightLog.findMany.mockResolvedValue([
       { id: 1, userId: 1, loggedAt: new Date('2026-08-17'), weight: 80 },
@@ -229,6 +230,7 @@ describe('DashboardAnalyticsService', () => {
       expectDayEntry({ weight: 80, goalKcal: 2000, objective: 'gain' }),
       expectDayEntry({
         day: '2026-08-18',
+        weight: null,
         goalKcal: 1600,
         objective: 'lose',
       }),
@@ -399,7 +401,7 @@ describe('DashboardAnalyticsService', () => {
     ]);
   });
 
-  it('should be return multiple day entry', async () => {
+  it('should be return multiple day entries without carrying weight or bodyFat forward', async () => {
     prismaMock.meal.findMany.mockResolvedValue([
       {
         id: 1,
@@ -482,6 +484,8 @@ describe('DashboardAnalyticsService', () => {
         totalProtein: 60,
         totalCarbs: 60,
         totalFat: 60,
+        weight: null,
+        bodyFat: null,
         day: '2026-08-17',
       }),
       expectDayEntry({
@@ -491,7 +495,49 @@ describe('DashboardAnalyticsService', () => {
         objective: 80,
         goalKcal: 2222,
       }),
-      expectDayEntry({ objective: 84, goalKcal: 1280, day: '2026-08-22' }),
+      expectDayEntry({
+        weight: null,
+        bodyFat: null,
+        objective: 84,
+        goalKcal: 1280,
+        day: '2026-08-22',
+      }),
+    ]);
+  });
+
+  it('should keep each body measure independent per day with no carry-forward across days', async () => {
+    prismaMock.meal.findMany.mockResolvedValue([]);
+    prismaMock.weightLog.findMany.mockResolvedValue([
+      {
+        id: 1,
+        userId: 1,
+        loggedAt: new Date('2026-08-16'),
+        weight: 80,
+        bodyFat: 20,
+        fatFreeMass: 64,
+        bodyWater: 50,
+        muscleMass: 55,
+      },
+      { id: 2, userId: 1, loggedAt: new Date('2026-08-18'), weight: 79 },
+    ]);
+    prismaMock.goalSetting.findMany.mockResolvedValue([]);
+
+    const dashboard = await service.getDashboard(
+      1,
+      new Date('2026-08-01'),
+      new Date('2026-08-31'),
+    );
+
+    expect(dashboard).toEqual([
+      expectDayEntry({
+        day: '2026-08-16',
+        weight: 80,
+        bodyFat: 20,
+        fatFreeMass: 64,
+        bodyWater: 50,
+        muscleMass: 55,
+      }),
+      expectDayEntry({ day: '2026-08-18', weight: 79 }),
     ]);
   });
 });

@@ -3,6 +3,21 @@ import { Injectable } from '@nestjs/common';
 import { GoalSetting, WeightLog } from '../generated/prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 
+type DashboardDay = {
+  day: string;
+  totalKcal: number | null;
+  totalProtein: number | null;
+  totalCarbs: number | null;
+  totalFat: number | null;
+  weight: number | null;
+  bodyFat: number | null;
+  fatFreeMass: number | null;
+  bodyWater: number | null;
+  muscleMass: number | null;
+  goalKcal: number | null;
+  objective: string | null;
+};
+
 @Injectable()
 export class DashboardAnalyticsService {
   constructor(private readonly prisma: PrismaService) {}
@@ -12,28 +27,36 @@ export class DashboardAnalyticsService {
    * @param userId - Id of a user to get data
    * @param from - Start date of the period to analyze
    * @param to - End date of hte period to analyze
-   * @returns Array of daily stats
+   * @returns Array of daily stats, one entry per day that has at least one
+   * meal, weight log or goal setting in the period, ordered from the most
+   * recent day to the oldest
    *  - day: date string(YYY-MM-DD)
-   *  - totalKcal: sum of calories logged at day
-   *  - totalProtein: the total amount of protein consumed per day
-   *  - totalCarbs: the total amount of carbs consumed per day
-   *  - totalFat: the total amount of fat consumed per day
-   *  - weight: the weight logged that day or null if none was set
-   *  - bodyFat: the value of body fat
-   *  - fatFreeMass: the fat free mass logged that day
-   *  - bodyWater: the body water logged that day
-   *  - muscleMass: the muscle mass logged that day
-   *  - goalKcal: the calorie goal or null if none was set
-   *  - objective: lose or gain weight
+   *  - totalKcal: sum of calories logged at day, or null if no meal was logged that day
+   *  - totalProtein: the total amount of protein consumed per day, or null if no meal was logged that day
+   *  - totalCarbs: the total amount of carbs consumed per day, or null if no meal was logged that day
+   *  - totalFat: the total amount of fat consumed per day, or null if no meal was logged that day
+   *  - weight: the weight logged that day, or null if none was logged that day
+   *  - bodyFat: the body fat logged that day, or null if none was logged that day
+   *  - fatFreeMass: the fat free mass logged that day, or null if none was logged that day
+   *  - bodyWater: the body water logged that day, or null if none was logged that day
+   *  - muscleMass: the muscle mass logged that day, or null if none was logged that day
+   *  - goalKcal: the calorie goal applicable that day, or null if none was set
+   *  - objective: lose or gain weight, applicable that day, or null if none was set
    */
-  async getDashboard(userId: number, from: Date, to: Date) {
+  async getDashboard(
+    userId: number,
+    from: Date,
+    to: Date,
+  ): Promise<DashboardDay[]> {
     const [meals, weightLogs, goals, previousGoal] = await Promise.all([
       this.prisma.meal.findMany({
         where: { userId: userId, loggedAt: { gte: from, lte: to } },
         include: {
           items: {
             include: {
-              foodItem: { select: { name: true, brand: true, baseUnit: true } },
+              foodItem: {
+                select: { name: true, brand: true, baseUnit: true },
+              },
             },
           },
         },
@@ -105,17 +128,22 @@ export class DashboardAnalyticsService {
 
     const dashboard = allDays.map((day) => {
       const goal = getGoalDate(new Date(day));
+      const log = weightLogsDay[day];
       return {
         day,
-        totalKcal: totalsByDay[day]?.kcal ?? null,
-        totalProtein: totalsByDay[day]?.protein ?? null,
-        totalCarbs: totalsByDay[day]?.carbs ?? null,
-        totalFat: totalsByDay[day]?.fat ?? null,
-        weight: weightLogsDay[day]?.weight ?? null,
-        bodyFat: weightLogsDay[day]?.bodyFat ?? null,
-        fatFreeMass: weightLogsDay[day]?.fatFreeMass ?? null,
-        bodyWater: weightLogsDay[day]?.bodyWater ?? null,
-        muscleMass: weightLogsDay[day]?.muscleMass ?? null,
+        totalKcal: totalsByDay[day] ? Math.round(totalsByDay[day].kcal) : null,
+        totalProtein: totalsByDay[day]
+          ? Math.round(totalsByDay[day].protein)
+          : null,
+        totalCarbs: totalsByDay[day]
+          ? Math.round(totalsByDay[day].carbs)
+          : null,
+        totalFat: totalsByDay[day] ? Math.round(totalsByDay[day].fat) : null,
+        weight: log?.weight ?? null,
+        bodyFat: log?.bodyFat ?? null,
+        fatFreeMass: log?.fatFreeMass ?? null,
+        bodyWater: log?.bodyWater ?? null,
+        muscleMass: log?.muscleMass ?? null,
         goalKcal: goal?.dailyCalories ?? null,
         objective: goal?.objective ?? null,
       };
