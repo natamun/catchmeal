@@ -59,3 +59,17 @@ export function getMe() {
     ({ user }) => user,
   );
 }
+
+export interface CompleteOAuthProfileInput {
+  username: string;
+  name: string;
+  email: string;
+}
+
+export function completeOAuthProfile(input: CompleteOAuthProfileInput) {
+  return request<AuthUser>(`${AUTH_URL}/complete-profile`, {
+    method: 'PATCH',
+    headers: JSON_HEADERS,
+    body: JSON.stringify(input),
+  });
+}

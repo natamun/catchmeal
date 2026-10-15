@@ -9,6 +9,7 @@ import Nav, { type Tab } from './components/layout/Nav';
 import AuthPage from './pages/AuthPage';
 import LandingPage from './pages/LandingPage';
 import LegalNoticePage from './pages/LegalNoticePage';
+import OAuthOnboardingPage from './pages/OAuthOnboardingPage';
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 import TermsOfServicePage from './pages/TermsOfServicePage';
 import { SocketProvider } from './socket/SocketProvider';
@@ -80,6 +81,14 @@ function AppShell() {
       return 'La connexion a échoué. Réessayez.';
     }
     return null;
+  });
+  const [isOnboarding, setIsOnboarding] = useState<boolean>(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('onboarding') === '1') {
+      window.history.replaceState({}, '', window.location.pathname);
+      return true;
+    }
+    return false;
   });
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isJournalPickerOpen, setIsJournalPickerOpen] = useState(false);
@@ -174,6 +183,19 @@ function AppShell() {
   const isAdmin = user?.role === 'ADMIN';
   const hasAssistant =
     activeTab === 'stats' || activeTab === 'home' || activeTab === 'food';
+
+  if (isOnboarding && user) {
+    return (
+      <OAuthOnboardingPage
+        prefill={{
+          username: user.username,
+          name: user.name ?? '',
+          email: '',
+        }}
+        onComplete={() => setIsOnboarding(false)}
+      />
+    );
+  }
 
   const pages: Record<Tab, React.ReactNode> = {
     home: (
