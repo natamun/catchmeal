@@ -23,8 +23,9 @@ fclean: clean
 re: fclean all
 
 #-----	Prod	-----#
+
 prod:
-	$(PROD) up --build -V -d
+	$(PROD) -f docker-compose.build.yml up -d --build
 
 prodDown:
 	$(PROD) down
@@ -33,8 +34,9 @@ prodLogs:
 	$(PROD) logs -f
 
 deploy:
-	git pull
-	$(PROD) up --build -d
+	$(PROD) pull
+	$(PROD) up -d
+
 #-----	Prod	-----#
 
 format:
