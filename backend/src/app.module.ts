@@ -1,5 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { APP_GUARD } from '@nestjs/core';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 
 import { ActivityModule } from './activity/activity.module';
 import { AdminModule } from './admin/admin.module';
@@ -21,6 +23,8 @@ import { WebsocketModule } from './websocket/websocket.module';
 
 @Module({
   imports: [
+    // Set the rate limit to 100 req/min
+    ThrottlerModule.forRoot([{ ttl: 60_000, limit: 100 }]),
     ConfigModule.forRoot(),
     FoodItemsModule,
     OpenFoodFactsModule,
@@ -40,6 +44,6 @@ import { WebsocketModule } from './websocket/websocket.module';
     PresenceModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, { provide: APP_GUARD, useClass: ThrottlerGuard }],
 })
 export class AppModule {}

@@ -10,6 +10,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
+import { Throttle } from '@nestjs/throttler';
 import type { Request as ExpressRequest, Response } from 'express';
 
 import { AuthService, type SignInData } from './auth.service';
@@ -64,6 +65,7 @@ function safeRedirectUrl(path: string = ''): string {
 export class PassportAuthController {
   constructor(private authService: AuthService) {}
 
+  @Throttle({ default: { limit: 5, ttl: 3_600_000 } })
   @Post('register')
   async register(
     @Body() dto: RegisterDto,
@@ -74,6 +76,10 @@ export class PassportAuthController {
     return toUserResponse(result);
   }
 
+  @Throttle({
+    short: { limit: 5, ttl: 60_000 },
+    long: { limit: 20, ttl: 3_600_000 },
+  })
   @HttpCode(HttpStatus.OK)
   @Post('login')
   @UseGuards(PassportLocalGuard)
