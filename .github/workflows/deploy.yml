@@ -9,13 +9,23 @@ permissions:
   contents: read
   packages: write
 
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
 jobs:
+  ci:
+    uses: ./.github/workflows/ci.yml
+
   deploy:
+    needs: ci
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
         with:
           persist-credentials: false
+
+      - uses: docker/setup-buildx-action@v3
 
       - uses: docker/login-action@v3
         with:
@@ -28,23 +38,34 @@ jobs:
           context: ./backend
           file: ./backend/Dockerfile.prod
           push: true
-          tags: ghcr.io/natamun/catchmeal-backend:latest
+          tags: |
+            ghcr.io/natamun/catchmeal-backend:latest
+            ghcr.io/natamun/catchmeal-backend:${{ github.sha }}
+          cache-from: type=gha,scope=backend
+          cache-to: type=gha,scope=backend,mode=max
 
       - uses: docker/build-push-action@v6
         with:
           context: ./frontend
           file: ./frontend/Dockerfile.prod
-          build-args: VITE_API_URL=/api
+          build-args: |
+            VITE_API_URL=/api
           push: true
-          tags: ghcr.io/natamun/catchmeal-frontend:latest
-      
+          tags: |
+            ghcr.io/natamun/catchmeal-frontend:latest
+            ghcr.io/natamun/catchmeal-frontend:${{ github.sha }}
+          cache-from: type=gha,scope=frontend
+          cache-to: type=gha,scope=frontend,mode=max
+
       - uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.VM_HOST }}
           username: ${{ secrets.VM_USER }}
           key: ${{ secrets.VM_SSH_KEY }}
           script: |
+            set -e
             cd ~/catchmeal
+            git pull --ff-only
             docker compose -f docker-compose.prod.yml pull
-            docker compose -f docker-compose.prod.yml up -d
+            docker compose -f docker-compose.prod.yml up -d --remove-orphans
             docker image prune -f
