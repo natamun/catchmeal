@@ -185,23 +185,24 @@ export function PrivacyPolicyContent({ heading: Heading = 'h2' }: Props) {
         </li>
       </ul>
 
-      <Heading>7. Vos droits (Art. 25 et suivants nLPD)</Heading>
+      <Heading>7. Vos droits (Art. 25 et suivants nLPD / RGPD)</Heading>
       <p>
-        Vous disposez à tout moment des droits suivants concernant vos données :
+        Vous disposez à tout moment des droits d'accès, de rectification, de
+        portabilité et de suppression de vos données personnelles et de santé.
+      </p>
+      <p>
+        Vous pouvez exercer directement l'ensemble de ces droits depuis les
+        paramètres de votre compte :
       </p>
       <ul>
         <li>
-          <strong>Droit d'accès et d'information :</strong> Connaître les
-          données stockées à votre sujet.
+          <strong>Droit d'accès et de portabilité :</strong> Exportation
+          instantanée de l'intégralité de vos données aux formats HTML et JSON.
         </li>
         <li>
-          <strong>Droit de rectification et de suppression :</strong> Demander
-          la correction ou la suppression définitive de votre compte et de vos
-          données de santé.
-        </li>
-        <li>
-          <strong>Droit de retrait du consentement :</strong> Retirer votre
-          consentement au traitement de vos données de santé.
+          <strong>Droit à l'effacement et retrait du consentement :</strong>{' '}
+          Suppression définitive et immédiate de votre compte et de toutes vos
+          données associées.
         </li>
       </ul>
     </>
