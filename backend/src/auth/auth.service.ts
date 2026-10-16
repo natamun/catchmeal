@@ -34,6 +34,7 @@ export type SignInData = {
   fatFreeMass?: number | null;
   bodyWater?: number | null;
   muscleMass?: number | null;
+  hasPassword?: boolean;
 };
 
 type AuthResult = {
@@ -52,6 +53,7 @@ type AuthResult = {
   gender?: string | null;
   birthDate?: Date | null;
   activityLevel?: string | null;
+  hasPassword?: boolean;
 };
 
 interface OAuthUserParams {
@@ -101,6 +103,7 @@ export class AuthService {
       fatFreeMass: user.fatFreeMass,
       bodyWater: user.bodyWater,
       muscleMass: user.muscleMass,
+      hasPassword: true,
     };
   }
 
@@ -164,7 +167,11 @@ export class AuthService {
         passwordHash,
       });
 
-      return this.signIn({ userId: user.id, username: user.username });
+      return this.signIn({
+        userId: user.id,
+        username: user.username,
+        hasPassword: true,
+      });
     } catch (error) {
       if (
         error instanceof Prisma.PrismaClientKnownRequestError &&
@@ -203,6 +210,7 @@ export class AuthService {
       gender: user.gender,
       birthDate: user.birthDate,
       activityLevel: user.activityLevel,
+      hasPassword: user.hasPassword,
     };
   }
 

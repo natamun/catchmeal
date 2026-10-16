@@ -46,6 +46,7 @@ function toUserResponse(data: SignInData): UserResponse {
     fatFreeMass: data.fatFreeMass,
     bodyWater: data.bodyWater,
     muscleMass: data.muscleMass,
+    hasPassword: data.hasPassword,
   };
 }
 

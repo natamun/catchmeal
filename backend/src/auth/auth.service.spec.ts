@@ -84,7 +84,11 @@ describe('AuthService', () => {
         password: 'motdepasse123',
       });
 
-      expect(result).toEqual({ userId: 1, username: 'alice' });
+      expect(result).toEqual({
+        userId: 1,
+        username: 'alice',
+        hasPassword: true,
+      });
     });
   });
 
@@ -123,6 +127,7 @@ describe('AuthService', () => {
         accessToken: 'signed-token',
         userId: 1,
         username: 'alice',
+        hasPassword: true,
       });
     });
 

@@ -25,11 +25,27 @@ describe('JwtStrategy', () => {
   });
 
   it('should return the user info when the user still exists', async () => {
-    usersServiceMock.findById.mockResolvedValue({ id: 1, username: 'alice' });
+    usersServiceMock.findById.mockResolvedValue({
+      id: 1,
+      username: 'alice',
+      passwordHash: 'hash',
+    });
 
     const result = await strategy.validate({ sub: 1, username: 'alice' });
 
-    expect(result).toEqual({ userId: 1, username: 'alice' });
+    expect(result).toEqual({ userId: 1, username: 'alice', hasPassword: true });
+  });
+
+  it('should report that an OAuth account has no password', async () => {
+    usersServiceMock.findById.mockResolvedValue({
+      id: 2,
+      username: 'bob',
+      passwordHash: '',
+    });
+
+    const result = await strategy.validate({ sub: 2, username: 'bob' });
+
+    expect(result).toMatchObject({ userId: 2, hasPassword: false });
   });
 
   it('should reject the token when the user no longer exists', async () => {
