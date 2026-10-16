@@ -33,9 +33,29 @@ prodDown:
 prodLogs:
 	$(PROD) logs -f
 
+prodRestartBackend:
+	$(PROD) up -d --force-recreate backend
+
+prodRestartFrontend:
+	$(PROD) up -d --force-recreate frontend
+
+prodRestartCaddy:
+	$(PROD) up -d --force-recreate caddy
+
+prodReloadCaddy:
+	$(PROD) exec caddy caddy reload --config /etc/caddy/Caddyfile --adapter caddyfile
+
 deploy:
 	$(PROD) pull
 	$(PROD) up -d
+
+prodDeployBackend:
+	$(PROD) pull backend
+	$(PROD) up -d backend
+
+prodDeployFrontend:
+	$(PROD) pull frontend
+	$(PROD) up -d frontend
 
 #-----	Prod	-----#
 
@@ -82,4 +102,9 @@ shellFrontend:
 prismaStudio:
 	$(DEV) exec backend npx prisma studio --port 5555 --browser none
 
-.PHONY: all dev prod logsBackend logsFrontend clean fclean re format formatCheck lint lintCheck build test testVerbose testE2e check migrate shellBackend shellFrontend prismaStudio
+.PHONY: all dev prod prodDown prodLogs deploy clean fclean re \
+	logsBackend logsFrontend restartBackend restartFrontend \
+	prodRestartBackend prodRestartFrontend prodRestartCaddy prodReloadCaddy \
+	prodDeployBackend prodDeployFrontend restart prodRestart prodLogsService \
+	format formatCheck lint lintCheck build test testVerbose testE2e check \
+	migrate shellBackend shellFrontend prismaStudio
