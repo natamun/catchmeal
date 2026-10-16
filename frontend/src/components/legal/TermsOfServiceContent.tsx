@@ -46,12 +46,17 @@ export function TermsOfServiceContent({ heading: Heading = 'h2' }: Props) {
       <p>Si vous utilisez les fonctionnalités sociales de l'application :</p>
       <ul>
         <li>
-          Vous êtes responsable des informations ou repas que vous choisissez de
-          rendre publics.
+          Vous êtes responsable des informations, repas et messages que vous
+          choisissez de publier ou de partager.
         </li>
         <li>
-          Il est strictement interdit de publier du contenu diffamatoire,
-          incitant à des troubles alimentaires ou contraire aux lois suisses.
+          L'utilisateur s'engage à maintenir un comportement respectueux dans
+          la messagerie privée.
+        </li>
+        <li>
+          Il est strictement interdit de publier ou de transmettre du contenu
+          diffamatoire, incitant à des troubles alimentaires, violent ou
+          contraire aux lois suisses et européennes en vigueur.
         </li>
       </ul>
 
