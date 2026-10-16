@@ -50,8 +50,8 @@ export function TermsOfServiceContent({ heading: Heading = 'h2' }: Props) {
           choisissez de publier ou de partager.
         </li>
         <li>
-          L'utilisateur s'engage à maintenir un comportement respectueux dans
-          la messagerie privée.
+          L'utilisateur s'engage à maintenir un comportement respectueux dans la
+          messagerie privée.
         </li>
         <li>
           Il est strictement interdit de publier ou de transmettre du contenu
