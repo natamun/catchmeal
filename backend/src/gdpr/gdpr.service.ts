@@ -13,6 +13,12 @@ export class GdprService {
   async exportUserData(userId: number) {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
+      omit: {
+        passwordHash: true,
+        id: true,
+        role: true,
+        deletedAt: true,
+      },
       include: {
         meal: { include: { items: true } },
         foodItems: true,
@@ -33,19 +39,9 @@ export class GdprService {
 
     await this.emailService.sendDataExportConfirmation(user.email);
 
-    // Exclude sensitive internal fields from the export
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const {
-      passwordHash: _passwordHash,
-      id: _id,
-      role: _role,
-      deletedAt: _deletedAt,
-      ...safeProfile
-    } = user;
-
     return {
       exportedAt: new Date().toISOString(),
-      data: { profile: safeProfile },
+      data: { profile: user },
     };
   }
 
