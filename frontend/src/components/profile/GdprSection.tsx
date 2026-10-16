@@ -156,13 +156,15 @@ export function GdprSection({
               chevron
             )}
           </button>
-          <button
-            type="button"
-            onClick={() => changePasswordDialogRef.current?.showModal()}
-            className={`${ROW_CLASS} text-green-600 hover:bg-green-50`}
-          >
-            Changer le mot de passe {chevron}
-          </button>
+          {user?.hasPassword !== false && (
+            <button
+              type="button"
+              onClick={() => changePasswordDialogRef.current?.showModal()}
+              className={`${ROW_CLASS} text-green-600 hover:bg-green-50`}
+            >
+              Changer le mot de passe {chevron}
+            </button>
+          )}
           <button
             type="button"
             onClick={onPolitiqueConfidentialite}

@@ -17,6 +17,7 @@ export interface AuthUser {
   gender?: string | null;
   birthDate?: string | null;
   activityLevel?: string | null;
+  hasPassword?: boolean;
 }
 
 export interface RegisterInput {

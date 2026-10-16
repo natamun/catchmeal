@@ -23,6 +23,7 @@ export interface AuthUser {
   fatFreeMass?: number | null;
   bodyWater?: number | null;
   muscleMass?: number | null;
+  hasPassword?: boolean;
 }
 
 export interface AuthContextValue {
