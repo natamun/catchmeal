@@ -188,7 +188,9 @@ export function GdprSection({
 }) {
   const { logout, user } = useAuth();
   const [exportLoading, setExportLoading] = useState(false);
-  const lastExportFormat = useRef<'html' | 'json'>('html');
+  const [lastExportFormat, setLastExportFormat] = useState<'html' | 'json'>(
+    'html',
+  );
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [deleteErrorToast, setDeleteErrorToast] = useState<string | null>(null);
   const deleteDialogRef = useRef<HTMLDialogElement | null>(null);
@@ -204,7 +206,7 @@ export function GdprSection({
   async function handleExport(format: 'html' | 'json') {
     if (!user) return;
     exportFormatDialogRef.current?.close();
-    lastExportFormat.current = format;
+    setLastExportFormat(format);
     setExportLoading(true);
     try {
       const data = await exportMyData();
@@ -346,7 +348,7 @@ export function GdprSection({
         maxWidth="sm"
       >
         <p className="text-sm text-green-600">
-          {lastExportFormat.current === 'html' ? (
+          {lastExportFormat === 'html' ? (
             <>
               Vos données ont été téléchargées. Ouvrez le fichier{' '}
               <strong>mes-donnees-catchmeal.html</strong> dans votre navigateur
