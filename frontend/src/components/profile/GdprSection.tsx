@@ -188,6 +188,10 @@ export function GdprSection({
 }) {
   const { logout, user } = useAuth();
   const [exportLoading, setExportLoading] = useState(false);
+  const [exportFormat, setExportFormat] = useState<'html' | 'json' | null>(
+    null,
+  );
+  const lastExportFormat = useRef<'html' | 'json'>('html');
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [deleteErrorToast, setDeleteErrorToast] = useState<string | null>(null);
   const deleteDialogRef = useRef<HTMLDialogElement | null>(null);
@@ -199,23 +203,38 @@ export function GdprSection({
 
   useTimeout(() => setPasswordToast(null), passwordToast ? 3000 : null);
 
-  async function handleExport() {
+  async function handleExport(format: 'html' | 'json') {
     if (!user) return;
     setExportLoading(true);
+    setExportFormat(format);
+    lastExportFormat.current = format;
     try {
       const data = await exportMyData();
-      const blob = new Blob([buildExportHtml(data)], { type: 'text/html' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = 'mes-donnees-catchmeal.html';
-      link.click();
-      URL.revokeObjectURL(url);
+      if (format === 'html') {
+        const blob = new Blob([buildExportHtml(data)], { type: 'text/html' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'mes-donnees-catchmeal.html';
+        link.click();
+        URL.revokeObjectURL(url);
+      } else {
+        const blob = new Blob([JSON.stringify(data.data.profile, null, 2)], {
+          type: 'application/json',
+        });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'mes-donnees-catchmeal.json';
+        link.click();
+        URL.revokeObjectURL(url);
+      }
       exportSuccessDialogRef.current?.showModal();
     } catch {
       exportErrorDialogRef.current?.showModal();
     } finally {
       setExportLoading(false);
+      setExportFormat(null);
     }
   }
 
@@ -257,12 +276,32 @@ export function GdprSection({
           </button>
           <button
             type="button"
-            onClick={() => void handleExport()}
+            onClick={() => void handleExport('html')}
             disabled={exportLoading}
             className={`${ROW_CLASS} text-green-600 hover:bg-green-50 disabled:pointer-events-none`}
           >
-            {exportLoading ? 'Export en cours...' : 'Exporter mes données'}
-            {exportLoading ? (
+            {exportLoading && exportFormat === 'html'
+              ? 'Export en cours...'
+              : 'Exporter mes données (HTML)'}
+            {exportLoading && exportFormat === 'html' ? (
+              <LoaderCircle
+                className="h-4 w-4 animate-spin text-green-400"
+                aria-hidden="true"
+              />
+            ) : (
+              chevron
+            )}
+          </button>
+          <button
+            type="button"
+            onClick={() => void handleExport('json')}
+            disabled={exportLoading}
+            className={`${ROW_CLASS} text-green-600 hover:bg-green-50 disabled:pointer-events-none`}
+          >
+            {exportLoading && exportFormat === 'json'
+              ? 'Export en cours...'
+              : 'Exporter mes données (JSON)'}
+            {exportLoading && exportFormat === 'json' ? (
               <LoaderCircle
                 className="h-4 w-4 animate-spin text-green-400"
                 aria-hidden="true"
@@ -303,9 +342,19 @@ export function GdprSection({
         maxWidth="sm"
       >
         <p className="text-sm text-green-600">
-          Vos données ont été téléchargées. Ouvrez le fichier{' '}
-          <strong>mes-donnees-catchmeal.html</strong> dans votre navigateur pour
-          les consulter.
+          {lastExportFormat.current === 'html' ? (
+            <>
+              Vos données ont été téléchargées. Ouvrez le fichier{' '}
+              <strong>mes-donnees-catchmeal.html</strong> dans votre navigateur
+              pour les consulter.
+            </>
+          ) : (
+            <>
+              Vos données ont été téléchargées. Ouvrez le fichier{' '}
+              <strong>mes-donnees-catchmeal.json</strong> dans n'importe quel
+              éditeur de texte pour les consulter.
+            </>
+          )}
         </p>
         <button
           type="button"
