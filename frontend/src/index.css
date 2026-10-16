@@ -348,6 +348,7 @@ body {
   .legal-document {
     color: var(--color-green-800);
     line-height: 1.7;
+    text-align: justify;
   }
 
   .legal-document h1 {
