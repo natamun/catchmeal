@@ -188,13 +188,11 @@ export function GdprSection({
 }) {
   const { logout, user } = useAuth();
   const [exportLoading, setExportLoading] = useState(false);
-  const [exportFormat, setExportFormat] = useState<'html' | 'json' | null>(
-    null,
-  );
   const lastExportFormat = useRef<'html' | 'json'>('html');
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [deleteErrorToast, setDeleteErrorToast] = useState<string | null>(null);
   const deleteDialogRef = useRef<HTMLDialogElement | null>(null);
+  const exportFormatDialogRef = useRef<HTMLDialogElement | null>(null);
   const exportSuccessDialogRef = useRef<HTMLDialogElement | null>(null);
   const exportErrorDialogRef = useRef<HTMLDialogElement | null>(null);
   const deleteSuccessDialogRef = useRef<HTMLDialogElement | null>(null);
@@ -205,9 +203,9 @@ export function GdprSection({
 
   async function handleExport(format: 'html' | 'json') {
     if (!user) return;
-    setExportLoading(true);
-    setExportFormat(format);
+    exportFormatDialogRef.current?.close();
     lastExportFormat.current = format;
+    setExportLoading(true);
     try {
       const data = await exportMyData();
       if (format === 'html') {
@@ -234,7 +232,6 @@ export function GdprSection({
       exportErrorDialogRef.current?.showModal();
     } finally {
       setExportLoading(false);
-      setExportFormat(null);
     }
   }
 
@@ -276,32 +273,12 @@ export function GdprSection({
           </button>
           <button
             type="button"
-            onClick={() => void handleExport('html')}
+            onClick={() => exportFormatDialogRef.current?.showModal()}
             disabled={exportLoading}
             className={`${ROW_CLASS} text-green-600 hover:bg-green-50 disabled:pointer-events-none`}
           >
-            {exportLoading && exportFormat === 'html'
-              ? 'Export en cours...'
-              : 'Exporter mes données (HTML)'}
-            {exportLoading && exportFormat === 'html' ? (
-              <LoaderCircle
-                className="h-4 w-4 animate-spin text-green-400"
-                aria-hidden="true"
-              />
-            ) : (
-              chevron
-            )}
-          </button>
-          <button
-            type="button"
-            onClick={() => void handleExport('json')}
-            disabled={exportLoading}
-            className={`${ROW_CLASS} text-green-600 hover:bg-green-50 disabled:pointer-events-none`}
-          >
-            {exportLoading && exportFormat === 'json'
-              ? 'Export en cours...'
-              : 'Exporter mes données (JSON)'}
-            {exportLoading && exportFormat === 'json' ? (
+            {exportLoading ? 'Export en cours...' : 'Exporter mes données'}
+            {exportLoading ? (
               <LoaderCircle
                 className="h-4 w-4 animate-spin text-green-400"
                 aria-hidden="true"
@@ -335,6 +312,33 @@ export function GdprSection({
           </button>
         </div>
       </SummaryCard>
+
+      <BaseDialog
+        dialogRef={exportFormatDialogRef}
+        title="Choisir le format d'export"
+        maxWidth="sm"
+      >
+        <p className="text-sm text-green-600">
+          Sélectionnez le format dans lequel vous souhaitez télécharger vos
+          données.
+        </p>
+        <div className="flex flex-col gap-3">
+          <button
+            type="button"
+            onClick={() => void handleExport('html')}
+            className="w-full cursor-pointer rounded-xl bg-green-500 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-green-600"
+          >
+            HTML — lisible dans un navigateur
+          </button>
+          <button
+            type="button"
+            onClick={() => void handleExport('json')}
+            className="w-full cursor-pointer rounded-xl border border-green-200 px-4 py-2.5 text-sm font-semibold text-green-700 transition-colors hover:bg-green-50"
+          >
+            JSON — format structuré pour applications
+          </button>
+        </div>
+      </BaseDialog>
 
       <BaseDialog
         dialogRef={exportSuccessDialogRef}
