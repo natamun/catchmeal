@@ -144,7 +144,11 @@ export class AuthService {
         passwordHash: '',
       });
 
-      return { userId: newUser.id, username: newUser.username, isNewUser: true };
+      return {
+        userId: newUser.id,
+        username: newUser.username,
+        isNewUser: true,
+      };
     } catch (error) {
       if (
         error instanceof Prisma.PrismaClientKnownRequestError &&

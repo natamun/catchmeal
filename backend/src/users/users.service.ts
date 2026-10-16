@@ -7,10 +7,10 @@ import {
 import 'multer';
 
 import { ActivityService } from '../activity/activity.service';
+import { CompleteOAuthProfileDto } from '../auth/dto/complete-oauth-profile.dto';
 import { ActivityType, Prisma } from '../generated/prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { SupabaseService } from '../supabase/supabase.service';
-import { CompleteOAuthProfileDto } from '../auth/dto/complete-oauth-profile.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 
 export const SAFE_USER_SELECT = {
