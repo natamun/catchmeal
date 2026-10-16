@@ -1,20 +1,25 @@
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 services:
   frontend:
     image: ghcr.io/natamun/catchmeal-frontend:latest
     restart: unless-stopped
-    networks:
-      - proxy
+    logging: *default-logging
+    security_opt:
+      - no-new-privileges:true
 
   backend:
     image: ghcr.io/natamun/catchmeal-backend:latest
     env_file:
       - ./backend/.env
-    environment:
-      FRONTEND_URL: ${FRONTEND_URL}
     restart: unless-stopped
-    networks:
-      - proxy
-      - internal
+    logging: *default-logging
+    security_opt:
+      - no-new-privileges:true
 
   caddy:
     image: caddy:2
@@ -23,21 +28,19 @@ services:
     ports:
       - "80:80"
       - "443:443"
+      - "443:443/udp"
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./logs/caddy:/var/log/caddy
       - caddy_data:/data
       - caddy_config:/config
     depends_on:
       - frontend
       - backend
     restart: unless-stopped
-    networks:
-      - proxy
-
-networks:
-  proxy:
-  internal:
-    internal: true
+    logging: *default-logging
+    security_opt:
+      - no-new-privileges:true
 
 volumes:
   caddy_data:
