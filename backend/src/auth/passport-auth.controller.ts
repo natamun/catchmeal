@@ -14,8 +14,11 @@ import { AuthGuard } from '@nestjs/passport';
 import { Throttle } from '@nestjs/throttler';
 import type { Request as ExpressRequest, Response } from 'express';
 
+import { UsersService } from '../users/users.service';
+import { AuthService, type SignInData } from './auth.service';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { CompleteOAuthProfileDto } from './dto/complete-oauth-profile.dto';
+import { RegisterDto } from './dto/register.dto';
 import { OptionalJwtAuthGuard } from './guards/optional-jwt.guard';
 import { PassportJwtAuthGuard } from './guards/passport-jwt.guard';
 import { PassportLocalGuard } from './guards/passport-local.guard';
@@ -113,7 +116,7 @@ export class PassportAuthController {
 
   @Patch('complete-profile')
   @UseGuards(PassportJwtAuthGuard)
-  async completeOAuthProfile(
+  completeOAuthProfile(
     @Request() request: RequestWithUser,
     @Body() dto: CompleteOAuthProfileDto,
   ) {
