@@ -1,12 +1,22 @@
 {$DOMAIN:localhost} {
+    encode zstd gzip
     handle /socket.io/* {
-        reverse_proxy backend:3000
+        reverse_proxy backend:3000 {
+            lb_try_duration 30s
+            lb_try_interval 500ms
+        }
     }
     handle_path /api/* {
-        reverse_proxy backend:3000
+        reverse_proxy backend:3000 {    
+            lb_try_duration 30s
+            lb_try_interval 500ms
+        }
     }
     handle {
-        reverse_proxy frontend:80
+        reverse_proxy frontend:80 {
+            lb_try_duration 30s
+            lb_try_interval 500ms
+        }
     }
     header {
         Strict-Transport-Security "max-age=31536000"
@@ -14,5 +24,21 @@
         X-Frame-Options "DENY"
         Referrer-Policy "strict-origin-when-cross-origin"
         -Server
+    }
+    log {
+        output file /var/log/caddy/access.log {
+            roll_size 10mb
+            roll_keep 5
+            roll_keep_for 720h
+        }
+        format filter {
+            wrap json
+            fields {
+                request>uri query {
+                    delete code
+                    delete state
+                }
+            }
+        }
     }
 }
