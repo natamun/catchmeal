@@ -14,8 +14,8 @@ import { AuthGuard } from '@nestjs/passport';
 import { Throttle } from '@nestjs/throttler';
 import type { Request as ExpressRequest, Response } from 'express';
 
-import { CompleteOAuthProfileDto } from './dto/complete-oauth-profile.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
+import { CompleteOAuthProfileDto } from './dto/complete-oauth-profile.dto';
 import { OptionalJwtAuthGuard } from './guards/optional-jwt.guard';
 import { PassportJwtAuthGuard } from './guards/passport-jwt.guard';
 import { PassportLocalGuard } from './guards/passport-local.guard';
