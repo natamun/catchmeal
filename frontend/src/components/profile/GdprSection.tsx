@@ -1,12 +1,14 @@
 import { useRef, useState } from 'react';
-import { AlertCircle, ChevronRight, LoaderCircle } from 'lucide-react';
+import { AlertCircle, Check, ChevronRight, LoaderCircle } from 'lucide-react';
 
 import { useAuth } from '../../auth/auth-context';
+import { useTimeout } from '../../hooks/useTimeout';
 import { BaseDialog } from '../ui/BaseDialog';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
 import SummaryCard from '../ui/SummaryCard';
 import { Toast } from '../ui/Toast';
 import { deleteMyAccount, exportMyData, type DataExport } from './api';
+import { ChangePasswordDialog } from './ChangePasswordDialog';
 
 const ROW_CLASS =
   'flex w-full cursor-pointer items-center justify-between border-b border-green-200 px-6 py-4 text-left text-sm transition-colors last:border-b-0';
@@ -77,6 +79,10 @@ export function GdprSection({
   const exportSuccessDialogRef = useRef<HTMLDialogElement | null>(null);
   const exportErrorDialogRef = useRef<HTMLDialogElement | null>(null);
   const deleteSuccessDialogRef = useRef<HTMLDialogElement | null>(null);
+  const changePasswordDialogRef = useRef<HTMLDialogElement | null>(null);
+  const [passwordToast, setPasswordToast] = useState<string | null>(null);
+
+  useTimeout(() => setPasswordToast(null), passwordToast ? 3000 : null);
 
   async function handleExport() {
     if (!user) return;
@@ -150,6 +156,15 @@ export function GdprSection({
               chevron
             )}
           </button>
+          {user?.hasPassword !== false && (
+            <button
+              type="button"
+              onClick={() => changePasswordDialogRef.current?.showModal()}
+              className={`${ROW_CLASS} text-green-600 hover:bg-green-50`}
+            >
+              Changer le mot de passe {chevron}
+            </button>
+          )}
           <button
             type="button"
             onClick={onPolitiqueConfidentialite}
@@ -230,6 +245,13 @@ export function GdprSection({
           OK
         </button>
       </BaseDialog>
+
+      <ChangePasswordDialog
+        dialogRef={changePasswordDialogRef}
+        onSuccess={() => setPasswordToast('Mot de passe modifié')}
+      />
+
+      <Toast message={passwordToast} icon={Check} />
 
       <Toast message={deleteErrorToast} icon={AlertCircle} />
     </>

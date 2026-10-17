@@ -1,4 +1,9 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
 
@@ -29,6 +34,7 @@ export type SignInData = {
   fatFreeMass?: number | null;
   bodyWater?: number | null;
   muscleMass?: number | null;
+  hasPassword?: boolean;
 };
 
 type AuthResult = {
@@ -47,6 +53,7 @@ type AuthResult = {
   gender?: string | null;
   birthDate?: Date | null;
   activityLevel?: string | null;
+  hasPassword?: boolean;
 };
 
 interface OAuthUserParams {
@@ -96,6 +103,7 @@ export class AuthService {
       fatFreeMass: user.fatFreeMass,
       bodyWater: user.bodyWater,
       muscleMass: user.muscleMass,
+      hasPassword: true,
     };
   }
 
@@ -159,7 +167,11 @@ export class AuthService {
         passwordHash,
       });
 
-      return this.signIn({ userId: user.id, username: user.username });
+      return this.signIn({
+        userId: user.id,
+        username: user.username,
+        hasPassword: true,
+      });
     } catch (error) {
       if (
         error instanceof Prisma.PrismaClientKnownRequestError &&
@@ -198,6 +210,40 @@ export class AuthService {
       gender: user.gender,
       birthDate: user.birthDate,
       activityLevel: user.activityLevel,
+      hasPassword: user.hasPassword,
     };
+  }
+
+  async changePassword(
+    userId: number,
+    currentPassword: string,
+    newPassword: string,
+  ) {
+    const user = await this.usersService.findById(userId);
+    if (!user) {
+      throw new UnauthorizedException();
+    }
+
+    if (!user.passwordHash) {
+      throw new BadRequestException(
+        "Ce compte utilise une connexion Google/Github/42 : il n'y a pas de mot de passe à modifier",
+      );
+    }
+
+    const matches = await bcrypt.compare(currentPassword, user.passwordHash);
+    if (!matches) {
+      throw new BadRequestException('Mot de passe actuel incorrect');
+    }
+
+    if (currentPassword === newPassword) {
+      throw new BadRequestException(
+        "Le nouveau mot de passe doit être différent de l'ancien",
+      );
+    }
+
+    const passwordHash = await bcrypt.hash(newPassword, SALT_ROUNDS);
+    await this.usersService.updatePasswordHash(userId, passwordHash);
+
+    return { success: true };
   }
 }

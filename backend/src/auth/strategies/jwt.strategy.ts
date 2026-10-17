@@ -45,6 +45,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       fatFreeMass: user.fatFreeMass,
       bodyWater: user.bodyWater,
       muscleMass: user.muscleMass,
+      hasPassword: Boolean(user.passwordHash),
     };
   }
 }

@@ -1,4 +1,8 @@
-import { ConflictException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
 import * as bcrypt from 'bcryptjs';
@@ -13,7 +17,9 @@ describe('AuthService', () => {
 
   const usersServiceMock = {
     findUserByName: jest.fn(),
+    findById: jest.fn(),
     create: jest.fn(),
+    updatePasswordHash: jest.fn(),
   };
 
   const jwtServiceMock = {
@@ -78,7 +84,11 @@ describe('AuthService', () => {
         password: 'motdepasse123',
       });
 
-      expect(result).toEqual({ userId: 1, username: 'alice' });
+      expect(result).toEqual({
+        userId: 1,
+        username: 'alice',
+        hasPassword: true,
+      });
     });
   });
 
@@ -117,6 +127,7 @@ describe('AuthService', () => {
         accessToken: 'signed-token',
         userId: 1,
         username: 'alice',
+        hasPassword: true,
       });
     });
 
@@ -156,6 +167,77 @@ describe('AuthService', () => {
         userId: 1,
         username: 'alice',
       });
+    });
+  });
+
+  describe('changePassword', () => {
+    const currentPassword = 'ancienmotdepasse';
+    const newPassword = 'nouveaumotdepasse';
+
+    it('should store a new hash and return success when the current password matches', async () => {
+      const passwordHash = await bcrypt.hash(currentPassword, 10);
+      usersServiceMock.findById.mockResolvedValue({ id: 1, passwordHash });
+      usersServiceMock.updatePasswordHash.mockResolvedValue({ id: 1 });
+
+      const result = await service.changePassword(
+        1,
+        currentPassword,
+        newPassword,
+      );
+
+      expect(result).toEqual({ success: true });
+
+      const calls = usersServiceMock.updatePasswordHash.mock.calls as [
+        number,
+        string,
+      ][];
+      const [userId, newHash] = calls[0];
+
+      expect(userId).toBe(1);
+      expect(newHash).not.toBe(newPassword);
+      expect(await bcrypt.compare(newPassword, newHash)).toBe(true);
+    });
+
+    it('should throw a BadRequestException and keep the hash when the current password is wrong', async () => {
+      const passwordHash = await bcrypt.hash(currentPassword, 10);
+      usersServiceMock.findById.mockResolvedValue({ id: 1, passwordHash });
+
+      await expect(
+        service.changePassword(1, 'mauvaismotdepasse', newPassword),
+      ).rejects.toBeInstanceOf(BadRequestException);
+
+      expect(usersServiceMock.updatePasswordHash).not.toHaveBeenCalled();
+    });
+
+    it('should throw a BadRequestException when the account has no password (OAuth)', async () => {
+      usersServiceMock.findById.mockResolvedValue({ id: 1, passwordHash: '' });
+
+      await expect(
+        service.changePassword(1, currentPassword, newPassword),
+      ).rejects.toBeInstanceOf(BadRequestException);
+
+      expect(usersServiceMock.updatePasswordHash).not.toHaveBeenCalled();
+    });
+
+    it('should throw a BadRequest when the new password is the same as the current one', async () => {
+      const passwordHash = await bcrypt.hash(currentPassword, 10);
+      usersServiceMock.findById.mockResolvedValue({ id: 1, passwordHash });
+
+      await expect(
+        service.changePassword(1, currentPassword, currentPassword),
+      ).rejects.toBeInstanceOf(BadRequestException);
+
+      expect(usersServiceMock.updatePasswordHash).not.toHaveBeenCalled();
+    });
+
+    it('should throw an UnauthorizedException when the user does not exist', async () => {
+      usersServiceMock.findById.mockResolvedValue(null);
+
+      await expect(
+        service.changePassword(1, currentPassword, newPassword),
+      ).rejects.toBeInstanceOf(UnauthorizedException);
+
+      expect(usersServiceMock.updatePasswordHash).not.toHaveBeenCalled();
     });
   });
 });

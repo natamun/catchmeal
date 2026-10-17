@@ -77,6 +77,11 @@ export interface DataExport {
   };
 }
 
+export interface ChangePasswordInput {
+  currentPassword: string;
+  newPassword: string;
+}
+
 export function exportMyData() {
   return request<DataExport>(`${BASE_URL}/gdpr/export`);
 }
@@ -84,6 +89,14 @@ export function exportMyData() {
 export function deleteMyAccount() {
   return request<{ message: string }>(`${BASE_URL}/gdpr/account`, {
     method: 'DELETE',
+  });
+}
+
+export function changePassword(input: ChangePasswordInput) {
+  return request<{ success: boolean }>(`${BASE_URL}/auth/password`, {
+    method: 'PATCH',
+    headers: JSON_HEADERS,
+    body: JSON.stringify(input),
   });
 }
 
