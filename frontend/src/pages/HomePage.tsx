@@ -1,12 +1,11 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { CheckCircle2, Zap } from 'lucide-react';
+import { useNavigate, useSearchParams } from 'react-router';
 
 import { useAuth } from '../auth/auth-context';
-import type { ActivityItem } from '../components/friends/types';
 import CalorieSummary from '../components/home/CalorieSummary';
 import DailyMealForm from '../components/home/DailyMealForm';
 import DailyMealList from '../components/home/DailyMealList';
-import DailyMealPicker from '../components/home/DailyMealPicker';
 import FriendsActivity from '../components/home/FriendsActivity';
 import MacroBreakdown from '../components/home/MacroBreakdown';
 import QuickAddDialog from '../components/home/QuickAddDialog';
@@ -20,6 +19,12 @@ import { useActivityFeed } from '../hooks/useActivityFeed';
 import { useDailyMeals } from '../hooks/useDailyMeals';
 import { usePresence } from '../hooks/usePresence';
 import { useTimeout } from '../hooks/useTimeout';
+import { PATHS } from '../routes';
+import {
+  journalAddPath,
+  journalPath,
+  parseDateParam,
+} from '../routing/journal';
 import { latestActivityPerFriend } from '../utils/latestActivityPerFriend';
 
 interface SectionEdit {
@@ -29,19 +34,12 @@ interface SectionEdit {
   meals: Meal[];
 }
 
-interface HomePageProps {
-  onReplyToActivity?: (activity: ActivityItem) => void;
-  onPickerChange?: (isOpen: boolean) => void;
-}
-
-export default function HomePage({
-  onReplyToActivity,
-  onPickerChange,
-}: HomePageProps) {
+export default function HomePage() {
   const { user } = useAuth();
-  const [selectedDate, setSelectedDate] = useState(() => new Date());
-  const [addingMealType, setAddingMealType] = useState<MealType | null>(null);
-  const isPickerOpen = addingMealType !== null;
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const dateParam = searchParams.get('date');
+  const selectedDate = useMemo(() => parseDateParam(dateParam), [dateParam]);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const { meals, foodItems, isReady, isLoading, loadError, reload, retry } =
     useDailyMeals(selectedDate);
@@ -61,11 +59,6 @@ export default function HomePage({
       });
     return () => controller.abort();
   }, [user]);
-
-  useEffect(() => {
-    onPickerChange?.(isPickerOpen);
-    return () => onPickerChange?.(false);
-  }, [isPickerOpen, onPickerChange]);
 
   const dayTotals = meals.reduce(
     (acc, meal) => {
@@ -110,81 +103,77 @@ export default function HomePage({
 
   return (
     <>
-      {addingMealType ? (
-        <DailyMealPicker
-          mealType={addingMealType}
-          date={selectedDate}
-          onClose={() => setAddingMealType(null)}
-          onAdded={() => {
-            setAddingMealType(null);
-            setSuccessMessage('Ajouté au journal');
-            reload();
-          }}
-        />
-      ) : (
-        <div className="animate-fade-in-up">
-          <h1 className="sr-only">Accueil</h1>
-          <div className="flex flex-col gap-4 md:gap-6">
-            <div className="flex flex-wrap justify-between gap-3">
-              <DateNavigator value={selectedDate} onChange={setSelectedDate} />
-              <button
-                type="button"
-                onClick={() => quickAddDialogRef.current?.showModal()}
-                aria-label="Ajout rapide"
-                title="Ajout rapide"
-                className="flex cursor-pointer items-center justify-center gap-2 rounded-xl bg-green-500 px-3 text-sm font-medium text-white transition-colors hover:bg-green-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-400 max-2xs:order-first max-2xs:w-full max-2xs:py-2.5 xs:px-4"
-              >
-                <Zap className="h-4 w-4" />
-                <span className="hidden max-2xs:inline xs:inline">
-                  Ajout rapide
-                </span>
-              </button>
-            </div>
-            <div
-              key={selectedDate.toDateString()}
-              className="flex animate-fade-in-up flex-col gap-4 md:gap-6"
+      <div className="animate-fade-in-up">
+        <h1 className="sr-only">Accueil</h1>
+        <div className="flex flex-col gap-4 md:gap-6">
+          <div className="flex flex-wrap justify-between gap-3">
+            <DateNavigator
+              value={selectedDate}
+              onChange={(date) =>
+                void navigate(journalPath(date), { replace: true })
+              }
+            />
+            <button
+              type="button"
+              onClick={() => quickAddDialogRef.current?.showModal()}
+              aria-label="Ajout rapide"
+              title="Ajout rapide"
+              className="flex cursor-pointer items-center justify-center gap-2 rounded-xl bg-green-500 px-3 text-sm font-medium text-white transition-colors hover:bg-green-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-400 max-2xs:order-first max-2xs:w-full max-2xs:py-2.5 xs:px-4"
             >
-              <div className="grid auto-rows-fr grid-cols-1 gap-4 md:gap-6 lg:grid-cols-3">
-                <CalorieSummary
-                  consumed={Math.round(dayTotals.kcal)}
-                  goal={user.dailyCalorieGoal ?? 2000}
-                  isLoading={isLoading}
-                  unavailable={unavailable}
-                />
-                <MacroBreakdown
-                  protein={Math.round(dayTotals.protein)}
-                  proteinGoal={user.dailyProteinGoal ?? 150}
-                  carbs={Math.round(dayTotals.carbs)}
-                  carbsGoal={user.dailyCarbsGoal ?? 250}
-                  fat={Math.round(dayTotals.fat)}
-                  fatGoal={user.dailyFatGoal ?? 65}
-                  isLoading={isLoading}
-                  unavailable={unavailable}
-                />
-                <WeightWidget
-                  history={weightHistory}
-                  hasError={weightError}
-                  goalWeight={user.targetWeight ?? null}
-                />
-              </div>
-              <DailyMealList
-                meals={meals}
-                foodItems={foodItems}
+              <Zap className="h-4 w-4" />
+              <span className="hidden max-2xs:inline xs:inline">
+                Ajout rapide
+              </span>
+            </button>
+          </div>
+          <div
+            key={selectedDate.toDateString()}
+            className="flex animate-fade-in-up flex-col gap-4 md:gap-6"
+          >
+            <div className="grid auto-rows-fr grid-cols-1 gap-4 md:gap-6 lg:grid-cols-3">
+              <CalorieSummary
+                consumed={Math.round(dayTotals.kcal)}
+                goal={user.dailyCalorieGoal ?? 2000}
                 isLoading={isLoading}
-                loadError={loadError}
-                onRetry={retry}
-                onAdd={setAddingMealType}
-                onEdit={openSectionEditor}
+                unavailable={unavailable}
+              />
+              <MacroBreakdown
+                protein={Math.round(dayTotals.protein)}
+                proteinGoal={user.dailyProteinGoal ?? 150}
+                carbs={Math.round(dayTotals.carbs)}
+                carbsGoal={user.dailyCarbsGoal ?? 250}
+                fat={Math.round(dayTotals.fat)}
+                fatGoal={user.dailyFatGoal ?? 65}
+                isLoading={isLoading}
+                unavailable={unavailable}
+              />
+              <WeightWidget
+                history={weightHistory}
+                hasError={weightError}
+                goalWeight={user.targetWeight ?? null}
               />
             </div>
-            <FriendsActivity
-              activities={latestActivities}
-              presence={presence}
-              onReply={(activity) => onReplyToActivity?.(activity)}
+            <DailyMealList
+              meals={meals}
+              foodItems={foodItems}
+              isLoading={isLoading}
+              loadError={loadError}
+              onRetry={retry}
+              onAdd={(mealType) =>
+                void navigate(journalAddPath(mealType, selectedDate))
+              }
+              onEdit={openSectionEditor}
             />
           </div>
+          <FriendsActivity
+            activities={latestActivities}
+            presence={presence}
+            onReply={(activity) =>
+              void navigate(PATHS.friends, { state: { replyTo: activity } })
+            }
+          />
         </div>
-      )}
+      </div>
       <DailyMealForm
         dialogRef={editDialogRef}
         mealType={sectionEdit.mealType}

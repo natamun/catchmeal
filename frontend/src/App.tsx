@@ -5,15 +5,12 @@ import {
   Route,
   Routes,
   useNavigate,
-  useOutletContext,
   useSearchParams,
 } from 'react-router';
 
 import { useAuth } from './auth/auth-context';
 import { AuthProvider } from './auth/AuthProvider';
-import AppLayout, {
-  type AppLayoutContext,
-} from './components/layout/AppLayout';
+import AppLayout from './components/layout/AppLayout';
 import { deleteMyAccount } from './components/profile/api';
 import AuthPage from './pages/AuthPage';
 import LandingPage from './pages/LandingPage';
@@ -31,6 +28,7 @@ const PRELOAD_DELAY_MS = 1000;
 
 const loaders = {
   home: () => import('./pages/HomePage'),
+  journalAdd: () => import('./pages/JournalAddPage'),
   food: () => import('./pages/FoodPage'),
   stats: () => import('./pages/StatsPage'),
   friends: () => import('./pages/FriendsPage'),
@@ -39,6 +37,7 @@ const loaders = {
 };
 
 const HomePage = lazy(loaders.home);
+const JournalAddPage = lazy(loaders.journalAdd);
 const FoodPage = lazy(loaders.food);
 const StatsPage = lazy(loaders.stats);
 const FriendsPage = lazy(loaders.friends);
@@ -112,33 +111,6 @@ function WelcomeRoute() {
   );
 }
 
-function HomeRoute() {
-  const navigate = useNavigate();
-  const { setPendingReply, setIsJournalPickerOpen } =
-    useOutletContext<AppLayoutContext>();
-
-  return (
-    <HomePage
-      onReplyToActivity={(activity) => {
-        setPendingReply(activity);
-        void navigate(PATHS.friends);
-      }}
-      onPickerChange={setIsJournalPickerOpen}
-    />
-  );
-}
-
-function FriendsRoute() {
-  const { pendingReply, setPendingReply } =
-    useOutletContext<AppLayoutContext>();
-
-  useEffect(() => {
-    setPendingReply(null);
-  }, [setPendingReply]);
-
-  return <FriendsPage pendingReply={pendingReply} />;
-}
-
 function AppRoutes() {
   const { status, user } = useAuth();
   const role = user?.role;
@@ -149,6 +121,7 @@ function AppRoutes() {
     if (status !== 'authenticated') return;
 
     const timer = window.setTimeout(() => {
+      preload(loaders.journalAdd);
       preload(loaders.food);
       preload(loaders.stats);
       preload(loaders.friends);
@@ -204,10 +177,11 @@ function AppRoutes() {
           </RequireAuth>
         }
       >
-        <Route path={PATHS.home} element={<HomeRoute />} />
+        <Route path={PATHS.home} element={<HomePage />} />
+        <Route path={PATHS.journalAdd} element={<JournalAddPage />} />
         <Route path={PATHS.food} element={<FoodPage />} />
         <Route path={PATHS.stats} element={<StatsPage />} />
-        <Route path={PATHS.friends} element={<FriendsRoute />} />
+        <Route path={PATHS.friends} element={<FriendsPage />} />
         <Route path={PATHS.profile} element={<ProfilePage />} />
         <Route
           path={PATHS.admin}

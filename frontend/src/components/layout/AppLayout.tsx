@@ -1,17 +1,21 @@
 import { Suspense, useState } from 'react';
-import { Outlet, useLocation } from 'react-router';
+import { CheckCircle2 } from 'lucide-react';
+import { Outlet, useLocation, useMatch } from 'react-router';
 
 import { useAuth } from '../../auth/auth-context';
+import { useTimeout } from '../../hooks/useTimeout';
 import { PATHS } from '../../routes';
 import type { ChatMessage } from '../../types/ChatBotType';
 import ChatBotPopup from '../ai/ChatBotPopup';
-import type { ActivityItem } from '../friends/types';
+import { Toast } from '../ui/Toast';
 import { ConnectionBanner } from './ConnectionBanner';
 import Nav, { type Tab } from './Nav';
 
 const TABS: Tab[] = ['home', 'food', 'stats', 'friends', 'profile', 'admin'];
 
 const ASSISTANT_TABS: Tab[] = ['home', 'stats', 'food'];
+
+const TOAST_DURATION_MS = 3000;
 
 const WELCOME_MESSAGE: ChatMessage = {
   role: 'assistant',
@@ -20,9 +24,7 @@ const WELCOME_MESSAGE: ChatMessage = {
 };
 
 export interface AppLayoutContext {
-  pendingReply: ActivityItem | null;
-  setPendingReply: (activity: ActivityItem | null) => void;
-  setIsJournalPickerOpen: (isOpen: boolean) => void;
+  showToast: (message: string) => void;
 }
 
 function tabFromPath(pathname: string): Tab {
@@ -36,20 +38,18 @@ function tabFromPath(pathname: string): Tab {
 export default function AppLayout() {
   const { user } = useAuth();
   const { pathname } = useLocation();
-  const [pendingReply, setPendingReply] = useState<ActivityItem | null>(null);
-  const [isJournalPickerOpen, setIsJournalPickerOpen] = useState(false);
+  const isAddingToJournal = useMatch(PATHS.journalAdd) !== null;
+  const [toast, setToast] = useState<string | null>(null);
   const [isAssistantOpen, setIsAssistantOpen] = useState(false);
   const [assistantMessages, setAssistantMessages] = useState<ChatMessage[]>([
     WELCOME_MESSAGE,
   ]);
 
+  useTimeout(() => setToast(null), toast ? TOAST_DURATION_MS : null);
+
   const activeTab = tabFromPath(pathname);
   const hasAssistant = ASSISTANT_TABS.includes(activeTab);
-  const context: AppLayoutContext = {
-    pendingReply,
-    setPendingReply,
-    setIsJournalPickerOpen,
-  };
+  const context: AppLayoutContext = { showToast: setToast };
 
   return (
     <div className="min-h-screen bg-green-50">
@@ -73,7 +73,7 @@ export default function AppLayout() {
           <Outlet context={context} />
         </Suspense>
       </main>
-      {hasAssistant && !isJournalPickerOpen && (
+      {hasAssistant && !isAddingToJournal && (
         <ChatBotPopup
           isOpen={isAssistantOpen}
           onToggle={setIsAssistantOpen}
@@ -82,6 +82,7 @@ export default function AppLayout() {
           activePage={activeTab}
         />
       )}
+      <Toast message={toast} icon={CheckCircle2} />
     </div>
   );
 }

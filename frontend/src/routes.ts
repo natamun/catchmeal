@@ -7,6 +7,7 @@ export const PATHS = {
   terms: '/terms',
   welcome: '/welcome',
   home: '/home',
+  journalAdd: '/home/add/:mealType',
   food: '/food',
   stats: '/stats',
   friends: '/friends',
