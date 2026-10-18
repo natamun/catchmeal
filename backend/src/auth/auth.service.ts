@@ -18,6 +18,7 @@ type AuthInput = { username: string; password: string };
 export type SignInData = {
   userId: number;
   username: string;
+  email?: string;
   role?: string;
   name?: string;
   avatarUrl?: string | null;
@@ -117,6 +118,7 @@ export class AuthService {
       return {
         userId: existingUser.id,
         username: existingUser.username,
+        email: existingUser.email,
         name: existingUser.name,
         avatarUrl: existingUser.avatarUrl,
         height: existingUser.height,
@@ -147,6 +149,7 @@ export class AuthService {
       return {
         userId: newUser.id,
         username: newUser.username,
+        email: newUser.email,
         isNewUser: true,
       };
     } catch (error) {
