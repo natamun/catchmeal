@@ -44,6 +44,7 @@ export class UsersService {
     name: string;
     email: string;
     passwordHash: string;
+    oauthProvider?: string;
   }) {
     return this.prisma.user.create({ data });
   }

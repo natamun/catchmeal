@@ -55,6 +55,7 @@ export class FortyTwoStrategy extends PassportStrategy(Strategy, '42') {
       username: `42_${profile.login}`,
       name: profile.displayname,
       email: profile.email,
+      provider: '42',
     });
   }
 }

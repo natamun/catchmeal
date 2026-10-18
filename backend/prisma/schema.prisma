@@ -38,6 +38,7 @@ model User {
   name              String
   email             String        @unique
   passwordHash      String
+  oauthProvider     String?
   avatarUrl         String?
   height            Float?
   targetWeight      Float?

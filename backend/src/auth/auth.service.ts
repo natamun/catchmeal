@@ -62,6 +62,7 @@ interface OAuthUserParams {
   username: string;
   name: string;
   email: string;
+  provider: 'google' | 'github' | '42';
 }
 
 @Injectable()
@@ -110,7 +111,7 @@ export class AuthService {
   }
 
   async findOrCreateFromOAuth(params: OAuthUserParams): Promise<SignInData> {
-    const { username, name, email } = params;
+    const { username, name, email, provider } = params;
 
     const existingUser = await this.usersService.findUserByEmail(email);
 
@@ -144,6 +145,7 @@ export class AuthService {
         name,
         email,
         passwordHash: '',
+        oauthProvider: provider,
       });
 
       return {

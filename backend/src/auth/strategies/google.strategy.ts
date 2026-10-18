@@ -36,6 +36,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
       username: `google_${profile.id}`,
       name: displayName,
       email,
+      provider: 'google',
     });
   }
 }
