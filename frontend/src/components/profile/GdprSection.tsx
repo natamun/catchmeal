@@ -1,8 +1,10 @@
 import { useRef, useState } from 'react';
 import { AlertCircle, Check, ChevronRight, LoaderCircle } from 'lucide-react';
+import { Link } from 'react-router';
 
 import { useAuth } from '../../auth/auth-context';
 import { useTimeout } from '../../hooks/useTimeout';
+import { PATHS } from '../../routes';
 import { BaseDialog } from '../ui/BaseDialog';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
 import SummaryCard from '../ui/SummaryCard';
@@ -181,11 +183,7 @@ function buildExportHtml(data: DataExport): string {
 </html>`;
 }
 
-export function GdprSection({
-  onPolitiqueConfidentialite,
-}: {
-  onPolitiqueConfidentialite: () => void;
-}) {
+export function GdprSection() {
   const { logout, user } = useAuth();
   const [exportLoading, setExportLoading] = useState(false);
   const [lastExportFormat, setLastExportFormat] = useState<'html' | 'json'>(
@@ -298,13 +296,12 @@ export function GdprSection({
               Changer le mot de passe {chevron}
             </button>
           )}
-          <button
-            type="button"
-            onClick={onPolitiqueConfidentialite}
+          <Link
+            to={PATHS.privacy}
             className={`${ROW_CLASS} text-green-600 hover:bg-green-50`}
           >
             Politique de confidentialité et RGPD {chevron}
-          </button>
+          </Link>
           <button
             type="button"
             onClick={openDeleteDialog}

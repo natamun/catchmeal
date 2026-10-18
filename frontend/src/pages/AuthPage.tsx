@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react';
 import { ArrowLeft } from 'lucide-react';
+import { Link, useLocation, useMatch, useNavigate } from 'react-router';
 
 import { useAuth } from '../auth/auth-context';
 import AuthBrandPanel from '../components/auth/AuthBrandPanel';
@@ -11,15 +12,12 @@ import { Brand } from '../components/ui/Brand';
 import { FieldError } from '../components/ui/FieldError';
 import { Input } from '../components/ui/Input';
 import { useTimeout } from '../hooks/useTimeout';
+import { PATHS } from '../routes';
 import { requestErrorMessage } from '../utils/requestErrorMessage';
 
 type Mode = 'login' | 'register';
 
-interface Props {
-  initialMode: Mode;
-  onCancel: () => void;
-  oauthError?: string | null;
-}
+const OAUTH_ERROR_MESSAGE = 'La connexion a échoué. Réessayez.';
 
 interface AuthFormState {
   username: string;
@@ -83,9 +81,15 @@ function validateAuthForm(
   return errors;
 }
 
-export default function AuthPage({ initialMode, onCancel, oauthError }: Props) {
+export default function AuthPage() {
   const { login, register } = useAuth();
-  const [mode, setMode] = useState<Mode>(initialMode);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const mode: Mode = useMatch(PATHS.register) ? 'register' : 'login';
+  const oauthError =
+    (location.state as { oauthFailed?: boolean } | null)?.oauthFailed === true
+      ? OAUTH_ERROR_MESSAGE
+      : null;
   const [form, setForm] = useState<AuthFormState>(EMPTY_FORM);
   const [touched, setTouched] = useState<
     Partial<Record<keyof AuthFormState, boolean>>
@@ -124,7 +128,10 @@ export default function AuthPage({ initialMode, onCancel, oauthError }: Props) {
       : undefined;
 
   const switchMode = (nextMode: Mode) => {
-    setMode(nextMode);
+    void navigate(nextMode === 'login' ? PATHS.login : PATHS.register, {
+      replace: true,
+      state: location.state as unknown,
+    });
     setTouched({});
     setSubmitAttempted(false);
     setError(null);
@@ -179,14 +186,13 @@ export default function AuthPage({ initialMode, onCancel, oauthError }: Props) {
         >
           <div className="w-full max-w-sm rounded-2xl border border-green-200 bg-white p-6 shadow-sm lg:border-0 lg:p-0 lg:shadow-none">
             <div className="mb-6 flex items-center justify-between">
-              <button
-                type="button"
-                onClick={onCancel}
-                className="flex cursor-pointer items-center gap-2 text-sm font-medium text-green-700 transition-colors hover:text-green-500"
+              <Link
+                to={PATHS.landing}
+                className="flex items-center gap-2 text-sm font-medium text-green-700 transition-colors hover:text-green-500"
               >
                 <ArrowLeft className="h-4 w-4" aria-hidden="true" />
                 Retour
-              </button>
+              </Link>
               <div className="lg:hidden">
                 <Brand />
               </div>

@@ -4,7 +4,6 @@ import {
   Navigate,
   Route,
   Routes,
-  useLocation,
   useNavigate,
   useOutletContext,
   useSearchParams,
@@ -15,7 +14,6 @@ import { AuthProvider } from './auth/AuthProvider';
 import AppLayout, {
   type AppLayoutContext,
 } from './components/layout/AppLayout';
-import type { LegalPageId } from './components/legal/LegalLayout';
 import { deleteMyAccount } from './components/profile/api';
 import AuthPage from './pages/AuthPage';
 import LandingPage from './pages/LandingPage';
@@ -30,13 +28,6 @@ import { SocketProvider } from './socket/SocketProvider';
 
 const SESSION_HINT_KEY = 'session-hint';
 const PRELOAD_DELAY_MS = 1000;
-const OAUTH_ERROR_MESSAGE = 'La connexion a échoué. Réessayez.';
-
-const LEGAL_PATHS: Record<LegalPageId, string> = {
-  'mentions-legales': PATHS.legalNotice,
-  confidentialite: PATHS.privacy,
-  conditions: PATHS.terms,
-};
 
 const loaders = {
   home: () => import('./pages/HomePage'),
@@ -79,7 +70,6 @@ if (hasSessionHint()) preload(loaders.home);
 
 function LandingRoute() {
   const { status } = useAuth();
-  const navigate = useNavigate();
   const [params] = useSearchParams();
 
   if (params.get('error') === 'oauth_failed') {
@@ -95,53 +85,7 @@ function LandingRoute() {
     );
   }
 
-  return (
-    <LandingPage
-      onLogin={() => void navigate(PATHS.login)}
-      onRegister={() => void navigate(PATHS.register)}
-      onMentionsLegales={() => void navigate(PATHS.legalNotice)}
-      onConfidentialite={() => void navigate(PATHS.privacy)}
-      onConditions={() => void navigate(PATHS.terms)}
-    />
-  );
-}
-
-function AuthRoute({ mode }: { mode: 'login' | 'register' }) {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const oauthFailed =
-    (location.state as { oauthFailed?: boolean } | null)?.oauthFailed === true;
-
-  return (
-    <RequireGuest>
-      <AuthPage
-        key={mode}
-        initialMode={mode}
-        onCancel={() => void navigate(PATHS.landing)}
-        oauthError={oauthFailed ? OAUTH_ERROR_MESSAGE : null}
-      />
-    </RequireGuest>
-  );
-}
-
-function LegalRoute({ page }: { page: LegalPageId }) {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const props = {
-    onBack: () =>
-      void (location.key === 'default'
-        ? navigate(PATHS.landing)
-        : navigate(-1)),
-    onNavigate: (target: LegalPageId) => void navigate(LEGAL_PATHS[target]),
-  };
-
-  if (page === 'mentions-legales') {
-    return <LegalNoticePage {...props} />;
-  }
-  if (page === 'confidentialite') {
-    return <PrivacyPolicyPage {...props} />;
-  }
-  return <TermsOfServicePage {...props} />;
+  return <LandingPage />;
 }
 
 function WelcomeRoute() {
@@ -195,16 +139,6 @@ function FriendsRoute() {
   return <FriendsPage pendingReply={pendingReply} />;
 }
 
-function ProfileRoute() {
-  const navigate = useNavigate();
-
-  return (
-    <ProfilePage
-      onPolitiqueConfidentialite={() => void navigate(PATHS.privacy)}
-    />
-  );
-}
-
 function AppRoutes() {
   const { status, user } = useAuth();
   const role = user?.role;
@@ -236,17 +170,25 @@ function AppRoutes() {
   return (
     <Routes>
       <Route path={PATHS.landing} element={<LandingRoute />} />
-      <Route path={PATHS.login} element={<AuthRoute mode="login" />} />
-      <Route path={PATHS.register} element={<AuthRoute mode="register" />} />
       <Route
-        path={PATHS.legalNotice}
-        element={<LegalRoute page="mentions-legales" />}
+        path={PATHS.login}
+        element={
+          <RequireGuest>
+            <AuthPage />
+          </RequireGuest>
+        }
       />
       <Route
-        path={PATHS.privacy}
-        element={<LegalRoute page="confidentialite" />}
+        path={PATHS.register}
+        element={
+          <RequireGuest>
+            <AuthPage />
+          </RequireGuest>
+        }
       />
-      <Route path={PATHS.terms} element={<LegalRoute page="conditions" />} />
+      <Route path={PATHS.legalNotice} element={<LegalNoticePage />} />
+      <Route path={PATHS.privacy} element={<PrivacyPolicyPage />} />
+      <Route path={PATHS.terms} element={<TermsOfServicePage />} />
       <Route
         path={PATHS.welcome}
         element={
@@ -266,7 +208,7 @@ function AppRoutes() {
         <Route path={PATHS.food} element={<FoodPage />} />
         <Route path={PATHS.stats} element={<StatsPage />} />
         <Route path={PATHS.friends} element={<FriendsRoute />} />
-        <Route path={PATHS.profile} element={<ProfileRoute />} />
+        <Route path={PATHS.profile} element={<ProfilePage />} />
         <Route
           path={PATHS.admin}
           element={

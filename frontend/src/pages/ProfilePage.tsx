@@ -6,11 +6,7 @@ import { GoalsCard } from '../components/profile/GoalsCard';
 import { ProfileIdentityCard } from '../components/profile/ProfileIdentityCard';
 import { WeightCard } from '../components/profile/WeightCard';
 
-export default function ProfilePage({
-  onPolitiqueConfidentialite,
-}: {
-  onPolitiqueConfidentialite: () => void;
-}) {
+export default function ProfilePage() {
   const { user, updateUser } = useAuth();
   const [latestWeight, setLatestWeight] = useState<number | null>();
 
@@ -30,7 +26,7 @@ export default function ProfilePage({
 
       <GoalsCard user={user} latestWeight={latestWeight} />
 
-      <GdprSection onPolitiqueConfidentialite={onPolitiqueConfidentialite} />
+      <GdprSection />
     </div>
   );
 }
