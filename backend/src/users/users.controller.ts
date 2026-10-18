@@ -102,6 +102,18 @@ export class UsersController {
     return this.usersService.getWeightHistory(userId);
   }
 
+  @Delete('weight/:entryId')
+  deleteWeight(
+    @Param('userId', ParseIntPipe) userId: number,
+    @Param('entryId', ParseIntPipe) entryId: number,
+    @Request() req: RequestWithUser,
+  ) {
+    if (req.user.userId !== userId) {
+      throw new ForbiddenException('You can only delete your own weight');
+    }
+    return this.usersService.deleteWeight(userId, entryId);
+  }
+
   @Delete('avatar')
   deleteAvatar(
     @Param('userId', ParseIntPipe) userId: number,

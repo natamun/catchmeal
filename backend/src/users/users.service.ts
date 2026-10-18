@@ -251,6 +251,30 @@ export class UsersService {
     });
   }
 
+  async deleteWeight(userId: number, entryId: number) {
+    const entry = await this.prisma.weightLog.findUnique({
+      where: { id: entryId },
+    });
+    if (!entry || entry.userId !== userId)
+      throw new NotFoundException('Entry not found');
+
+    const deleted = await this.prisma.weightLog.delete({
+      where: { id: entryId },
+      select: {
+        id: true,
+        weight: true,
+        bodyFat: true,
+        fatFreeMass: true,
+        bodyWater: true,
+        muscleMass: true,
+        loggedAt: true,
+      },
+    });
+    await this.activityService.removeByWeightLog(userId, entryId);
+
+    return deleted;
+  }
+
   async logWeight(
     userId: number,
     weight: number,
@@ -290,6 +314,7 @@ export class UsersService {
     });
     await this.activityService.record(userId, ActivityType.WEIGHT_LOGGED, {
       weight,
+      weightLogId: entry.id,
     });
     if (
       user.targetWeight !== null &&
@@ -298,7 +323,7 @@ export class UsersService {
       await this.activityService.record(
         userId,
         ActivityType.WEIGHT_GOAL_REACHED,
-        { targetWeight: user.targetWeight },
+        { targetWeight: user.targetWeight, weightLogId: entry.id },
       );
     }
     return entry;

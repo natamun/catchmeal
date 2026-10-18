@@ -9,6 +9,7 @@ describe('UsersController', () => {
 
   const usersServiceMock = {
     deleteAvatar: jest.fn(),
+    deleteWeight: jest.fn(),
   };
 
   const mockReq = (
@@ -55,6 +56,36 @@ describe('UsersController', () => {
       ).toThrow(ForbiddenException);
 
       expect(usersServiceMock.deleteAvatar).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('deleteWeight', () => {
+    it('should call deleteWeight service when user targets their own weight entry', async () => {
+      usersServiceMock.deleteWeight.mockResolvedValue({ id: 5 });
+
+      await controller.deleteWeight(
+        1,
+        5,
+        mockReq(1) as Express.Request & {
+          user: { userId: number; username: string };
+        },
+      );
+
+      expect(usersServiceMock.deleteWeight).toHaveBeenCalledWith(1, 5);
+    });
+
+    it('should throw ForbiddenException when user targets someone else weight entry', () => {
+      expect(() =>
+        controller.deleteWeight(
+          2,
+          5,
+          mockReq(1) as Express.Request & {
+            user: { userId: number; username: string };
+          },
+        ),
+      ).toThrow(ForbiddenException);
+
+      expect(usersServiceMock.deleteWeight).not.toHaveBeenCalled();
     });
   });
 });
