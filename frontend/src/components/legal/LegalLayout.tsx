@@ -1,8 +1,8 @@
-import { useEffect, type ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { ArrowLeft } from 'lucide-react';
-import { useLocation, useNavigate } from 'react-router';
 
 import { PATHS } from '../../routes';
+import { useGoBack } from '../../routing/navigation';
 import PublicFooter from '../layout/PublicFooter';
 import PublicHeader from '../layout/PublicHeader';
 import { LEGAL_PAGES } from './legalPages';
@@ -12,15 +12,7 @@ interface Props {
 }
 
 export function LegalLayout({ children }: Props) {
-  const navigate = useNavigate();
-  const location = useLocation();
-
-  useEffect(() => {
-    window.scrollTo({ top: 0 });
-  }, [location.pathname]);
-
-  const goBack = () =>
-    void (location.key === 'default' ? navigate(PATHS.landing) : navigate(-1));
+  const goBack = useGoBack(PATHS.landing);
 
   return (
     <div className="flex min-h-screen flex-col bg-white">

@@ -31,6 +31,7 @@ import { useFriends } from '../hooks/useFriends.ts';
 import { usePresence } from '../hooks/usePresence.ts';
 import { useTimeout } from '../hooks/useTimeout.ts';
 import { useUnreadMessages } from '../hooks/useUnreadMessages.ts';
+import { navigationState } from '../routing/navigation';
 import { requestErrorMessage } from '../utils/requestErrorMessage';
 
 type Tab = 'friends' | 'requests';
@@ -44,8 +45,7 @@ export default function FriendsPage() {
   const { user } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
-  const replyTo =
-    (location.state as { replyTo?: ActivityItem } | null)?.replyTo ?? null;
+  const replyTo = navigationState(location).replyTo ?? null;
   const userId = user!.userId;
   const {
     friends,

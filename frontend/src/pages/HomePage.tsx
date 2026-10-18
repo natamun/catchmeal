@@ -25,6 +25,7 @@ import {
   journalPath,
   parseDateParam,
 } from '../routing/journal';
+import type { NavigationState } from '../routing/navigation';
 import { latestActivityPerFriend } from '../utils/latestActivityPerFriend';
 
 interface SectionEdit {
@@ -169,7 +170,9 @@ export default function HomePage() {
             activities={latestActivities}
             presence={presence}
             onReply={(activity) =>
-              void navigate(PATHS.friends, { state: { replyTo: activity } })
+              void navigate(PATHS.friends, {
+                state: { replyTo: activity } satisfies NavigationState,
+              })
             }
           />
         </div>

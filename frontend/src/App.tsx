@@ -21,6 +21,9 @@ import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 import TermsOfServicePage from './pages/TermsOfServicePage';
 import { PATHS } from './routes';
 import { RequireAdmin, RequireAuth, RequireGuest } from './routing/guards';
+import type { NavigationState } from './routing/navigation';
+import { PageTitle } from './routing/PageTitle';
+import { ScrollToTop } from './routing/ScrollToTop';
 import { SocketProvider } from './socket/SocketProvider';
 
 const SESSION_HINT_KEY = 'session-hint';
@@ -72,7 +75,9 @@ function LandingRoute() {
   const [params] = useSearchParams();
 
   if (params.get('error') === 'oauth_failed') {
-    return <Navigate to={PATHS.login} replace state={{ oauthFailed: true }} />;
+    const state: NavigationState = { oauthFailed: true };
+
+    return <Navigate to={PATHS.login} replace state={state} />;
   }
 
   if (status === 'authenticated') {
@@ -200,6 +205,8 @@ function AppRoutes() {
 export default function App() {
   return (
     <BrowserRouter>
+      <ScrollToTop />
+      <PageTitle />
       <AuthProvider>
         <SocketProvider>
           <AppRoutes />

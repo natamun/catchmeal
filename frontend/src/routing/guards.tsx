@@ -1,15 +1,12 @@
 import type { ReactNode } from 'react';
-import { Navigate, useLocation, type Location } from 'react-router';
+import { Navigate, useLocation } from 'react-router';
 
 import { useAuth } from '../auth/auth-context';
 import { PATHS } from '../routes';
+import { navigationState, type NavigationState } from './navigation';
 
 interface GuardProps {
   children: ReactNode;
-}
-
-interface FromState {
-  from?: Location;
 }
 
 export function RequireAuth({ children }: GuardProps) {
@@ -21,7 +18,9 @@ export function RequireAuth({ children }: GuardProps) {
       return <Navigate to={PATHS.landing} replace />;
     }
 
-    return <Navigate to={PATHS.login} replace state={{ from: location }} />;
+    const state: NavigationState = { from: location };
+
+    return <Navigate to={PATHS.login} replace state={state} />;
   }
 
   return children;
@@ -32,7 +31,7 @@ export function RequireGuest({ children }: GuardProps) {
   const location = useLocation();
 
   if (status === 'authenticated') {
-    const from = (location.state as FromState | null)?.from;
+    const { from } = navigationState(location);
 
     return <Navigate to={from ?? PATHS.home} replace />;
   }

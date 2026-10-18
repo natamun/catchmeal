@@ -13,6 +13,7 @@ import { FieldError } from '../components/ui/FieldError';
 import { Input } from '../components/ui/Input';
 import { useTimeout } from '../hooks/useTimeout';
 import { PATHS } from '../routes';
+import { navigationState } from '../routing/navigation';
 import { requestErrorMessage } from '../utils/requestErrorMessage';
 
 type Mode = 'login' | 'register';
@@ -87,9 +88,7 @@ export default function AuthPage() {
   const location = useLocation();
   const mode: Mode = useMatch(PATHS.register) ? 'register' : 'login';
   const oauthError =
-    (location.state as { oauthFailed?: boolean } | null)?.oauthFailed === true
-      ? OAUTH_ERROR_MESSAGE
-      : null;
+    navigationState(location).oauthFailed === true ? OAUTH_ERROR_MESSAGE : null;
   const [form, setForm] = useState<AuthFormState>(EMPTY_FORM);
   const [touched, setTouched] = useState<
     Partial<Record<keyof AuthFormState, boolean>>
@@ -130,7 +129,7 @@ export default function AuthPage() {
   const switchMode = (nextMode: Mode) => {
     void navigate(nextMode === 'login' ? PATHS.login : PATHS.register, {
       replace: true,
-      state: location.state as unknown,
+      state: navigationState(location),
     });
     setTouched({});
     setSubmitAttempted(false);
