@@ -5,6 +5,7 @@ const AUTH_URL = `${import.meta.env.VITE_API_URL}/auth`;
 export interface AuthUser {
   userId: number;
   username: string;
+  email?: string;
   role?: string;
   name?: string;
   avatarUrl?: string | null;
