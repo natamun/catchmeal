@@ -22,6 +22,7 @@ export class AdminService {
         createAt: true,
         deletedAt: true,
         passwordHash: true,
+        oauthProvider: true,
         _count: {
           select: {
             userFriend: { where: { status: 'ACCEPTED' } },
@@ -54,6 +55,7 @@ export class AdminService {
         deletedAt: true,
         lastSeenAt: true,
         passwordHash: true,
+        oauthProvider: true,
         _count: {
           select: {
             userFriend: { where: { status: 'ACCEPTED' } },

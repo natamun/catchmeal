@@ -20,13 +20,14 @@ const PROVIDER_LABELS: Record<string, string> = {
 };
 
 function getAuthMethod(user: AdminUser): string {
-  if (user.hasPassword) return 'Mot de passe';
-  if (user.username.startsWith('google_')) return 'Google';
-  if (user.username.startsWith('github_')) return 'GitHub';
-  if (user.username.startsWith('42_')) return '42';
   if (user.oauthProvider) {
     return PROVIDER_LABELS[user.oauthProvider] ?? user.oauthProvider;
   }
+  if (user.hasPassword) return 'Mot de passe';
+  // Accounts created before oauthProvider existed: infer from the username prefix
+  if (user.username.startsWith('google_')) return 'Google';
+  if (user.username.startsWith('github_')) return 'GitHub';
+  if (user.username.startsWith('42_')) return '42';
   return 'OAuth';
 }
 
