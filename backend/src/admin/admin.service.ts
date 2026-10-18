@@ -21,6 +21,7 @@ export class AdminService {
         avatarUrl: true,
         createAt: true,
         deletedAt: true,
+        passwordHash: true,
         _count: {
           select: {
             userFriend: { where: { status: 'ACCEPTED' } },
@@ -29,10 +30,14 @@ export class AdminService {
       },
       orderBy: { createAt: 'desc' },
     });
-    return users.map((u) => ({
-      ...u,
-      onlineStatus: this.presenceService.isOnline(u.id),
-    }));
+    return users.map((u) => {
+      const { passwordHash, ...rest } = u;
+      return {
+        ...rest,
+        hasPassword: passwordHash !== '',
+        onlineStatus: this.presenceService.isOnline(u.id),
+      };
+    });
   }
 
   async getUserById(userId: number) {
@@ -48,6 +53,7 @@ export class AdminService {
         createAt: true,
         deletedAt: true,
         lastSeenAt: true,
+        passwordHash: true,
         _count: {
           select: {
             userFriend: { where: { status: 'ACCEPTED' } },
@@ -56,7 +62,12 @@ export class AdminService {
       },
     });
     if (!user) return null;
-    return { ...user, onlineStatus: this.presenceService.isOnline(userId) };
+    const { passwordHash, ...rest } = user;
+    return {
+      ...rest,
+      hasPassword: passwordHash !== '',
+      onlineStatus: this.presenceService.isOnline(userId),
+    };
   }
 
   async getStats() {

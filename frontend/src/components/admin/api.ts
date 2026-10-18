@@ -12,6 +12,7 @@ export interface AdminUser {
   createAt: string;
   deletedAt: string | null;
   lastSeenAt: string | null;
+  hasPassword: boolean;
   oauthProvider?: string | null;
   onlineStatus: boolean;
   _count?: { userFriend: number };
