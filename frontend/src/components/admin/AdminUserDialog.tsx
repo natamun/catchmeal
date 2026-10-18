@@ -19,6 +19,18 @@ const PROVIDER_LABELS: Record<string, string> = {
   github: 'GitHub',
 };
 
+function getAuthMethod(user: AdminUser): string {
+  if (user.oauthProvider) {
+    return PROVIDER_LABELS[user.oauthProvider] ?? user.oauthProvider;
+  }
+  if (user.hasPassword) return 'Mot de passe';
+  // Accounts created before oauthProvider existed: infer from the username prefix
+  if (user.username.startsWith('google_')) return 'Google';
+  if (user.username.startsWith('github_')) return 'GitHub';
+  if (user.username.startsWith('42_')) return '42';
+  return 'OAuth';
+}
+
 interface PanelProps {
   user: AdminUser;
   container: HTMLElement | null;
@@ -68,11 +80,7 @@ function UserPanel({
         <StatTile label="Statut">
           {user.deletedAt ? 'Supprimé' : 'Actif'}
         </StatTile>
-        <StatTile label="Connexion">
-          {user.oauthProvider
-            ? PROVIDER_LABELS[user.oauthProvider]
-            : 'Mot de passe'}
-        </StatTile>
+        <StatTile label="Connexion">{getAuthMethod(user)}</StatTile>
         <StatTile label="Amis">{user._count?.userFriend ?? '–'}</StatTile>
         <StatTile label="Créé le">
           {new Date(user.createAt).toLocaleDateString('fr-FR')}

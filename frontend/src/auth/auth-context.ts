@@ -7,6 +7,7 @@ export type AuthStatus = 'loading' | 'authenticated' | 'unauthenticated';
 export interface AuthUser {
   userId: number;
   username: string;
+  email?: string;
   role?: string;
   name?: string;
   avatarUrl?: string | null;

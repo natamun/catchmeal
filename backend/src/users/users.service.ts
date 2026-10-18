@@ -7,6 +7,7 @@ import {
 import 'multer';
 
 import { ActivityService } from '../activity/activity.service';
+import { CompleteOAuthProfileDto } from '../auth/dto/complete-oauth-profile.dto';
 import { ActivityType, Prisma } from '../generated/prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { SupabaseService } from '../supabase/supabase.service';
@@ -43,6 +44,7 @@ export class UsersService {
     name: string;
     email: string;
     passwordHash: string;
+    oauthProvider?: string;
   }) {
     return this.prisma.user.create({ data });
   }
@@ -330,5 +332,49 @@ export class UsersService {
       take: 20,
       orderBy: { username: 'asc' },
     });
+  }
+
+  async completeOAuthProfile(userId: number, dto: CompleteOAuthProfileDto) {
+    try {
+      return await this.prisma.user.update({
+        where: { id: userId },
+        data: {
+          username: dto.username.trim(),
+          name: dto.name.trim(),
+          email: dto.email.trim(),
+        },
+        select: {
+          id: true,
+          username: true,
+          name: true,
+          email: true,
+          role: true,
+          avatarUrl: true,
+          height: true,
+          targetWeight: true,
+          dailyCalorieGoal: true,
+          dailyProteinGoal: true,
+          dailyCarbsGoal: true,
+          dailyFatGoal: true,
+          gender: true,
+          birthDate: true,
+          activityLevel: true,
+          bodyFat: true,
+          fatFreeMass: true,
+          bodyWater: true,
+          muscleMass: true,
+        },
+      });
+    } catch (error) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2002'
+      ) {
+        throw new ConflictException(
+          "Ce nom d'utilisateur ou cet email est déjà pris",
+        );
+      }
+      throw error;
+    }
   }
 }

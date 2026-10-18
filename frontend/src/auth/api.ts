@@ -5,6 +5,7 @@ const AUTH_URL = `${import.meta.env.VITE_API_URL}/auth`;
 export interface AuthUser {
   userId: number;
   username: string;
+  email?: string;
   role?: string;
   name?: string;
   avatarUrl?: string | null;
@@ -58,4 +59,18 @@ export function getMe() {
   return request<{ user: AuthUser | null }>(`${AUTH_URL}/me`).then(
     ({ user }) => user,
   );
+}
+
+export interface CompleteOAuthProfileInput {
+  username: string;
+  name: string;
+  email: string;
+}
+
+export function completeOAuthProfile(input: CompleteOAuthProfileInput) {
+  return request<AuthUser>(`${AUTH_URL}/complete-profile`, {
+    method: 'PATCH',
+    headers: JSON_HEADERS,
+    body: JSON.stringify(input),
+  });
 }

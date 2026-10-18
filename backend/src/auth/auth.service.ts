@@ -18,6 +18,7 @@ type AuthInput = { username: string; password: string };
 export type SignInData = {
   userId: number;
   username: string;
+  email?: string;
   role?: string;
   name?: string;
   avatarUrl?: string | null;
@@ -35,6 +36,7 @@ export type SignInData = {
   bodyWater?: number | null;
   muscleMass?: number | null;
   hasPassword?: boolean;
+  isNewUser?: boolean;
 };
 
 type AuthResult = {
@@ -60,6 +62,7 @@ interface OAuthUserParams {
   username: string;
   name: string;
   email: string;
+  provider: 'google' | 'github' | '42';
 }
 
 @Injectable()
@@ -108,7 +111,7 @@ export class AuthService {
   }
 
   async findOrCreateFromOAuth(params: OAuthUserParams): Promise<SignInData> {
-    const { username, name, email } = params;
+    const { username, name, email, provider } = params;
 
     const existingUser = await this.usersService.findUserByEmail(email);
 
@@ -116,6 +119,7 @@ export class AuthService {
       return {
         userId: existingUser.id,
         username: existingUser.username,
+        email: existingUser.email,
         name: existingUser.name,
         avatarUrl: existingUser.avatarUrl,
         height: existingUser.height,
@@ -131,6 +135,7 @@ export class AuthService {
         fatFreeMass: existingUser.fatFreeMass,
         bodyWater: existingUser.bodyWater,
         muscleMass: existingUser.muscleMass,
+        isNewUser: false,
       };
     }
 
@@ -140,9 +145,15 @@ export class AuthService {
         name,
         email,
         passwordHash: '',
+        oauthProvider: provider,
       });
 
-      return { userId: newUser.id, username: newUser.username };
+      return {
+        userId: newUser.id,
+        username: newUser.username,
+        email: newUser.email,
+        isNewUser: true,
+      };
     } catch (error) {
       if (
         error instanceof Prisma.PrismaClientKnownRequestError &&
@@ -150,7 +161,12 @@ export class AuthService {
       ) {
         // Race condition: user was created between our check and insert
         const retried = await this.usersService.findUserByEmail(email);
-        if (retried) return { userId: retried.id, username: retried.username };
+        if (retried)
+          return {
+            userId: retried.id,
+            username: retried.username,
+            isNewUser: false,
+          };
       }
       throw error;
     }

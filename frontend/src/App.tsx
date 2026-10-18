@@ -6,9 +6,11 @@ import ChatBotPopup from './components/ai/ChatBotPopup';
 import type { ActivityItem } from './components/friends/types';
 import { ConnectionBanner } from './components/layout/ConnectionBanner';
 import Nav, { type Tab } from './components/layout/Nav';
+import { deleteMyAccount } from './components/profile/api';
 import AuthPage from './pages/AuthPage';
 import LandingPage from './pages/LandingPage';
 import LegalNoticePage from './pages/LegalNoticePage';
+import OAuthOnboardingPage from './pages/OAuthOnboardingPage';
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 import TermsOfServicePage from './pages/TermsOfServicePage';
 import { SocketProvider } from './socket/SocketProvider';
@@ -65,7 +67,7 @@ type Page =
   | 'conditions';
 
 function AppShell() {
-  const { status, user } = useAuth();
+  const { status, user, logout } = useAuth();
   const [page, setPage] = useState<Page>(() => {
     const params = new URLSearchParams(window.location.search);
     return params.get('error') === 'oauth_failed' ? 'login' : 'landing';
@@ -80,6 +82,14 @@ function AppShell() {
       return 'La connexion a échoué. Réessayez.';
     }
     return null;
+  });
+  const [isOnboarding, setIsOnboarding] = useState<boolean>(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('onboarding') === '1') {
+      window.history.replaceState({}, '', window.location.pathname);
+      return true;
+    }
+    return false;
   });
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isJournalPickerOpen, setIsJournalPickerOpen] = useState(false);
@@ -174,6 +184,27 @@ function AppShell() {
   const isAdmin = user?.role === 'ADMIN';
   const hasAssistant =
     activeTab === 'stats' || activeTab === 'home' || activeTab === 'food';
+
+  if (isOnboarding && user) {
+    return (
+      <OAuthOnboardingPage
+        prefill={{
+          username: '',
+          name: user.name ?? '',
+          email: user.email ?? '',
+        }}
+        onComplete={() => setIsOnboarding(false)}
+        onBack={async () => {
+          try {
+            await deleteMyAccount();
+          } catch {
+            /* ignore */
+          }
+          await logout();
+        }}
+      />
+    );
+  }
 
   const pages: Record<Tab, React.ReactNode> = {
     home: (
