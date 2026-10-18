@@ -1,23 +1,42 @@
-import { lazy, Suspense, useEffect, useState } from 'react';
+import { lazy, useEffect } from 'react';
+import {
+  BrowserRouter,
+  Navigate,
+  Route,
+  Routes,
+  useLocation,
+  useNavigate,
+  useOutletContext,
+  useSearchParams,
+} from 'react-router';
 
 import { useAuth } from './auth/auth-context';
 import { AuthProvider } from './auth/AuthProvider';
-import ChatBotPopup from './components/ai/ChatBotPopup';
-import type { ActivityItem } from './components/friends/types';
-import { ConnectionBanner } from './components/layout/ConnectionBanner';
-import Nav, { type Tab } from './components/layout/Nav';
+import AppLayout, {
+  type AppLayoutContext,
+} from './components/layout/AppLayout';
+import type { LegalPageId } from './components/legal/LegalLayout';
 import { deleteMyAccount } from './components/profile/api';
 import AuthPage from './pages/AuthPage';
 import LandingPage from './pages/LandingPage';
 import LegalNoticePage from './pages/LegalNoticePage';
+import NotFoundPage from './pages/NotFoundPage';
 import OAuthOnboardingPage from './pages/OAuthOnboardingPage';
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 import TermsOfServicePage from './pages/TermsOfServicePage';
+import { PATHS } from './routes';
+import { RequireAdmin, RequireAuth, RequireGuest } from './routing/guards';
 import { SocketProvider } from './socket/SocketProvider';
-import type { ChatMessage } from './types/ChatBotType';
 
 const SESSION_HINT_KEY = 'session-hint';
 const PRELOAD_DELAY_MS = 1000;
+const OAUTH_ERROR_MESSAGE = 'La connexion a échoué. Réessayez.';
+
+const LEGAL_PATHS: Record<LegalPageId, string> = {
+  'mentions-legales': PATHS.legalNotice,
+  confidentialite: PATHS.privacy,
+  conditions: PATHS.terms,
+};
 
 const loaders = {
   home: () => import('./pages/HomePage'),
@@ -58,49 +77,131 @@ function saveSessionHint(connected: boolean) {
 
 if (hasSessionHint()) preload(loaders.home);
 
-type Page =
-  | 'landing'
-  | 'login'
-  | 'register'
-  | 'mentions-legales'
-  | 'confidentialite'
-  | 'conditions';
+function LandingRoute() {
+  const { status } = useAuth();
+  const navigate = useNavigate();
+  const [params] = useSearchParams();
 
-function AppShell() {
-  const { status, user, logout } = useAuth();
-  const [page, setPage] = useState<Page>(() => {
-    const params = new URLSearchParams(window.location.search);
-    return params.get('error') === 'oauth_failed' ? 'login' : 'landing';
-  });
-  const [previousPage, setPreviousPage] = useState<Page>('landing');
-  const [activeTab, setActiveTab] = useState<Tab>('home');
-  const [pendingReply, setPendingReply] = useState<ActivityItem | null>(null);
-  const [oauthError] = useState<string | null>(() => {
-    const params = new URLSearchParams(window.location.search);
-    if (params.get('error') === 'oauth_failed') {
-      window.history.replaceState({}, '', window.location.pathname);
-      return 'La connexion a échoué. Réessayez.';
-    }
+  if (params.get('error') === 'oauth_failed') {
+    return <Navigate to={PATHS.login} replace state={{ oauthFailed: true }} />;
+  }
+
+  if (status === 'authenticated') {
+    return (
+      <Navigate
+        to={params.get('onboarding') === '1' ? PATHS.welcome : PATHS.home}
+        replace
+      />
+    );
+  }
+
+  return (
+    <LandingPage
+      onLogin={() => void navigate(PATHS.login)}
+      onRegister={() => void navigate(PATHS.register)}
+      onMentionsLegales={() => void navigate(PATHS.legalNotice)}
+      onConfidentialite={() => void navigate(PATHS.privacy)}
+      onConditions={() => void navigate(PATHS.terms)}
+    />
+  );
+}
+
+function AuthRoute({ mode }: { mode: 'login' | 'register' }) {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const oauthFailed =
+    (location.state as { oauthFailed?: boolean } | null)?.oauthFailed === true;
+
+  return (
+    <RequireGuest>
+      <AuthPage
+        key={mode}
+        initialMode={mode}
+        onCancel={() => void navigate(PATHS.landing)}
+        oauthError={oauthFailed ? OAUTH_ERROR_MESSAGE : null}
+      />
+    </RequireGuest>
+  );
+}
+
+function LegalRoute({ page }: { page: LegalPageId }) {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const props = {
+    onBack: () =>
+      void (location.key === 'default'
+        ? navigate(PATHS.landing)
+        : navigate(-1)),
+    onNavigate: (target: LegalPageId) => void navigate(LEGAL_PATHS[target]),
+  };
+
+  if (page === 'mentions-legales') {
+    return <LegalNoticePage {...props} />;
+  }
+  if (page === 'confidentialite') {
+    return <PrivacyPolicyPage {...props} />;
+  }
+  return <TermsOfServicePage {...props} />;
+}
+
+function WelcomeRoute() {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  if (!user) {
     return null;
-  });
-  const [isOnboarding, setIsOnboarding] = useState<boolean>(() => {
-    const params = new URLSearchParams(window.location.search);
-    if (params.get('onboarding') === '1') {
-      window.history.replaceState({}, '', window.location.pathname);
-      return true;
-    }
-    return false;
-  });
-  const [isOpen, setIsOpen] = useState<boolean>(false);
-  const [isJournalPickerOpen, setIsJournalPickerOpen] = useState(false);
-  const [message, setMessage] = useState<ChatMessage[]>([
-    {
-      role: 'assistant',
-      content:
-        "Salut ! Je peux t'aider à comprendre tes stats ou te conseiller sur tes repas 😊",
-    },
-  ]);
+  }
 
+  return (
+    <OAuthOnboardingPage
+      prefill={{
+        username: '',
+        name: user.name ?? '',
+        email: user.email ?? '',
+      }}
+      onComplete={() => void navigate(PATHS.home, { replace: true })}
+      onBack={async () => {
+        await deleteMyAccount().catch(() => undefined);
+        await logout();
+      }}
+    />
+  );
+}
+
+function HomeRoute() {
+  const navigate = useNavigate();
+  const { setPendingReply, setIsJournalPickerOpen } =
+    useOutletContext<AppLayoutContext>();
+
+  return (
+    <HomePage
+      onReplyToActivity={(activity) => {
+        setPendingReply(activity);
+        void navigate(PATHS.friends);
+      }}
+      onPickerChange={setIsJournalPickerOpen}
+    />
+  );
+}
+
+function FriendsRoute() {
+  const { pendingReply } = useOutletContext<AppLayoutContext>();
+
+  return <FriendsPage pendingReply={pendingReply} />;
+}
+
+function ProfileRoute() {
+  const navigate = useNavigate();
+
+  return (
+    <ProfilePage
+      onPolitiqueConfidentialite={() => void navigate(PATHS.privacy)}
+    />
+  );
+}
+
+function AppRoutes() {
+  const { status, user } = useAuth();
   const role = user?.role;
 
   useEffect(() => {
@@ -119,11 +220,6 @@ function AppShell() {
     return () => window.clearTimeout(timer);
   }, [status, role]);
 
-  const navigateTo = (dest: Page) => {
-    setPreviousPage(page);
-    setPage(dest);
-  };
-
   if (status === 'loading') {
     return (
       <div className="flex min-h-screen items-center justify-center text-sm text-green-500">
@@ -132,149 +228,62 @@ function AppShell() {
     );
   }
 
-  if (page === 'mentions-legales') {
-    return (
-      <LegalNoticePage
-        onBack={() => setPage(previousPage)}
-        onNavigate={setPage}
-      />
-    );
-  }
-
-  if (page === 'confidentialite') {
-    return (
-      <PrivacyPolicyPage
-        onBack={() => setPage(previousPage)}
-        onNavigate={setPage}
-      />
-    );
-  }
-
-  if (page === 'conditions') {
-    return (
-      <TermsOfServicePage
-        onBack={() => setPage(previousPage)}
-        onNavigate={setPage}
-      />
-    );
-  }
-
-  if (status === 'unauthenticated') {
-    if (page === 'login' || page === 'register') {
-      return (
-        <AuthPage
-          initialMode={page}
-          onCancel={() => setPage('landing')}
-          oauthError={oauthError}
-        />
-      );
-    }
-
-    return (
-      <LandingPage
-        onLogin={() => navigateTo('login')}
-        onRegister={() => navigateTo('register')}
-        onMentionsLegales={() => navigateTo('mentions-legales')}
-        onConfidentialite={() => navigateTo('confidentialite')}
-        onConditions={() => navigateTo('conditions')}
-      />
-    );
-  }
-
-  const isAdmin = user?.role === 'ADMIN';
-  const hasAssistant =
-    activeTab === 'stats' || activeTab === 'home' || activeTab === 'food';
-
-  if (isOnboarding && user) {
-    return (
-      <OAuthOnboardingPage
-        prefill={{
-          username: '',
-          name: user.name ?? '',
-          email: user.email ?? '',
-        }}
-        onComplete={() => setIsOnboarding(false)}
-        onBack={async () => {
-          try {
-            await deleteMyAccount();
-          } catch {
-            /* ignore */
-          }
-          await logout();
-        }}
-      />
-    );
-  }
-
-  const pages: Record<Tab, React.ReactNode> = {
-    home: (
-      <HomePage
-        onReplyToActivity={(activity) => {
-          setPendingReply(activity);
-          setActiveTab('friends');
-        }}
-        onPickerChange={setIsJournalPickerOpen}
-      />
-    ),
-    food: <FoodPage />,
-    stats: <StatsPage />,
-    friends: <FriendsPage pendingReply={pendingReply} />,
-    profile: (
-      <ProfilePage
-        onPolitiqueConfidentialite={() => navigateTo('confidentialite')}
-      />
-    ),
-    admin: isAdmin ? <AdminPage /> : <HomePage />,
-  };
-
   return (
-    <div className="min-h-screen bg-green-50">
-      <ConnectionBanner />
-      <Nav
-        active={activeTab}
-        onChange={(tab) => {
-          setPendingReply(null);
-          setActiveTab(tab);
-        }}
-        isAdmin={isAdmin}
+    <Routes>
+      <Route path={PATHS.landing} element={<LandingRoute />} />
+      <Route path={PATHS.login} element={<AuthRoute mode="login" />} />
+      <Route path={PATHS.register} element={<AuthRoute mode="register" />} />
+      <Route
+        path={PATHS.legalNotice}
+        element={<LegalRoute page="mentions-legales" />}
       />
-      <main
-        id="main-content"
-        className={`mx-auto max-w-6xl px-6 pt-6 ${
-          hasAssistant
-            ? 'pb-24 pointer-coarse:pb-[calc(var(--spacing-bottom-nav)+6rem+env(safe-area-inset-bottom))]'
-            : 'pb-8 pointer-coarse:pb-[calc(var(--spacing-bottom-nav)+2rem+env(safe-area-inset-bottom))]'
-        }`}
+      <Route
+        path={PATHS.privacy}
+        element={<LegalRoute page="confidentialite" />}
+      />
+      <Route path={PATHS.terms} element={<LegalRoute page="conditions" />} />
+      <Route
+        path={PATHS.welcome}
+        element={
+          <RequireAuth>
+            <WelcomeRoute />
+          </RequireAuth>
+        }
+      />
+      <Route
+        element={
+          <RequireAuth>
+            <AppLayout />
+          </RequireAuth>
+        }
       >
-        <Suspense
-          fallback={
-            <div className="flex h-40 items-center justify-center text-sm text-green-500">
-              Chargement...
-            </div>
+        <Route path={PATHS.home} element={<HomeRoute />} />
+        <Route path={PATHS.food} element={<FoodPage />} />
+        <Route path={PATHS.stats} element={<StatsPage />} />
+        <Route path={PATHS.friends} element={<FriendsRoute />} />
+        <Route path={PATHS.profile} element={<ProfileRoute />} />
+        <Route
+          path={PATHS.admin}
+          element={
+            <RequireAdmin>
+              <AdminPage />
+            </RequireAdmin>
           }
-        >
-          {pages[activeTab]}
-        </Suspense>
-      </main>
-      {hasAssistant && !isJournalPickerOpen && (
-        <ChatBotPopup
-          isOpen={isOpen}
-          onToggle={setIsOpen}
-          messages={message}
-          onMessagesChange={setMessage}
-          activePage={activeTab}
         />
-      )}
-    </div>
+      </Route>
+      <Route path="*" element={<NotFoundPage />} />
+    </Routes>
   );
 }
 
 export default function App() {
   return (
-    <AuthProvider>
-      <SocketProvider>
-        <AppShell />
-      </SocketProvider>
-    </AuthProvider>
+    <BrowserRouter>
+      <AuthProvider>
+        <SocketProvider>
+          <AppRoutes />
+        </SocketProvider>
+      </AuthProvider>
+    </BrowserRouter>
   );
 }
