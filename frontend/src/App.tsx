@@ -185,7 +185,12 @@ function HomeRoute() {
 }
 
 function FriendsRoute() {
-  const { pendingReply } = useOutletContext<AppLayoutContext>();
+  const { pendingReply, setPendingReply } =
+    useOutletContext<AppLayoutContext>();
+
+  useEffect(() => {
+    setPendingReply(null);
+  }, [setPendingReply]);
 
   return <FriendsPage pendingReply={pendingReply} />;
 }

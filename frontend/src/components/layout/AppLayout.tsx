@@ -1,5 +1,5 @@
 import { Suspense, useState } from 'react';
-import { Outlet, useLocation, useNavigate } from 'react-router';
+import { Outlet, useLocation } from 'react-router';
 
 import { useAuth } from '../../auth/auth-context';
 import { PATHS } from '../../routes';
@@ -36,7 +36,6 @@ function tabFromPath(pathname: string): Tab {
 export default function AppLayout() {
   const { user } = useAuth();
   const { pathname } = useLocation();
-  const navigate = useNavigate();
   const [pendingReply, setPendingReply] = useState<ActivityItem | null>(null);
   const [isJournalPickerOpen, setIsJournalPickerOpen] = useState(false);
   const [isAssistantOpen, setIsAssistantOpen] = useState(false);
@@ -55,14 +54,7 @@ export default function AppLayout() {
   return (
     <div className="min-h-screen bg-green-50">
       <ConnectionBanner />
-      <Nav
-        active={activeTab}
-        onChange={(tab) => {
-          setPendingReply(null);
-          void navigate(PATHS[tab]);
-        }}
-        isAdmin={user?.role === 'ADMIN'}
-      />
+      <Nav isAdmin={user?.role === 'ADMIN'} />
       <main
         id="main-content"
         className={`mx-auto max-w-6xl px-6 pt-6 ${
