@@ -15,6 +15,7 @@ describe('ActivityService', () => {
       create: jest.fn(),
       findFirst: jest.fn(),
       findMany: jest.fn(),
+      deleteMany: jest.fn(),
     },
   };
   const friendsServiceMock = { getFriendIds: jest.fn() };
@@ -278,6 +279,41 @@ describe('ActivityService', () => {
           user: { id: 2, username: 'bob', name: 'Bob' },
         },
       ]);
+    });
+  });
+
+  describe('removeByWeightLog', () => {
+    it('should delete the activities linked to the weight entry and notify frineds', async () => {
+      prismaMock.activity.findMany.mockResolvedValue([{ id: 10 }, { id: 11 }]);
+      friendsServiceMock.getFriendIds.mockResolvedValue([2, 3]);
+
+      await service.removeByWeightLog(1, 7);
+
+      expect(prismaMock.activity.findMany).toHaveBeenCalledWith({
+        where: {
+          userId: 1,
+          metadata: { path: ['weightLogId'], equals: 7 },
+        },
+        select: { id: true },
+      });
+      expect(prismaMock.activity.deleteMany).toHaveBeenCalledWith({
+        where: { id: { in: [10, 11] } },
+      });
+      expect(to).toHaveBeenCalledWith('user:2');
+      expect(to).toHaveBeenCalledWith('user:3');
+      expect(emit).toHaveBeenCalledTimes(4);
+      expect(emit).toHaveBeenCalledWith('activity:removed', { id: 10 });
+      expect(emit).toHaveBeenCalledWith('activity:removed', { id: 11 });
+    });
+
+    it('should do nothing when no activity is linked to the entry', async () => {
+      prismaMock.activity.findMany.mockResolvedValue([]);
+
+      await service.removeByWeightLog(1, 7);
+
+      expect(prismaMock.activity.deleteMany).not.toHaveBeenCalled();
+      expect(friendsServiceMock.getFriendIds).not.toHaveBeenCalled();
+      expect(emit).not.toHaveBeenCalled();
     });
   });
 });

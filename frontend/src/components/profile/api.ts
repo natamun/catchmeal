@@ -201,7 +201,6 @@ export function updateWeight(
   });
 }
 
-// TODO: wire to the backend, DELETE /users/:userId/weight/:entryId does not exist yet
 export function deleteWeight(userId: number, entryId: number) {
   return request<WeightEntry>(`${BASE_URL}/users/${userId}/weight/${entryId}`, {
     method: 'DELETE',

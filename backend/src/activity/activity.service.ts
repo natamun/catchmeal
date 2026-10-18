@@ -145,4 +145,27 @@ export class ActivityService {
 
     return activities.map((activity) => this.toFeedItem(activity));
   }
+
+  async removeByWeightLog(userId: number, weightLogId: number) {
+    const activities = await this.prisma.activity.findMany({
+      where: {
+        userId,
+        metadata: { path: ['weightLogId'], equals: weightLogId },
+      },
+      select: { id: true },
+    });
+    if (activities.length === 0) return;
+
+    const ids = activities.map((activity) => activity.id);
+    await this.prisma.activity.deleteMany({ where: { id: { in: ids } } });
+
+    const friendIds = await this.friendsService.getFriendIds(userId);
+    friendIds.forEach((friendId) => {
+      ids.forEach((id) => {
+        this.activityGateway.server
+          .to(`user:${friendId}`)
+          .emit('activity:removed', { id });
+      });
+    });
+  }
 }

@@ -1,3 +1,4 @@
+import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 
 import { ActivityService } from '../activity/activity.service';
@@ -21,6 +22,8 @@ describe('UsersService', () => {
       create: jest.fn(),
       findFirst: jest.fn(),
       findMany: jest.fn(),
+      findUnique: jest.fn(),
+      delete: jest.fn(),
     },
   };
 
@@ -31,6 +34,7 @@ describe('UsersService', () => {
 
   const activityServiceMock = {
     record: jest.fn(),
+    removeByWeightLog: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -125,6 +129,39 @@ describe('UsersService', () => {
     expect(result).toEqual(entry);
   });
 
+  it('should link the weight activity to the logged entry', async () => {
+    prismaMock.user.findFirstOrThrow.mockResolvedValue({
+      id: 1,
+      targetWeight: null,
+    });
+    prismaMock.weightLog.create.mockResolvedValue({ id: 7, weight: 75.5 });
+
+    await service.logWeight(1, 75.5);
+
+    expect(activityServiceMock.record).toHaveBeenCalledWith(
+      1,
+      ActivityType.WEIGHT_LOGGED,
+      { weight: 75.5, weightLogId: 7 },
+    );
+  });
+
+  it('should link the weight goal activity to the logged entry', async () => {
+    prismaMock.user.findFirstOrThrow.mockResolvedValue({
+      id: 1,
+      targetWeight: 80,
+    });
+    prismaMock.weightLog.findFirst.mockResolvedValue({ weight: 82 });
+    prismaMock.weightLog.create.mockResolvedValue({ id: 8, weight: 79.8 });
+
+    await service.logWeight(1, 79.8);
+
+    expect(activityServiceMock.record).toHaveBeenCalledWith(
+      1,
+      ActivityType.WEIGHT_GOAL_REACHED,
+      { targetWeight: 80, weightLogId: 8 },
+    );
+  });
+
   it.each<[number | undefined, number, number, boolean]>([
     [82, 79.8, 80, true],
     [81, 80, 80, true],
@@ -206,6 +243,56 @@ describe('UsersService', () => {
     await expect(service.getWeightHistory(99)).rejects.toThrow(
       'User not found',
     );
+  });
+
+  describe('deleteWeight', () => {
+    it('should delete the entry and its linked activities', async () => {
+      const deleted = { id: 5, weight: 75 };
+      prismaMock.weightLog.findUnique.mockResolvedValue({ id: 5, userId: 1 });
+      prismaMock.weightLog.delete.mockResolvedValue(deleted);
+
+      const result = await service.deleteWeight(1, 5);
+
+      expect(prismaMock.weightLog.delete).toHaveBeenCalledWith({
+        where: { id: 5 },
+        select: {
+          id: true,
+          weight: true,
+          bodyFat: true,
+          fatFreeMass: true,
+          bodyWater: true,
+          muscleMass: true,
+          loggedAt: true,
+        },
+      });
+
+      expect(activityServiceMock.removeByWeightLog).toHaveBeenCalledWith(1, 5);
+      expect(result).toEqual(deleted);
+    });
+
+    it('should throw NotFoundException when the entry does not exist', async () => {
+      prismaMock.weightLog.findUnique.mockResolvedValue(null);
+
+      await expect(service.deleteWeight(1, 99)).rejects.toBeInstanceOf(
+        NotFoundException,
+      );
+
+      expect(prismaMock.weightLog.delete).not.toHaveBeenCalled();
+
+      expect(activityServiceMock.removeByWeightLog).not.toHaveBeenCalled();
+    });
+
+    it('should throw NotFoundException and delete nothing when the entry belongs to another user', async () => {
+      prismaMock.weightLog.findUnique.mockResolvedValue({ id: 5, userId: 2 });
+
+      await expect(service.deleteWeight(1, 5)).rejects.toBeInstanceOf(
+        NotFoundException,
+      );
+
+      expect(prismaMock.weightLog.delete).not.toHaveBeenCalled();
+
+      expect(activityServiceMock.removeByWeightLog).not.toHaveBeenCalled();
+    });
   });
 
   describe('deleteAvatar', () => {
