@@ -32,6 +32,7 @@ function toUserResponse(data: SignInData): UserResponse {
   return {
     userId: data.userId,
     username: data.username,
+    email: data.email,
     role: data.role,
     name: data.name,
     avatarUrl: data.avatarUrl,
@@ -128,6 +129,7 @@ export class PassportAuthController {
   redirectToGoogle() {}
 
   @Get('google/callback')
+  @Throttle({ default: { limit: 5, ttl: 3_600_000 } })
   @UseGuards(AuthGuard('google'))
   async googleCallback(
     @Request() request: RequestWithUser,
@@ -149,6 +151,7 @@ export class PassportAuthController {
   redirectToGitHub() {}
 
   @Get('github/callback')
+  @Throttle({ default: { limit: 5, ttl: 3_600_000 } })
   @UseGuards(AuthGuard('github'))
   async githubCallback(
     @Request() request: RequestWithUser,
@@ -170,6 +173,7 @@ export class PassportAuthController {
   redirectToFortyTwo() {}
 
   @Get('42/callback')
+  @Throttle({ default: { limit: 5, ttl: 3_600_000 } })
   @UseGuards(AuthGuard('42'))
   async fortyTwoCallback(
     @Request() request: RequestWithUser,
