@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { ArrowLeft } from 'lucide-react';
 
 import * as authApi from '../auth/api';
 import { useAuth } from '../auth/auth-context';
@@ -16,6 +17,7 @@ interface Props {
     email: string;
   };
   onComplete: () => void;
+  onBack: () => Promise<void>;
 }
 
 interface FormState {
@@ -59,7 +61,11 @@ function validate(form: FormState): Partial<Record<keyof FormState, string>> {
   return errors;
 }
 
-export default function OAuthOnboardingPage({ prefill, onComplete }: Props) {
+export default function OAuthOnboardingPage({
+  prefill,
+  onComplete,
+  onBack,
+}: Props) {
   const { updateUser } = useAuth();
   const [form, setForm] = useState<FormState>({
     username: prefill.username,
@@ -145,6 +151,14 @@ export default function OAuthOnboardingPage({ prefill, onComplete }: Props) {
       >
         <div className="w-full max-w-sm rounded-2xl border border-green-200 bg-white p-6 shadow-sm lg:border-0 lg:p-0 lg:shadow-none">
           <div className="mb-6 flex items-center justify-between">
+            <button
+              type="button"
+              onClick={() => void onBack()}
+              className="flex cursor-pointer items-center gap-2 text-sm font-medium text-green-700 transition-colors hover:text-green-500"
+            >
+              <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+              Retour
+            </button>
             <div className="lg:hidden">
               <Brand />
             </div>

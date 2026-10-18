@@ -6,6 +6,7 @@ import ChatBotPopup from './components/ai/ChatBotPopup';
 import type { ActivityItem } from './components/friends/types';
 import { ConnectionBanner } from './components/layout/ConnectionBanner';
 import Nav, { type Tab } from './components/layout/Nav';
+import { deleteMyAccount } from './components/profile/api';
 import AuthPage from './pages/AuthPage';
 import LandingPage from './pages/LandingPage';
 import LegalNoticePage from './pages/LegalNoticePage';
@@ -66,7 +67,7 @@ type Page =
   | 'conditions';
 
 function AppShell() {
-  const { status, user } = useAuth();
+  const { status, user, logout } = useAuth();
   const [page, setPage] = useState<Page>(() => {
     const params = new URLSearchParams(window.location.search);
     return params.get('error') === 'oauth_failed' ? 'login' : 'landing';
@@ -188,11 +189,19 @@ function AppShell() {
     return (
       <OAuthOnboardingPage
         prefill={{
-          username: user.username,
+          username: '',
           name: user.name ?? '',
-          email: '',
+          email: user.email ?? '',
         }}
         onComplete={() => setIsOnboarding(false)}
+        onBack={async () => {
+          try {
+            await deleteMyAccount();
+          } catch {
+            /* ignore */
+          }
+          await logout();
+        }}
       />
     );
   }
