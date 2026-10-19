@@ -25,15 +25,22 @@ export function useActivityFeed(userId: number) {
     const handleRemoved = ({ id }: { id: number }) => {
       setActivities((prev) => prev.filter((activity) => activity.id !== id));
     };
+    const handleUpdated = (item: ActivityItem) => {
+      setActivities((prev) =>
+        prev.map((activity) => (activity.id === item.id ? item : activity)),
+      );
+    };
     const handleReconnect = () => loadActivities();
 
     socket.on('activity:new', handleNew);
     socket.on('activity:removed', handleRemoved);
+    socket.on('activity:updated', handleUpdated);
     socket.io.on('reconnect', handleReconnect);
 
     return () => {
       socket.off('activity:new', handleNew);
       socket.off('activity:removed', handleRemoved);
+      socket.off('activity:updated', handleUpdated);
       socket.io.off('reconnect', handleReconnect);
     };
   }, [socket, userId]);
