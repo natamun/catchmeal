@@ -310,7 +310,11 @@ describe('UsersService', () => {
 
       const result = await service.updateWeight(1, 5, 72);
 
-      expect(activityServiceMock.updateWeightActivity).toHaveBeenCalledWith(1, 5, 72);
+      expect(activityServiceMock.updateWeightActivity).toHaveBeenCalledWith(
+        1,
+        5,
+        72,
+      );
       expect(result).toEqual(updatedEntry);
     });
 
@@ -335,7 +339,9 @@ describe('UsersService', () => {
         weight: 70,
       });
 
-      await expect(service.updateWeight(1, 5, 72)).rejects.toBeInstanceOf(NotFoundException);
+      await expect(service.updateWeight(1, 5, 72)).rejects.toBeInstanceOf(
+        NotFoundException,
+      );
 
       expect(prismaMock.weightLog.update).not.toHaveBeenCalled();
       expect(activityServiceMock.updateWeightActivity).not.toHaveBeenCalled();

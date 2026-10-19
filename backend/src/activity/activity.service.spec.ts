@@ -344,7 +344,9 @@ describe('ActivityService', () => {
         where: { id: 10 },
         data: { metadata: { weight: 72, weightLogId: 7 } },
         include: {
-          user: { select: { id: true, username: true, name: true, avatarUrl: true} }
+          user: {
+            select: { id: true, username: true, name: true, avatarUrl: true },
+          },
         },
       });
       expect(to).toHaveBeenCalledWith('user:2');
