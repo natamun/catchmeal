@@ -16,6 +16,7 @@ describe('ActivityService', () => {
       findFirst: jest.fn(),
       findMany: jest.fn(),
       deleteMany: jest.fn(),
+      update: jest.fn(),
     },
   };
   const friendsServiceMock = { getFriendIds: jest.fn() };
@@ -312,6 +313,58 @@ describe('ActivityService', () => {
       await service.removeByWeightLog(1, 7);
 
       expect(prismaMock.activity.deleteMany).not.toHaveBeenCalled();
+      expect(friendsServiceMock.getFriendIds).not.toHaveBeenCalled();
+      expect(emit).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('updateWeightActivity', () => {
+    it('should rewrite the weight in the linked activity and notify friends', async () => {
+      prismaMock.activity.findFirst.mockResolvedValue({ id: 10 });
+      prismaMock.activity.update.mockResolvedValue({
+        id: 10,
+        type: ActivityType.WEIGHT_LOGGED,
+        metadata: { weight: 72, weightLogId: 7 },
+        createdAt,
+        user,
+      });
+      friendsServiceMock.getFriendIds.mockResolvedValue([2, 3]);
+
+      await service.updateWeightActivity(1, 7, 72);
+
+      expect(prismaMock.activity.findFirst).toHaveBeenCalledWith({
+        where: {
+          userId: 1,
+          type: ActivityType.WEIGHT_LOGGED,
+          metadata: { path: ['weightLogId'], equals: 7 },
+        },
+        select: { id: true },
+      });
+      expect(prismaMock.activity.update).toHaveBeenCalledWith({
+        where: { id: 10 },
+        data: { metadata: { weight: 72, weightLogId: 7 } },
+        include: {
+          user: { select: { id: true, username: true, name: true, avatarUrl: true} }
+        },
+      });
+      expect(to).toHaveBeenCalledWith('user:2');
+      expect(to).toHaveBeenCalledWith('user:3');
+      expect(emit).toHaveBeenCalledTimes(2);
+      expect(emit).toHaveBeenCalledWith('activity:updated', {
+        id: 10,
+        type: ActivityType.WEIGHT_LOGGED,
+        message: 'a enregistré son poids (72 kg)',
+        createdAt,
+        user,
+      });
+    });
+
+    it('should do nothing when no activity is linked to the entry', async () => {
+      prismaMock.activity.findFirst.mockResolvedValue(null);
+
+      await service.updateWeightActivity(1, 7, 72);
+
+      expect(prismaMock.activity.update).not.toHaveBeenCalled();
       expect(friendsServiceMock.getFriendIds).not.toHaveBeenCalled();
       expect(emit).not.toHaveBeenCalled();
     });
