@@ -1,6 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import * as nodemailer from 'nodemailer';
 
+const APP_NAME = 'CatCHMeal';
+
 const BASE_STYLE = `
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -85,7 +87,7 @@ export class EmailService {
   }
 
   private get fromAddress(): string {
-    return process.env.EMAIL_FROM ?? '"KcalApp" <noreply@kcalapp.dev>';
+    return process.env.EMAIL_FROM ?? `"${APP_NAME}" <noreply@catchmeal.dev>`;
   }
 
   private async send(mail: nodemailer.SendMailOptions): Promise<void> {
@@ -113,15 +115,15 @@ export class EmailService {
   <div class="card">
     <div class="header">
       <h1>Export de données</h1>
-      <p>KcalApp — Confidentialité</p>
+      <p>${APP_NAME} — Confidentialité</p>
     </div>
     <div class="body">
       <p>Votre demande d'export de données personnelles a bien été traitée.</p>
-      <p>Le fichier téléchargé contient l'ensemble des informations associées à votre compte : profil, repas, historique de poids et objectifs.</p>
+      <p>Le fichier téléchargé contient l'ensemble des informations associées à votre compte : profil, données de santé, repas, historique de poids, objectifs, amis, messages et activités.</p>
       <div class="notice">
         Si vous n'êtes pas à l'origine de cette demande, contactez-nous immédiatement.
       </div>
-      <p>— L'équipe KcalApp</p>
+      <p>— L'équipe ${APP_NAME}</p>
     </div>
     <div class="footer">
       Cet email a été envoyé automatiquement, merci de ne pas y répondre.
@@ -129,6 +131,15 @@ export class EmailService {
   </div>
 </body>
 </html>`,
+      text: `Export de données
+
+Votre demande d'export de données personnelles a bien été traitée.
+
+Le fichier téléchargé contient l'ensemble des informations associées à votre compte : profil, données de santé, repas, historique de poids, objectifs, amis, messages et activités.
+
+Si vous n'êtes pas à l'origine de cette demande, contactez-nous immédiatement.
+
+— L'équipe ${APP_NAME}`,
     });
   }
 
@@ -148,15 +159,15 @@ export class EmailService {
   <div class="card">
     <div class="header">
       <h1>Compte supprimé</h1>
-      <p>KcalApp — Confidentialité</p>
+      <p>${APP_NAME} — Confidentialité</p>
     </div>
     <div class="body">
       <p>La suppression de votre compte a bien été effectuée.</p>
-      <p>Toutes vos données personnelles ont été anonymisées et ne sont plus accessibles sur KcalApp.</p>
+      <p>Toutes vos données personnelles ont été anonymisées et ne sont plus accessibles sur ${APP_NAME}.</p>
       <div class="notice">
         Si vous n'êtes pas à l'origine de cette demande, contactez-nous immédiatement.
       </div>
-      <p>— L'équipe KcalApp</p>
+      <p>— L'équipe ${APP_NAME}</p>
     </div>
     <div class="footer">
       Cet email a été envoyé automatiquement, merci de ne pas y répondre.
@@ -164,6 +175,15 @@ export class EmailService {
   </div>
 </body>
 </html>`,
+      text: `Compte supprimé
+
+La suppression de votre compte a bien été effectuée.
+
+Toutes vos données personnelles ont été anonymisées et ne sont plus accessibles sur ${APP_NAME}.
+
+Si vous n'êtes pas à l'origine de cette demande, contactez-nous immédiatement.
+
+— L'équipe ${APP_NAME}`,
     });
   }
 }
