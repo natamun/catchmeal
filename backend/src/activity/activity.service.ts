@@ -168,4 +168,34 @@ export class ActivityService {
       });
     });
   }
+
+  async updateWeightActivity(
+    userId: number,
+    weightLogId: number,
+    weight: number,
+  ) {
+    const activity = await this.prisma.activity.findFirst({
+      where: {
+        userId,
+        type: ActivityType.WEIGHT_LOGGED,
+        metadata: { path: ['weightLogId'], equals: weightLogId },
+      },
+      select: { id: true },
+    });
+    if (!activity) return;
+
+    const updated = await this.prisma.activity.update({
+      where: { id: activity.id },
+      data: { metadata: { weight, weightLogId } },
+      include: { user: { select: SAFE_USER_SELECT } },
+    });
+
+    const item = this.toFeedItem(updated);
+    const friendIds = await this.friendsService.getFriendIds(userId);
+    friendIds.forEach((friendId) => {
+      this.activityGateway.server
+        .to(`user:${friendId}`)
+        .emit('activity:updated', item);
+    });
+  }
 }

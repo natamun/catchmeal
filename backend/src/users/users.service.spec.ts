@@ -24,6 +24,7 @@ describe('UsersService', () => {
       findMany: jest.fn(),
       findUnique: jest.fn(),
       delete: jest.fn(),
+      update: jest.fn(),
     },
   };
 
@@ -35,6 +36,7 @@ describe('UsersService', () => {
   const activityServiceMock = {
     record: jest.fn(),
     removeByWeightLog: jest.fn(),
+    updateWeightActivity: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -292,6 +294,57 @@ describe('UsersService', () => {
       expect(prismaMock.weightLog.delete).not.toHaveBeenCalled();
 
       expect(activityServiceMock.removeByWeightLog).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('updateWeigth', () => {
+    const updatedEntry = { id: 5, weight: 72 };
+
+    it('should update the entry and its linked activity when the weight changes', async () => {
+      prismaMock.weightLog.findUnique.mockResolvedValue({
+        id: 5,
+        userId: 1,
+        weight: 70,
+      });
+      prismaMock.weightLog.update.mockResolvedValue(updatedEntry);
+
+      const result = await service.updateWeight(1, 5, 72);
+
+      expect(activityServiceMock.updateWeightActivity).toHaveBeenCalledWith(
+        1,
+        5,
+        72,
+      );
+      expect(result).toEqual(updatedEntry);
+    });
+
+    it('should not touch the activity when the weight is unchanged', async () => {
+      prismaMock.weightLog.findUnique.mockResolvedValue({
+        id: 5,
+        userId: 1,
+        weight: 70,
+      });
+      prismaMock.weightLog.update.mockResolvedValue({ id: 5, weight: 70 });
+
+      await service.updateWeight(1, 5, 70, 18);
+
+      expect(prismaMock.weightLog.update).toHaveBeenCalled();
+      expect(activityServiceMock.updateWeightActivity).not.toHaveBeenCalled();
+    });
+
+    it('should throw NotFoundException and update nothing when the entry belongs to another user', async () => {
+      prismaMock.weightLog.findUnique.mockResolvedValue({
+        id: 5,
+        userId: 2,
+        weight: 70,
+      });
+
+      await expect(service.updateWeight(1, 5, 72)).rejects.toBeInstanceOf(
+        NotFoundException,
+      );
+
+      expect(prismaMock.weightLog.update).not.toHaveBeenCalled();
+      expect(activityServiceMock.updateWeightActivity).not.toHaveBeenCalled();
     });
   });
 

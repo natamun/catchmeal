@@ -236,7 +236,8 @@ export class UsersService {
     });
     if (!entry || entry.userId !== userId)
       throw new NotFoundException('Entry not found');
-    return this.prisma.weightLog.update({
+
+    const updated = await this.prisma.weightLog.update({
       where: { id: entryId },
       data: { weight, bodyFat, fatFreeMass, bodyWater, muscleMass },
       select: {
@@ -249,6 +250,10 @@ export class UsersService {
         loggedAt: true,
       },
     });
+    if (weight !== entry.weight)
+      await this.activityService.updateWeightActivity(userId, entryId, weight);
+
+    return updated;
   }
 
   async deleteWeight(userId: number, entryId: number) {
