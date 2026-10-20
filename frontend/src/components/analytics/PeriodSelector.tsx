@@ -6,7 +6,7 @@ import {
 } from 'date-fns';
 import { ArrowRight, CalendarDays } from 'lucide-react';
 
-import CalendarButton, { type DateRange } from '../ui/CalendarButton';
+import { CalendarButton, type DateRange } from '../ui/CalendarButton';
 import { PillTabs } from '../ui/PillTabs';
 import { lastDays } from './period';
 
@@ -37,10 +37,7 @@ interface PeriodSelectorProps {
   onChange: (period: DateRange) => void;
 }
 
-export default function PeriodSelector({
-  period,
-  onChange,
-}: PeriodSelectorProps) {
+export function PeriodSelector({ period, onChange }: PeriodSelectorProps) {
   const today = new Date();
 
   return (

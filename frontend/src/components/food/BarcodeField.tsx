@@ -35,7 +35,7 @@ interface BarcodeFieldProps {
   onProduct: (product: OffProduct) => void;
 }
 
-export default function BarcodeField({
+export function BarcodeField({
   value,
   error,
   showError,

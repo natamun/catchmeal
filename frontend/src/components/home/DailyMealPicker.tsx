@@ -3,15 +3,15 @@ import { ChevronLeft } from 'lucide-react';
 
 import { useCurrentUser } from '../../auth/authContext';
 import { listFoodItems } from '../food/api';
-import FoodItemList from '../food/FoodItemList';
+import { FoodItemList } from '../food/FoodItemList';
 import type { FoodItem } from '../food/types';
 import { listMeals } from '../meal/api';
 import { buildDrafts, type MealItemDraft } from '../meal/draft';
-import MealList from '../meal/MealList';
+import { MealList } from '../meal/MealList';
 import { MEAL_TYPE_LABELS, type Meal, type MealType } from '../meal/types';
 import { PillTabs } from '../ui/PillTabs';
 import { SelectToggle } from '../ui/SelectToggle';
-import DailyMealForm from './DailyMealForm';
+import { DailyMealForm } from './DailyMealForm';
 
 type PickerTab = 'food' | 'meal';
 
@@ -37,7 +37,7 @@ interface DailyMealPickerProps {
   onAdded: () => void;
 }
 
-export default function DailyMealPicker({
+export function DailyMealPicker({
   mealType,
   date,
   onClose,

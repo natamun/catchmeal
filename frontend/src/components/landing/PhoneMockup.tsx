@@ -1,4 +1,4 @@
-export default function PhoneMockup() {
+export function PhoneMockup() {
   return (
     <div className="relative flex items-center justify-center">
       <div

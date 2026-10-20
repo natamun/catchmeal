@@ -104,7 +104,7 @@ function NavItem({ tab, variant, icon }: NavItemProps) {
   );
 }
 
-export default function Nav({ isAdmin = false }: Props) {
+export function Nav({ isAdmin = false }: Props) {
   const user = useCurrentUser();
   const { logout } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);

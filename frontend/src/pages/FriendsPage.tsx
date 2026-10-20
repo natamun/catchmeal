@@ -2,20 +2,20 @@ import { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router';
 
 import { useCurrentUser } from '../auth/authContext';
-import AddFriendDialog from '../components/friends/AddFriendDialog';
+import { AddFriendDialog } from '../components/friends/AddFriendDialog';
 import {
   acceptFriendRequest,
   removeFriendship,
 } from '../components/friends/api';
-import FriendRow from '../components/friends/FriendRow';
-import FriendsActivity from '../components/friends/FriendsActivity';
-import RequestRow from '../components/friends/RequestRow';
+import { FriendRow } from '../components/friends/FriendRow';
+import { FriendsActivity } from '../components/friends/FriendsActivity';
+import { RequestRow } from '../components/friends/RequestRow';
 import type {
   ActivityItem,
   Friend,
   UserSummary,
 } from '../components/friends/types';
-import ChatWindow from '../components/messages/ChatWindow';
+import { ChatWindow } from '../components/messages/ChatWindow';
 import { AddCircleButton } from '../components/ui/AddCircleButton';
 import { ConfirmDialog } from '../components/ui/ConfirmDialog';
 import {

@@ -36,7 +36,7 @@ function macrosOf(item: FoodItem) {
   }));
 }
 
-export default function FoodItemList({
+export function FoodItemList({
   items,
   isLoading,
   loadError,

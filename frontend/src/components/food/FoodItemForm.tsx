@@ -17,7 +17,7 @@ import { Input } from '../ui/Input';
 import { PillTabs } from '../ui/PillTabs';
 import { useToast } from '../ui/toastContext';
 import { createFoodItem, deleteFoodItem, updateFoodItem } from './api';
-import BarcodeField from './BarcodeField';
+import { BarcodeField } from './BarcodeField';
 import type { FoodItem, OffProduct, QuantityUnit } from './types';
 
 interface FoodItemFormState {
@@ -132,7 +132,7 @@ interface FoodItemFormProps {
   onItemDeleted: (id: number) => void;
 }
 
-export default function FoodItemForm({
+export function FoodItemForm({
   dialogRef,
   editingItem,
   foodItems,

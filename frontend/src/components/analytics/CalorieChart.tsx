@@ -15,9 +15,9 @@ import {
   type TooltipContentProps,
 } from 'recharts';
 
-import SummaryCard from '../ui/SummaryCard';
-import buildDataGraph from './buildDataGraph';
-import ChartSkeleton from './ChartSkeleton';
+import { SummaryCard } from '../ui/SummaryCard';
+import { buildDataGraph } from './buildDataGraph';
+import { ChartSkeleton } from './ChartSkeleton';
 import {
   AXIS_WIDTH,
   CHART_HEIGHT,
@@ -28,7 +28,7 @@ import {
 } from './chartStyle';
 import { legendLabel } from './legendLabel';
 import { MACRO_SERIES, UNSPLIT_SERIES } from './macroSeries';
-import MacroTooltip from './MacroTooltip';
+import { MacroTooltip } from './MacroTooltip';
 import type { DashboardDay, DataGraph, Grain, KcalPoint } from './types';
 
 const GRAIN_CAPTION: Record<Grain, string> = {
@@ -123,7 +123,7 @@ interface Props {
   isLoading?: boolean;
 }
 
-export default function CalorieChart({ days, isLoading = false }: Props) {
+export function CalorieChart({ days, isLoading = false }: Props) {
   const [width, setWidth] = useState(INITIAL_WIDTH);
 
   const dataLength = days.length;

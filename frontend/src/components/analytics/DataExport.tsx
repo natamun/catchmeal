@@ -4,7 +4,7 @@ import { Download } from 'lucide-react';
 import { formatDayMonth } from '../../utils/format';
 import { toApiDate } from '../meal/api';
 import type { DateRange } from '../ui/CalendarButton';
-import SummaryCard from '../ui/SummaryCard';
+import { SummaryCard } from '../ui/SummaryCard';
 import type { DashboardDay } from './types';
 
 function downloadJson(data: unknown, filename: string) {
@@ -34,7 +34,7 @@ interface Props {
   isLoading?: boolean;
 }
 
-export default function DataExport({ period, days, isLoading = false }: Props) {
+export function DataExport({ period, days, isLoading = false }: Props) {
   const isEmpty = !isLoading && days.length === 0;
 
   return (

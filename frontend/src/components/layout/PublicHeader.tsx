@@ -60,7 +60,7 @@ function Pressable({
   );
 }
 
-export default function PublicHeader({ links, action }: Props) {
+export function PublicHeader({ links, action }: Props) {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuVisible = useDelayedUnmount(menuOpen, 100);
   const burgerRef = useRef<HTMLButtonElement>(null);

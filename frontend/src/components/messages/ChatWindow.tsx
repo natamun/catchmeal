@@ -6,7 +6,7 @@ import { useConversation } from '../../hooks/useConversation';
 import type { ActivityItem, UserSummary } from '../friends/types';
 import { BaseDialog } from '../ui/BaseDialog';
 import { Input } from '../ui/Input';
-import QuotedActivity from './QuotedActivity';
+import { QuotedActivity } from './QuotedActivity';
 
 interface ChatWindowProps {
   dialogRef: RefObject<HTMLDialogElement | null>;
@@ -15,7 +15,7 @@ interface ChatWindowProps {
   onClose?: () => void;
 }
 
-export default function ChatWindow({
+export function ChatWindow({
   dialogRef,
   friend,
   quotedActivity,

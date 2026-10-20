@@ -15,8 +15,8 @@ import {
 import { formatWeekday } from '../../utils/format';
 import type { DateRange } from '../ui/CalendarButton';
 import { SelectDropdown } from '../ui/SelectDropdown';
-import SummaryCard from '../ui/SummaryCard';
-import ChartSkeleton from './ChartSkeleton';
+import { SummaryCard } from '../ui/SummaryCard';
+import { ChartSkeleton } from './ChartSkeleton';
 import {
   AXIS_WIDTH,
   CHART_HEIGHT,
@@ -26,7 +26,7 @@ import {
   X_TICK,
   Y_TICK,
 } from './chartStyle';
-import ChartTooltip from './ChartTooltip';
+import { ChartTooltip } from './ChartTooltip';
 import type { DashboardDay } from './types';
 
 const TITLE = 'Évolution';
@@ -84,7 +84,7 @@ interface Props {
   isLoading?: boolean;
 }
 
-export default function MeasureChart({
+export function MeasureChart({
   measure,
   onMeasureChange,
   targetWeight,

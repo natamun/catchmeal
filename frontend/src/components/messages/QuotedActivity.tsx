@@ -17,7 +17,7 @@ interface QuotedActivityProps {
   onDismiss?: () => void;
 }
 
-export default function QuotedActivity({
+export function QuotedActivity({
   activity,
   variant,
   onDismiss,

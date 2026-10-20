@@ -62,7 +62,7 @@ interface DailyMealListProps {
   onEdit: (mealType: MealType) => void;
 }
 
-export default function DailyMealList({
+export function DailyMealList({
   meals,
   foodItems,
   isLoading,

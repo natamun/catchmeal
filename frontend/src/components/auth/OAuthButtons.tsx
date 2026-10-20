@@ -56,7 +56,7 @@ const PROVIDERS = [
   },
 ];
 
-export default function OAuthButtons() {
+export function OAuthButtons() {
   return (
     <div className="grid grid-cols-3 gap-3">
       {PROVIDERS.map(({ name, path, icon, iconOnly }) => (

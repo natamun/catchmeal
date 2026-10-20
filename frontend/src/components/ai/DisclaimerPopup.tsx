@@ -4,9 +4,7 @@ type DisclaimerPopupProps = {
   setDisclaimer: (x: boolean) => void;
 };
 
-export default function DisclaimerPopup({
-  setDisclaimer,
-}: DisclaimerPopupProps) {
+export function DisclaimerPopup({ setDisclaimer }: DisclaimerPopupProps) {
   return (
     <div className="max-h-full w-full overflow-y-auto rounded-2xl bg-white p-5 shadow-lg">
       <div className="flex items-center justify-between gap-3">

@@ -1,6 +1,6 @@
 import { CHART_HEIGHT } from './chartStyle';
 
-export default function ChartSkeleton() {
+export function ChartSkeleton() {
   return (
     <div
       className="animate-pulse rounded-xl bg-green-50"

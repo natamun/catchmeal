@@ -3,7 +3,7 @@ import { ArrowLeft } from 'lucide-react';
 
 import * as authApi from '../auth/api';
 import { useAuth } from '../auth/authContext';
-import AuthBrandPanel from '../components/auth/AuthBrandPanel';
+import { AuthBrandPanel } from '../components/auth/AuthBrandPanel';
 import { Brand } from '../components/ui/Brand';
 import { FieldError } from '../components/ui/FieldError';
 import { LABEL_CLASS } from '../components/ui/fieldStyle';
@@ -62,11 +62,7 @@ function validate(form: FormState): Partial<Record<keyof FormState, string>> {
   return errors;
 }
 
-export default function OAuthOnboardingPage({
-  prefill,
-  onComplete,
-  onBack,
-}: Props) {
+export function OAuthOnboardingPage({ prefill, onComplete, onBack }: Props) {
   const { updateUser } = useAuth();
   const {
     form,

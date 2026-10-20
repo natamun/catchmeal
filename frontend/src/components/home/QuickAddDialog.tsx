@@ -42,7 +42,7 @@ interface QuickAddDialogProps {
   onSaved: () => void;
 }
 
-export default function QuickAddDialog({
+export function QuickAddDialog({
   dialogRef,
   date,
   onSaved,

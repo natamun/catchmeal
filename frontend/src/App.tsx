@@ -10,16 +10,16 @@ import {
 
 import { useAuth } from './auth/authContext';
 import { AuthProvider } from './auth/AuthProvider';
-import AppLayout from './components/layout/AppLayout';
+import { AppLayout } from './components/layout/AppLayout';
 import { deleteMyAccount } from './components/profile/api';
 import { useIosVisibleViewport } from './hooks/useIosVisibleViewport';
-import AuthPage from './pages/AuthPage';
-import LandingPage from './pages/LandingPage';
-import LegalNoticePage from './pages/LegalNoticePage';
-import NotFoundPage from './pages/NotFoundPage';
-import OAuthOnboardingPage from './pages/OAuthOnboardingPage';
-import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
-import TermsOfServicePage from './pages/TermsOfServicePage';
+import { AuthPage } from './pages/AuthPage';
+import { LandingPage } from './pages/LandingPage';
+import { LegalNoticePage } from './pages/LegalNoticePage';
+import { NotFoundPage } from './pages/NotFoundPage';
+import { OAuthOnboardingPage } from './pages/OAuthOnboardingPage';
+import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage';
+import { TermsOfServicePage } from './pages/TermsOfServicePage';
 import { RequireAdmin, RequireAuth, RequireGuest } from './routing/guards';
 import type { NavigationState } from './routing/navigation';
 import { PageTitle } from './routing/PageTitle';
@@ -205,7 +205,7 @@ function AppRoutes() {
   );
 }
 
-export default function App() {
+export function App() {
   return (
     <BrowserRouter>
       <ScrollToTop />

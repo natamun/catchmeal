@@ -6,7 +6,7 @@ import type { DashboardDay } from '../components/analytics/types';
 
 const NO_DAYS: DashboardDay[] = [];
 
-export default function useDashboard(from: string, to: string) {
+export function useDashboard(from: string, to: string) {
   const { userId } = useCurrentUser();
   const key = `${userId}:${from}:${to}`;
   const [loaded, setLoaded] = useState<Record<string, DashboardDay[]>>({});

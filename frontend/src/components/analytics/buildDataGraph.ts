@@ -16,7 +16,7 @@ export function averageOf(days: DashboardDay[], key: NumericKey) {
 
 const shortDate = (day: string) => day.slice(5).split('-').reverse().join('-');
 
-export default function buildDataGraph(
+export function buildDataGraph(
   dashboard: DashboardDay[],
   grain: Grain,
 ): DataGraph[] {

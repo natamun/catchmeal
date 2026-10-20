@@ -13,11 +13,11 @@ import {
 } from 'lucide-react';
 import { Link } from 'react-router';
 
-import FeatureCard from '../components/landing/FeatureCard';
-import LandingSection from '../components/landing/LandingSection';
-import PhoneMockup from '../components/landing/PhoneMockup';
-import PublicFooter from '../components/layout/PublicFooter';
-import PublicHeader from '../components/layout/PublicHeader';
+import { FeatureCard } from '../components/landing/FeatureCard';
+import { LandingSection } from '../components/landing/LandingSection';
+import { PhoneMockup } from '../components/landing/PhoneMockup';
+import { PublicFooter } from '../components/layout/PublicFooter';
+import { PublicHeader } from '../components/layout/PublicHeader';
 import { OpenFoodFactsLink } from '../components/ui/OpenFoodFactsLink';
 import { PATHS } from '../routing/paths';
 
@@ -94,7 +94,7 @@ const COMMITMENTS = [
   'Aucune publicité, aucune revente de données.',
 ];
 
-export default function LandingPage() {
+export function LandingPage() {
   return (
     <div id="landing-page" className="bg-white">
       <PublicHeader

@@ -36,7 +36,7 @@ function macrosOf(meal: Meal) {
   };
 }
 
-export default function MealList({
+export function MealList({
   meals,
   isLoading,
   loadError,

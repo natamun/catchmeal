@@ -17,7 +17,7 @@ interface DraftItemListProps {
   className?: string;
 }
 
-export default function DraftItemList({
+export function DraftItemList({
   items,
   onAdjust,
   onRemove,

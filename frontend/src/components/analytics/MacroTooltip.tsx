@@ -8,12 +8,7 @@ interface Props extends TooltipContentProps {
   averaged: boolean;
 }
 
-export default function MacroTooltip({
-  active,
-  payload,
-  label,
-  averaged,
-}: Props) {
+export function MacroTooltip({ active, payload, label, averaged }: Props) {
   const point = payload[0]?.payload as KcalPoint | undefined;
 
   if (!active || !point) {

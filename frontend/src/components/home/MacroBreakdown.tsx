@@ -1,4 +1,4 @@
-import SummaryCard from '../ui/SummaryCard';
+import { SummaryCard } from '../ui/SummaryCard';
 import { progressLaps } from './progress';
 
 interface Macros {
@@ -73,7 +73,7 @@ function Bar({
   );
 }
 
-export default function MacroBreakdown({
+export function MacroBreakdown({
   protein,
   carbs,
   fat,

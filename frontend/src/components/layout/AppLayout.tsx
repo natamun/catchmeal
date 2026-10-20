@@ -3,11 +3,11 @@ import { Outlet, useLocation, useMatch } from 'react-router';
 
 import { useCurrentUser } from '../../auth/authContext';
 import { PATHS } from '../../routing/paths';
-import ChatBotPopup from '../ai/ChatBotPopup';
+import { ChatBotPopup } from '../ai/ChatBotPopup';
 import type { ChatMessage } from '../ai/types';
 import { ToastProvider } from '../ui/ToastProvider';
 import { ConnectionBanner } from './ConnectionBanner';
-import Nav, { type Tab } from './Nav';
+import { Nav, type Tab } from './Nav';
 
 const TABS: Tab[] = ['home', 'food', 'stats', 'friends', 'profile', 'admin'];
 
@@ -27,7 +27,7 @@ function tabFromPath(pathname: string): Tab {
   );
 }
 
-export default function AppLayout() {
+export function AppLayout() {
   const user = useCurrentUser();
   const { pathname } = useLocation();
   const isAddingToJournal = useMatch(PATHS.journalAdd) !== null;

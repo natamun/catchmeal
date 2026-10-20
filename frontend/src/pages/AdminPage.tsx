@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 
 import { useAuth } from '../auth/authContext';
-import AdminSearchBar from '../components/admin/AdminSearchBar';
+import { AdminSearchBar } from '../components/admin/AdminSearchBar';
 import { AdminUserDialog } from '../components/admin/AdminUserDialog';
 import {
   getStats,
@@ -22,9 +22,9 @@ import {
   ListCardLoading,
 } from '../components/ui/ListCard';
 import { LoadError } from '../components/ui/LoadError';
-import Skeleton from '../components/ui/Skeleton';
-import StatTile from '../components/ui/StatTile';
-import SummaryCard from '../components/ui/SummaryCard';
+import { Skeleton } from '../components/ui/Skeleton';
+import { StatTile } from '../components/ui/StatTile';
+import { SummaryCard } from '../components/ui/SummaryCard';
 
 function matches(user: AdminUser, criteria: AdminFilterCriteria) {
   const query = criteria.query.trim().toLowerCase();

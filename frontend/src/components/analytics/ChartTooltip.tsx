@@ -40,11 +40,7 @@ export function TooltipRow({
   );
 }
 
-export default function ChartTooltip({
-  active,
-  payload,
-  label,
-}: TooltipContentProps) {
+export function ChartTooltip({ active, payload, label }: TooltipContentProps) {
   if (!active || payload.length === 0) {
     return null;
   }

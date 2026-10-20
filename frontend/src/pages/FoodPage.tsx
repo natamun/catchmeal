@@ -2,12 +2,12 @@ import { useEffect, useRef, useState } from 'react';
 
 import { useCurrentUser } from '../auth/authContext';
 import { listFoodItems } from '../components/food/api';
-import FoodItemForm from '../components/food/FoodItemForm';
-import FoodItemList from '../components/food/FoodItemList';
+import { FoodItemForm } from '../components/food/FoodItemForm';
+import { FoodItemList } from '../components/food/FoodItemList';
 import type { FoodItem } from '../components/food/types';
 import { listMeals } from '../components/meal/api';
-import MealForm from '../components/meal/MealForm';
-import MealList from '../components/meal/MealList';
+import { MealForm } from '../components/meal/MealForm';
+import { MealList } from '../components/meal/MealList';
 import type { Meal } from '../components/meal/types';
 import { AddCircleButton } from '../components/ui/AddCircleButton';
 import { EditIconButton } from '../components/ui/EditIconButton';

@@ -1,9 +1,9 @@
 import { CalendarDays } from 'lucide-react';
 
 import { MACROS } from '../../constants/macros';
-import Skeleton from '../ui/Skeleton';
-import StatTile from '../ui/StatTile';
-import SummaryCard from '../ui/SummaryCard';
+import { Skeleton } from '../ui/Skeleton';
+import { StatTile } from '../ui/StatTile';
+import { SummaryCard } from '../ui/SummaryCard';
 import { averageOf } from './buildDataGraph';
 import { MACRO_TOTAL_KEYS } from './macroSeries';
 import type { DashboardDay } from './types';
@@ -14,7 +14,7 @@ interface Props {
   className?: string;
 }
 
-export default function NutritionAverages({
+export function NutritionAverages({
   days,
   isLoading = false,
   className,

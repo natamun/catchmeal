@@ -9,7 +9,7 @@ interface Props {
   children: ReactNode;
 }
 
-export default function SummaryCard({
+export function SummaryCard({
   title,
   aside,
   inlineAside = false,

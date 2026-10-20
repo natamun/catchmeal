@@ -6,7 +6,7 @@ import { useCurrentUser } from '../../auth/authContext';
 import { requestErrorMessage } from '../../utils/requestErrorMessage';
 import type { Tab } from '../layout/Nav';
 import { askAssistant } from './api';
-import DisclaimerPopup from './DisclaimerPopup';
+import { DisclaimerPopup } from './DisclaimerPopup';
 import type { ChatMessage } from './types';
 
 interface ChatBotPopupProps {
@@ -17,7 +17,7 @@ interface ChatBotPopupProps {
   activePage: Tab;
 }
 
-export default function ChatBotPopup({
+export function ChatBotPopup({
   isOpen,
   onToggle,
   messages,

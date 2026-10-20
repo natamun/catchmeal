@@ -10,7 +10,7 @@ import { FieldError } from '../ui/FieldError';
 import { LABEL_CLASS } from '../ui/fieldStyle';
 import { Input } from '../ui/Input';
 import { SelectDropdown } from '../ui/SelectDropdown';
-import StatTile from '../ui/StatTile';
+import { StatTile } from '../ui/StatTile';
 import {
   deleteUser,
   updateUser,

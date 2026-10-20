@@ -8,7 +8,7 @@ interface Props {
   children: ReactNode;
 }
 
-export default function FeatureCard({
+export function FeatureCard({
   icon: Icon,
   title,
   inline = false,

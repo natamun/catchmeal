@@ -23,7 +23,7 @@ import {
   mealToItems,
   type MealItemDraft,
 } from './draft';
-import DraftItemList from './DraftItemList';
+import { DraftItemList } from './DraftItemList';
 import {
   EMPTY_QUICK_ADD_FORM,
   QUICK_ADD_FIELDS,
@@ -40,7 +40,7 @@ interface MealFormProps {
   onMealDeleted: (id: number) => void;
 }
 
-export default function MealForm({
+export function MealForm({
   dialogRef,
   foodItems,
   editingMeal,

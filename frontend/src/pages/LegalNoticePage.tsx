@@ -19,7 +19,7 @@ const TEAM = [
   },
 ];
 
-export default function LegalNoticePage() {
+export function LegalNoticePage() {
   return (
     <LegalLayout>
       <h1>Mentions légales</h1>

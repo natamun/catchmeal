@@ -10,7 +10,7 @@ interface RequestRowProps {
   onDecline: () => void;
 }
 
-export default function RequestRow({
+export function RequestRow({
   from,
   isBusy,
   onAccept,

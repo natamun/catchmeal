@@ -4,7 +4,7 @@ import { useCurrentUser } from '../../auth/authContext';
 import { requestErrorMessage } from '../../utils/requestErrorMessage';
 import { createMeal, deleteMeal, toApiDate, updateMeal } from '../meal/api';
 import { draftsToInput, draftTotals, type MealItemDraft } from '../meal/draft';
-import DraftItemList from '../meal/DraftItemList';
+import { DraftItemList } from '../meal/DraftItemList';
 import { MEAL_TYPE_LABELS, type Meal, type MealType } from '../meal/types';
 import { BaseDialog } from '../ui/BaseDialog';
 import { MacroSummary } from '../ui/MacroSummary';
@@ -19,7 +19,7 @@ interface DailyMealFormProps {
   onSaved: () => void;
 }
 
-export default function DailyMealForm({
+export function DailyMealForm({
   dialogRef,
   mealType,
   date,

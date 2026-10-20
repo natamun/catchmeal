@@ -7,7 +7,7 @@ import { PATHS } from '../../routing/paths';
 import { BaseDialog } from '../ui/BaseDialog';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
 import { LoadError } from '../ui/LoadError';
-import SummaryCard from '../ui/SummaryCard';
+import { SummaryCard } from '../ui/SummaryCard';
 import { useToast } from '../ui/toastContext';
 import { deleteMyAccount, exportMyData } from './api';
 import { ChangePasswordDialog } from './ChangePasswordDialog';

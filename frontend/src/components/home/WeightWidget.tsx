@@ -1,8 +1,8 @@
 import { Minus, TrendingDown, TrendingUp } from 'lucide-react';
 
 import { formatKg } from '../../utils/format';
-import StatTile from '../ui/StatTile';
-import SummaryCard from '../ui/SummaryCard';
+import { StatTile } from '../ui/StatTile';
+import { SummaryCard } from '../ui/SummaryCard';
 
 interface Props {
   history: { weight: number; loggedAt: string }[] | null;
@@ -17,11 +17,7 @@ function formatDay(isoDate: string) {
   return `${day === 1 ? '1er' : day} ${month}`;
 }
 
-export default function WeightWidget({
-  history,
-  hasError = false,
-  goalWeight,
-}: Props) {
+export function WeightWidget({ history, hasError = false, goalWeight }: Props) {
   const isLoading = history === null && !hasError;
   const current = history?.[0] ?? null;
   const previous = history?.[1] ?? null;

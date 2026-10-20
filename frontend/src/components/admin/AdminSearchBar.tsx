@@ -78,7 +78,7 @@ interface AdminSearchBarProps {
   onFilterChange: (criteria: AdminFilterCriteria) => void;
 }
 
-export default function AdminSearchBar({
+export function AdminSearchBar({
   criteria,
   onFilterChange,
 }: AdminSearchBarProps) {

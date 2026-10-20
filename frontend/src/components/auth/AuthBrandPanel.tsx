@@ -8,7 +8,7 @@ const ARGUMENTS = [
   'Un suivi partagé avec vos amis',
 ];
 
-export default function AuthBrandPanel() {
+export function AuthBrandPanel() {
   return (
     <aside className="hidden flex-col justify-between border-r border-green-200 bg-green-50 p-12 lg:flex">
       <Brand size="lg" />

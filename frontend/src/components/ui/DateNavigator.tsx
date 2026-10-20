@@ -1,6 +1,6 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
-import CalendarButton from './CalendarButton';
+import { CalendarButton } from './CalendarButton';
 
 const ARROW_CLASS =
   'flex cursor-pointer items-center justify-center rounded-lg px-3 py-1.5 text-green-500 transition-colors hover:bg-green-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-400';
@@ -40,7 +40,7 @@ interface DateNavigatorProps {
   onChange: (date: Date) => void;
 }
 
-export default function DateNavigator({ value, onChange }: DateNavigatorProps) {
+export function DateNavigator({ value, onChange }: DateNavigatorProps) {
   return (
     <div className="flex gap-1.5 self-start rounded-xl border border-green-200 bg-white p-1.5 max-2xs:w-full">
       <button

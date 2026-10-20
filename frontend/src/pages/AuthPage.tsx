@@ -3,8 +3,8 @@ import { ArrowLeft } from 'lucide-react';
 import { Link, useLocation, useMatch, useNavigate } from 'react-router';
 
 import { useAuth } from '../auth/authContext';
-import AuthBrandPanel from '../components/auth/AuthBrandPanel';
-import OAuthButtons from '../components/auth/OAuthButtons';
+import { AuthBrandPanel } from '../components/auth/AuthBrandPanel';
+import { OAuthButtons } from '../components/auth/OAuthButtons';
 import { PrivacyPolicyContent } from '../components/legal/PrivacyPolicyContent';
 import { TermsOfServiceContent } from '../components/legal/TermsOfServiceContent';
 import { BaseDialog } from '../components/ui/BaseDialog';
@@ -85,7 +85,7 @@ function validateAuthForm(
   return errors;
 }
 
-export default function AuthPage() {
+export function AuthPage() {
   const { login, register } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();

@@ -1,8 +1,8 @@
 import { Minus, TrendingDown, TrendingUp } from 'lucide-react';
 
 import { formatKg } from '../../utils/format';
-import Skeleton from '../ui/Skeleton';
-import SummaryCard from '../ui/SummaryCard';
+import { Skeleton } from '../ui/Skeleton';
+import { SummaryCard } from '../ui/SummaryCard';
 import type { DashboardDay } from './types';
 
 interface Props {
@@ -10,7 +10,7 @@ interface Props {
   isLoading?: boolean;
 }
 
-export default function WeightVariation({ days, isLoading = false }: Props) {
+export function WeightVariation({ days, isLoading = false }: Props) {
   const weights = days.flatMap(({ weight }) =>
     weight === null ? [] : [weight],
   );

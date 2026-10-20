@@ -21,7 +21,7 @@ interface AddFriendDialogProps {
   onSent: (username: string) => void;
 }
 
-export default function AddFriendDialog({
+export function AddFriendDialog({
   dialogRef,
   userId,
   friendIds,

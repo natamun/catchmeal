@@ -80,7 +80,7 @@ interface RangeProps extends SharedProps {
   onRangeChange: (range: DateRange) => void;
 }
 
-export default function CalendarButton(props: DayProps | RangeProps) {
+export function CalendarButton(props: DayProps | RangeProps) {
   const { children, className, wrapperClassName, min, max, placement } = props;
   const pickerRef = useRef<DatePicker>(null);
   const [isOpen, setIsOpen] = useState(false);

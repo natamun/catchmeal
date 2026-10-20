@@ -7,12 +7,7 @@ interface Props {
   children: ReactNode;
 }
 
-export default function LandingSection({
-  id,
-  title,
-  tinted = false,
-  children,
-}: Props) {
+export function LandingSection({ id, title, tinted = false, children }: Props) {
   return (
     <section
       id={id}

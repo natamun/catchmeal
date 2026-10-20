@@ -11,7 +11,7 @@ interface FriendsActivityProps {
   onReply: (activity: ActivityItem) => void;
 }
 
-export default function FriendsActivity({
+export function FriendsActivity({
   activities,
   presence,
   onReply,

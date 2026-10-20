@@ -13,7 +13,7 @@ interface FriendRowProps {
   onRemove: () => void;
 }
 
-export default function FriendRow({
+export function FriendRow({
   friend,
   online,
   lastSeenAt,
