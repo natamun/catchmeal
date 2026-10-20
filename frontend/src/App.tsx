@@ -27,9 +27,17 @@ import { PATHS } from './routing/paths';
 import { ScrollToTop } from './routing/ScrollToTop';
 import { SocketProvider } from './socket/SocketProvider';
 
+/**
+ * Remembers in localStorage that the last visit was logged in, so the journal
+ * code can start downloading before /auth/me answers.
+ */
 const SESSION_HINT_KEY = 'session-hint';
 const PRELOAD_DELAY_MS = 1000;
 
+/**
+ * The pages behind the login live in their own files and are loaded on demand
+ * (lazy): visitors of the public pages never download them.
+ */
 const loaders = {
   home: () => import('./pages/HomePage'),
   journalAdd: () => import('./pages/JournalAddPage'),
@@ -48,6 +56,10 @@ const FriendsPage = lazy(loaders.friends);
 const ProfilePage = lazy(loaders.profile);
 const AdminPage = lazy(loaders.admin);
 
+/**
+ * Starts downloading a page's code in advance. A failure is ignored: the page
+ * will simply load when visited.
+ */
 function preload(load: () => Promise<unknown>) {
   load().catch(() => undefined);
 }
@@ -71,6 +83,11 @@ function saveSessionHint(connected: boolean) {
 
 if (hasSessionHint()) preload(loaders.home);
 
+/**
+ * The '/' route: the landing page for visitors. A logged-in user goes to the
+ * journal, or to the welcome page right after an OAuth sign-up. An OAuth error
+ * sent back by the backend is shown on the login page.
+ */
 function LandingRoute() {
   const { status } = useAuth();
   const [params] = useSearchParams();
@@ -93,6 +110,10 @@ function LandingRoute() {
   return <LandingPage />;
 }
 
+/**
+ * Welcome page of a new OAuth user, who must choose a username first. "Back"
+ * deletes the half-created account and logs out.
+ */
 function WelcomeRoute() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
@@ -117,6 +138,11 @@ function WelcomeRoute() {
   );
 }
 
+/**
+ * All the routes of the app. It waits for the session check before choosing a
+ * page, so a logged-in user never sees the login page flash. Once logged in,
+ * the code of the other pages is preloaded after one second.
+ */
 function AppRoutes() {
   const { status, user } = useAuth();
   const role = user?.role;
@@ -205,6 +231,10 @@ function AppRoutes() {
   );
 }
 
+/**
+ * Root component: the router, then the tab title and scroll handling, then the
+ * session and the socket around the routes.
+ */
 export function App() {
   return (
     <BrowserRouter>

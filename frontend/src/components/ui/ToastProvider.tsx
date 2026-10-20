@@ -7,12 +7,18 @@ import { ToastContext, type ShowToast } from './toastContext';
 
 const TOAST_DURATION_MS = 3000;
 
+/**
+ * Displays one toast at a time for the logged-in part of the app; a new message
+ * replaces the current one. It vanishes after 3 seconds.
+ */
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [toast, setToast] = useState<{
     message: string | null;
     icon: LucideIcon;
   }>({ message: null, icon: CheckCircle2 });
 
+  // Only the message is cleared: the icon must stay during the fade-out
+  // animation.
   useTimeout(
     () => setToast((current) => ({ ...current, message: null })),
     toast.message ? TOAST_DURATION_MS : null,

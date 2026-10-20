@@ -37,6 +37,10 @@ function titleFor(pathname: string) {
   return TITLES[pathname] ?? 'Page introuvable';
 }
 
+/**
+ * Keeps the browser tab title in sync with the page ("Amis | CatCHMeal"). The
+ * landing page keeps the title written in index.html.
+ */
 export function PageTitle() {
   const { pathname } = useLocation();
   const title = titleFor(pathname);

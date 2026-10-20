@@ -4,6 +4,11 @@ import * as authApi from './api';
 import type { AuthUser } from './api';
 import { AuthContext, type AuthStatus } from './authContext';
 
+/**
+ * Holds the session for the whole app. It asks /auth/me once when the app
+ * starts, then keeps the user up to date after login, register, logout and
+ * profile edits (updateUser).
+ */
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [status, setStatus] = useState<AuthStatus>('loading');
