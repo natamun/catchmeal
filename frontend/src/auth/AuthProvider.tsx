@@ -42,7 +42,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setStatus('unauthenticated');
   }, []);
 
-  const updateUser = useCallback((partial: Partial<authApi.AuthUser>) => {
+  const updateUser = useCallback((partial: Partial<AuthUser>) => {
     setUser((prev) => (prev ? { ...prev, ...partial } : prev));
   }, []);
 

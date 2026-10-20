@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-import type { AuthUser } from '../../auth/auth-context';
+import type { AuthUser } from '../../auth/api';
 import { calculateBMR, calculateTDEE } from '../../utils/bmr';
 import { formatKg } from '../../utils/format';
 import { SelectDropdown } from '../ui/SelectDropdown';

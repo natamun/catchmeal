@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react';
 import { Trash2 } from 'lucide-react';
 
-import type { AuthUser } from '../../auth/auth-context';
+import type { AuthUser } from '../../auth/api';
 import { useTimeout } from '../../hooks/useTimeout';
 import {
   hasTooManyDecimals,
