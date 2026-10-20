@@ -6,7 +6,8 @@ import { SelectDropdown } from '../ui/SelectDropdown';
 import { Skeleton } from '../ui/Skeleton';
 import { StatTile } from '../ui/StatTile';
 import { SummaryCard } from '../ui/SummaryCard';
-import { calculateBMR, calculateTDEE } from './bmr';
+import type { WeightEntry } from './api';
+import { calculateBMR, calculateTDEE, fatFreeMassOf } from './bmr';
 import { formatMeasure } from './measures';
 
 const DURATION_OPTIONS = [
@@ -22,17 +23,18 @@ const DURATION_OPTIONS = [
 
 interface Props {
   user: AuthUser;
-  latestWeight: number | null | undefined;
+  latestEntry: WeightEntry | null | undefined;
 }
 
 /**
  * Current goals next to recommended ones, computed from the profile and the
- * latest weight: the BMR and daily needs (bmr.ts), then the calories to reach
+ * latest weigh-in: the BMR and daily needs (bmr.ts), then the calories to reach
  * the target weight in the chosen time.
  */
-export function GoalsCard({ user, latestWeight }: Props) {
+export function GoalsCard({ user, latestEntry }: Props) {
   const [duration, setDuration] = useState('90');
-  const isLoading = latestWeight === undefined;
+  const isLoading = latestEntry === undefined;
+  const latestWeight = latestEntry?.weight;
 
   const bmr =
     latestWeight && user.height && user.birthDate && user.gender
@@ -41,7 +43,7 @@ export function GoalsCard({ user, latestWeight }: Props) {
           user.height,
           user.birthDate,
           user.gender,
-          user.muscleMass,
+          latestEntry ? fatFreeMassOf(latestEntry) : null,
         )
       : null;
 
@@ -61,10 +63,13 @@ export function GoalsCard({ user, latestWeight }: Props) {
 
   const recommendedMacros = (() => {
     if (!recommendedKcal || !latestWeight) return null;
-    // Protein: 2.2 g per kg of muscle when known, else 1.8 g per kg of body
-    // weight. Fat: 30% of the calories. Carbs: the calories left (4 kcal/g).
+    // Protein: 2.2 g per kg of muscle when the latest weigh-in has it, else
+    // 1.8 g per kg of body weight. Fat: 30% of the calories. Carbs: the
+    // calories left (4 kcal/g).
     const protein = Math.round(
-      user.muscleMass ? 2.2 * user.muscleMass : 1.8 * latestWeight,
+      latestEntry?.muscleMass
+        ? 2.2 * latestEntry.muscleMass
+        : 1.8 * latestWeight,
     );
     const fat = Math.round((recommendedKcal * 0.3) / 9);
     const carbs = Math.round((recommendedKcal - protein * 4 - fat * 9) / 4);

@@ -1,3 +1,5 @@
+import type { WeightEntry } from './api';
+
 /** Usual activity factors: daily needs = BMR x factor. */
 const ACTIVITY_MULTIPLIERS: Record<string, number> = {
   SEDENTARY: 1.2,
@@ -20,18 +22,32 @@ function getAge(birthDate: string): number {
 }
 
 /**
- * Basal metabolic rate: the calories burned per day at rest. With a muscle mass
- * it uses the Katch-McArdle formula (370 + 21.6 x mass). Otherwise Mifflin-St
- * Jeor: +5 for men, -161 for women, -78 (halfway) otherwise.
+ * Fat-free mass of a weigh-in: the measured value, else deduced from the weight
+ * and the body fat percentage (weight x (1 - fat / 100)). Null when neither is
+ * known.
+ */
+export function fatFreeMassOf(
+  entry: Pick<WeightEntry, 'weight' | 'bodyFat' | 'fatFreeMass'>,
+): number | null {
+  if (entry.fatFreeMass !== null) return entry.fatFreeMass;
+  if (entry.bodyFat !== null) return entry.weight * (1 - entry.bodyFat / 100);
+  return null;
+}
+
+/**
+ * Basal metabolic rate: the calories burned per day at rest. With a fat-free
+ * mass it uses the Katch-McArdle formula (370 + 21.6 x fat-free mass).
+ * Otherwise Mifflin-St Jeor: +5 for men, -161 for women, -78 (halfway)
+ * otherwise.
  */
 export function calculateBMR(
   weightKg: number,
   heightCm: number,
   birthDate: string,
   gender: string,
-  muscleMass?: number | null,
+  fatFreeMass?: number | null,
 ): number {
-  if (muscleMass) return Math.round(370 + 21.6 * muscleMass);
+  if (fatFreeMass) return Math.round(370 + 21.6 * fatFreeMass);
   const age = getAge(birthDate);
   const base = 10 * weightKg + 6.25 * heightCm - 5 * age;
   if (gender === 'MALE') return Math.round(base + 5);

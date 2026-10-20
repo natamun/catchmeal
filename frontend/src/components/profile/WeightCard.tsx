@@ -40,15 +40,15 @@ function describeBmi(weight: number, height: number) {
 interface Props {
   userId: number;
   height?: number | null;
-  onLatestWeight?: (weight: number | null) => void;
+  onLatestEntry?: (entry: WeightEntry | null) => void;
 }
 
 /**
  * Body composition card: latest weigh-in and BMI, the history, and a dialog to
- * add, correct or delete a weigh-in. It reports the latest weight to the page,
- * which GoalsCard needs.
+ * add, correct or delete a weigh-in. It reports the latest weigh-in to the
+ * page, which GoalsCard needs.
  */
-export function WeightCard({ userId, height, onLatestWeight }: Props) {
+export function WeightCard({ userId, height, onLatestEntry }: Props) {
   const [history, setHistory] = useState<WeightEntry[] | null>(null);
   const [hasError, setHasError] = useState(false);
   const [attempt, setAttempt] = useState(0);
@@ -64,17 +64,17 @@ export function WeightCard({ userId, height, onLatestWeight }: Props) {
     getWeightHistory(userId, controller.signal)
       .then((entries) => {
         setHistory(entries);
-        onLatestWeight?.(entries[0]?.weight ?? null);
+        onLatestEntry?.(entries[0] ?? null);
       })
       .catch(() => {
         if (!controller.signal.aborted) {
           setHasError(true);
-          onLatestWeight?.(null);
+          onLatestEntry?.(null);
         }
       });
 
     return () => controller.abort();
-  }, [userId, onLatestWeight, attempt]);
+  }, [userId, onLatestEntry, attempt]);
 
   const retry = () => {
     setHasError(false);
@@ -98,14 +98,14 @@ export function WeightCard({ userId, height, onLatestWeight }: Props) {
     ].sort((a, b) => b.loggedAt.localeCompare(a.loggedAt));
 
     setHistory(next);
-    onLatestWeight?.(next[0].weight);
+    onLatestEntry?.(next[0]);
   };
 
   const handleDeleted = (entryId: number) => {
     const next = (history ?? []).filter((entry) => entry.id !== entryId);
 
     setHistory(next);
-    onLatestWeight?.(next[0]?.weight ?? null);
+    onLatestEntry?.(next[0] ?? null);
   };
 
   const latest = history?.[0];
