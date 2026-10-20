@@ -60,7 +60,7 @@ export function buildExportHtml(data: DataExport): string {
   const weightRows = (p.weightLogs ?? [])
     .map(
       (w) =>
-        `<tr><td>${fmtDateTime(w.loggedAt)}</td><td>${w.weight} kg</td><td>${fmt(w.bodyFat ? w.bodyFat + '%' : null)}</td><td>${fmt(w.muscleMass ? w.muscleMass + ' kg' : null)}</td></tr>`,
+        `<tr><td>${fmtDateTime(w.loggedAt)}</td><td>${w.weight} kg</td><td>${fmt(w.bodyFat ? w.bodyFat + '%' : null)}</td><td>${fmt(w.fatFreeMass ? w.fatFreeMass + ' kg' : null)}</td><td>${fmt(w.bodyWater ? w.bodyWater + '%' : null)}</td><td>${fmt(w.muscleMass ? w.muscleMass + ' kg' : null)}</td></tr>`,
     )
     .join('');
 
@@ -130,10 +130,6 @@ export function buildExportHtml(data: DataExport): string {
     <tr><td>Genre</td><td>${fmt(p.gender)}</td></tr>
     <tr><td>Date de naissance</td><td>${fmtDate(p.birthDate)}</td></tr>
     <tr><td>Niveau d'activité</td><td>${fmt(p.activityLevel)}</td></tr>
-    <tr><td>Masse grasse</td><td>${p.bodyFat ? p.bodyFat + '%' : '—'}</td></tr>
-    <tr><td>Masse maigre</td><td>${p.fatFreeMass ? p.fatFreeMass + ' kg' : '—'}</td></tr>
-    <tr><td>Eau corporelle</td><td>${p.bodyWater ? p.bodyWater + '%' : '—'}</td></tr>
-    <tr><td>Masse musculaire</td><td>${p.muscleMass ? p.muscleMass + ' kg' : '—'}</td></tr>
   </table>
 
   <h2>Objectifs nutritionnels actuels</h2>
@@ -154,7 +150,7 @@ export function buildExportHtml(data: DataExport): string {
   ${foodRows ? `<table><thead><tr><th>Aliment</th><th>Kcal</th><th>Protéines</th><th>Glucides</th><th>Lipides</th></tr></thead><tbody>${foodRows}</tbody></table>` : '<p class="empty">Aucun aliment créé.</p>'}
 
   <h2>Historique de poids (${(p.weightLogs ?? []).length})</h2>
-  ${weightRows ? `<table><thead><tr><th>Date</th><th>Poids</th><th>Masse grasse</th><th>Masse musculaire</th></tr></thead><tbody>${weightRows}</tbody></table>` : '<p class="empty">Aucune entrée de poids.</p>'}
+  ${weightRows ? `<table><thead><tr><th>Date</th><th>Poids</th><th>Masse grasse</th><th>Masse maigre</th><th>Eau corporelle</th><th>Masse musculaire</th></tr></thead><tbody>${weightRows}</tbody></table>` : '<p class="empty">Aucune entrée de poids.</p>'}
 
   <h2>Amis (${(p.userFriend ?? []).length})</h2>
   ${friendRows ? `<table><thead><tr><th>Ami</th><th>Statut</th><th>Dernière connexion</th></tr></thead><tbody>${friendRows}</tbody></table>` : '<p class="empty">Aucun ami.</p>'}

@@ -19,10 +19,6 @@ export interface AuthUser {
   gender?: string | null;
   birthDate?: string | null;
   activityLevel?: string | null;
-  bodyFat?: number | null;
-  fatFreeMass?: number | null;
-  bodyWater?: number | null;
-  muscleMass?: number | null;
   hasPassword?: boolean;
 }
 

@@ -17,10 +17,6 @@ export interface UserProfile {
   gender: string | null;
   birthDate: string | null;
   activityLevel: string | null;
-  bodyFat: number | null;
-  fatFreeMass: number | null;
-  bodyWater: number | null;
-  muscleMass: number | null;
 }
 
 /** Fields to change in the profile; the fields left out stay as they are. */
@@ -36,10 +32,6 @@ export interface UpdateProfileInput {
   gender?: string;
   birthDate?: string;
   activityLevel?: string;
-  bodyFat?: number;
-  fatFreeMass?: number;
-  bodyWater?: number;
-  muscleMass?: number;
 }
 
 export interface WeightEntry {
@@ -79,6 +71,8 @@ interface ExportFoodItem {
 interface ExportWeightLog {
   weight: number;
   bodyFat: number | null;
+  fatFreeMass: number | null;
+  bodyWater: number | null;
   muscleMass: number | null;
   loggedAt: string;
 }
