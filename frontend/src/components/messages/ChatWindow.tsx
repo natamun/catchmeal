@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type RefObject } from 'react';
 import { Send } from 'lucide-react';
 
-import { useAuth } from '../../auth/auth-context';
+import { useCurrentUser } from '../../auth/auth-context';
 import { useConversation } from '../../hooks/useConversation';
 import type { ActivityItem, UserSummary } from '../friends/types';
 import { BaseDialog } from '../ui/BaseDialog';
@@ -21,8 +21,7 @@ export default function ChatWindow({
   quotedActivity,
   onClose,
 }: ChatWindowProps) {
-  const { user } = useAuth();
-  const userId = user!.userId;
+  const { userId } = useCurrentUser();
   const { messages, isLoading, loadError, send, isConnected } = useConversation(
     userId,
     friend.id,

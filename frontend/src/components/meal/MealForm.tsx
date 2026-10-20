@@ -2,7 +2,7 @@ import { useRef, useState, type RefObject } from 'react';
 import * as Popover from '@radix-ui/react-popover';
 import { CheckCircle2, Trash2 } from 'lucide-react';
 
-import { useAuth } from '../../auth/auth-context';
+import { useCurrentUser } from '../../auth/auth-context';
 import { useTimeout } from '../../hooks/useTimeout';
 import { parseDecimal } from '../../utils/decimals';
 import { requestErrorMessage } from '../../utils/requestErrorMessage';
@@ -50,8 +50,7 @@ export default function MealForm({
   onMealUpdated,
   onMealDeleted,
 }: MealFormProps) {
-  const { user } = useAuth();
-  const userId = user!.userId;
+  const { userId } = useCurrentUser();
   const [name, setName] = useState('');
   const [nameTouched, setNameTouched] = useState(false);
   const [nameFocused, setNameFocused] = useState(false);

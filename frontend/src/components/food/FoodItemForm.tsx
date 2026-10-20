@@ -1,7 +1,7 @@
 import { useRef, useState, type RefObject } from 'react';
 import { CheckCircle2, Trash2 } from 'lucide-react';
 
-import { useAuth } from '../../auth/auth-context';
+import { useCurrentUser } from '../../auth/auth-context';
 import { useTimeout } from '../../hooks/useTimeout';
 import {
   hasTooManyDecimals,
@@ -142,8 +142,7 @@ export default function FoodItemForm({
   onItemUpdated,
   onItemDeleted,
 }: FoodItemFormProps) {
-  const { user } = useAuth();
-  const userId = user!.userId;
+  const { userId } = useCurrentUser();
   const [form, setForm] = useState<FoodItemFormState>(EMPTY_FORM);
   const [touched, setTouched] = useState<
     Partial<Record<keyof FoodItemFormState, boolean>>

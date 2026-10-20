@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { CheckCircle2, Zap } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router';
 
-import { useAuth } from '../auth/auth-context';
+import { useCurrentUser } from '../auth/auth-context';
 import CalorieSummary from '../components/home/CalorieSummary';
 import DailyMealForm from '../components/home/DailyMealForm';
 import DailyMealList from '../components/home/DailyMealList';
@@ -36,7 +36,7 @@ interface SectionEdit {
 }
 
 export default function HomePage() {
-  const { user } = useAuth();
+  const user = useCurrentUser();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const dateParam = searchParams.get('date');
@@ -51,7 +51,6 @@ export default function HomePage() {
   const [weightError, setWeightError] = useState(false);
 
   useEffect(() => {
-    if (!user) return;
     const controller = new AbortController();
     getWeightHistory(user.userId, controller.signal)
       .then(setWeightHistory)
@@ -81,13 +80,11 @@ export default function HomePage() {
   });
   const editDialogRef = useRef<HTMLDialogElement>(null);
   const quickAddDialogRef = useRef<HTMLDialogElement>(null);
-  const presence = usePresence(user!.userId);
-  const activities = useActivityFeed(user!.userId);
+  const presence = usePresence(user.userId);
+  const activities = useActivityFeed(user.userId);
   const latestActivities = latestActivityPerFriend(activities);
 
   useTimeout(() => setSuccessMessage(null), successMessage ? 3000 : null);
-
-  if (!user) return null;
 
   const openSectionEditor = (mealType: MealType) => {
     const sectionMeals = meals

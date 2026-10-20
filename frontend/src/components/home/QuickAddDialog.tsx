@@ -2,7 +2,7 @@ import { useState, type RefObject } from 'react';
 import * as Popover from '@radix-ui/react-popover';
 import { ChevronRight } from 'lucide-react';
 
-import { useAuth } from '../../auth/auth-context';
+import { useCurrentUser } from '../../auth/auth-context';
 import { useTimeout } from '../../hooks/useTimeout';
 import { parseDecimal } from '../../utils/decimals';
 import { requestErrorMessage } from '../../utils/requestErrorMessage';
@@ -48,8 +48,7 @@ export default function QuickAddDialog({
   date,
   onSaved,
 }: QuickAddDialogProps) {
-  const { user } = useAuth();
-  const userId = user!.userId;
+  const { userId } = useCurrentUser();
   const [mealType, setMealType] = useState<MealType>(defaultMealType);
   const [form, setForm] = useState(EMPTY_QUICK_ADD_FORM);
   const [touched, setTouched] = useState<

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { useAuth } from '../auth/auth-context';
+import { useCurrentUser } from '../auth/auth-context';
 import { listFoodItems } from '../components/food/api';
 import type { FoodItem } from '../components/food/types';
 import { listMealsOnDate, toApiDate } from '../components/meal/api';
@@ -16,8 +16,7 @@ function neighbourKey(dateKey: string, offset: number) {
 }
 
 export function useDailyMeals(date: Date) {
-  const { user } = useAuth();
-  const userId = user!.userId;
+  const { userId } = useCurrentUser();
   const dateKey = toApiDate(date);
   const [foodItems, setFoodItems] = useState<FoodItem[]>([]);
   const [foodsError, setFoodsError] = useState<string | null>(null);

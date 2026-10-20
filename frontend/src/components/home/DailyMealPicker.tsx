@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { ChevronLeft } from 'lucide-react';
 
-import { useAuth } from '../../auth/auth-context';
+import { useCurrentUser } from '../../auth/auth-context';
 import { listFoodItems } from '../food/api';
 import FoodItemList from '../food/FoodItemList';
 import type { FoodItem } from '../food/types';
@@ -43,8 +43,7 @@ export default function DailyMealPicker({
   onClose,
   onAdded,
 }: DailyMealPickerProps) {
-  const { user } = useAuth();
-  const userId = user!.userId;
+  const { userId } = useCurrentUser();
   const [foodItems, setFoodItems] = useState<FoodItem[]>([]);
   const [templates, setTemplates] = useState<Meal[]>([]);
   const [isLoading, setIsLoading] = useState(true);

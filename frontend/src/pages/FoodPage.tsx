@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 
-import { useAuth } from '../auth/auth-context';
+import { useCurrentUser } from '../auth/auth-context';
 import { listFoodItems } from '../components/food/api';
 import FoodItemForm from '../components/food/FoodItemForm';
 import FoodItemList from '../components/food/FoodItemList';
@@ -66,8 +66,7 @@ function LegendBubble({ show }: { show: boolean }) {
 }
 
 export default function FoodPage() {
-  const { user } = useAuth();
-  const userId = user!.userId;
+  const { userId } = useCurrentUser();
   const [activeTab, setActiveTab] = useState<Tab>('food');
   const [showLegend, setShowLegend] = useState(false);
   const [foodItems, setFoodItems] = useState<FoodItem[]>([]);

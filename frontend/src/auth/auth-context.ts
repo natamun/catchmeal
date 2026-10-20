@@ -23,3 +23,13 @@ export function useAuth() {
   }
   return ctx;
 }
+
+export function useCurrentUser() {
+  const { user } = useAuth();
+  if (!user) {
+    throw new Error(
+      'useCurrentUser must be used inside an authenticated route',
+    );
+  }
+  return user;
+}

@@ -1,6 +1,6 @@
 import { useState, type RefObject } from 'react';
 
-import { useAuth } from '../../auth/auth-context';
+import { useCurrentUser } from '../../auth/auth-context';
 import { requestErrorMessage } from '../../utils/requestErrorMessage';
 import { createMeal, deleteMeal, toApiDate, updateMeal } from '../meal/api';
 import { draftsToInput, draftTotals, type MealItemDraft } from '../meal/draft';
@@ -28,8 +28,7 @@ export default function DailyMealForm({
   existingMeals = [],
   onSaved,
 }: DailyMealFormProps) {
-  const { user } = useAuth();
-  const userId = user!.userId;
+  const { userId } = useCurrentUser();
   const [items, setItems] = useState<MealItemDraft[]>(initialItems);
   const [syncedKey, setSyncedKey] = useState(sessionKey);
   const [error, setError] = useState<string | null>(null);

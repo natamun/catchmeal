@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { CheckCircle2 } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router';
 
-import { useAuth } from '../auth/auth-context.ts';
+import { useCurrentUser } from '../auth/auth-context.ts';
 import AddFriendDialog from '../components/friends/AddFriendDialog.tsx';
 import {
   acceptFriendRequest,
@@ -42,11 +42,10 @@ const TAB_OPTIONS: { value: Tab; label: string }[] = [
 ];
 
 export default function FriendsPage() {
-  const { user } = useAuth();
+  const { userId } = useCurrentUser();
   const location = useLocation();
   const navigate = useNavigate();
   const replyTo = navigationState(location).replyTo ?? null;
-  const userId = user!.userId;
   const {
     friends,
     requests,
