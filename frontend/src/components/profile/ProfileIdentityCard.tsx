@@ -61,6 +61,20 @@ const GOAL_LIMITS = [
   { field: 'dailyFatGoal', min: 10, max: 1000, unit: 'g' },
 ] as const;
 
+const GENDER_OPTIONS = [
+  { value: 'MALE', label: 'Homme' },
+  { value: 'FEMALE', label: 'Femme' },
+  { value: 'OTHER', label: 'Autre' },
+];
+
+const ACTIVITY_OPTIONS = [
+  { value: 'SEDENTARY', label: 'Sédentaire' },
+  { value: 'LIGHTLY_ACTIVE', label: 'Légèrement actif' },
+  { value: 'MODERATELY_ACTIVE', label: 'Modérément actif' },
+  { value: 'VERY_ACTIVE', label: 'Très actif' },
+  { value: 'EXTRA_ACTIVE', label: 'Extrêmement actif' },
+];
+
 function validate(form: FormState): Partial<Record<Field, string>> {
   const errors: Partial<Record<Field, string>> = {};
   const usernameMessage = usernameError(form.username);
@@ -88,20 +102,6 @@ function validate(form: FormState): Partial<Record<Field, string>> {
   }
   return errors;
 }
-
-const GENDER_OPTIONS = [
-  { value: 'MALE', label: 'Homme' },
-  { value: 'FEMALE', label: 'Femme' },
-  { value: 'OTHER', label: 'Autre' },
-];
-
-const ACTIVITY_OPTIONS = [
-  { value: 'SEDENTARY', label: 'Sédentaire' },
-  { value: 'LIGHTLY_ACTIVE', label: 'Légèrement actif' },
-  { value: 'MODERATELY_ACTIVE', label: 'Modérément actif' },
-  { value: 'VERY_ACTIVE', label: 'Très actif' },
-  { value: 'EXTRA_ACTIVE', label: 'Extrêmement actif' },
-];
 
 export function ProfileIdentityCard({ user, onUpdate }: Props) {
   const [avatarBusy, setAvatarBusy] = useState(false);
