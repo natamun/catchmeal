@@ -3,7 +3,11 @@ import { CheckCircle2, Trash2 } from 'lucide-react';
 
 import { useAuth } from '../../auth/auth-context';
 import { useTimeout } from '../../hooks/useTimeout';
-import { hasTooManyDecimals, TOO_MANY_DECIMALS } from '../../utils/decimals';
+import {
+  hasTooManyDecimals,
+  parseDecimal,
+  TOO_MANY_DECIMALS,
+} from '../../utils/decimals';
 import { requestErrorMessage } from '../../utils/requestErrorMessage';
 import { BaseDialog } from '../ui/BaseDialog';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
@@ -102,20 +106,16 @@ function validateForm(
     errors.name = 'Nom requis';
   }
 
-  const quantity = Number(form.baseQuantity);
-  if (
-    form.baseQuantity.trim() === '' ||
-    Number.isNaN(quantity) ||
-    quantity <= 0
-  ) {
+  const quantity = parseDecimal(form.baseQuantity);
+  if (quantity === null || Number.isNaN(quantity) || quantity <= 0) {
     errors.baseQuantity = 'Supérieur à 0';
   } else if (hasTooManyDecimals(form.baseQuantity)) {
     errors.baseQuantity = TOO_MANY_DECIMALS;
   }
 
   for (const field of ['kcal', 'protein', 'carbs', 'fat'] as const) {
-    const value = Number(form[field]);
-    if (form[field].trim() === '' || Number.isNaN(value) || value < 0) {
+    const value = parseDecimal(form[field]);
+    if (value === null || Number.isNaN(value) || value < 0) {
       errors[field] = 'Minimum 0';
     } else if (hasTooManyDecimals(form[field])) {
       errors[field] = TOO_MANY_DECIMALS;
@@ -247,12 +247,12 @@ export default function FoodItemForm({
         name: form.name,
         brand: form.brand.trim() === '' ? null : form.brand,
         barcode: barcode === '' ? null : barcode,
-        baseQuantity: Number(form.baseQuantity),
+        baseQuantity: parseDecimal(form.baseQuantity) ?? 0,
         baseUnit: form.baseUnit,
-        kcal: Number(form.kcal),
-        protein: Number(form.protein),
-        carbs: Number(form.carbs),
-        fat: Number(form.fat),
+        kcal: parseDecimal(form.kcal) ?? 0,
+        protein: parseDecimal(form.protein) ?? 0,
+        carbs: parseDecimal(form.carbs) ?? 0,
+        fat: parseDecimal(form.fat) ?? 0,
       };
       const savedItem = editingItem
         ? await updateFoodItem(userId, editingItem.id, input)

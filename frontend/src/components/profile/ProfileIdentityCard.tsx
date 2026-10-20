@@ -3,6 +3,12 @@ import { Trash2 } from 'lucide-react';
 
 import type { AuthUser } from '../../auth/auth-context';
 import { useTimeout } from '../../hooks/useTimeout';
+import {
+  hasTooManyDecimals,
+  parseDecimal,
+  TOO_MANY_DECIMALS,
+  WHOLE_NUMBER_ONLY,
+} from '../../utils/decimals';
 import { requestErrorMessage } from '../../utils/requestErrorMessage';
 import { Avatar } from '../ui/Avatar';
 import { BaseDialog } from '../ui/BaseDialog';
@@ -46,41 +52,38 @@ interface FormState {
   activityLevel: string;
 }
 
+const GOAL_LIMITS = [
+  { field: 'dailyCalorieGoal', min: 500, max: 10000, unit: 'kcal' },
+  { field: 'dailyProteinGoal', min: 10, max: 500, unit: 'g' },
+  { field: 'dailyCarbsGoal', min: 10, max: 2000, unit: 'g' },
+  { field: 'dailyFatGoal', min: 10, max: 1000, unit: 'g' },
+] as const;
+
 function validate(form: FormState): Partial<Record<Field, string>> {
   const errors: Partial<Record<Field, string>> = {};
   if (form.username.trim().length < 3) errors.username = 'Minimum 3 caractères';
   else if (form.username.trim().length > 30)
     errors.username = 'Maximum 30 caractères';
   if (form.height) {
-    const h = parseFloat(form.height);
-    if (isNaN(h)) errors.height = 'Valeur invalide';
+    const h = parseDecimal(form.height);
+    if (h === null || isNaN(h)) errors.height = 'Valeur invalide';
     else if (h < 50 || h > 300) errors.height = 'Entre 50 et 300 cm';
+    else if (hasTooManyDecimals(form.height)) errors.height = TOO_MANY_DECIMALS;
   }
   if (form.targetWeight) {
-    const w = parseFloat(form.targetWeight);
-    if (isNaN(w)) errors.targetWeight = 'Valeur invalide';
+    const w = parseDecimal(form.targetWeight);
+    if (w === null || isNaN(w)) errors.targetWeight = 'Valeur invalide';
     else if (w < 20 || w > 500) errors.targetWeight = 'Entre 20 et 500 kg';
+    else if (hasTooManyDecimals(form.targetWeight))
+      errors.targetWeight = TOO_MANY_DECIMALS;
   }
-  if (form.dailyCalorieGoal) {
-    const c = parseInt(form.dailyCalorieGoal);
-    if (isNaN(c)) errors.dailyCalorieGoal = 'Valeur invalide';
-    else if (c < 500 || c > 10000)
-      errors.dailyCalorieGoal = 'Entre 500 et 10000 kcal';
-  }
-  if (form.dailyProteinGoal) {
-    const p = parseInt(form.dailyProteinGoal);
-    if (isNaN(p)) errors.dailyProteinGoal = 'Valeur invalide';
-    else if (p < 10 || p > 500) errors.dailyProteinGoal = 'Entre 10 et 500 g';
-  }
-  if (form.dailyCarbsGoal) {
-    const c = parseInt(form.dailyCarbsGoal);
-    if (isNaN(c)) errors.dailyCarbsGoal = 'Valeur invalide';
-    else if (c < 10 || c > 2000) errors.dailyCarbsGoal = 'Entre 10 et 2000 g';
-  }
-  if (form.dailyFatGoal) {
-    const f = parseInt(form.dailyFatGoal);
-    if (isNaN(f)) errors.dailyFatGoal = 'Valeur invalide';
-    else if (f < 10 || f > 1000) errors.dailyFatGoal = 'Entre 10 et 1000 g';
+  for (const { field, min, max, unit } of GOAL_LIMITS) {
+    if (!form[field]) continue;
+    const value = parseDecimal(form[field]);
+    if (value === null || isNaN(value)) errors[field] = 'Valeur invalide';
+    else if (!Number.isInteger(value)) errors[field] = WHOLE_NUMBER_ONLY;
+    else if (value < min || value > max)
+      errors[field] = `Entre ${min} et ${max} ${unit}`;
   }
   return errors;
 }
@@ -227,32 +230,24 @@ export function ProfileIdentityCard({ user, onUpdate }: Props) {
     const trimmedName = form.name.trim();
     if (trimmedUsername !== user.username) input.username = trimmedUsername;
     if (trimmedName !== (user.name ?? '')) input.name = trimmedName;
-    const parsedHeight = form.height ? parseFloat(form.height) : undefined;
+    const parsedHeight = parseDecimal(form.height) ?? undefined;
     if (parsedHeight !== (user.height ?? undefined))
       input.height = parsedHeight;
-    const parsedTargetWeight = form.targetWeight
-      ? parseFloat(form.targetWeight)
-      : undefined;
+    const parsedTargetWeight = parseDecimal(form.targetWeight) ?? undefined;
     if (parsedTargetWeight !== (user.targetWeight ?? undefined))
       input.targetWeight = parsedTargetWeight;
-    const parsedDailyCalorieGoal = form.dailyCalorieGoal
-      ? parseInt(form.dailyCalorieGoal)
-      : undefined;
+    const parsedDailyCalorieGoal =
+      parseDecimal(form.dailyCalorieGoal) ?? undefined;
     if (parsedDailyCalorieGoal !== (user.dailyCalorieGoal ?? undefined))
       input.dailyCalorieGoal = parsedDailyCalorieGoal;
-    const parsedDailyProteinGoal = form.dailyProteinGoal
-      ? parseInt(form.dailyProteinGoal)
-      : undefined;
+    const parsedDailyProteinGoal =
+      parseDecimal(form.dailyProteinGoal) ?? undefined;
     if (parsedDailyProteinGoal !== (user.dailyProteinGoal ?? undefined))
       input.dailyProteinGoal = parsedDailyProteinGoal;
-    const parsedDailyCarbsGoal = form.dailyCarbsGoal
-      ? parseInt(form.dailyCarbsGoal)
-      : undefined;
+    const parsedDailyCarbsGoal = parseDecimal(form.dailyCarbsGoal) ?? undefined;
     if (parsedDailyCarbsGoal !== (user.dailyCarbsGoal ?? undefined))
       input.dailyCarbsGoal = parsedDailyCarbsGoal;
-    const parsedDailyFatGoal = form.dailyFatGoal
-      ? parseInt(form.dailyFatGoal)
-      : undefined;
+    const parsedDailyFatGoal = parseDecimal(form.dailyFatGoal) ?? undefined;
     if (parsedDailyFatGoal !== (user.dailyFatGoal ?? undefined))
       input.dailyFatGoal = parsedDailyFatGoal;
     if (form.gender !== (user.gender ?? ''))

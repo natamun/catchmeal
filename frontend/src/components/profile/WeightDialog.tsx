@@ -2,6 +2,11 @@ import { useId, useRef, useState, type RefObject } from 'react';
 import { Trash2 } from 'lucide-react';
 
 import { useTimeout } from '../../hooks/useTimeout';
+import {
+  hasTooManyDecimals,
+  parseDecimal,
+  TOO_MANY_DECIMALS,
+} from '../../utils/decimals';
 import { formatDayMonth } from '../../utils/format';
 import { BaseDialog } from '../ui/BaseDialog';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
@@ -19,12 +24,6 @@ function toText(value: number | null | undefined) {
   return String(value ?? '').replace('.', ',');
 }
 
-function toNumber(text: string) {
-  const trimmed = text.trim();
-
-  return trimmed === '' ? null : Number(trimmed.replace(',', '.'));
-}
-
 function toForm(entry: WeightEntry | null): Record<MeasureKey, string> {
   return {
     weight: toText(entry?.weight),
@@ -39,7 +38,7 @@ function validate(form: Record<MeasureKey, string>) {
   const errors: Partial<Record<MeasureKey, string>> = {};
 
   for (const { key, unit, min, max } of MEASURES) {
-    const value = toNumber(form[key]);
+    const value = parseDecimal(form[key]);
 
     if (value === null) {
       if (key === 'weight') {
@@ -47,6 +46,8 @@ function validate(form: Record<MeasureKey, string>) {
       }
     } else if (Number.isNaN(value) || value < min || value > max) {
       errors[key] = `Entre ${min} et ${max} ${unit}`;
+    } else if (hasTooManyDecimals(form[key])) {
+      errors[key] = TOO_MANY_DECIMALS;
     }
   }
 
@@ -99,7 +100,7 @@ function WeightForm({
     setHasFailed(false);
     setTouched(Object.fromEntries(MEASURES.map(({ key }) => [key, true])));
 
-    const weight = toNumber(form.weight);
+    const weight = parseDecimal(form.weight);
 
     if (weight === null || Object.keys(errors).length > 0) {
       setSubmitAttempted(true);
@@ -108,10 +109,10 @@ function WeightForm({
 
     const input = {
       weight,
-      bodyFat: toNumber(form.bodyFat),
-      fatFreeMass: toNumber(form.fatFreeMass),
-      bodyWater: toNumber(form.bodyWater),
-      muscleMass: toNumber(form.muscleMass),
+      bodyFat: parseDecimal(form.bodyFat),
+      fatFreeMass: parseDecimal(form.fatFreeMass),
+      bodyWater: parseDecimal(form.bodyWater),
+      muscleMass: parseDecimal(form.muscleMass),
     };
 
     setIsSubmitting(true);

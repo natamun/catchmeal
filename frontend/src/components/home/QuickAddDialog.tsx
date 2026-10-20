@@ -4,6 +4,7 @@ import { ChevronRight } from 'lucide-react';
 
 import { useAuth } from '../../auth/auth-context';
 import { useTimeout } from '../../hooks/useTimeout';
+import { parseDecimal } from '../../utils/decimals';
 import { requestErrorMessage } from '../../utils/requestErrorMessage';
 import { createMeal, toApiDate } from '../meal/api';
 import {
@@ -113,10 +114,10 @@ export default function QuickAddDialog({
         items: [
           {
             quantity: 1,
-            kcal: Number(form.kcal),
-            protein: Number(form.protein),
-            carbs: Number(form.carbs),
-            fat: Number(form.fat),
+            kcal: parseDecimal(form.kcal) ?? 0,
+            protein: parseDecimal(form.protein) ?? 0,
+            carbs: parseDecimal(form.carbs) ?? 0,
+            fat: parseDecimal(form.fat) ?? 0,
           },
         ],
       });

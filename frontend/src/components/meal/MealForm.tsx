@@ -4,6 +4,7 @@ import { CheckCircle2, Trash2 } from 'lucide-react';
 
 import { useAuth } from '../../auth/auth-context';
 import { useTimeout } from '../../hooks/useTimeout';
+import { parseDecimal } from '../../utils/decimals';
 import { requestErrorMessage } from '../../utils/requestErrorMessage';
 import type { FoodItem } from '../food/types';
 import { BaseDialog } from '../ui/BaseDialog';
@@ -185,10 +186,10 @@ export default function MealForm({
         id: crypto.randomUUID(),
         kind: 'quick',
         quantity: 1,
-        kcal: Number(quickAddForm.kcal),
-        protein: Number(quickAddForm.protein),
-        carbs: Number(quickAddForm.carbs),
-        fat: Number(quickAddForm.fat),
+        kcal: parseDecimal(quickAddForm.kcal) ?? 0,
+        protein: parseDecimal(quickAddForm.protein) ?? 0,
+        carbs: parseDecimal(quickAddForm.carbs) ?? 0,
+        fat: parseDecimal(quickAddForm.fat) ?? 0,
       },
     ]);
     setQuickAddForm(EMPTY_QUICK_ADD_FORM);
