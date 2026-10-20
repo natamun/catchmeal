@@ -1,4 +1,23 @@
+import { Fragment } from 'react';
+
 import { LegalLayout } from '../components/legal/LegalLayout';
+
+const TEAM = [
+  { name: 'Natalino Munari', url: 'https://github.com/natamun' },
+  {
+    name: 'Maxime Martin',
+    url: 'https://www.linkedin.com/in/maxime-martin-090731aa',
+  },
+  {
+    name: 'Seully Trieste',
+    url: 'https://www.linkedin.com/in/seully-trieste-dev/',
+  },
+  { name: 'Curtis Bezençon', url: 'https://github.com/CurtXY' },
+  {
+    name: 'Diana Ramirez',
+    url: 'https://www.linkedin.com/in/dianaramirezcarrillo',
+  },
+];
 
 export default function LegalNoticePage() {
   return (
@@ -15,8 +34,15 @@ export default function LegalNoticePage() {
           <strong>Nom du projet :</strong> CatCHMeal
         </li>
         <li>
-          <strong>Équipe de développement :</strong> Natalino Munari, Maxime
-          Martin, Seully Trieste, Curtis Bezençon et Diana Ramirez
+          <strong>Équipe de développement :</strong>{' '}
+          {TEAM.map(({ name, url }, index) => (
+            <Fragment key={name}>
+              {index > 0 && (index === TEAM.length - 1 ? ' et ' : ', ')}
+              <a href={url} target="_blank" rel="noopener noreferrer">
+                {name}
+              </a>
+            </Fragment>
+          ))}
         </li>
         <li>
           <strong>Établissement d'enseignement :</strong> 42 Lausanne
