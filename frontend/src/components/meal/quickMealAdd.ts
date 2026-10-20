@@ -1,3 +1,5 @@
+import { hasTooManyDecimals, TOO_MANY_DECIMALS } from '../../utils/decimals';
+
 export type QuickAddField = 'kcal' | 'protein' | 'carbs' | 'fat';
 
 export const QUICK_ADD_FIELDS: { field: QuickAddField; label: string }[] = [
@@ -23,6 +25,8 @@ export function validateQuickAddForm(
     const value = Number(form[field]);
     if (form[field].trim() === '' || Number.isNaN(value) || value < 0) {
       errors[field] = 'Minimum 0';
+    } else if (hasTooManyDecimals(form[field])) {
+      errors[field] = TOO_MANY_DECIMALS;
     }
   }
 

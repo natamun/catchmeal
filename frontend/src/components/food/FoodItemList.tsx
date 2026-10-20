@@ -2,6 +2,7 @@ import { useState, type ReactNode } from 'react';
 import { ChevronRight } from 'lucide-react';
 
 import { MACROS } from '../../constants/macros';
+import { roundDecimals } from '../../utils/decimals';
 import { ListCard, ListCardEmpty, ListCardLoading } from '../ui/ListCard';
 import { LoadError } from '../ui/LoadError';
 import { MacroBadge } from '../ui/MacroBadge';
@@ -28,14 +29,14 @@ interface FoodItemListProps {
 }
 
 function formatBaseQuantity(item: FoodItem) {
-  return `${item.baseQuantity}${UNIT_LABELS[item.baseUnit]}`;
+  return `${roundDecimals(item.baseQuantity, 1)}${UNIT_LABELS[item.baseUnit]}`;
 }
 
 function macrosOf(item: FoodItem) {
   return MACROS.map(({ key, label, color }) => ({
     label,
     color,
-    value: item[key],
+    value: roundDecimals(item[key], 1),
   }));
 }
 
@@ -156,7 +157,7 @@ export default function FoodItemList({
                   ))}
                 </div>
                 <span className="min-w-20 shrink-0 rounded-full bg-green-50 px-2.5 py-0.5 text-center text-sm font-semibold text-green-800">
-                  {item.kcal} kcal
+                  {Math.round(item.kcal)} kcal
                 </span>
                 {renderAction?.(item)}
               </div>

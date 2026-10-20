@@ -3,6 +3,7 @@ import { CheckCircle2, Trash2 } from 'lucide-react';
 
 import { useAuth } from '../../auth/auth-context';
 import { useTimeout } from '../../hooks/useTimeout';
+import { hasTooManyDecimals, TOO_MANY_DECIMALS } from '../../utils/decimals';
 import { requestErrorMessage } from '../../utils/requestErrorMessage';
 import { BaseDialog } from '../ui/BaseDialog';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
@@ -108,12 +109,16 @@ function validateForm(
     quantity <= 0
   ) {
     errors.baseQuantity = 'Supérieur à 0';
+  } else if (hasTooManyDecimals(form.baseQuantity)) {
+    errors.baseQuantity = TOO_MANY_DECIMALS;
   }
 
   for (const field of ['kcal', 'protein', 'carbs', 'fat'] as const) {
     const value = Number(form[field]);
     if (form[field].trim() === '' || Number.isNaN(value) || value < 0) {
       errors[field] = 'Minimum 0';
+    } else if (hasTooManyDecimals(form[field])) {
+      errors[field] = TOO_MANY_DECIMALS;
     }
   }
 

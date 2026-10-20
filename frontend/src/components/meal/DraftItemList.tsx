@@ -30,7 +30,7 @@ export default function DraftItemList({
           return (
             <li key={item.id} className={ROW_CLASS}>
               <span className="min-w-0 flex-1 truncate text-sm font-medium text-green-800">
-                {item.kcal} kcal
+                {Math.round(item.kcal)} kcal
               </span>
               <button
                 type="button"

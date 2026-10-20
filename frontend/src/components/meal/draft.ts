@@ -1,3 +1,4 @@
+import { MAX_DECIMALS, roundDecimals } from '../../utils/decimals';
 import type { FoodItem } from '../food/types';
 import type { Meal, MealItemInput } from './types';
 
@@ -121,13 +122,16 @@ export function draftTotals(items: MealItemDraft[]) {
 export function draftsToInput(items: MealItemDraft[]): MealItemInput[] {
   return items.map((item) =>
     item.kind === 'food'
-      ? { foodItemId: item.foodItem.id, quantity: item.quantity }
+      ? {
+          foodItemId: item.foodItem.id,
+          quantity: roundDecimals(item.quantity, MAX_DECIMALS),
+        }
       : {
-          quantity: item.quantity,
-          kcal: item.kcal,
-          protein: item.protein,
-          carbs: item.carbs,
-          fat: item.fat,
+          quantity: roundDecimals(item.quantity, MAX_DECIMALS),
+          kcal: roundDecimals(item.kcal, MAX_DECIMALS),
+          protein: roundDecimals(item.protein, MAX_DECIMALS),
+          carbs: roundDecimals(item.carbs, MAX_DECIMALS),
+          fat: roundDecimals(item.fat, MAX_DECIMALS),
         },
   );
 }
