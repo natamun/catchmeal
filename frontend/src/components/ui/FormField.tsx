@@ -1,6 +1,7 @@
 import { useId, type ReactNode } from 'react';
 
 import { FieldError } from './FieldError';
+import { LABEL_CLASS } from './fieldStyle';
 
 interface FormFieldProps {
   label: string;
@@ -13,7 +14,7 @@ export function FormField({ label, error, children }: FormFieldProps) {
 
   return (
     <div className="relative flex flex-col gap-1">
-      <label htmlFor={id} className="text-sm font-semibold text-green-600">
+      <label htmlFor={id} className={LABEL_CLASS}>
         {label}
       </label>
       {children(id)}

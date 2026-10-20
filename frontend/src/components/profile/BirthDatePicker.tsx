@@ -8,6 +8,7 @@ import 'react-datepicker/dist/react-datepicker.css';
 
 import { toApiDate } from '../meal/api';
 import { CalendarTrigger } from '../ui/CalendarButton';
+import { LABEL_CLASS } from '../ui/fieldStyle';
 
 type View = 'year' | 'month' | 'day';
 
@@ -33,10 +34,7 @@ export function BirthDatePicker({ id, label, value, onChange }: Props) {
 
   return (
     <div className="flex flex-col gap-1">
-      <label
-        htmlFor={id}
-        className={`text-sm font-semibold text-green-600 ${KEEP_OPEN_CLASS}`}
-      >
+      <label htmlFor={id} className={`${LABEL_CLASS} ${KEEP_OPEN_CLASS}`}>
         {label}
       </label>
       <div className="flex flex-col">

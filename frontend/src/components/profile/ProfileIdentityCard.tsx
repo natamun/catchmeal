@@ -15,6 +15,7 @@ import { Avatar } from '../ui/Avatar';
 import { BaseDialog } from '../ui/BaseDialog';
 import { EditIconButton } from '../ui/EditIconButton';
 import { FieldError } from '../ui/FieldError';
+import { LABEL_CLASS } from '../ui/fieldStyle';
 import { Input } from '../ui/Input';
 import { SelectDropdown } from '../ui/SelectDropdown';
 import {
@@ -278,9 +279,7 @@ export function ProfileIdentityCard({ user, onUpdate }: Props) {
           <div className="col-span-2 flex items-center gap-3">
             <Avatar username={user.username} avatarUrl={user.avatarUrl} />
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-semibold text-green-600">
-                Photo de profil
-              </p>
+              <p className={LABEL_CLASS}>Photo de profil</p>
               {avatarError ? (
                 <p role="alert" className="text-xs text-red-500">
                   {avatarError}
@@ -320,10 +319,7 @@ export function ProfileIdentityCard({ user, onUpdate }: Props) {
           </div>
 
           <div className="relative col-span-2 flex flex-col gap-1">
-            <label
-              htmlFor="pf-username"
-              className="text-sm font-semibold text-green-600"
-            >
+            <label htmlFor="pf-username" className={LABEL_CLASS}>
               Nom d'utilisateur
             </label>
             <Input
@@ -342,10 +338,7 @@ export function ProfileIdentityCard({ user, onUpdate }: Props) {
           </div>
 
           <div className="col-span-2 flex flex-col gap-1">
-            <label
-              htmlFor="pf-name"
-              className="text-sm font-semibold text-green-600"
-            >
+            <label htmlFor="pf-name" className={LABEL_CLASS}>
               Nom complet
             </label>
             <Input
@@ -358,10 +351,7 @@ export function ProfileIdentityCard({ user, onUpdate }: Props) {
           </div>
 
           <div className="flex flex-col gap-1">
-            <label
-              htmlFor="pf-gender"
-              className="text-sm font-semibold text-green-600"
-            >
+            <label htmlFor="pf-gender" className={LABEL_CLASS}>
               Genre
             </label>
             <SelectDropdown
@@ -382,10 +372,7 @@ export function ProfileIdentityCard({ user, onUpdate }: Props) {
           />
 
           <div className="col-span-2 flex flex-col gap-1">
-            <label
-              htmlFor="pf-activity"
-              className="text-sm font-semibold text-green-600"
-            >
+            <label htmlFor="pf-activity" className={LABEL_CLASS}>
               Niveau d'activité
             </label>
             <SelectDropdown
@@ -450,10 +437,7 @@ export function ProfileIdentityCard({ user, onUpdate }: Props) {
               key={field}
               className="relative flex flex-col justify-end gap-1"
             >
-              <label
-                htmlFor={id}
-                className="text-sm font-semibold text-green-600"
-              >
+              <label htmlFor={id} className={LABEL_CLASS}>
                 {label}{' '}
                 <span
                   className={unit.endsWith('/jour') ? 'max-[500px]:block' : ''}
