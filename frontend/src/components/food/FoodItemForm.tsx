@@ -1,5 +1,5 @@
 import { useRef, useState, type RefObject } from 'react';
-import { CheckCircle2, Trash2 } from 'lucide-react';
+import { Trash2 } from 'lucide-react';
 
 import { useCurrentUser } from '../../auth/auth-context';
 import { useTimeout } from '../../hooks/useTimeout';
@@ -14,7 +14,7 @@ import { ConfirmDialog } from '../ui/ConfirmDialog';
 import { FieldError } from '../ui/FieldError';
 import { Input } from '../ui/Input';
 import { PillTabs } from '../ui/PillTabs';
-import { Toast } from '../ui/Toast';
+import { useToast } from '../ui/toast-context';
 import { createFoodItem, deleteFoodItem, updateFoodItem } from './api';
 import BarcodeField from './BarcodeField';
 import type { FoodItem, OffProduct, QuantityUnit } from './types';
@@ -153,7 +153,7 @@ export default function FoodItemForm({
   >(null);
   const [submitAttempted, setSubmitAttempted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const showToast = useToast();
   const [barcodeFieldKey, setBarcodeFieldKey] = useState(0);
   const [syncedItemId, setSyncedItemId] = useState<number | null>(
     editingItem?.id ?? null,
@@ -187,7 +187,6 @@ export default function FoodItemForm({
         );
 
   useTimeout(() => setSubmitAttempted(false), submitAttempted ? 5000 : null);
-  useTimeout(() => setSuccessMessage(null), successMessage ? 3000 : null);
 
   const handleFocus = (field: keyof FoodItemFormState) => {
     setFocusedField(field);
@@ -267,7 +266,7 @@ export default function FoodItemForm({
       setTouched({});
       setSubmitAttempted(false);
       closeDialog();
-      setSuccessMessage(
+      showToast(
         editingItem
           ? 'Produit modifié avec succès'
           : 'Produit enregistré avec succès',
@@ -290,7 +289,7 @@ export default function FoodItemForm({
       await deleteFoodItem(userId, editingItem.id);
       onItemDeleted(editingItem.id);
       closeDialog();
-      setSuccessMessage('Produit supprimé');
+      showToast('Produit supprimé');
     } catch {
       setError('Suppression impossible, réessayez.');
     } finally {
@@ -471,8 +470,6 @@ export default function FoodItemForm({
         onConfirm={() => void save()}
         tone="primary"
       />
-
-      <Toast message={successMessage} icon={CheckCircle2} />
     </>
   );
 }

@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from 'react';
-import { CheckCircle2 } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router';
 
 import { useCurrentUser } from '../auth/auth-context.ts';
@@ -25,11 +24,10 @@ import {
   ListCardLoading,
 } from '../components/ui/ListCard';
 import { LoadError } from '../components/ui/LoadError.tsx';
-import { Toast } from '../components/ui/Toast.tsx';
+import { useToast } from '../components/ui/toast-context';
 import { useActivityFeed } from '../hooks/useActivityFeed.ts';
 import { useFriends } from '../hooks/useFriends.ts';
 import { usePresence } from '../hooks/usePresence.ts';
-import { useTimeout } from '../hooks/useTimeout.ts';
 import { useUnreadMessages } from '../hooks/useUnreadMessages.ts';
 import { navigationState } from '../routing/navigation';
 import { requestErrorMessage } from '../utils/requestErrorMessage';
@@ -59,7 +57,7 @@ export default function FriendsPage() {
   const [activeTab, setActiveTab] = useState<Tab>('friends');
   const [busyId, setBusyId] = useState<number | null>(null);
   const [friendToRemove, setFriendToRemove] = useState<Friend | null>(null);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const showToast = useToast();
   const [actionError, setActionError] = useState<string | null>(null);
   const addDialogRef = useRef<HTMLDialogElement>(null);
   const confirmDialogRef = useRef<HTMLDialogElement>(null);
@@ -72,8 +70,6 @@ export default function FriendsPage() {
   const chatDialogRef = useRef<HTMLDialogElement>(null);
   const presence = usePresence(userId);
   const unreadIds = useUnreadMessages(userId, chatFriend?.id ?? null);
-
-  useTimeout(() => setSuccessMessage(null), successMessage ? 3000 : null);
 
   useEffect(() => {
     if (replyTo) {
@@ -90,7 +86,7 @@ export default function FriendsPage() {
     setBusyId(id);
     try {
       await action();
-      setSuccessMessage(message);
+      showToast(message);
       reload();
     } catch (err: unknown) {
       setActionError(
@@ -212,7 +208,7 @@ export default function FriendsPage() {
         sentRequestIds={sentRequestIds}
         receivedRequestIds={requests.map((r) => r.from.id)}
         onSent={(username) => {
-          setSuccessMessage(`Demande envoyée à ${username}`);
+          showToast(`Demande envoyée à ${username}`);
           reload();
         }}
       />
@@ -245,8 +241,6 @@ export default function FriendsPage() {
           }
         }}
       />
-
-      <Toast message={successMessage} icon={CheckCircle2} />
     </>
   );
 }

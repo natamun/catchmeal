@@ -1,13 +1,8 @@
 import { useMemo } from 'react';
-import {
-  Navigate,
-  useOutletContext,
-  useParams,
-  useSearchParams,
-} from 'react-router';
+import { Navigate, useParams, useSearchParams } from 'react-router';
 
 import DailyMealPicker from '../components/home/DailyMealPicker';
-import type { AppLayoutContext } from '../components/layout/AppLayout';
+import { useToast } from '../components/ui/toast-context';
 import { PATHS } from '../routes';
 import {
   journalPath,
@@ -19,7 +14,7 @@ import { useGoBack } from '../routing/navigation';
 export default function JournalAddPage() {
   const { mealType: slug } = useParams();
   const [searchParams] = useSearchParams();
-  const { showToast } = useOutletContext<AppLayoutContext>();
+  const showToast = useToast();
   const dateParam = searchParams.get('date');
   const date = useMemo(() => parseDateParam(dateParam), [dateParam]);
   const mealType = mealTypeFromSlug(slug);

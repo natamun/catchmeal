@@ -1,6 +1,6 @@
 import { useRef, useState, type RefObject } from 'react';
 import * as Popover from '@radix-ui/react-popover';
-import { CheckCircle2, Trash2 } from 'lucide-react';
+import { Trash2 } from 'lucide-react';
 
 import { useCurrentUser } from '../../auth/auth-context';
 import { useTimeout } from '../../hooks/useTimeout';
@@ -13,7 +13,7 @@ import { DropdownPanel } from '../ui/DropdownPanel';
 import { FieldError } from '../ui/FieldError';
 import { Input } from '../ui/Input';
 import { MacroSummary } from '../ui/MacroSummary';
-import { Toast } from '../ui/Toast';
+import { useToast } from '../ui/toast-context';
 import { createMeal, deleteMeal, updateMeal } from './api';
 import {
   draftsToInput,
@@ -69,7 +69,7 @@ export default function MealForm({
   const [error, setError] = useState<string | null>(null);
   const [submitAttempted, setSubmitAttempted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const showToast = useToast();
   const [syncedMealId, setSyncedMealId] = useState<number | null>(
     editingMeal?.id ?? null,
   );
@@ -89,7 +89,6 @@ export default function MealForm({
     quickAddSubmitAttempted ? 5000 : null,
   );
   useTimeout(() => setSubmitAttempted(false), submitAttempted ? 5000 : null);
-  useTimeout(() => setSuccessMessage(null), successMessage ? 3000 : null);
 
   const nameError = name.trim() === '' ? 'Nom requis' : undefined;
   const showNameError =
@@ -227,7 +226,7 @@ export default function MealForm({
       setNameTouched(false);
       setSubmitAttempted(false);
       closeDialog();
-      setSuccessMessage(
+      showToast(
         editingMeal
           ? 'Repas modifié avec succès'
           : 'Repas enregistré avec succès',
@@ -249,7 +248,7 @@ export default function MealForm({
       await deleteMeal(userId, editingMeal.id);
       onMealDeleted(editingMeal.id);
       closeDialog();
-      setSuccessMessage('Repas supprimé');
+      showToast('Repas supprimé');
     } catch {
       setError('Suppression impossible, réessayez.');
     } finally {
@@ -446,8 +445,6 @@ export default function MealForm({
         isPending={isSubmitting}
         onConfirm={() => void handleDelete()}
       />
-
-      <Toast message={successMessage} icon={CheckCircle2} />
     </>
   );
 }

@@ -1,15 +1,14 @@
 import { useRef, useState } from 'react';
-import { AlertCircle, Check, ChevronRight, LoaderCircle } from 'lucide-react';
+import { AlertCircle, ChevronRight, LoaderCircle } from 'lucide-react';
 import { Link } from 'react-router';
 
 import { useAuth } from '../../auth/auth-context';
-import { useTimeout } from '../../hooks/useTimeout';
 import { PATHS } from '../../routes';
 import { BaseDialog } from '../ui/BaseDialog';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
 import { LoadError } from '../ui/LoadError';
 import SummaryCard from '../ui/SummaryCard';
-import { Toast } from '../ui/Toast';
+import { useToast } from '../ui/toast-context';
 import { deleteMyAccount, exportMyData, type DataExport } from './api';
 import { ChangePasswordDialog } from './ChangePasswordDialog';
 
@@ -191,17 +190,13 @@ export function GdprSection() {
     'html',
   );
   const [deleteLoading, setDeleteLoading] = useState(false);
-  const [deleteErrorToast, setDeleteErrorToast] = useState<string | null>(null);
   const deleteDialogRef = useRef<HTMLDialogElement | null>(null);
   const exportFormatDialogRef = useRef<HTMLDialogElement | null>(null);
   const exportSuccessDialogRef = useRef<HTMLDialogElement | null>(null);
   const exportErrorDialogRef = useRef<HTMLDialogElement | null>(null);
   const deleteSuccessDialogRef = useRef<HTMLDialogElement | null>(null);
   const changePasswordDialogRef = useRef<HTMLDialogElement | null>(null);
-  const [passwordToast, setPasswordToast] = useState<string | null>(null);
-
-  useTimeout(() => setPasswordToast(null), passwordToast ? 3000 : null);
-  useTimeout(() => setDeleteErrorToast(null), deleteErrorToast ? 3000 : null);
+  const showToast = useToast();
 
   async function handleExport(format: 'html' | 'json') {
     if (!user) return;
@@ -251,7 +246,7 @@ export function GdprSection() {
       );
     } catch {
       deleteDialogRef.current?.close();
-      setDeleteErrorToast('Erreur lors de la suppression du compte');
+      showToast('Erreur lors de la suppression du compte', AlertCircle);
     } finally {
       setDeleteLoading(false);
     }
@@ -413,12 +408,8 @@ export function GdprSection() {
 
       <ChangePasswordDialog
         dialogRef={changePasswordDialogRef}
-        onSuccess={() => setPasswordToast('Mot de passe modifié')}
+        onSuccess={() => showToast('Mot de passe modifié')}
       />
-
-      <Toast message={passwordToast} icon={Check} />
-
-      <Toast message={deleteErrorToast} icon={AlertCircle} />
     </>
   );
 }

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { CheckCircle2, Zap } from 'lucide-react';
+import { Zap } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router';
 
 import { useCurrentUser } from '../auth/auth-context';
@@ -14,11 +14,10 @@ import { buildDrafts, type MealItemDraft } from '../components/meal/draft';
 import { mealTotals, type Meal, type MealType } from '../components/meal/types';
 import { getWeightHistory, type WeightEntry } from '../components/profile/api';
 import DateNavigator from '../components/ui/DateNavigator';
-import { Toast } from '../components/ui/Toast';
+import { useToast } from '../components/ui/toast-context';
 import { useActivityFeed } from '../hooks/useActivityFeed';
 import { useDailyMeals } from '../hooks/useDailyMeals';
 import { usePresence } from '../hooks/usePresence';
-import { useTimeout } from '../hooks/useTimeout';
 import { PATHS } from '../routes';
 import {
   journalAddPath,
@@ -41,7 +40,7 @@ export default function HomePage() {
   const [searchParams] = useSearchParams();
   const dateParam = searchParams.get('date');
   const selectedDate = useMemo(() => parseDateParam(dateParam), [dateParam]);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const showToast = useToast();
   const { meals, foodItems, isReady, isLoading, loadError, reload, retry } =
     useDailyMeals(selectedDate);
   const unavailable = !isReady && !isLoading;
@@ -83,8 +82,6 @@ export default function HomePage() {
   const presence = usePresence(user.userId);
   const activities = useActivityFeed(user.userId);
   const latestActivities = latestActivityPerFriend(activities);
-
-  useTimeout(() => setSuccessMessage(null), successMessage ? 3000 : null);
 
   const openSectionEditor = (mealType: MealType) => {
     const sectionMeals = meals
@@ -182,7 +179,7 @@ export default function HomePage() {
         sessionKey={sectionEdit.key}
         existingMeals={sectionEdit.meals}
         onSaved={() => {
-          setSuccessMessage('Journal mis à jour');
+          showToast('Journal mis à jour');
           reload();
         }}
       />
@@ -190,11 +187,10 @@ export default function HomePage() {
         dialogRef={quickAddDialogRef}
         date={selectedDate}
         onSaved={() => {
-          setSuccessMessage('Ajouté au journal');
+          showToast('Ajouté au journal');
           reload();
         }}
       />
-      <Toast message={successMessage} icon={CheckCircle2} />
     </>
   );
 }
