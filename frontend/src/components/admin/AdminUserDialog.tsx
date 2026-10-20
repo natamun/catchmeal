@@ -1,12 +1,23 @@
 import { useId, useRef, useState, type RefObject } from 'react';
 import { Trash2 } from 'lucide-react';
 
+import { requestErrorMessage } from '../../utils/requestErrorMessage';
 import { Avatar } from '../ui/Avatar';
 import { BaseDialog } from '../ui/BaseDialog';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
+import { FieldError } from '../ui/FieldError';
+import { Input } from '../ui/Input';
 import { SelectDropdown } from '../ui/SelectDropdown';
 import StatTile from '../ui/StatTile';
-import { deleteUser, updateUserRole, type AdminUser } from './api';
+import {
+  deleteUser,
+  updateUser,
+  type AdminUser,
+  type AdminUserChanges,
+} from './api';
+
+const LABEL_CLASS =
+  'text-xs font-semibold tracking-wide text-green-500 uppercase';
 
 const ROLE_OPTIONS = [
   { value: 'USER', label: 'Utilisateur' },
@@ -31,6 +42,13 @@ function getAuthMethod(user: AdminUser): string {
   return 'OAuth';
 }
 
+function usernameError(username: string) {
+  const length = username.trim().length;
+  if (length < 3) return 'Minimum 3 caractères';
+  if (length > 30) return 'Maximum 30 caractères';
+  return undefined;
+}
+
 interface PanelProps {
   user: AdminUser;
   container: HTMLElement | null;
@@ -45,18 +63,32 @@ function UserPanel({
   onUpdated,
 }: PanelProps) {
   const roleId = useId();
+  const usernameId = useId();
   const [role, setRole] = useState(user.role);
+  const [username, setUsername] = useState(user.username);
+  const [isUsernameTouched, setIsUsernameTouched] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [hasFailed, setHasFailed] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+
+  const error = usernameError(username);
+  const changes: AdminUserChanges = {};
+  if (role !== user.role) changes.role = role;
+  if (username.trim() !== user.username) changes.username = username.trim();
+  const hasChanges = Object.keys(changes).length > 0;
 
   const handleSave = async () => {
-    setHasFailed(false);
+    setSaveError(null);
     setIsSaving(true);
     try {
-      const updated = await updateUserRole(user.id, role);
-      onUpdated({ role: updated.role });
-    } catch {
-      setHasFailed(true);
+      const updated = await updateUser(user.id, changes);
+      onUpdated({ role: updated.role, username: updated.username });
+    } catch (err: unknown) {
+      setSaveError(
+        requestErrorMessage(
+          err,
+          "Impossible d'enregistrer les modifications. Réessayez.",
+        ),
+      );
     } finally {
       setIsSaving(false);
     }
@@ -95,11 +127,30 @@ function UserPanel({
         </StatTile>
       </dl>
 
+      <div className="relative flex flex-col gap-1.5">
+        <label htmlFor={usernameId} className={LABEL_CLASS}>
+          Nom d'utilisateur
+        </label>
+        <Input
+          id={usernameId}
+          value={username}
+          onChange={(e) => {
+            setUsername(e.target.value);
+            setSaveError(null);
+          }}
+          onBlur={() => setIsUsernameTouched(true)}
+          autoComplete="off"
+          aria-invalid={isUsernameTouched && Boolean(error)}
+          aria-describedby={`${usernameId}-error`}
+        />
+        <FieldError
+          id={`${usernameId}-error`}
+          message={isUsernameTouched ? error : undefined}
+        />
+      </div>
+
       <div className="flex flex-col gap-1.5">
-        <label
-          htmlFor={roleId}
-          className="text-xs font-semibold tracking-wide text-green-500 uppercase"
-        >
+        <label htmlFor={roleId} className={LABEL_CLASS}>
           Rôle
         </label>
         <SelectDropdown
@@ -111,9 +162,9 @@ function UserPanel({
         />
       </div>
 
-      {hasFailed && (
+      {saveError && (
         <p role="alert" className="text-sm text-red-500">
-          Impossible d&apos;enregistrer le rôle. Réessayez.
+          {saveError}
         </p>
       )}
       {hasDeleteFailed && (
@@ -125,7 +176,7 @@ function UserPanel({
       <button
         type="button"
         onClick={() => void handleSave()}
-        disabled={isSaving || role === user.role}
+        disabled={isSaving || !hasChanges || Boolean(error)}
         className="w-full cursor-pointer rounded-xl bg-green-500 px-6 py-3 font-semibold text-white transition-colors hover:bg-green-600 disabled:cursor-not-allowed disabled:opacity-60"
       >
         {isSaving ? 'Enregistrement...' : 'Enregistrer'}

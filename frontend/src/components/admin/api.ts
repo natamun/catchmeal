@@ -36,12 +36,20 @@ export function getStats() {
   return request<AdminStats>(`${BASE_URL}/admin/stats`);
 }
 
-export function updateUserRole(id: number, role: 'USER' | 'ADMIN') {
-  return request<AdminUser>(`${BASE_URL}/admin/users/${id}/role`, {
-    method: 'PATCH',
-    headers: JSON_HEADERS,
-    body: JSON.stringify({ role }),
-  });
+export interface AdminUserChanges {
+  role?: AdminUser['role'];
+  username?: string;
+}
+
+export function updateUser(id: number, changes: AdminUserChanges) {
+  return request<Pick<AdminUser, 'id' | 'username' | 'role'>>(
+    `${BASE_URL}/admin/users/${id}`,
+    {
+      method: 'PATCH',
+      headers: JSON_HEADERS,
+      body: JSON.stringify(changes),
+    },
+  );
 }
 
 export function deleteUser(id: number) {

@@ -13,6 +13,7 @@ import { Roles } from '../auth/decorators/roles.decorator';
 import { PassportJwtAuthGuard } from '../auth/guards/passport-jwt.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { AdminService } from './admin.service';
+import { UpdateAdminUserDto } from './dto/update-admin-user.dto';
 
 @Controller('admin')
 @UseGuards(PassportJwtAuthGuard, RolesGuard)
@@ -44,12 +45,11 @@ export class AdminController {
     return this.adminService.deleteUser(id);
   }
 
-  // PATCH /admin/users/:id/role — update user role
-  @Patch('users/:id/role')
-  updateUserRole(
+  @Patch('users/:id')
+  updateUser(
     @Param('id', ParseIntPipe) id: number,
-    @Body() body: { role: 'USER' | 'ADMIN' },
+    @Body() dto: UpdateAdminUserDto,
   ) {
-    return this.adminService.updateUserRole(id, body.role);
+    return this.adminService.updateUser(id, dto);
   }
 }

@@ -70,7 +70,11 @@ function compare(a: AdminUser, b: AdminUser, criteria: AdminFilterCriteria) {
 }
 
 export default function AdminPage() {
-  const { user: currentUser, logout } = useAuth();
+  const {
+    user: currentUser,
+    logout,
+    updateUser: updateCurrentUser,
+  } = useAuth();
   const [criteria, setCriteria] =
     useState<AdminFilterCriteria>(EMPTY_ADMIN_FILTER);
   const [users, setUsers] = useState<AdminUser[] | null>(null);
@@ -236,6 +240,9 @@ export default function AdminPage() {
             return;
           }
           mergeUser(selected.id, changes);
+          if (changes.username && selected.id === currentUser?.userId) {
+            updateCurrentUser({ username: changes.username });
+          }
           if (changes.deletedAt && selected.id === currentUser?.userId) {
             void logout();
           }
