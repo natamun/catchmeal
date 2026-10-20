@@ -7,7 +7,6 @@ import {
 } from '../components/friends/api';
 import type { Friend, FriendRequest } from '../components/friends/types';
 import { useSocket } from '../socket/socketContext';
-import { ApiError } from '../utils/request';
 
 /**
  * Friends, received requests and sent requests, loaded together and reloaded
@@ -36,9 +35,8 @@ export function useFriends(userId: number) {
         setSentRequestIds(loadedSentIds);
         setLoadError(null);
       })
-      .catch((err: unknown) => {
+      .catch(() => {
         if (controller.signal.aborted) return;
-        if (err instanceof ApiError && err.status === 403) return;
         setLoadError('Impossible de charger les amis.');
       })
       .finally(() => {

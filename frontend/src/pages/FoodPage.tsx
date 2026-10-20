@@ -15,7 +15,6 @@ import { PillTabs } from '../components/ui/PillTabs';
 import { MACROS } from '../constants/macros';
 import { useDelayedUnmount } from '../hooks/useDelayedUnmount';
 import { useSupportsHover } from '../hooks/useSupportsHover';
-import { ApiError } from '../utils/request';
 
 type Tab = 'food' | 'meal';
 
@@ -98,9 +97,8 @@ export default function FoodPage() {
     const controller = new AbortController();
     listFoodItems(userId, controller.signal)
       .then(setFoodItems)
-      .catch((err: unknown) => {
+      .catch(() => {
         if (controller.signal.aborted) return;
-        if (err instanceof ApiError && err.status === 403) return;
         setLoadError('Impossible de charger les aliments.');
       })
       .finally(() => {
@@ -115,9 +113,8 @@ export default function FoodPage() {
     const controller = new AbortController();
     listMeals(userId, false, controller.signal)
       .then(setMeals)
-      .catch((err: unknown) => {
+      .catch(() => {
         if (controller.signal.aborted) return;
-        if (err instanceof ApiError && err.status === 403) return;
         setMealsLoadError('Impossible de charger les repas.');
       })
       .finally(() => {

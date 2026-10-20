@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { ChevronLeft } from 'lucide-react';
 
 import { useCurrentUser } from '../../auth/authContext';
+import { useToggleSet } from '../../hooks/useToggleSet';
 import { listFoodItems } from '../food/api';
 import { FoodItemList } from '../food/FoodItemList';
 import type { FoodItem } from '../food/types';
@@ -19,17 +20,6 @@ const TAB_OPTIONS: { value: PickerTab; label: string }[] = [
   { value: 'food', label: 'Aliments' },
   { value: 'meal', label: 'Repas' },
 ];
-
-/** Adds the id when it is missing, removes it when it is there. */
-function toggleInSet(prev: Set<number>, id: number) {
-  const next = new Set(prev);
-  if (next.has(id)) {
-    next.delete(id);
-  } else {
-    next.add(id);
-  }
-  return next;
-}
 
 interface DailyMealPickerProps {
   mealType: MealType;
@@ -55,12 +45,8 @@ export function DailyMealPicker({
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [tab, setTab] = useState<PickerTab>('food');
-  const [selectedFoodIds, setSelectedFoodIds] = useState<Set<number>>(
-    new Set(),
-  );
-  const [selectedMealIds, setSelectedMealIds] = useState<Set<number>>(
-    new Set(),
-  );
+  const [selectedFoodIds, toggleFood] = useToggleSet<number>();
+  const [selectedMealIds, toggleMeal] = useToggleSet<number>();
   const [review, setReview] = useState<{
     key: number;
     items: MealItemDraft[];
@@ -134,9 +120,7 @@ export function DailyMealPicker({
                 <SelectToggle
                   selected={selectedFoodIds.has(food.id)}
                   label={`Sélectionner ${food.name}`}
-                  onToggle={() =>
-                    setSelectedFoodIds((prev) => toggleInSet(prev, food.id))
-                  }
+                  onToggle={() => toggleFood(food.id)}
                 />
               )}
             />
@@ -149,9 +133,7 @@ export function DailyMealPicker({
                 <SelectToggle
                   selected={selectedMealIds.has(meal.id)}
                   label={`Sélectionner ${meal.name ?? 'ce repas'}`}
-                  onToggle={() =>
-                    setSelectedMealIds((prev) => toggleInSet(prev, meal.id))
-                  }
+                  onToggle={() => toggleMeal(meal.id)}
                 />
               )}
             />
