@@ -78,6 +78,7 @@ export class PassportAuthController {
     @Res({ passthrough: true }) res: Response,
   ) {
     const result = await this.authService.register(dto);
+    if ('requiresVerification' in result) return result;
     this.setAuthCookie(res, result.accessToken);
     return toUserResponse(result);
   }

@@ -7,11 +7,17 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
 
-import { Prisma } from '../generated/prisma/client';
+import { EmailTokenService } from '../email-token/email-token.service';
+import { EmailService } from '../email/email.service';
+import { EmailTokenType, Prisma } from '../generated/prisma/client';
 import { UsersService } from '../users/users.service';
 import { RegisterDto } from './dto/register.dto';
 
 const SALT_ROUNDS = 10;
+
+const VERIFY_EMAIL_PATH = '/verify-email';
+
+type PendingVerification = { requiresVerification: true };
 
 type AuthInput = { username: string; password: string };
 
@@ -66,7 +72,13 @@ export class AuthService {
   constructor(
     private usersService: UsersService,
     private jwtService: JwtService,
+    private readonly emailTokenService: EmailTokenService,
+    private readonly emailService: EmailService,
   ) {}
+
+  private get emailVerificationRequired(): boolean {
+    return process.env.EMAIL_VERIFICATION_REQUIRED === 'true';
+  }
 
   async validateUser(input: AuthInput): Promise<SignInData | null> {
     const user = await this.usersService.findUserByName(input.username);
@@ -160,7 +172,7 @@ export class AuthService {
     }
   }
 
-  async register(dto: RegisterDto): Promise<AuthResult> {
+  async register(dto: RegisterDto): Promise<AuthResult | PendingVerification> {
     const passwordHash = await bcrypt.hash(dto.password, SALT_ROUNDS);
 
     try {
@@ -170,6 +182,12 @@ export class AuthService {
         email: dto.email,
         passwordHash,
       });
+
+      await this.sendVerificationEmail(user.id, dto.email);
+
+      if (this.emailVerificationRequired) {
+        return { requiresVerification: true };
+      }
 
       return this.signIn({
         userId: user.id,
@@ -186,6 +204,21 @@ export class AuthService {
         );
       }
       throw error;
+    }
+  }
+
+  async sendVerificationEmail(userId: number, email: string): Promise<void> {
+    try {
+      const token = await this.emailTokenService.create(
+        userId,
+        EmailTokenType.VERIFY_EMAIL,
+      );
+      const url = new URL(VERIFY_EMAIL_PATH, process.env.FRONTEND_URL);
+      url.searchParams.set('token', token);
+
+      await this.emailService.sendVerificationEmail(email, url.toString());
+    } catch (error) {
+      console.error('Failed to send the verification email', error);
     }
   }
 

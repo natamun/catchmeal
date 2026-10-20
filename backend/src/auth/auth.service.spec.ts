@@ -7,7 +7,9 @@ import { JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
 import * as bcrypt from 'bcryptjs';
 
-import { Prisma } from '../generated/prisma/client';
+import { EmailTokenService } from '../email-token/email-token.service';
+import { EmailService } from '../email/email.service';
+import { EmailTokenType, Prisma } from '../generated/prisma/client';
 import { UsersService } from '../users/users.service';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
@@ -26,6 +28,14 @@ describe('AuthService', () => {
     signAsync: jest.fn(),
   };
 
+  const emailTokenServiceMock = {
+    create: jest.fn(),
+  };
+
+  const emailServiceMock = {
+    sendVerificationEmail: jest.fn(),
+  };
+
   beforeEach(async () => {
     jest.resetAllMocks();
     const module: TestingModule = await Test.createTestingModule({
@@ -33,10 +43,15 @@ describe('AuthService', () => {
         AuthService,
         { provide: UsersService, useValue: usersServiceMock },
         { provide: JwtService, useValue: jwtServiceMock },
+        { provide: EmailTokenService, useValue: emailTokenServiceMock },
+        { provide: EmailService, useValue: emailServiceMock },
       ],
     }).compile();
 
     service = module.get<AuthService>(AuthService);
+
+    process.env.FRONTEND_URL = 'http://localhost:5173';
+    delete process.env.EMAIL_VERIFICATION_REQUIRED;
   });
 
   it('should be defined', () => {
@@ -149,6 +164,59 @@ describe('AuthService', () => {
       usersServiceMock.create.mockRejectedValue(unexpectedError);
 
       await expect(service.register(dto)).rejects.toBe(unexpectedError);
+    });
+
+    it('should send a verification link built from the new token', async () => {
+      usersServiceMock.create.mockResolvedValue({ id: 1, username: 'alice' });
+      jwtServiceMock.signAsync.mockResolvedValue('signed-token');
+      emailTokenServiceMock.create.mockResolvedValue('tok123');
+
+      await service.register(dto);
+
+      expect(emailTokenServiceMock.create).toHaveBeenCalledWith(
+        1,
+        EmailTokenType.VERIFY_EMAIL,
+      );
+      expect(emailServiceMock.sendVerificationEmail).toHaveBeenCalledWith(
+        'alice@example.com',
+        'http://localhost:5173/verify-email?token=tok123',
+      );
+    });
+
+    it('should not sign in and ask for verification when it is required', async () => {
+      process.env.EMAIL_VERIFICATION_REQUIRED = 'true';
+      usersServiceMock.create.mockResolvedValue({ id: 1, username: 'alice' });
+      emailTokenServiceMock.create.mockResolvedValue('tok123');
+
+      const result = await service.register(dto);
+
+      expect(result).toEqual({ requiresVerification: true });
+      expect(jwtServiceMock.signAsync).not.toHaveBeenCalled();
+      expect(emailServiceMock.sendVerificationEmail).toHaveBeenCalled();
+    });
+
+    it('should still register the user when the verification email cannot be prepared', async () => {
+      const errorSpy = jest
+        .spyOn(console, 'error')
+        .mockImplementation(() => undefined);
+      usersServiceMock.create.mockResolvedValue({ id: 1, username: 'alice' });
+      jwtServiceMock.signAsync.mockResolvedValue('signed-token');
+      emailTokenServiceMock.create.mockRejectedValue(new Error('db down'));
+
+      const result = await service.register(dto);
+
+      expect(result).toMatchObject({ accessToken: 'signed-token' });
+      expect(emailServiceMock.sendVerificationEmail).not.toHaveBeenCalled();
+      errorSpy.mockRestore();
+    });
+
+    it('should not send any email when the account cannot be created', async () => {
+      usersServiceMock.create.mockRejectedValue(new Error('database is down'));
+
+      await expect(service.register(dto)).rejects.toThrow('database is down');
+
+      expect(emailTokenServiceMock.create).not.toHaveBeenCalled();
+      expect(emailServiceMock.sendVerificationEmail).not.toHaveBeenCalled();
     });
   });
 

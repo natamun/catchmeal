@@ -2,6 +2,8 @@ import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 
+import { EmailTokenModule } from '../email-token/email-token.module';
+import { EmailModule } from '../email/email.module';
 import { UsersModule } from '../users/users.module';
 import { AuthService } from './auth.service';
 import { PassportAuthController } from './passport-auth.controller';
@@ -23,6 +25,8 @@ import { LocalStrategy } from './strategies/local.strategy';
   controllers: [PassportAuthController],
   imports: [
     UsersModule,
+    EmailModule,
+    EmailTokenModule,
     JwtModule.register({
       global: true,
       secret: process.env.JWT_SECRET,
