@@ -38,7 +38,7 @@ export function deleteFoodItem(userId: number, id: number) {
 }
 
 export function lookupOffProduct(userId: number, barcode: string) {
-  return request<OffProduct>(
+  return request<{ product: OffProduct | null }>(
     `${BASE_URL}/users/${userId}/off-products/${encodeURIComponent(barcode)}`,
-  );
+  ).then(({ product }) => product);
 }

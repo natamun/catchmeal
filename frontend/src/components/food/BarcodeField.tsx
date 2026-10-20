@@ -8,6 +8,7 @@ import { ApiError } from '../../utils/request';
 import { FieldError } from '../ui/FieldError';
 import { Input } from '../ui/Input';
 import { lookupOffProduct } from './api';
+import { isValidBarcode } from './barcode';
 import type { OffProduct } from './types';
 
 const BarcodeScannerDialog = lazy(() => import('./BarcodeScannerDialog'));
@@ -20,9 +21,10 @@ const ICON_BUTTON_CLASS =
 
 const OFF_URL = 'https://world.openfoodfacts.org';
 
+const INVALID_BARCODE = 'Code-barres invalide';
+
 const LOOKUP_ERRORS: Partial<Record<number, string>> = {
-  400: 'Code-barres invalide',
-  404: 'Produit introuvable',
+  400: INVALID_BARCODE,
   429: 'Trop de recherches, patientez 1 min',
   503: 'Open Food Facts ne répond pas',
 };
@@ -75,10 +77,18 @@ export default function BarcodeField({
   const runLookup = async (code: string) => {
     lookupIdRef.current += 1;
     const lookupId = lookupIdRef.current;
+    if (!isValidBarcode(code)) {
+      setLookupError({ message: INVALID_BARCODE, onField: true });
+      return;
+    }
     setIsLookingUp(true);
     try {
       const product = await lookupOffProduct(userId, code);
       if (lookupId !== lookupIdRef.current) {
+        return;
+      }
+      if (!product) {
+        setLookupError({ message: 'Produit introuvable', onField: false });
         return;
       }
       setFoundBarcode(product.barcode);
