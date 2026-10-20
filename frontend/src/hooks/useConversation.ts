@@ -4,6 +4,11 @@ import { getConversation } from '../components/messages/api';
 import type { Message } from '../components/messages/types';
 import { useSocket } from '../socket/socketContext';
 
+/**
+ * One chat conversation: loads the history, appends the new messages pushed by
+ * the socket and reloads after a reconnection. `send` goes through the socket
+ * and waits for the server's acknowledgement: the saved message, or { error }.
+ */
 export function useConversation(userId: number, otherUserId: number) {
   const { socket, isConnected } = useSocket();
   const [messages, setMessages] = useState<Message[]>([]);

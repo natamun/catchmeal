@@ -1,5 +1,6 @@
 import { PATHS } from '../../routing/paths';
 
+/** The three legal pages, used by the footer links and the tab titles. */
 export const LEGAL_PAGES = [
   {
     path: PATHS.privacy,

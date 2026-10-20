@@ -1,3 +1,4 @@
+/** Usual activity factors: daily needs = BMR x factor. */
 const ACTIVITY_MULTIPLIERS: Record<string, number> = {
   SEDENTARY: 1.2,
   LIGHTLY_ACTIVE: 1.375,
@@ -6,6 +7,7 @@ const ACTIVITY_MULTIPLIERS: Record<string, number> = {
   EXTRA_ACTIVE: 1.9,
 };
 
+/** Age in full years at today's date. */
 function getAge(birthDate: string): number {
   const today = new Date();
   const birth = new Date(birthDate);
@@ -17,6 +19,11 @@ function getAge(birthDate: string): number {
   return hasBirthdayPassed ? age : age - 1;
 }
 
+/**
+ * Basal metabolic rate: the calories burned per day at rest. With a muscle mass
+ * it uses the Katch-McArdle formula (370 + 21.6 x mass). Otherwise Mifflin-St
+ * Jeor: +5 for men, -161 for women, -78 (halfway) otherwise.
+ */
 export function calculateBMR(
   weightKg: number,
   heightCm: number,
@@ -32,6 +39,10 @@ export function calculateBMR(
   return Math.round(base - 78);
 }
 
+/**
+ * Total daily energy expenditure: the BMR times the activity factor (1.2 when
+ * the level is unknown).
+ */
 export function calculateTDEE(bmr: number, activityLevel: string): number {
   const multiplier = ACTIVITY_MULTIPLIERS[activityLevel] ?? 1.2;
   return Math.round(bmr * multiplier);

@@ -1,5 +1,9 @@
 import type { ActivityItem } from './types';
 
+/**
+ * Keeps only the most recent activity of each friend; the feed comes sorted
+ * newest first.
+ */
 export function latestActivityPerFriend(
   activities: ActivityItem[],
 ): ActivityItem[] {

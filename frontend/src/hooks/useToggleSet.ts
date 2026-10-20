@@ -1,5 +1,9 @@
 import { useState } from 'react';
 
+/**
+ * A Set kept in state, with a function that adds or removes a value. Used for
+ * the rows a list shows expanded.
+ */
 export function useToggleSet<T>() {
   const [values, setValues] = useState<Set<T>>(() => new Set());
 

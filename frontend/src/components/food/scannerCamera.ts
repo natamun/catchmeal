@@ -5,6 +5,10 @@ type FocusCapabilities = MediaTrackCapabilities & { focusMode?: string[] };
 
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
+/**
+ * Stops a test stream. Some phones need a short pause before another camera can
+ * open.
+ */
 async function release(stream: MediaStream) {
   stream.getTracks().forEach((track) => track.stop());
   await wait(RELEASE_DELAY_MS);
@@ -19,6 +23,11 @@ function canAutofocus(stream: MediaStream) {
 const cameraIndex = (label: string) =>
   Number(/camera2 (\d+)/.exec(label)?.[1] ?? 99);
 
+/**
+ * Tries the default rear camera first, then the other rear ones (sorted by
+ * their Android "camera2 N" index), and keeps the first one that can autofocus.
+ * When the browser cannot tell, the scanner just uses its default camera.
+ */
 async function pickRearCamera() {
   const { mediaDevices } = navigator;
   if (!('focusMode' in mediaDevices.getSupportedConstraints())) {
@@ -79,8 +88,17 @@ async function resolveCamera() {
   return picked;
 }
 
+/**
+ * Calls made at the same time share one search instead of opening the cameras
+ * twice.
+ */
 let pending: Promise<string | undefined> | null = null;
 
+/**
+ * Chooses the camera used to scan barcodes and remembers it in localStorage.
+ * Phones often have several rear cameras and the default one may not autofocus,
+ * which makes barcodes unreadable.
+ */
 export function findScannerCamera() {
   pending ??= resolveCamera().finally(() => {
     pending = null;

@@ -1,5 +1,10 @@
 const BARCODE_PATTERN = /^\d{8,14}$/;
 
+/**
+ * Same rule as the backend: 8 to 14 digits and a correct check digit (the last
+ * digit, computed from the others with weights 3 and 1). Catches a typo before
+ * any request is sent.
+ */
 export function isValidBarcode(code: string) {
   if (!BARCODE_PATTERN.test(code)) {
     return false;

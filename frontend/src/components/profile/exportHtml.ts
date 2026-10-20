@@ -1,5 +1,9 @@
 import type { DataExport } from './api';
 
+/**
+ * Escapes text before writing it into the HTML file, so a meal named <script>
+ * stays plain text.
+ */
 function escapeHtml(value: unknown): string {
   return String(value)
     .replace(/&/g, '&amp;')
@@ -9,6 +13,10 @@ function escapeHtml(value: unknown): string {
     .replace(/'/g, '&#039;');
 }
 
+/**
+ * Builds the readable HTML version of the GDPR export: one table per kind of
+ * data.
+ */
 export function buildExportHtml(data: DataExport): string {
   const p = data.data.profile;
 

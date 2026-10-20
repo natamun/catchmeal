@@ -4,6 +4,14 @@ import { useTimeout } from './useTimeout';
 
 const SUBMIT_ERRORS_MS = 5000;
 
+/**
+ * Holds a form's values and its validation state; every form of the app uses
+ * it. A field gets its red border once touched, and its error bubble only while
+ * it is focused, or for 5 seconds after a failed submit.
+ *
+ * attemptSubmit() reveals every error and returns whether the form can be sent;
+ * resetValidation() starts over, e.g. when a dialog opens again.
+ */
 export function useFormValidation<T extends object>(
   initialForm: T | (() => T),
   validate: (form: T) => Partial<Record<keyof T, string>>,

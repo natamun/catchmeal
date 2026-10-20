@@ -1,5 +1,6 @@
 export type MacroKey = 'kcal' | 'protein' | 'carbs' | 'fat';
 
+/** Calories and macros of a listed item: a food, or the totals of a meal. */
 export type Macros = Record<MacroKey, number>;
 
 export interface MacroFilter {
@@ -12,6 +13,7 @@ export interface SortOption {
   direction: 'asc' | 'desc';
 }
 
+/** Search text, macro ranges and sort chosen in a food or meal list. */
 export interface FilterCriteria {
   query: string;
   kcal: MacroFilter;
@@ -21,6 +23,7 @@ export interface FilterCriteria {
   sort: SortOption;
 }
 
+/** No filter: unlimited ranges, sorted by name. */
 export const EMPTY_FILTER_CRITERIA: FilterCriteria = {
   query: '',
   kcal: { min: -Infinity, max: Infinity },
@@ -30,6 +33,7 @@ export const EMPTY_FILTER_CRITERIA: FilterCriteria = {
   sort: { field: 'name', direction: 'asc' },
 };
 
+/** Whether a value is inside the chosen range. */
 export function matchesMacro(value: number, filter: MacroFilter) {
   return value >= filter.min && value <= filter.max;
 }

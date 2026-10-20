@@ -1,3 +1,4 @@
+/** Length limits shared by the forms, the same as the backend DTOs. */
 export const MIN_LENGTH = { username: 3, password: 8 } as const;
 
 export const MAX_LENGTH = {
@@ -17,6 +18,10 @@ export function maxLengthMessage(max: number) {
   return `${max} caractères maximum`;
 }
 
+/**
+ * Error message for a username, or undefined when it is valid. Spaces around it
+ * are ignored, as on the backend.
+ */
 export function usernameError(username: string) {
   const { length } = username.trim();
   if (length < MIN_LENGTH.username) {
@@ -28,6 +33,10 @@ export function usernameError(username: string) {
   return undefined;
 }
 
+/**
+ * Quick check before sending (something@domain.xx, 255 characters at most); the
+ * backend validates the email again.
+ */
 export function isValidEmail(email: string) {
   return EMAIL_PATTERN.test(email) && email.length <= MAX_LENGTH.email;
 }

@@ -6,6 +6,10 @@ import {
 
 export type QuickAddField = 'kcal' | 'protein' | 'carbs' | 'fat';
 
+/**
+ * Fields of a quick add: calories and macros typed by hand, without a food of
+ * the library.
+ */
 export const QUICK_ADD_FIELDS: { field: QuickAddField; label: string }[] = [
   { field: 'kcal', label: 'Kcal' },
   { field: 'protein', label: 'Protéines (g)' },
@@ -20,6 +24,7 @@ export const EMPTY_QUICK_ADD_FORM: Record<QuickAddField, string> = {
   fat: '',
 };
 
+/** Every field is required, 0 or more, with 2 decimals at most. */
 export function validateQuickAddForm(
   form: Record<QuickAddField, string>,
 ): Partial<Record<QuickAddField, string>> {

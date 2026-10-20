@@ -6,6 +6,11 @@ import type { DashboardDay } from '../components/analytics/types';
 
 const NO_DAYS: DashboardDay[] = [];
 
+/**
+ * Stats of a date range for the stats page. Each range is cached, so coming
+ * back to a period already seen shows it instantly; `retry` reloads after an
+ * error.
+ */
 export function useDashboard(from: string, to: string) {
   const { userId } = useCurrentUser();
   const key = `${userId}:${from}:${to}`;

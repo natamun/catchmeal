@@ -9,6 +9,11 @@ import type { Friend, FriendRequest } from '../components/friends/types';
 import { useSocket } from '../socket/socketContext';
 import { ApiError } from '../utils/request';
 
+/**
+ * Friends, received requests and sent requests, loaded together and reloaded
+ * whenever the socket announces a change (new request, acceptance, removal) or
+ * reconnects.
+ */
 export function useFriends(userId: number) {
   const [friends, setFriends] = useState<Friend[]>([]);
   const [requests, setRequests] = useState<FriendRequest[]>([]);

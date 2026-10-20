@@ -7,6 +7,11 @@ import {
 import type { Message } from '../components/messages/types';
 import { useSocket } from '../socket/socketContext';
 
+/**
+ * Ids of the friends who sent me unread messages, for the badges. Opening a
+ * chat marks it as read, and a message arriving in the open chat is marked as
+ * read right away.
+ */
 export function useUnreadMessages(
   userId: number,
   openChatFriendId: number | null,
