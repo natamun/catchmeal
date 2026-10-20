@@ -1,7 +1,7 @@
 import { Suspense, useState } from 'react';
 import { Outlet, useLocation, useMatch } from 'react-router';
 
-import { useAuth } from '../../auth/auth-context';
+import { useCurrentUser } from '../../auth/auth-context';
 import { PATHS } from '../../routes';
 import type { ChatMessage } from '../../types/ChatBotType';
 import ChatBotPopup from '../ai/ChatBotPopup';
@@ -28,7 +28,7 @@ function tabFromPath(pathname: string): Tab {
 }
 
 export default function AppLayout() {
-  const { user } = useAuth();
+  const user = useCurrentUser();
   const { pathname } = useLocation();
   const isAddingToJournal = useMatch(PATHS.journalAdd) !== null;
   const [isAssistantOpen, setIsAssistantOpen] = useState(false);
@@ -43,7 +43,7 @@ export default function AppLayout() {
     <ToastProvider>
       <div className="min-h-screen bg-green-50">
         <ConnectionBanner />
-        <Nav isAdmin={user?.role === 'ADMIN'} />
+        <Nav isAdmin={user.role === 'ADMIN'} />
         <main
           id="main-content"
           className={`mx-auto max-w-6xl px-6 pt-6 ${

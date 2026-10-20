@@ -1,14 +1,13 @@
 import { useEffect, useState } from 'react';
 
-import { useAuth } from '../auth/auth-context';
+import { useCurrentUser } from '../auth/auth-context';
 import { getDashboard } from '../components/analytics/api';
 import type { DashboardDay } from '../types/dashboard-analytics';
 
 const NO_DAYS: DashboardDay[] = [];
 
 export default function useDashboard(from: string, to: string) {
-  const { user } = useAuth();
-  const userId = user?.userId;
+  const { userId } = useCurrentUser();
   const key = `${userId}:${from}:${to}`;
   const [loaded, setLoaded] = useState<Record<string, DashboardDay[]>>({});
   const [failedKey, setFailedKey] = useState<string | null>(null);
@@ -17,7 +16,7 @@ export default function useDashboard(from: string, to: string) {
   const isCached = days !== undefined;
 
   useEffect(() => {
-    if (!userId || isCached) return;
+    if (isCached) return;
     const controller = new AbortController();
 
     getDashboard(userId, from, to, controller.signal)

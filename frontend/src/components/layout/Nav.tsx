@@ -12,7 +12,7 @@ import {
 } from 'lucide-react';
 import { NavLink, useMatch } from 'react-router';
 
-import { useAuth } from '../../auth/auth-context';
+import { useAuth, useCurrentUser } from '../../auth/auth-context';
 import { PATHS } from '../../routes';
 import { Avatar } from '../ui/Avatar';
 import { Brand } from '../ui/Brand';
@@ -105,17 +105,14 @@ function NavItem({ tab, variant, icon }: NavItemProps) {
 }
 
 export default function Nav({ isAdmin = false }: Props) {
-  const { user, logout } = useAuth();
+  const user = useCurrentUser();
+  const { logout } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
   const [menuContainer, setMenuContainer] = useState<HTMLDivElement | null>(
     null,
   );
   const profileMatch = useMatch(PATHS.profile);
   const adminMatch = useMatch(PATHS.admin);
-
-  if (!user) {
-    return null;
-  }
 
   const onAccountPage = profileMatch !== null || adminMatch !== null;
   const bottomTabs = isAdmin

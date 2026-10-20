@@ -2,7 +2,7 @@ import { useRef, useState } from 'react';
 import { AlertCircle, ChevronRight, LoaderCircle } from 'lucide-react';
 import { Link } from 'react-router';
 
-import { useAuth } from '../../auth/auth-context';
+import { useAuth, useCurrentUser } from '../../auth/auth-context';
 import { PATHS } from '../../routes';
 import { BaseDialog } from '../ui/BaseDialog';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
@@ -21,7 +21,8 @@ const chevron = (
 );
 
 export function GdprSection() {
-  const { logout, user } = useAuth();
+  const user = useCurrentUser();
+  const { logout } = useAuth();
   const [exportLoading, setExportLoading] = useState(false);
   const [lastExportFormat, setLastExportFormat] = useState<'html' | 'json'>(
     'html',
@@ -36,7 +37,6 @@ export function GdprSection() {
   const showToast = useToast();
 
   async function handleExport(format: 'html' | 'json') {
-    if (!user) return;
     exportFormatDialogRef.current?.close();
     setLastExportFormat(format);
     setExportLoading(true);
@@ -70,7 +70,6 @@ export function GdprSection() {
   }
 
   async function handleDeleteAccount() {
-    if (!user) return;
     setDeleteLoading(true);
     try {
       await deleteMyAccount();
@@ -120,7 +119,7 @@ export function GdprSection() {
               chevron
             )}
           </button>
-          {user?.hasPassword !== false && (
+          {user.hasPassword !== false && (
             <button
               type="button"
               onClick={() => changePasswordDialogRef.current?.showModal()}

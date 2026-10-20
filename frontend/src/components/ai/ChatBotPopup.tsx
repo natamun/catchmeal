@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { ArrowUp, Bot, LoaderCircle, X } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 
-import { useAuth } from '../../auth/auth-context';
+import { useCurrentUser } from '../../auth/auth-context';
 import type { ChatMessage, ResponseMistral } from '../../types/ChatBotType';
 import { JSON_HEADERS, request } from '../../utils/request';
 import { requestErrorMessage } from '../../utils/requestErrorMessage';
@@ -31,8 +31,7 @@ export default function ChatBotPopup({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [disclamer, setDisclamer] = useState<boolean>(false);
   const [sendError, setSendError] = useState<string | null>(null);
-  const { user } = useAuth();
-  const CURRENT_USER_ID = user?.userId;
+  const { userId } = useCurrentUser();
   const API_URL = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
@@ -67,11 +66,8 @@ export default function ChatBotPopup({
       textareaRef.current.style.height = 'auto';
     }
     try {
-      if (!CURRENT_USER_ID) {
-        throw new Error('UID is not defined');
-      }
       const data = await request<ResponseMistral>(
-        `${API_URL}/users/${CURRENT_USER_ID}/chat`,
+        `${API_URL}/users/${userId}/chat`,
         {
           method: 'POST',
           headers: JSON_HEADERS,
