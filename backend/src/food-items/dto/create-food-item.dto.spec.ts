@@ -63,4 +63,25 @@ describe('CreateFoodItemDto', () => {
   it('should reject a blank name', async () => {
     await expect(parse({ name: '   ' })).rejects.toThrow(BadRequestException);
   });
+
+  it('should accept numbers with up to 2 decimals', async () => {
+    const dto = await parse({
+      baseQuantity: 2.25,
+      kcal: 130.5,
+      protein: 2.45,
+      carbs: 28.1,
+      fat: 0.35,
+    });
+
+    expect(dto.protein).toBe(2.45);
+  });
+
+  it.each(['baseQuantity', 'kcal', 'protein', 'carbs', 'fat'])(
+    'should reject a %s with more than 2 decimals',
+    async (field) => {
+      await expect(parse({ [field]: 2.222 })).rejects.toThrow(
+        BadRequestException,
+      );
+    },
+  );
 });

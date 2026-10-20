@@ -13,6 +13,8 @@ import {
 
 import { QuantityUnit } from '../../generated/prisma/enums';
 
+const MAX_DECIMALS = 2;
+
 const trim = ({ value }: { value: unknown }) =>
   typeof value === 'string' ? value.trim() : value;
 
@@ -37,26 +39,26 @@ export class CreateFoodItemDto {
   @Matches(/^\d{8,14}$/, { message: 'barcode must be 8 to 14 digits' })
   barcode?: string | null;
 
-  @IsNumber()
+  @IsNumber({ maxDecimalPlaces: MAX_DECIMALS })
   @IsPositive()
   baseQuantity: number;
 
   @IsEnum(QuantityUnit)
   baseUnit: QuantityUnit;
 
-  @IsNumber()
+  @IsNumber({ maxDecimalPlaces: MAX_DECIMALS })
   @Min(0)
   kcal: number;
 
-  @IsNumber()
+  @IsNumber({ maxDecimalPlaces: MAX_DECIMALS })
   @Min(0)
   protein: number;
 
-  @IsNumber()
+  @IsNumber({ maxDecimalPlaces: MAX_DECIMALS })
   @Min(0)
   carbs: number;
 
-  @IsNumber()
+  @IsNumber({ maxDecimalPlaces: MAX_DECIMALS })
   @Min(0)
   fat: number;
 }
