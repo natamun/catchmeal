@@ -2,7 +2,7 @@ import { useState, type RefObject } from 'react';
 import * as Popover from '@radix-ui/react-popover';
 import { ChevronRight } from 'lucide-react';
 
-import { useCurrentUser } from '../../auth/auth-context';
+import { useCurrentUser } from '../../auth/authContext';
 import { useFormValidation } from '../../hooks/useFormValidation';
 import { parseDecimal } from '../../utils/decimals';
 import { requestErrorMessage } from '../../utils/requestErrorMessage';

@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { Navigate, useParams, useSearchParams } from 'react-router';
 
 import DailyMealPicker from '../components/home/DailyMealPicker';
-import { useToast } from '../components/ui/toast-context';
+import { useToast } from '../components/ui/toastContext';
 import {
   journalPath,
   mealTypeFromSlug,

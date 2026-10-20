@@ -1,7 +1,7 @@
 import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { ArrowUpRight, LoaderCircle, ScanBarcode, Search } from 'lucide-react';
 
-import { useCurrentUser } from '../../auth/auth-context';
+import { useCurrentUser } from '../../auth/authContext';
 import { useHasCamera } from '../../hooks/useHasCamera';
 import { useTimeout } from '../../hooks/useTimeout';
 import { ApiError } from '../../utils/request';

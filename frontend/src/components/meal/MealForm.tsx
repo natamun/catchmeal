@@ -2,7 +2,7 @@ import { useRef, useState, type RefObject } from 'react';
 import * as Popover from '@radix-ui/react-popover';
 import { Trash2 } from 'lucide-react';
 
-import { useCurrentUser } from '../../auth/auth-context';
+import { useCurrentUser } from '../../auth/authContext';
 import { useFormValidation } from '../../hooks/useFormValidation';
 import { useTimeout } from '../../hooks/useTimeout';
 import { parseDecimal } from '../../utils/decimals';
@@ -15,7 +15,7 @@ import { FieldError } from '../ui/FieldError';
 import { LABEL_CLASS } from '../ui/fieldStyle';
 import { Input } from '../ui/Input';
 import { MacroSummary } from '../ui/MacroSummary';
-import { useToast } from '../ui/toast-context';
+import { useToast } from '../ui/toastContext';
 import { createMeal, deleteMeal, updateMeal } from './api';
 import {
   draftsToInput,

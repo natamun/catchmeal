@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { ChevronLeft } from 'lucide-react';
 
-import { useCurrentUser } from '../../auth/auth-context';
+import { useCurrentUser } from '../../auth/authContext';
 import { listFoodItems } from '../food/api';
 import FoodItemList from '../food/FoodItemList';
 import type { FoodItem } from '../food/types';

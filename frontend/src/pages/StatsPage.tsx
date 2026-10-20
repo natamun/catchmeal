@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-import { useCurrentUser } from '../auth/auth-context';
+import { useCurrentUser } from '../auth/authContext';
 import CalorieChart from '../components/analytics/CalorieChart';
 import DataExport from '../components/analytics/DataExport';
 import MeasureChart, {

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-import { useAuth, useCurrentUser } from '../auth/auth-context';
+import { useAuth, useCurrentUser } from '../auth/authContext';
 import { GdprSection } from '../components/profile/GdprSection';
 import { GoalsCard } from '../components/profile/GoalsCard';
 import { ProfileIdentityCard } from '../components/profile/ProfileIdentityCard';

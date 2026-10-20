@@ -2,13 +2,13 @@ import { useRef, useState } from 'react';
 import { AlertCircle, ChevronRight, LoaderCircle } from 'lucide-react';
 import { Link } from 'react-router';
 
-import { useAuth, useCurrentUser } from '../../auth/auth-context';
+import { useAuth, useCurrentUser } from '../../auth/authContext';
 import { PATHS } from '../../routing/paths';
 import { BaseDialog } from '../ui/BaseDialog';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
 import { LoadError } from '../ui/LoadError';
 import SummaryCard from '../ui/SummaryCard';
-import { useToast } from '../ui/toast-context';
+import { useToast } from '../ui/toastContext';
 import { deleteMyAccount, exportMyData } from './api';
 import { ChangePasswordDialog } from './ChangePasswordDialog';
 import { buildExportHtml } from './exportHtml';

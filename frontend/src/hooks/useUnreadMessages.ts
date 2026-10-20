@@ -5,7 +5,7 @@ import {
   markConversationRead,
 } from '../components/messages/api';
 import type { Message } from '../components/messages/types';
-import { useSocket } from '../socket/socket-context';
+import { useSocket } from '../socket/socketContext';
 
 export function useUnreadMessages(
   userId: number,

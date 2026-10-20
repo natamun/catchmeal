@@ -1,7 +1,7 @@
 import { useRef, useState, type RefObject } from 'react';
 import { Trash2 } from 'lucide-react';
 
-import { useCurrentUser } from '../../auth/auth-context';
+import { useCurrentUser } from '../../auth/authContext';
 import { useFormValidation } from '../../hooks/useFormValidation';
 import {
   hasTooManyDecimals,
@@ -15,7 +15,7 @@ import { FieldError } from '../ui/FieldError';
 import { LABEL_CLASS } from '../ui/fieldStyle';
 import { Input } from '../ui/Input';
 import { PillTabs } from '../ui/PillTabs';
-import { useToast } from '../ui/toast-context';
+import { useToast } from '../ui/toastContext';
 import { createFoodItem, deleteFoodItem, updateFoodItem } from './api';
 import BarcodeField from './BarcodeField';
 import type { FoodItem, OffProduct, QuantityUnit } from './types';

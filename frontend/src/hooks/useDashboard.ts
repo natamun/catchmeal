@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-import { useCurrentUser } from '../auth/auth-context';
+import { useCurrentUser } from '../auth/authContext';
 import { getDashboard } from '../components/analytics/api';
 import type { DashboardDay } from '../components/analytics/types';
 

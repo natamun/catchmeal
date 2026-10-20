@@ -2,7 +2,7 @@ import { useRef, useState } from 'react';
 import { ArrowLeft } from 'lucide-react';
 import { Link, useLocation, useMatch, useNavigate } from 'react-router';
 
-import { useAuth } from '../auth/auth-context';
+import { useAuth } from '../auth/authContext';
 import AuthBrandPanel from '../components/auth/AuthBrandPanel';
 import OAuthButtons from '../components/auth/OAuthButtons';
 import { PrivacyPolicyContent } from '../components/legal/PrivacyPolicyContent';

@@ -8,7 +8,7 @@ import {
   useSearchParams,
 } from 'react-router';
 
-import { useAuth } from './auth/auth-context';
+import { useAuth } from './auth/authContext';
 import { AuthProvider } from './auth/AuthProvider';
 import AppLayout from './components/layout/AppLayout';
 import { deleteMyAccount } from './components/profile/api';

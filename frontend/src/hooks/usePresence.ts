@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 
 import { getFriendsPresence } from '../components/friends/api';
 import type { FriendPresence } from '../components/friends/types';
-import { useSocket } from '../socket/socket-context';
+import { useSocket } from '../socket/socketContext';
 
 export function usePresence(userId: number) {
   const { socket } = useSocket();

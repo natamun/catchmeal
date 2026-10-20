@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 
-import { useCurrentUser } from '../auth/auth-context';
+import { useCurrentUser } from '../auth/authContext';
 import { listFoodItems } from '../components/food/api';
 import FoodItemForm from '../components/food/FoodItemForm';
 import FoodItemList from '../components/food/FoodItemList';

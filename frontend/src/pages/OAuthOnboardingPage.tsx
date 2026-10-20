@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { ArrowLeft } from 'lucide-react';
 
 import * as authApi from '../auth/api';
-import { useAuth } from '../auth/auth-context';
+import { useAuth } from '../auth/authContext';
 import AuthBrandPanel from '../components/auth/AuthBrandPanel';
 import { Brand } from '../components/ui/Brand';
 import { FieldError } from '../components/ui/FieldError';

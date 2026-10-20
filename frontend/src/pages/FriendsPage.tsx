@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router';
 
-import { useCurrentUser } from '../auth/auth-context';
+import { useCurrentUser } from '../auth/authContext';
 import AddFriendDialog from '../components/friends/AddFriendDialog';
 import {
   acceptFriendRequest,
@@ -24,7 +24,7 @@ import {
   ListCardLoading,
 } from '../components/ui/ListCard';
 import { LoadError } from '../components/ui/LoadError';
-import { useToast } from '../components/ui/toast-context';
+import { useToast } from '../components/ui/toastContext';
 import { useActivityFeed } from '../hooks/useActivityFeed';
 import { useFriends } from '../hooks/useFriends';
 import { usePresence } from '../hooks/usePresence';

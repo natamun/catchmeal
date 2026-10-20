@@ -2,11 +2,11 @@ import { useEffect, useRef, useState } from 'react';
 import { ArrowUp, Bot, LoaderCircle, X } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 
-import { useCurrentUser } from '../../auth/auth-context';
+import { useCurrentUser } from '../../auth/authContext';
 import { requestErrorMessage } from '../../utils/requestErrorMessage';
 import type { Tab } from '../layout/Nav';
 import { askAssistant } from './api';
-import DisclamerPopup from './DisclamerPopup';
+import DisclaimerPopup from './DisclaimerPopup';
 import type { ChatMessage } from './types';
 
 interface ChatBotPopupProps {
@@ -29,7 +29,7 @@ export default function ChatBotPopup({
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const lastAssistantRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const [disclamer, setDisclamer] = useState<boolean>(false);
+  const [disclaimer, setDisclaimer] = useState<boolean>(false);
   const [sendError, setSendError] = useState<string | null>(null);
   const { userId } = useCurrentUser();
 
@@ -101,9 +101,9 @@ export default function ChatBotPopup({
           aria-label="Assistant CatCHMeal"
           className="relative flex h-128 max-h-[calc(100dvh-var(--spacing-header)-4rem-env(safe-area-inset-bottom))] w-[min(24rem,calc(100vw-3rem))] animate-fade-in-up flex-col overflow-hidden rounded-2xl border border-green-200 bg-white shadow-lg pointer-coarse:max-h-[calc(100dvh-var(--spacing-bottom-nav)-4rem-env(safe-area-inset-bottom))] ios-typing:h-[calc(var(--visible-height)-2rem)] ios-typing:max-h-none"
         >
-          {disclamer && (
+          {disclaimer && (
             <div className="absolute inset-0 z-10 flex items-center bg-black/30 p-4 backdrop-blur-sm">
-              <DisclamerPopup setDisclamer={setDisclamer} />
+              <DisclaimerPopup setDisclaimer={setDisclaimer} />
             </div>
           )}
           <div className="flex items-center justify-between px-4 pt-4 pb-3">
@@ -149,7 +149,7 @@ export default function ChatBotPopup({
               className="max-h-20 min-w-0 flex-1 resize-none self-center overflow-y-auto text-sm text-green-800 outline-none"
               value={input}
               maxLength={250}
-              disabled={disclamer}
+              disabled={disclaimer}
               minLength={1}
               rows={1}
               ref={textareaRef}
@@ -189,7 +189,7 @@ export default function ChatBotPopup({
             Par votre utilisation du chat, vous acceptez cette{' '}
             <button
               type="button"
-              onClick={() => setDisclamer(true)}
+              onClick={() => setDisclaimer(true)}
               className="cursor-pointer font-medium text-green-600 underline underline-offset-2 transition-colors hover:text-green-800"
             >
               clause de non-responsabilité

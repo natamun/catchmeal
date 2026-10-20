@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type RefObject } from 'react';
 import { Send } from 'lucide-react';
 
-import { useCurrentUser } from '../../auth/auth-context';
+import { useCurrentUser } from '../../auth/authContext';
 import { useConversation } from '../../hooks/useConversation';
 import type { ActivityItem, UserSummary } from '../friends/types';
 import { BaseDialog } from '../ui/BaseDialog';

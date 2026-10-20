@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 
-import { useAuth } from '../auth/auth-context';
+import { useAuth } from '../auth/authContext';
 import AdminSearchBar from '../components/admin/AdminSearchBar';
 import { AdminUserDialog } from '../components/admin/AdminUserDialog';
 import {

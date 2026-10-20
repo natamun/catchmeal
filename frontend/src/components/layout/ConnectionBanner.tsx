@@ -1,4 +1,4 @@
-import { useSocket } from '../../socket/socket-context';
+import { useSocket } from '../../socket/socketContext';
 
 export function ConnectionBanner() {
   const { isConnected, hasConnectedOnce } = useSocket();

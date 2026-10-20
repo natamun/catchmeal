@@ -1,8 +1,8 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { io, type Socket } from 'socket.io-client';
 
-import { useAuth } from '../auth/auth-context';
-import { SocketContext } from './socket-context';
+import { useAuth } from '../auth/authContext';
+import { SocketContext } from './socketContext';
 
 export function SocketProvider({ children }: { children: ReactNode }) {
   const { status } = useAuth();

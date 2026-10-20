@@ -1,6 +1,6 @@
 import { useState, type RefObject } from 'react';
 
-import { useCurrentUser } from '../../auth/auth-context';
+import { useCurrentUser } from '../../auth/authContext';
 import { requestErrorMessage } from '../../utils/requestErrorMessage';
 import { createMeal, deleteMeal, toApiDate, updateMeal } from '../meal/api';
 import { draftsToInput, draftTotals, type MealItemDraft } from '../meal/draft';

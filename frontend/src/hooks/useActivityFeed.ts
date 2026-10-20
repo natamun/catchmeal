@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 
 import { getFriendsActivity } from '../components/friends/api';
 import type { ActivityItem } from '../components/friends/types';
-import { useSocket } from '../socket/socket-context';
+import { useSocket } from '../socket/socketContext';
 
 export function useActivityFeed(userId: number) {
   const { socket } = useSocket();

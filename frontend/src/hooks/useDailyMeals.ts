@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { useCurrentUser } from '../auth/auth-context';
+import { useCurrentUser } from '../auth/authContext';
 import { listFoodItems } from '../components/food/api';
 import type { FoodItem } from '../components/food/types';
 import { listMealsOnDate, toApiDate } from '../components/meal/api';

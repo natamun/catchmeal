@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Zap } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router';
 
-import { useCurrentUser } from '../auth/auth-context';
+import { useCurrentUser } from '../auth/authContext';
 import FriendsActivity from '../components/friends/FriendsActivity';
 import { latestActivityPerFriend } from '../components/friends/latestActivityPerFriend';
 import CalorieSummary from '../components/home/CalorieSummary';
@@ -15,7 +15,7 @@ import { buildDrafts, type MealItemDraft } from '../components/meal/draft';
 import { mealTotals, type Meal, type MealType } from '../components/meal/types';
 import { getWeightHistory, type WeightEntry } from '../components/profile/api';
 import DateNavigator from '../components/ui/DateNavigator';
-import { useToast } from '../components/ui/toast-context';
+import { useToast } from '../components/ui/toastContext';
 import { useActivityFeed } from '../hooks/useActivityFeed';
 import { useDailyMeals } from '../hooks/useDailyMeals';
 import { usePresence } from '../hooks/usePresence';

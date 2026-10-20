@@ -12,7 +12,7 @@ import {
 } from 'lucide-react';
 import { NavLink, useMatch } from 'react-router';
 
-import { useAuth, useCurrentUser } from '../../auth/auth-context';
+import { useAuth, useCurrentUser } from '../../auth/authContext';
 import { PATHS } from '../../routing/paths';
 import { Avatar } from '../ui/Avatar';
 import { Brand } from '../ui/Brand';

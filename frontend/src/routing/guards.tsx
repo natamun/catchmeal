@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { Navigate, useLocation } from 'react-router';
 
-import { useAuth } from '../auth/auth-context';
+import { useAuth } from '../auth/authContext';
 import { navigationState, type NavigationState } from './navigation';
 import { PATHS } from './paths';
 

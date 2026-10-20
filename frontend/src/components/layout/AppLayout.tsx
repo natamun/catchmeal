@@ -1,7 +1,7 @@
 import { Suspense, useState } from 'react';
 import { Outlet, useLocation, useMatch } from 'react-router';
 
-import { useCurrentUser } from '../../auth/auth-context';
+import { useCurrentUser } from '../../auth/authContext';
 import { PATHS } from '../../routing/paths';
 import ChatBotPopup from '../ai/ChatBotPopup';
 import type { ChatMessage } from '../ai/types';

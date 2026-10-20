@@ -3,7 +3,7 @@ import { CheckCircle2, type LucideIcon } from 'lucide-react';
 
 import { useTimeout } from '../../hooks/useTimeout';
 import { Toast } from './Toast';
-import { ToastContext, type ShowToast } from './toast-context';
+import { ToastContext, type ShowToast } from './toastContext';
 
 const TOAST_DURATION_MS = 3000;
 

@@ -6,7 +6,7 @@ import {
   listSentRequests,
 } from '../components/friends/api';
 import type { Friend, FriendRequest } from '../components/friends/types';
-import { useSocket } from '../socket/socket-context';
+import { useSocket } from '../socket/socketContext';
 import { ApiError } from '../utils/request';
 
 export function useFriends(userId: number) {

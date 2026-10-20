@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 
 import { getConversation } from '../components/messages/api';
 import type { Message } from '../components/messages/types';
-import { useSocket } from '../socket/socket-context';
+import { useSocket } from '../socket/socketContext';
 
 export function useConversation(userId: number, otherUserId: number) {
   const { socket, isConnected } = useSocket();
