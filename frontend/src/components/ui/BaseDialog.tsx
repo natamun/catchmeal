@@ -54,11 +54,14 @@ export function BaseDialog({
       className={`dialog-fade m-auto w-[calc(100vw-2rem)] ${MAX_WIDTH_CLASS[maxWidth]} overflow-hidden rounded-2xl border-none bg-white p-0 shadow-lg backdrop:backdrop-blur-sm ios-typing:mt-[calc(var(--visible-top)+1rem)] ios-typing:mb-auto`}
     >
       <div className="flex max-h-[calc(100dvh-3rem)] flex-col gap-5 overflow-y-auto p-4 sm:p-6 ios-typing:max-h-[calc(var(--visible-height)-2rem)]">
-        <div className="flex items-center justify-between">
-          <h3 id={titleId} className="text-lg font-bold text-green-800">
+        <div className="flex items-center justify-between gap-3">
+          <h3
+            id={titleId}
+            className="min-w-0 truncate text-lg font-bold text-green-800"
+          >
             {title}
           </h3>
-          <div className="flex items-center gap-3">
+          <div className="flex shrink-0 items-center gap-3">
             {headerActions}
             <button
               type="button"
