@@ -15,6 +15,7 @@ export function SocketProvider({ children }: { children: ReactNode }) {
 
     const instance = io(import.meta.env.VITE_SOCKET_URL || undefined, {
       withCredentials: true,
+      closeOnBeforeunload: true,
     });
     instance.on('connect', () => {
       setIsConnected(true);

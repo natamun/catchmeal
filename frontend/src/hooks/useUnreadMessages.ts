@@ -27,7 +27,7 @@ export function useUnreadMessages(
           return next;
         }),
       )
-      .catch(console.error);
+      .catch(() => undefined);
   }, [userId, openChatFriendId]);
 
   useEffect(() => {
@@ -36,7 +36,7 @@ export function useUnreadMessages(
         .then((ids) =>
           setUnreadIds(new Set(ids.filter((id) => id !== openChatRef.current))),
         )
-        .catch(console.error);
+        .catch(() => undefined);
     };
 
     load();
@@ -47,7 +47,7 @@ export function useUnreadMessages(
       if (message.receiverId !== userId) return;
 
       if (message.senderId === openChatRef.current) {
-        markConversationRead(userId, message.senderId).catch(console.error);
+        markConversationRead(userId, message.senderId).catch(() => undefined);
         return;
       }
       setUnreadIds((prev) => new Set(prev).add(message.senderId));

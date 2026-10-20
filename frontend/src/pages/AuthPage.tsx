@@ -204,7 +204,6 @@ export default function AuthPage() {
             <form
               onSubmit={(e) => void handleSubmit(e)}
               noValidate
-              autoComplete="off"
               className="flex flex-col gap-4"
             >
               <div className="grid gap-4 sm:grid-cols-2">
@@ -217,6 +216,7 @@ export default function AuthPage() {
                   <Input
                     id="auth-username"
                     type="text"
+                    autoComplete="username"
                     placeholder="3 caractères minimum"
                     value={form.username}
                     onChange={(e) => handleChange('username', e.target.value)}
@@ -238,6 +238,7 @@ export default function AuthPage() {
                     <Input
                       id="auth-name"
                       type="text"
+                      autoComplete="name"
                       placeholder="Prénom et nom"
                       value={form.name}
                       onChange={(e) => handleChange('name', e.target.value)}
@@ -262,6 +263,7 @@ export default function AuthPage() {
                   <Input
                     id="auth-email"
                     type="email"
+                    autoComplete="email"
                     placeholder="nom@exemple.ch"
                     value={form.email}
                     onChange={(e) => handleChange('email', e.target.value)}
@@ -284,6 +286,9 @@ export default function AuthPage() {
                 <Input
                   id="auth-password"
                   type="password"
+                  autoComplete={
+                    mode === 'login' ? 'current-password' : 'new-password'
+                  }
                   placeholder={
                     mode === 'login'
                       ? 'Votre mot de passe'

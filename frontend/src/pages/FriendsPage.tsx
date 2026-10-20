@@ -211,6 +211,7 @@ export default function FriendsPage() {
         dialogRef={addDialogRef}
         friendIds={friends.map((f) => f.friend.id)}
         sentRequestIds={sentRequestIds}
+        receivedRequestIds={requests.map((r) => r.from.id)}
         onSent={(username) => {
           setSuccessMessage(`Demande envoyée à ${username}`);
           reload();
