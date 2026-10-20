@@ -71,12 +71,12 @@ export class EmailService {
   private readonly transporter: nodemailer.Transporter;
 
   constructor() {
-    const isProduction = process.env.NODE_ENV === 'production';
+    const port = Number(process.env.MAILTRAP_PORT);
     this.transporter = nodemailer.createTransport({
       host: process.env.MAILTRAP_HOST,
-      port: Number(process.env.MAILTRAP_PORT),
-      secure: isProduction,
-      requireTLS: isProduction,
+      port,
+      secure: port === 465,
+      requireTLS: process.env.NODE_ENV === 'production',
       auth: {
         user: process.env.MAILTRAP_USER,
         pass: process.env.MAILTRAP_PASS,

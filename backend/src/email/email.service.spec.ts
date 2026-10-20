@@ -25,6 +25,48 @@ describe('EmailService', () => {
     logError.mockRestore();
   });
 
+  describe('transport', () => {
+    const initialEnv = {
+      NODE_ENV: process.env.NODE_ENV,
+      MAILTRAP_PORT: process.env.MAILTRAP_PORT,
+    };
+
+    afterEach(() => {
+      for (const [key, value] of Object.entries(initialEnv)) {
+        if (value === undefined) {
+          delete process.env[key];
+        } else {
+          process.env[key] = value;
+        }
+      }
+    });
+
+    it('upgrades with STARTTLS and requires it in production on port 2525', () => {
+      process.env.NODE_ENV = 'production';
+      process.env.MAILTRAP_PORT = '2525';
+
+      service = new EmailService();
+
+      expect(nodemailer.createTransport).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          port: 2525,
+          secure: false,
+          requireTLS: true,
+        }),
+      );
+    });
+
+    it('uses TLS from the start on port 465', () => {
+      process.env.MAILTRAP_PORT = '465';
+
+      service = new EmailService();
+
+      expect(nodemailer.createTransport).toHaveBeenLastCalledWith(
+        expect.objectContaining({ port: 465, secure: true }),
+      );
+    });
+  });
+
   it('sends the export confirmation to the user', async () => {
     sendMail.mockResolvedValue({});
 
