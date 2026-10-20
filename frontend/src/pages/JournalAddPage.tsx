@@ -3,13 +3,13 @@ import { Navigate, useParams, useSearchParams } from 'react-router';
 
 import DailyMealPicker from '../components/home/DailyMealPicker';
 import { useToast } from '../components/ui/toast-context';
-import { PATHS } from '../routes';
 import {
   journalPath,
   mealTypeFromSlug,
   parseDateParam,
 } from '../routing/journal';
 import { useGoBack } from '../routing/navigation';
+import { PATHS } from '../routing/paths';
 
 export default function JournalAddPage() {
   const { mealType: slug } = useParams();

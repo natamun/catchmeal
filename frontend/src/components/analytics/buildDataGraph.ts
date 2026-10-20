@@ -1,9 +1,4 @@
-import type {
-  DashboardDay,
-  DataGraph,
-  Grain,
-  NumericKey,
-} from '../types/dashboard-analytics';
+import type { DashboardDay, DataGraph, Grain, NumericKey } from './types';
 
 const STEP: Record<Grain, number> = { day: 1, week: 7, biWeek: 14 };
 

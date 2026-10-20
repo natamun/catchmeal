@@ -1,12 +1,12 @@
 import { useState } from 'react';
 
 import type { AuthUser } from '../../auth/api';
-import { calculateBMR, calculateTDEE } from '../../utils/bmr';
 import { formatKg } from '../../utils/format';
 import { SelectDropdown } from '../ui/SelectDropdown';
 import Skeleton from '../ui/Skeleton';
 import StatTile from '../ui/StatTile';
 import SummaryCard from '../ui/SummaryCard';
+import { calculateBMR, calculateTDEE } from './bmr';
 import { formatMeasure } from './measures';
 
 const DURATION_OPTIONS = [

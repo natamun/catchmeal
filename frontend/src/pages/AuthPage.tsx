@@ -13,8 +13,8 @@ import { FieldError } from '../components/ui/FieldError';
 import { LABEL_CLASS } from '../components/ui/fieldStyle';
 import { Input } from '../components/ui/Input';
 import { useFormValidation } from '../hooks/useFormValidation';
-import { PATHS } from '../routes';
 import { navigationState } from '../routing/navigation';
+import { PATHS } from '../routing/paths';
 import { requestErrorMessage } from '../utils/requestErrorMessage';
 import {
   isValidEmail,

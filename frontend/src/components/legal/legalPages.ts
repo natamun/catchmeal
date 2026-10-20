@@ -1,4 +1,4 @@
-import { PATHS } from '../../routes';
+import { PATHS } from '../../routing/paths';
 
 export const LEGAL_PAGES = [
   {

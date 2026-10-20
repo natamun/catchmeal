@@ -3,11 +3,11 @@ import { ArrowUp, Bot, LoaderCircle, X } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 
 import { useCurrentUser } from '../../auth/auth-context';
-import type { ChatMessage, ResponseMistral } from '../../types/ChatBotType';
-import { JSON_HEADERS, request } from '../../utils/request';
 import { requestErrorMessage } from '../../utils/requestErrorMessage';
 import type { Tab } from '../layout/Nav';
+import { askAssistant } from './api';
 import DisclamerPopup from './DisclamerPopup';
+import type { ChatMessage } from './types';
 
 interface ChatBotPopupProps {
   isOpen: boolean;
@@ -32,7 +32,6 @@ export default function ChatBotPopup({
   const [disclamer, setDisclamer] = useState<boolean>(false);
   const [sendError, setSendError] = useState<string | null>(null);
   const { userId } = useCurrentUser();
-  const API_URL = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -66,16 +65,7 @@ export default function ChatBotPopup({
       textareaRef.current.style.height = 'auto';
     }
     try {
-      const data = await request<ResponseMistral>(
-        `${API_URL}/users/${userId}/chat`,
-        {
-          method: 'POST',
-          headers: JSON_HEADERS,
-          body: JSON.stringify({
-            message: addMessage.content,
-          }),
-        },
-      );
+      const data = await askAssistant(userId, addMessage.content);
       if (data) {
         const addResponse: ChatMessage = {
           role: 'assistant',

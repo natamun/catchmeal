@@ -1,7 +1,7 @@
 import { Link } from 'react-router';
 
 import { Brand } from '../components/ui/Brand';
-import { PATHS } from '../routes';
+import { PATHS } from '../routing/paths';
 
 export default function NotFoundPage() {
   return (

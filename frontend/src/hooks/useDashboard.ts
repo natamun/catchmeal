@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 
 import { useCurrentUser } from '../auth/auth-context';
 import { getDashboard } from '../components/analytics/api';
-import type { DashboardDay } from '../types/dashboard-analytics';
+import type { DashboardDay } from '../components/analytics/types';
 
 const NO_DAYS: DashboardDay[] = [];
 

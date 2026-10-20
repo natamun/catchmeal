@@ -3,7 +3,7 @@ import { Menu, X, type LucideIcon } from 'lucide-react';
 import { Link, NavLink } from 'react-router';
 
 import { useDelayedUnmount } from '../../hooks/useDelayedUnmount';
-import { PATHS } from '../../routes';
+import { PATHS } from '../../routing/paths';
 import { Brand } from '../ui/Brand';
 
 type Target = { to: string } | { onClick: () => void };

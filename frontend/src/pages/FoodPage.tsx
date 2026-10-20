@@ -14,6 +14,7 @@ import { EditIconButton } from '../components/ui/EditIconButton';
 import { PillTabs } from '../components/ui/PillTabs';
 import { MACROS } from '../constants/macros';
 import { useDelayedUnmount } from '../hooks/useDelayedUnmount';
+import { useSupportsHover } from '../hooks/useSupportsHover';
 import { ApiError } from '../utils/request';
 
 type Tab = 'food' | 'meal';
@@ -22,21 +23,6 @@ const TAB_OPTIONS: { value: Tab; label: string }[] = [
   { value: 'food', label: 'Aliments' },
   { value: 'meal', label: 'Repas' },
 ];
-
-function useSupportsHover() {
-  const [supportsHover, setSupportsHover] = useState(
-    () => window.matchMedia('(hover: hover)').matches,
-  );
-
-  useEffect(() => {
-    const query = window.matchMedia('(hover: hover)');
-    const handleChange = () => setSupportsHover(query.matches);
-    query.addEventListener('change', handleChange);
-    return () => query.removeEventListener('change', handleChange);
-  }, []);
-
-  return supportsHover;
-}
 
 function LegendBubble({ show }: { show: boolean }) {
   const displayed = useDelayedUnmount(show, 100);

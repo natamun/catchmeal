@@ -15,14 +15,8 @@ import {
   type TooltipContentProps,
 } from 'recharts';
 
-import type {
-  DashboardDay,
-  DataGraph,
-  Grain,
-  KcalPoint,
-} from '../../types/dashboard-analytics';
-import buildDataGraph from '../../utils/buildDataGraph';
 import SummaryCard from '../ui/SummaryCard';
+import buildDataGraph from './buildDataGraph';
 import ChartSkeleton from './ChartSkeleton';
 import {
   AXIS_WIDTH,
@@ -35,6 +29,7 @@ import {
 import { legendLabel } from './legendLabel';
 import { MACRO_SERIES, UNSPLIT_SERIES } from './macroSeries';
 import MacroTooltip from './MacroTooltip';
+import type { DashboardDay, DataGraph, Grain, KcalPoint } from './types';
 
 const GRAIN_CAPTION: Record<Grain, string> = {
   day: 'Par jour',

@@ -2,8 +2,8 @@ import type { ReactNode } from 'react';
 import { Navigate, useLocation } from 'react-router';
 
 import { useAuth } from '../auth/auth-context';
-import { PATHS } from '../routes';
 import { navigationState, type NavigationState } from './navigation';
+import { PATHS } from './paths';
 
 interface GuardProps {
   children: ReactNode;

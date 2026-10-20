@@ -3,7 +3,7 @@ import { generatePath } from 'react-router';
 
 import { toApiDate } from '../components/meal/api';
 import type { MealType } from '../components/meal/types';
-import { PATHS } from '../routes';
+import { PATHS } from './paths';
 
 const MEAL_TYPE_SLUGS: Record<MealType, string> = {
   BREAKFAST: 'breakfast',

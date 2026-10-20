@@ -1,5 +1,5 @@
-import type { DashboardDay } from '../../types/dashboard-analytics';
 import { request } from '../../utils/request';
+import type { DashboardDay } from './types';
 
 const BASE_URL: string = import.meta.env.VITE_API_URL;
 

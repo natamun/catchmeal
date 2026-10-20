@@ -1,8 +1,8 @@
 import type { ReactNode } from 'react';
 import { ArrowLeft } from 'lucide-react';
 
-import { PATHS } from '../../routes';
 import { useGoBack } from '../../routing/navigation';
+import { PATHS } from '../../routing/paths';
 import PublicFooter from '../layout/PublicFooter';
 import PublicHeader from '../layout/PublicHeader';
 import { LEGAL_PAGES } from './legalPages';

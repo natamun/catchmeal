@@ -12,7 +12,6 @@ import {
   type TooltipContentProps,
 } from 'recharts';
 
-import type { DashboardDay } from '../../types/dashboard-analytics';
 import { formatWeekday } from '../../utils/format';
 import type { DateRange } from '../ui/CalendarButton';
 import { SelectDropdown } from '../ui/SelectDropdown';
@@ -28,6 +27,7 @@ import {
   Y_TICK,
 } from './chartStyle';
 import ChartTooltip from './ChartTooltip';
+import type { DashboardDay } from './types';
 
 const TITLE = 'Évolution';
 const SELECT_ID = 'stats-measure';

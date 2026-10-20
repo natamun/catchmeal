@@ -8,13 +8,13 @@ import {
   removeFriendship,
 } from '../components/friends/api';
 import FriendRow from '../components/friends/FriendRow';
+import FriendsActivity from '../components/friends/FriendsActivity';
 import RequestRow from '../components/friends/RequestRow';
 import type {
   ActivityItem,
   Friend,
   UserSummary,
 } from '../components/friends/types';
-import FriendsActivity from '../components/home/FriendsActivity';
 import ChatWindow from '../components/messages/ChatWindow';
 import { AddCircleButton } from '../components/ui/AddCircleButton';
 import { ConfirmDialog } from '../components/ui/ConfirmDialog';

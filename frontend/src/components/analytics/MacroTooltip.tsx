@@ -1,8 +1,8 @@
 import type { TooltipContentProps } from 'recharts';
 
-import type { KcalPoint } from '../../types/dashboard-analytics';
 import { TooltipFrame, TooltipRow } from './ChartTooltip';
 import { MACRO_SERIES } from './macroSeries';
+import type { KcalPoint } from './types';
 
 interface Props extends TooltipContentProps {
   averaged: boolean;

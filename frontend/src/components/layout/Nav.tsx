@@ -13,7 +13,7 @@ import {
 import { NavLink, useMatch } from 'react-router';
 
 import { useAuth, useCurrentUser } from '../../auth/auth-context';
-import { PATHS } from '../../routes';
+import { PATHS } from '../../routing/paths';
 import { Avatar } from '../ui/Avatar';
 import { Brand } from '../ui/Brand';
 import { DropdownPanel } from '../ui/DropdownPanel';

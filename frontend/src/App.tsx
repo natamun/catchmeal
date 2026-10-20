@@ -20,10 +20,10 @@ import NotFoundPage from './pages/NotFoundPage';
 import OAuthOnboardingPage from './pages/OAuthOnboardingPage';
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 import TermsOfServicePage from './pages/TermsOfServicePage';
-import { PATHS } from './routes';
 import { RequireAdmin, RequireAuth, RequireGuest } from './routing/guards';
 import type { NavigationState } from './routing/navigation';
 import { PageTitle } from './routing/PageTitle';
+import { PATHS } from './routing/paths';
 import { ScrollToTop } from './routing/ScrollToTop';
 import { SocketProvider } from './socket/SocketProvider';
 

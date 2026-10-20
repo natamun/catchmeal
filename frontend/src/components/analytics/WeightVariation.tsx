@@ -1,9 +1,9 @@
 import { Minus, TrendingDown, TrendingUp } from 'lucide-react';
 
-import type { DashboardDay } from '../../types/dashboard-analytics';
 import { formatKg } from '../../utils/format';
 import Skeleton from '../ui/Skeleton';
 import SummaryCard from '../ui/SummaryCard';
+import type { DashboardDay } from './types';
 
 interface Props {
   days: DashboardDay[];

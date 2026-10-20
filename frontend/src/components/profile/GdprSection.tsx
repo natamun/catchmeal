@@ -3,7 +3,7 @@ import { AlertCircle, ChevronRight, LoaderCircle } from 'lucide-react';
 import { Link } from 'react-router';
 
 import { useAuth, useCurrentUser } from '../../auth/auth-context';
-import { PATHS } from '../../routes';
+import { PATHS } from '../../routing/paths';
 import { BaseDialog } from '../ui/BaseDialog';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
 import { LoadError } from '../ui/LoadError';

@@ -1,4 +1,4 @@
-import type { ActivityItem } from '../components/friends/types';
+import type { ActivityItem } from './types';
 
 export function latestActivityPerFriend(
   activities: ActivityItem[],

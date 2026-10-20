@@ -3,8 +3,8 @@ import { matchPath, useLocation } from 'react-router';
 
 import { LEGAL_PAGES } from '../components/legal/legalPages';
 import { MEAL_TYPE_LABELS } from '../components/meal/types';
-import { PATHS } from '../routes';
 import { mealTypeFromSlug } from './journal';
+import { PATHS } from './paths';
 
 const APP_NAME = 'CatCHMeal';
 

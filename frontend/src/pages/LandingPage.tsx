@@ -19,7 +19,7 @@ import PhoneMockup from '../components/landing/PhoneMockup';
 import PublicFooter from '../components/layout/PublicFooter';
 import PublicHeader from '../components/layout/PublicHeader';
 import { OpenFoodFactsLink } from '../components/ui/OpenFoodFactsLink';
-import { PATHS } from '../routes';
+import { PATHS } from '../routing/paths';
 
 const NAV_LINKS = [
   { label: 'Avantages', id: 'avantages' },

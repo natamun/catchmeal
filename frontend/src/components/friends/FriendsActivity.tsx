@@ -1,9 +1,9 @@
 import { MessageCircle } from 'lucide-react';
 
 import { formatRelativeTime } from '../../utils/formatRelativeTime';
-import type { ActivityItem, FriendPresence } from '../friends/types';
 import { Avatar } from '../ui/Avatar';
 import { ListCard } from '../ui/ListCard';
+import type { ActivityItem, FriendPresence } from './types';
 
 interface FriendsActivityProps {
   activities: ActivityItem[];

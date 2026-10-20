@@ -3,10 +3,11 @@ import { Zap } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router';
 
 import { useCurrentUser } from '../auth/auth-context';
+import FriendsActivity from '../components/friends/FriendsActivity';
+import { latestActivityPerFriend } from '../components/friends/latestActivityPerFriend';
 import CalorieSummary from '../components/home/CalorieSummary';
 import DailyMealForm from '../components/home/DailyMealForm';
 import DailyMealList from '../components/home/DailyMealList';
-import FriendsActivity from '../components/home/FriendsActivity';
 import MacroBreakdown from '../components/home/MacroBreakdown';
 import QuickAddDialog from '../components/home/QuickAddDialog';
 import WeightWidget from '../components/home/WeightWidget';
@@ -18,14 +19,13 @@ import { useToast } from '../components/ui/toast-context';
 import { useActivityFeed } from '../hooks/useActivityFeed';
 import { useDailyMeals } from '../hooks/useDailyMeals';
 import { usePresence } from '../hooks/usePresence';
-import { PATHS } from '../routes';
 import {
   journalAddPath,
   journalPath,
   parseDateParam,
 } from '../routing/journal';
 import type { NavigationState } from '../routing/navigation';
-import { latestActivityPerFriend } from '../utils/latestActivityPerFriend';
+import { PATHS } from '../routing/paths';
 
 interface SectionEdit {
   mealType: MealType;

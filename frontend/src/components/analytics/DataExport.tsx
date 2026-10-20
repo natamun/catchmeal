@@ -1,11 +1,11 @@
 import { isSameDay } from 'date-fns';
 import { Download } from 'lucide-react';
 
-import type { DashboardDay } from '../../types/dashboard-analytics';
 import { formatDayMonth } from '../../utils/format';
 import { toApiDate } from '../meal/api';
 import type { DateRange } from '../ui/CalendarButton';
 import SummaryCard from '../ui/SummaryCard';
+import type { DashboardDay } from './types';
 
 function downloadJson(data: unknown, filename: string) {
   const blob = new Blob([JSON.stringify(data, null, 2)], {

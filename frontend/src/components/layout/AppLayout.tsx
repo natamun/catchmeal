@@ -2,9 +2,9 @@ import { Suspense, useState } from 'react';
 import { Outlet, useLocation, useMatch } from 'react-router';
 
 import { useCurrentUser } from '../../auth/auth-context';
-import { PATHS } from '../../routes';
-import type { ChatMessage } from '../../types/ChatBotType';
+import { PATHS } from '../../routing/paths';
 import ChatBotPopup from '../ai/ChatBotPopup';
+import type { ChatMessage } from '../ai/types';
 import { ToastProvider } from '../ui/ToastProvider';
 import { ConnectionBanner } from './ConnectionBanner';
 import Nav, { type Tab } from './Nav';
