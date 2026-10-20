@@ -8,7 +8,7 @@ import { Brand } from '../components/ui/Brand';
 import { FieldError } from '../components/ui/FieldError';
 import { LABEL_CLASS } from '../components/ui/fieldStyle';
 import { Input } from '../components/ui/Input';
-import { useTimeout } from '../hooks/useTimeout';
+import { useFormValidation } from '../hooks/useFormValidation';
 import { requestErrorMessage } from '../utils/requestErrorMessage';
 import {
   isValidEmail,
@@ -68,56 +68,30 @@ export default function OAuthOnboardingPage({
   onBack,
 }: Props) {
   const { updateUser } = useAuth();
-  const [form, setForm] = useState<FormState>({
-    username: prefill.username,
-    name: prefill.name,
-    email: prefill.email,
-  });
-  const [touched, setTouched] = useState<
-    Partial<Record<keyof FormState, boolean>>
-  >({});
-  const [focusedField, setFocusedField] = useState<keyof FormState | null>(
-    null,
+  const {
+    form,
+    handleFocus,
+    handleBlur,
+    handleChange,
+    isInvalid,
+    errorMessage,
+    attemptSubmit,
+  } = useFormValidation<FormState>(
+    {
+      username: prefill.username,
+      name: prefill.name,
+      email: prefill.email,
+    },
+    validate,
   );
-  const [submitAttempted, setSubmitAttempted] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const errors = validate(form);
-
-  useTimeout(() => setSubmitAttempted(false), submitAttempted ? 5000 : null);
-
-  const handleFocus = (field: keyof FormState) => setFocusedField(field);
-
-  const handleBlur = (field: keyof FormState) => {
-    setTouched((prev) => ({ ...prev, [field]: true }));
-    setFocusedField((current) => (current === field ? null : current));
-  };
-
-  const handleChange = (field: keyof FormState, value: string) => {
-    setForm((prev) => ({ ...prev, [field]: value }));
-    setTouched((prev) => ({ ...prev, [field]: true }));
-  };
-
-  const isInvalid = (field: keyof FormState) =>
-    Boolean(touched[field] && errors[field]);
-
-  const errorMessage = (field: keyof FormState) =>
-    touched[field] && (focusedField === field || submitAttempted)
-      ? errors[field]
-      : undefined;
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setError(null);
 
-    const allTouched = Object.fromEntries(
-      Object.keys(form).map((key) => [key, true]),
-    ) as Record<keyof FormState, boolean>;
-    setTouched(allTouched);
-
-    if (Object.keys(errors).length > 0) {
-      setSubmitAttempted(true);
+    if (!attemptSubmit()) {
       return;
     }
 

@@ -1,7 +1,7 @@
 import { useId, useRef, useState, type RefObject } from 'react';
 import { Trash2 } from 'lucide-react';
 
-import { useTimeout } from '../../hooks/useTimeout';
+import { useFormValidation } from '../../hooks/useFormValidation';
 import {
   hasTooManyDecimals,
   parseDecimal,
@@ -65,43 +65,24 @@ function WeightForm({
   hasDeleteFailed,
 }: WeightFormProps & { hasDeleteFailed: boolean }) {
   const formId = useId();
-  const [form, setForm] = useState(() => toForm(entry));
-  const [touched, setTouched] = useState<Partial<Record<MeasureKey, boolean>>>(
-    {},
-  );
-  const [focusedField, setFocusedField] = useState<MeasureKey | null>(null);
-  const [submitAttempted, setSubmitAttempted] = useState(false);
+  const {
+    form,
+    handleFocus,
+    handleBlur,
+    handleChange,
+    isInvalid,
+    errorMessage,
+    attemptSubmit,
+  } = useFormValidation(() => toForm(entry), validate);
   const [hasFailed, setHasFailed] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  useTimeout(() => setSubmitAttempted(false), submitAttempted ? 5000 : null);
-
-  const errors = validate(form);
-
-  const handleChange = (field: MeasureKey, value: string) => {
-    setForm((prev) => ({ ...prev, [field]: value }));
-    setTouched((prev) => ({ ...prev, [field]: true }));
-  };
-
-  const handleBlur = (field: MeasureKey) => {
-    setTouched((prev) => ({ ...prev, [field]: true }));
-    setFocusedField((current) => (current === field ? null : current));
-  };
-
-  const errorMessage = (field: MeasureKey) =>
-    touched[field] && (focusedField === field || submitAttempted)
-      ? errors[field]
-      : undefined;
 
   const handleSubmit = async (event: React.SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
     setHasFailed(false);
-    setTouched(Object.fromEntries(MEASURES.map(({ key }) => [key, true])));
-
     const weight = parseDecimal(form.weight);
 
-    if (weight === null || Object.keys(errors).length > 0) {
-      setSubmitAttempted(true);
+    if (!attemptSubmit() || weight === null) {
       return;
     }
 
@@ -136,9 +117,9 @@ function WeightForm({
         placeholder={`Ex : ${example}`}
         value={form[field]}
         onChange={(e) => handleChange(field, e.target.value)}
-        onFocus={() => setFocusedField(field)}
+        onFocus={() => handleFocus(field)}
         onBlur={() => handleBlur(field)}
-        aria-invalid={Boolean(touched[field] && errors[field])}
+        aria-invalid={isInvalid(field)}
         aria-describedby={`${formId}-${field}-error`}
       />
       <FieldError

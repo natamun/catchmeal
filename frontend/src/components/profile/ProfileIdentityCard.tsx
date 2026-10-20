@@ -2,7 +2,7 @@ import { useRef, useState } from 'react';
 import { Trash2 } from 'lucide-react';
 
 import type { AuthUser } from '../../auth/api';
-import { useTimeout } from '../../hooks/useTimeout';
+import { useFormValidation } from '../../hooks/useFormValidation';
 import {
   hasTooManyDecimals,
   parseDecimal,
@@ -124,39 +124,23 @@ export function ProfileIdentityCard({ user, onUpdate }: Props) {
     activityLevel: user.activityLevel ?? '',
   });
 
-  const [form, setForm] = useState<FormState>(initForm);
-  const [touched, setTouched] = useState<Partial<Record<Field, boolean>>>({});
-  const [focusedField, setFocusedField] = useState<Field | null>(null);
-  const [submitAttempted, setSubmitAttempted] = useState(false);
+  const {
+    form,
+    setForm,
+    handleFocus,
+    handleBlur,
+    handleChange,
+    isInvalid,
+    errorMessage,
+    attemptSubmit,
+    resetValidation,
+  } = useFormValidation<FormState>(initForm, validate);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
 
-  useTimeout(() => setSubmitAttempted(false), submitAttempted ? 5000 : null);
-
-  const errors = validate(form);
-
-  const handleChange = (field: Field, value: string) => {
-    setForm((prev) => ({ ...prev, [field]: value }));
-    setTouched((prev) => ({ ...prev, [field]: true }));
-  };
-
-  const handleBlur = (field: Field) => {
-    setTouched((prev) => ({ ...prev, [field]: true }));
-    setFocusedField((cur) => (cur === field ? null : cur));
-  };
-
-  const isInvalid = (field: Field) => Boolean(touched[field] && errors[field]);
-
-  const errorMessage = (field: Field) =>
-    touched[field] && (focusedField === field || submitAttempted)
-      ? errors[field]
-      : undefined;
-
   function handleEdit() {
     setForm(initForm());
-    setTouched({});
-    setFocusedField(null);
-    setSubmitAttempted(false);
+    resetValidation();
     setSaveError(null);
     setAvatarError(null);
     setDialogNode(dialogRef.current);
@@ -193,23 +177,7 @@ export function ProfileIdentityCard({ user, onUpdate }: Props) {
   }
 
   async function handleSave() {
-    const allTouched = Object.fromEntries(
-      (
-        [
-          'username',
-          'height',
-          'targetWeight',
-          'dailyCalorieGoal',
-          'dailyProteinGoal',
-          'dailyCarbsGoal',
-          'dailyFatGoal',
-        ] as Field[]
-      ).map((f) => [f, true]),
-    );
-    setTouched(allTouched);
-
-    if (Object.keys(errors).length > 0) {
-      setSubmitAttempted(true);
+    if (!attemptSubmit()) {
       return;
     }
 
@@ -363,7 +331,7 @@ export function ProfileIdentityCard({ user, onUpdate }: Props) {
               placeholder="Ex : jdupont"
               value={form.username}
               onChange={(e) => handleChange('username', e.target.value)}
-              onFocus={() => setFocusedField('username')}
+              onFocus={() => handleFocus('username')}
               onBlur={() => handleBlur('username')}
               aria-invalid={isInvalid('username')}
             />
@@ -500,7 +468,7 @@ export function ProfileIdentityCard({ user, onUpdate }: Props) {
                 placeholder={`Ex : ${example}`}
                 value={form[field]}
                 onChange={(e) => handleChange(field, e.target.value)}
-                onFocus={() => setFocusedField(field)}
+                onFocus={() => handleFocus(field)}
                 onBlur={() => handleBlur(field)}
                 aria-invalid={isInvalid(field)}
               />

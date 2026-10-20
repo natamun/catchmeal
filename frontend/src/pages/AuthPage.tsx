@@ -12,7 +12,7 @@ import { Brand } from '../components/ui/Brand';
 import { FieldError } from '../components/ui/FieldError';
 import { LABEL_CLASS } from '../components/ui/fieldStyle';
 import { Input } from '../components/ui/Input';
-import { useTimeout } from '../hooks/useTimeout';
+import { useFormValidation } from '../hooks/useFormValidation';
 import { PATHS } from '../routes';
 import { navigationState } from '../routing/navigation';
 import { requestErrorMessage } from '../utils/requestErrorMessage';
@@ -92,50 +92,27 @@ export default function AuthPage() {
   const mode: Mode = useMatch(PATHS.register) ? 'register' : 'login';
   const oauthError =
     navigationState(location).oauthFailed === true ? OAUTH_ERROR_MESSAGE : null;
-  const [form, setForm] = useState<AuthFormState>(EMPTY_FORM);
-  const [touched, setTouched] = useState<
-    Partial<Record<keyof AuthFormState, boolean>>
-  >({});
-  const [focusedField, setFocusedField] = useState<keyof AuthFormState | null>(
-    null,
-  );
-  const [submitAttempted, setSubmitAttempted] = useState(false);
+  const {
+    form,
+    handleFocus,
+    handleBlur,
+    handleChange,
+    isInvalid,
+    errorMessage,
+    attemptSubmit,
+    resetValidation,
+  } = useFormValidation(EMPTY_FORM, (values) => validateAuthForm(mode, values));
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const conditionsDialogRef = useRef<HTMLDialogElement>(null);
   const confidentialiteDialogRef = useRef<HTMLDialogElement>(null);
-
-  const errors = validateAuthForm(mode, form);
-
-  useTimeout(() => setSubmitAttempted(false), submitAttempted ? 5000 : null);
-
-  const handleFocus = (field: keyof AuthFormState) => setFocusedField(field);
-
-  const handleBlur = (field: keyof AuthFormState) => {
-    setTouched((prev) => ({ ...prev, [field]: true }));
-    setFocusedField((current) => (current === field ? null : current));
-  };
-
-  const handleChange = (field: keyof AuthFormState, value: string) => {
-    setForm((prev) => ({ ...prev, [field]: value }));
-    setTouched((prev) => ({ ...prev, [field]: true }));
-  };
-
-  const isInvalid = (field: keyof AuthFormState) =>
-    Boolean(touched[field] && errors[field]);
-
-  const errorMessage = (field: keyof AuthFormState) =>
-    touched[field] && (focusedField === field || submitAttempted)
-      ? errors[field]
-      : undefined;
 
   const switchMode = (nextMode: Mode) => {
     void navigate(nextMode === 'login' ? PATHS.login : PATHS.register, {
       replace: true,
       state: navigationState(location),
     });
-    setTouched({});
-    setSubmitAttempted(false);
+    resetValidation();
     setError(null);
   };
 
@@ -143,13 +120,7 @@ export default function AuthPage() {
     event.preventDefault();
     setError(null);
 
-    const allTouched = Object.fromEntries(
-      Object.keys(form).map((key) => [key, true]),
-    ) as Record<keyof AuthFormState, boolean>;
-    setTouched(allTouched);
-
-    if (Object.keys(errors).length > 0) {
-      setSubmitAttempted(true);
+    if (!attemptSubmit()) {
       return;
     }
 

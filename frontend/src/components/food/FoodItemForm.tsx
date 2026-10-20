@@ -2,7 +2,7 @@ import { useRef, useState, type RefObject } from 'react';
 import { Trash2 } from 'lucide-react';
 
 import { useCurrentUser } from '../../auth/auth-context';
-import { useTimeout } from '../../hooks/useTimeout';
+import { useFormValidation } from '../../hooks/useFormValidation';
 import {
   hasTooManyDecimals,
   parseDecimal,
@@ -141,15 +141,20 @@ export default function FoodItemForm({
   onItemDeleted,
 }: FoodItemFormProps) {
   const { userId } = useCurrentUser();
-  const [form, setForm] = useState<FoodItemFormState>(EMPTY_FORM);
-  const [touched, setTouched] = useState<
-    Partial<Record<keyof FoodItemFormState, boolean>>
-  >({});
+  const {
+    form,
+    setForm,
+    errors,
+    submitAttempted,
+    handleFocus,
+    handleBlur,
+    handleChange,
+    isInvalid,
+    errorMessage,
+    attemptSubmit,
+    resetValidation,
+  } = useFormValidation(EMPTY_FORM, validateForm);
   const [error, setError] = useState<string | null>(null);
-  const [focusedField, setFocusedField] = useState<
-    keyof FoodItemFormState | null
-  >(null);
-  const [submitAttempted, setSubmitAttempted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const showToast = useToast();
   const [barcodeFieldKey, setBarcodeFieldKey] = useState(0);
@@ -162,16 +167,13 @@ export default function FoodItemForm({
   if ((editingItem?.id ?? null) !== syncedItemId) {
     setSyncedItemId(editingItem?.id ?? null);
     setForm(editingItem ? itemToForm(editingItem) : EMPTY_FORM);
-    setTouched({});
+    resetValidation();
     setError(null);
-    setSubmitAttempted(false);
   }
 
   const closeDialog = () => {
     dialogRef.current?.close();
   };
-
-  const errors = validateForm(form);
 
   const barcode = form.barcode.trim();
   const duplicates =
@@ -184,34 +186,9 @@ export default function FoodItemForm({
             significantDigits(item.barcode) === significantDigits(barcode),
         );
 
-  useTimeout(() => setSubmitAttempted(false), submitAttempted ? 5000 : null);
-
-  const handleFocus = (field: keyof FoodItemFormState) => {
-    setFocusedField(field);
-  };
-
-  const handleBlur = (field: keyof FoodItemFormState) => {
-    setTouched((prev) => ({ ...prev, [field]: true }));
-    setFocusedField((current) => (current === field ? null : current));
-  };
-
-  const handleChange = (field: keyof FoodItemFormState, value: string) => {
-    setForm((prev) => ({ ...prev, [field]: value }));
-    setTouched((prev) => ({ ...prev, [field]: true }));
-  };
-
-  const isInvalid = (field: keyof FoodItemFormState) =>
-    Boolean(touched[field] && errors[field]);
-
-  const errorMessage = (field: keyof FoodItemFormState) =>
-    touched[field] && (focusedField === field || submitAttempted)
-      ? errors[field]
-      : undefined;
-
   const handleProduct = (product: OffProduct) => {
     setForm(productToForm(product));
-    setTouched({});
-    setSubmitAttempted(false);
+    resetValidation();
     setError(null);
   };
 
@@ -219,13 +196,7 @@ export default function FoodItemForm({
     event.preventDefault();
     setError(null);
 
-    const allTouched = Object.fromEntries(
-      Object.keys(form).map((key) => [key, true]),
-    ) as Record<keyof FoodItemFormState, boolean>;
-    setTouched(allTouched);
-
-    if (Object.keys(errors).length > 0) {
-      setSubmitAttempted(true);
+    if (!attemptSubmit()) {
       return;
     }
     if (duplicates.length > 0) {
@@ -261,8 +232,7 @@ export default function FoodItemForm({
         setForm(EMPTY_FORM);
         setBarcodeFieldKey((key) => key + 1);
       }
-      setTouched({});
-      setSubmitAttempted(false);
+      resetValidation();
       closeDialog();
       showToast(
         editingItem

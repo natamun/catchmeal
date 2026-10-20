@@ -3,6 +3,7 @@ import * as Popover from '@radix-ui/react-popover';
 import { Trash2 } from 'lucide-react';
 
 import { useCurrentUser } from '../../auth/auth-context';
+import { useFormValidation } from '../../hooks/useFormValidation';
 import { useTimeout } from '../../hooks/useTimeout';
 import { parseDecimal } from '../../utils/decimals';
 import { requestErrorMessage } from '../../utils/requestErrorMessage';
@@ -27,7 +28,6 @@ import {
   EMPTY_QUICK_ADD_FORM,
   QUICK_ADD_FIELDS,
   validateQuickAddForm,
-  type QuickAddField,
 } from './quickMealAdd';
 import type { Meal, MealInput } from './types';
 
@@ -57,13 +57,10 @@ export default function MealForm({
   const [searchFocused, setSearchFocused] = useState(false);
   const [dialogNode, setDialogNode] = useState<HTMLDialogElement | null>(null);
   const [quickAddOpen, setQuickAddOpen] = useState(false);
-  const [quickAddForm, setQuickAddForm] = useState(EMPTY_QUICK_ADD_FORM);
-  const [quickAddTouched, setQuickAddTouched] = useState<
-    Partial<Record<QuickAddField, boolean>>
-  >({});
-  const [quickAddFocusedField, setQuickAddFocusedField] =
-    useState<QuickAddField | null>(null);
-  const [quickAddSubmitAttempted, setQuickAddSubmitAttempted] = useState(false);
+  const quickAdd = useFormValidation(
+    EMPTY_QUICK_ADD_FORM,
+    validateQuickAddForm,
+  );
   const [error, setError] = useState<string | null>(null);
   const [submitAttempted, setSubmitAttempted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -82,10 +79,6 @@ export default function MealForm({
     setError(null);
   }
 
-  useTimeout(
-    () => setQuickAddSubmitAttempted(false),
-    quickAddSubmitAttempted ? 5000 : null,
-  );
   useTimeout(() => setSubmitAttempted(false), submitAttempted ? 5000 : null);
 
   const nameError = name.trim() === '' ? 'Nom requis' : undefined;
@@ -108,8 +101,6 @@ export default function MealForm({
   const isSearchOpen = searchFocused && searchResults.length > 0;
 
   const rawTotals = draftTotals(items);
-
-  const quickAddErrors = validateQuickAddForm(quickAddForm);
 
   const closeDialog = () => {
     dialogRef.current?.close();
@@ -142,37 +133,8 @@ export default function MealForm({
     );
   };
 
-  const handleQuickAddFocus = (field: QuickAddField) => {
-    setQuickAddFocusedField(field);
-  };
-
-  const handleQuickAddBlur = (field: QuickAddField) => {
-    setQuickAddTouched((prev) => ({ ...prev, [field]: true }));
-    setQuickAddFocusedField((current) => (current === field ? null : current));
-  };
-
-  const handleQuickAddChange = (field: QuickAddField, value: string) => {
-    setQuickAddForm((prev) => ({ ...prev, [field]: value }));
-    setQuickAddTouched((prev) => ({ ...prev, [field]: true }));
-  };
-
-  const isQuickAddInvalid = (field: QuickAddField) =>
-    Boolean(quickAddTouched[field] && quickAddErrors[field]);
-
-  const quickAddErrorMessage = (field: QuickAddField) =>
-    quickAddTouched[field] &&
-    (quickAddFocusedField === field || quickAddSubmitAttempted)
-      ? quickAddErrors[field]
-      : undefined;
-
   const addQuickItem = () => {
-    const allTouched = Object.fromEntries(
-      QUICK_ADD_FIELDS.map(({ field }) => [field, true]),
-    ) as Record<QuickAddField, boolean>;
-    setQuickAddTouched(allTouched);
-
-    if (Object.keys(quickAddErrors).length > 0) {
-      setQuickAddSubmitAttempted(true);
+    if (!quickAdd.attemptSubmit()) {
       return;
     }
 
@@ -182,15 +144,14 @@ export default function MealForm({
         id: crypto.randomUUID(),
         kind: 'quick',
         quantity: 1,
-        kcal: parseDecimal(quickAddForm.kcal) ?? 0,
-        protein: parseDecimal(quickAddForm.protein) ?? 0,
-        carbs: parseDecimal(quickAddForm.carbs) ?? 0,
-        fat: parseDecimal(quickAddForm.fat) ?? 0,
+        kcal: parseDecimal(quickAdd.form.kcal) ?? 0,
+        protein: parseDecimal(quickAdd.form.protein) ?? 0,
+        carbs: parseDecimal(quickAdd.form.carbs) ?? 0,
+        fat: parseDecimal(quickAdd.form.fat) ?? 0,
       },
     ]);
-    setQuickAddForm(EMPTY_QUICK_ADD_FORM);
-    setQuickAddTouched({});
-    setQuickAddSubmitAttempted(false);
+    quickAdd.setForm(EMPTY_QUICK_ADD_FORM);
+    quickAdd.resetValidation();
     setQuickAddOpen(false);
   };
 
@@ -343,19 +304,19 @@ export default function MealForm({
                                 type="text"
                                 inputMode="decimal"
                                 placeholder="0"
-                                value={quickAddForm[field]}
+                                value={quickAdd.form[field]}
                                 onChange={(e) =>
-                                  handleQuickAddChange(field, e.target.value)
+                                  quickAdd.handleChange(field, e.target.value)
                                 }
-                                onFocus={() => handleQuickAddFocus(field)}
-                                onBlur={() => handleQuickAddBlur(field)}
-                                aria-invalid={isQuickAddInvalid(field)}
+                                onFocus={() => quickAdd.handleFocus(field)}
+                                onBlur={() => quickAdd.handleBlur(field)}
+                                aria-invalid={quickAdd.isInvalid(field)}
                                 aria-describedby={`quick-${field}-error`}
                                 autoComplete="off"
                               />
                               <FieldError
                                 id={`quick-${field}-error`}
-                                message={quickAddErrorMessage(field)}
+                                message={quickAdd.errorMessage(field)}
                               />
                             </div>
                           ))}
