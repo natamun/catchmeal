@@ -1,3 +1,5 @@
+import { UseGuards } from '@nestjs/common';
+import { SkipThrottle } from '@nestjs/throttler';
 import {
   ConnectedSocket,
   MessageBody,
@@ -10,10 +12,12 @@ import { validate } from 'class-validator';
 import { Server } from 'socket.io';
 
 import type { AuthenticatedSocket } from '../websocket/authenticated-socket';
+import { WsThrottlerGuard } from '../websocket/ws-throttler.guard';
 import { SendMessageDto } from './dto/send-message.dto';
 import { MessagesService } from './messages.service';
 
 @WebSocketGateway()
+@SkipThrottle()
 export class MessagesGateway {
   @WebSocketServer()
   server: Server;
@@ -24,6 +28,7 @@ export class MessagesGateway {
     void client.join(`user:${client.data.userId}`);
   }
 
+  @UseGuards(WsThrottlerGuard)
   @SubscribeMessage('message:send')
   async handleSend(
     @ConnectedSocket() client: AuthenticatedSocket,
