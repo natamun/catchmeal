@@ -1,34 +1,34 @@
 import { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router';
 
-import { useCurrentUser } from '../auth/auth-context.ts';
-import AddFriendDialog from '../components/friends/AddFriendDialog.tsx';
+import { useCurrentUser } from '../auth/auth-context';
+import AddFriendDialog from '../components/friends/AddFriendDialog';
 import {
   acceptFriendRequest,
   removeFriendship,
-} from '../components/friends/api.ts';
-import FriendRow from '../components/friends/FriendRow.tsx';
-import RequestRow from '../components/friends/RequestRow.tsx';
+} from '../components/friends/api';
+import FriendRow from '../components/friends/FriendRow';
+import RequestRow from '../components/friends/RequestRow';
 import type {
   ActivityItem,
   Friend,
   UserSummary,
-} from '../components/friends/types.ts';
-import FriendsActivity from '../components/home/FriendsActivity.tsx';
-import ChatWindow from '../components/messages/ChatWindow.tsx';
+} from '../components/friends/types';
+import FriendsActivity from '../components/home/FriendsActivity';
+import ChatWindow from '../components/messages/ChatWindow';
 import { AddCircleButton } from '../components/ui/AddCircleButton';
-import { ConfirmDialog } from '../components/ui/ConfirmDialog.tsx';
+import { ConfirmDialog } from '../components/ui/ConfirmDialog';
 import {
   ListCard,
   ListCardEmpty,
   ListCardLoading,
 } from '../components/ui/ListCard';
-import { LoadError } from '../components/ui/LoadError.tsx';
+import { LoadError } from '../components/ui/LoadError';
 import { useToast } from '../components/ui/toast-context';
-import { useActivityFeed } from '../hooks/useActivityFeed.ts';
-import { useFriends } from '../hooks/useFriends.ts';
-import { usePresence } from '../hooks/usePresence.ts';
-import { useUnreadMessages } from '../hooks/useUnreadMessages.ts';
+import { useActivityFeed } from '../hooks/useActivityFeed';
+import { useFriends } from '../hooks/useFriends';
+import { usePresence } from '../hooks/usePresence';
+import { useUnreadMessages } from '../hooks/useUnreadMessages';
 import { navigationState } from '../routing/navigation';
 import { requestErrorMessage } from '../utils/requestErrorMessage';
 
