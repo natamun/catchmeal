@@ -57,6 +57,23 @@ const BASE_STYLE = `
       font-size: 13px;
       color: #1b4332;
     }
+    .actions {
+      text-align: center;
+      margin: 24px 0;
+    }
+    .button {
+      display: inline-block;
+      background-color: #40916c;
+      color: #ffffff;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      text-decoration: none;
+    }
+    .link {
+      word-break: break-all;
+    }
     .footer {
       border-top: 1px solid #95d5b2;
       padding: 16px 32px;
@@ -182,6 +199,56 @@ La suppression de votre compte a bien été effectuée.
 Toutes vos données personnelles ont été anonymisées et ne sont plus accessibles sur ${APP_NAME}.
 
 Si vous n'êtes pas à l'origine de cette demande, contactez-nous immédiatement.
+
+— L'équipe ${APP_NAME}`,
+    });
+  }
+
+  async sendVerificationEmail(
+    userEmail: string,
+    verificationUrl: string,
+  ): Promise<void> {
+    return this.send({
+      from: this.fromAddress,
+      to: userEmail,
+      subject: 'Confirmez votre adresse e-mail',
+      html: `<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  ${BASE_STYLE}
+</head>
+<body>
+  <div class="card">
+    <div class="header">
+      <h1>Confirmez votre adresse</h1>
+      <p>${APP_NAME} — Inscription</p>
+    </div>
+    <div class="body">
+      <p>Bienvenue sur ${APP_NAME} ! Pour finaliser la création de votre compte, confirmez votre adresse e-mail.</p>
+      <div class="actions">
+        <a class="button" href="${verificationUrl}">Confirmer mon adresse</a>
+      </div>
+      <p class="link">Si le bouton ne fonctionne pas, copiez ce lien dans votre navigateur :<br />${verificationUrl}</p>
+      <div class="notice">
+        Ce lien est valable 24 heures. Si vous n'êtes pas à l'origine de cette inscription, ignorez simplement ce message.
+      </div>
+      <p>— L'équipe ${APP_NAME}</p>
+    </div>
+    <div class="footer">
+      Cet email a été envoyé automatiquement, merci de ne pas y répondre.
+    </div>
+  </div>
+</body>
+</html>`,
+      text: `Confirmez votre adresse
+
+Bienvenue sur ${APP_NAME} ! Pour finaliser la création de votre compte, confirmez votre adresse e-mail en ouvrant ce lien :
+
+${verificationUrl}
+
+Ce lien est valable 24 heures. Si vous n'êtes pas à l'origine de cette inscription, ignorez simplement ce message.
 
 — L'équipe ${APP_NAME}`,
     });
