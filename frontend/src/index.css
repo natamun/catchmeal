@@ -431,3 +431,11 @@ html:has(#landing-page) {
     scroll-behavior: auto !important;
   }
 }
+
+@supports (-webkit-touch-callout: none) {
+  input,
+  textarea,
+  select {
+    font-size: max(16px, 1em);
+  }
+}
