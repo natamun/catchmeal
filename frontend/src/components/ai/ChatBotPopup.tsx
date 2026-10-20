@@ -108,12 +108,12 @@ export default function ChatBotPopup({
   }
 
   return (
-    <div className="fixed right-6 bottom-6 z-20 pointer-coarse:bottom-[calc(var(--spacing-bottom-nav)+1rem+env(safe-area-inset-bottom))]">
+    <div className="fixed right-6 bottom-6 z-20 pointer-coarse:bottom-[calc(var(--spacing-bottom-nav)+1rem+env(safe-area-inset-bottom))] ios-typing:top-[calc(var(--visible-top)+1rem)] ios-typing:bottom-auto">
       {isOpen && (
         <div
           role="dialog"
           aria-label="Assistant CatCHMeal"
-          className="relative flex h-128 max-h-[calc(100dvh-var(--spacing-header)-4rem-env(safe-area-inset-bottom))] w-[min(24rem,calc(100vw-3rem))] animate-fade-in-up flex-col overflow-hidden rounded-2xl border border-green-200 bg-white shadow-lg pointer-coarse:max-h-[calc(100dvh-var(--spacing-bottom-nav)-4rem-env(safe-area-inset-bottom))]"
+          className="relative flex h-128 max-h-[calc(100dvh-var(--spacing-header)-4rem-env(safe-area-inset-bottom))] w-[min(24rem,calc(100vw-3rem))] animate-fade-in-up flex-col overflow-hidden rounded-2xl border border-green-200 bg-white shadow-lg pointer-coarse:max-h-[calc(100dvh-var(--spacing-bottom-nav)-4rem-env(safe-area-inset-bottom))] ios-typing:h-[calc(var(--visible-height)-2rem)] ios-typing:max-h-none"
         >
           {disclamer && (
             <div className="absolute inset-0 z-10 flex items-center bg-black/30 p-4 backdrop-blur-sm">
@@ -217,7 +217,7 @@ export default function ChatBotPopup({
           type="button"
           onClick={() => onToggle(true)}
           aria-label="Ouvrir l'assistant"
-          className="flex h-12 w-12 cursor-pointer items-center justify-center rounded-full bg-green-500 text-white shadow-lg ring-2 ring-white transition-colors hover:bg-green-600 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-green-400"
+          className="flex h-12 w-12 cursor-pointer items-center justify-center rounded-full bg-green-500 text-white shadow-lg ring-2 ring-white transition-colors hover:bg-green-600 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-green-400 ios-typing:hidden"
         >
           <Bot className="h-6 w-6" />
         </button>

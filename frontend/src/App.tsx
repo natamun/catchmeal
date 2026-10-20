@@ -12,6 +12,7 @@ import { useAuth } from './auth/auth-context';
 import { AuthProvider } from './auth/AuthProvider';
 import AppLayout from './components/layout/AppLayout';
 import { deleteMyAccount } from './components/profile/api';
+import { useIosVisibleViewport } from './hooks/useIosVisibleViewport';
 import AuthPage from './pages/AuthPage';
 import LandingPage from './pages/LandingPage';
 import LegalNoticePage from './pages/LegalNoticePage';
@@ -119,6 +120,8 @@ function WelcomeRoute() {
 function AppRoutes() {
   const { status, user } = useAuth();
   const role = user?.role;
+
+  useIosVisibleViewport();
 
   useEffect(() => {
     if (status === 'loading') return;

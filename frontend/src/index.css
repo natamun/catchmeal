@@ -1,5 +1,19 @@
 @import 'tailwindcss';
 
+@custom-variant ios-typing {
+  @supports (-webkit-touch-callout: none) {
+    :root:has(
+        :is(
+            input:not([type='checkbox'], [type='radio'], [type='range'], [type='file']),
+            textarea
+          ):focus
+      )
+      & {
+      @slot;
+    }
+  }
+}
+
 @custom-variant hover {
   &:active {
     @slot;
@@ -128,6 +142,8 @@
 }
 
 :root {
+  --visible-top: 0px;
+  --visible-height: 100dvh;
   font-family: var(--font-sans);
   font-size: var(--text-base);
   font-synthesis: none;

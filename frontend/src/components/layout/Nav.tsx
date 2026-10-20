@@ -218,7 +218,7 @@ export default function Nav({ isAdmin = false }: Props) {
         </div>
       </header>
 
-      <footer className="fixed right-0 bottom-0 left-0 z-10 hidden border-t border-green-200 bg-white pr-[max(0.5rem,env(safe-area-inset-right))] pb-[env(safe-area-inset-bottom)] pl-[max(0.5rem,env(safe-area-inset-left))] pointer-coarse:block">
+      <footer className="fixed right-0 bottom-0 left-0 z-10 hidden border-t border-green-200 bg-white pr-[max(0.5rem,env(safe-area-inset-right))] pb-[env(safe-area-inset-bottom)] pl-[max(0.5rem,env(safe-area-inset-left))] pointer-coarse:block ios-typing:hidden">
         <nav aria-label="Navigation principale">
           <ul className="flex h-bottom-nav">
             {bottomTabs.map((tab) => (
