@@ -201,6 +201,7 @@ export function GdprSection() {
   const [passwordToast, setPasswordToast] = useState<string | null>(null);
 
   useTimeout(() => setPasswordToast(null), passwordToast ? 3000 : null);
+  useTimeout(() => setDeleteErrorToast(null), deleteErrorToast ? 3000 : null);
 
   async function handleExport(format: 'html' | 'json') {
     if (!user) return;
@@ -251,7 +252,6 @@ export function GdprSection() {
     } catch {
       deleteDialogRef.current?.close();
       setDeleteErrorToast('Erreur lors de la suppression du compte');
-      setTimeout(() => setDeleteErrorToast(null), 3000);
     } finally {
       setDeleteLoading(false);
     }
