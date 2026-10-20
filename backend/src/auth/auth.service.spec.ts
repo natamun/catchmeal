@@ -22,6 +22,7 @@ describe('AuthService', () => {
     findById: jest.fn(),
     create: jest.fn(),
     updatePasswordHash: jest.fn(),
+    markEmailVerified: jest.fn(),
   };
 
   const jwtServiceMock = {
@@ -30,6 +31,7 @@ describe('AuthService', () => {
 
   const emailTokenServiceMock = {
     create: jest.fn(),
+    consume: jest.fn(),
   };
 
   const emailServiceMock = {
@@ -307,5 +309,67 @@ describe('AuthService', () => {
 
       expect(usersServiceMock.updatePasswordHash).not.toHaveBeenCalled();
     });
+  });
+
+  describe('verifyEmail', () => {
+    it('should mark the email as verified when the token is valid', async () => {
+      emailTokenServiceMock.consume.mockResolvedValue({
+        status: 'valid',
+        userId: 1,
+      });
+
+      const result = await service.verifyEmail('tok123');
+
+      expect(emailTokenServiceMock.consume).toHaveBeenCalledWith(
+        'tok123',
+        EmailTokenType.VERIFY_EMAIL,
+      );
+      expect(usersServiceMock.markEmailVerified).toHaveBeenCalledWith(1);
+      expect(result).toEqual({ verified: true });
+    });
+
+    it('should answer verified when an already used link belongs to a verified account', async () => {
+      emailTokenServiceMock.consume.mockResolvedValue({
+        status: 'used',
+        userId: 1,
+      });
+      usersServiceMock.findById.mockResolvedValue({
+        id: 1,
+        emailVerifiedAt: new Date(),
+      });
+
+      const result = await service.verifyEmail('tok123');
+
+      expect(result).toEqual({ verified: true });
+      expect(usersServiceMock.markEmailVerified).not.toHaveBeenCalled();
+    });
+
+    it('should refuse a used link when the account is not verified', async () => {
+      emailTokenServiceMock.consume.mockResolvedValue({
+        status: 'used',
+        userId: 1,
+      });
+      usersServiceMock.findById.mockResolvedValue({
+        id: 1,
+        emailVerifiedAt: null,
+      });
+
+      await expect(service.verifyEmail('tok123')).rejects.toBeInstanceOf(
+        BadRequestException,
+      );
+      expect(usersServiceMock.markEmailVerified).not.toHaveBeenCalled();
+    });
+
+    it.each(['expired', 'invalid'])(
+      'should refuse a %s link without verifying anything',
+      async (status) => {
+        emailTokenServiceMock.consume.mockResolvedValue({ status });
+
+        await expect(service.verifyEmail('tok123')).rejects.toBeInstanceOf(
+          BadRequestException,
+        );
+        expect(usersServiceMock.markEmailVerified).not.toHaveBeenCalled();
+      },
+    );
   });
 });

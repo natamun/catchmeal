@@ -19,6 +19,7 @@ import { AuthService, type SignInData } from './auth.service';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { CompleteOAuthProfileDto } from './dto/complete-oauth-profile.dto';
 import { RegisterDto } from './dto/register.dto';
+import { VerifyEmailDto } from './dto/verify-email.dto';
 import { OptionalJwtAuthGuard } from './guards/optional-jwt.guard';
 import { PassportJwtAuthGuard } from './guards/passport-jwt.guard';
 import { PassportLocalGuard } from './guards/passport-local.guard';
@@ -81,6 +82,13 @@ export class PassportAuthController {
     if ('requiresVerification' in result) return result;
     this.setAuthCookie(res, result.accessToken);
     return toUserResponse(result);
+  }
+
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
+  @HttpCode(HttpStatus.OK)
+  @Post('verify-email')
+  verifyEmail(@Body() dto: VerifyEmailDto) {
+    return this.authService.verifyEmail(dto.token);
   }
 
   @Throttle({

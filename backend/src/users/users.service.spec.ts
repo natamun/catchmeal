@@ -17,6 +17,7 @@ describe('UsersService', () => {
       findFirst: jest.fn(),
       findFirstOrThrow: jest.fn(),
       update: jest.fn(),
+      updateMany: jest.fn(),
     },
     weightLog: {
       create: jest.fn(),
@@ -368,6 +369,24 @@ describe('UsersService', () => {
 
       await expect(service.deleteAvatar(1)).rejects.toThrow('Storage error');
       expect(prismaMock.user.update).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('markEmailVerified', () => {
+    it('should set the verification date only on an unverified, active account', async () => {
+      prismaMock.user.updateMany.mockResolvedValue({ count: 1 });
+
+      await service.markEmailVerified(1);
+
+      const calls = prismaMock.user.updateMany.mock.calls as [
+        { where: object; data: { emailVerifiedAt: Date } },
+      ][];
+      expect(calls[0][0].where).toEqual({
+        id: 1,
+        emailVerifiedAt: null,
+        deletedAt: null,
+      });
+      expect(calls[0][0].data.emailVerifiedAt).toBeInstanceOf(Date);
     });
   });
 });

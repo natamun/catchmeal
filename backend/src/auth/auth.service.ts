@@ -222,6 +222,32 @@ export class AuthService {
     }
   }
 
+  async verifyEmail(token: string): Promise<{ verified: true }> {
+    const check = await this.emailTokenService.consume(
+      token,
+      EmailTokenType.VERIFY_EMAIL,
+    );
+
+    switch (check.status) {
+      case 'valid':
+        await this.usersService.markEmailVerified(check.userId);
+        return { verified: true };
+      case 'used': {
+        const user = await this.usersService.findById(check.userId);
+        if (user?.emailVerifiedAt) {
+          return { verified: true };
+        }
+        throw new BadRequestException('Ce lien a déjà été utilisé.');
+      }
+      case 'expired':
+        throw new BadRequestException(
+          'Ce lien a expiré. Demandez-en un nouveau.',
+        );
+      case 'invalid':
+        throw new BadRequestException('Ce lien est invalide.');
+    }
+  }
+
   async signIn(user: SignInData): Promise<AuthResult> {
     const tokenPayload = {
       sub: user.userId,

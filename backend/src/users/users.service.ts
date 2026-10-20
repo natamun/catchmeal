@@ -69,6 +69,13 @@ export class UsersService {
     });
   }
 
+  markEmailVerified(userId: number) {
+    return this.prisma.user.updateMany({
+      where: { id: userId, emailVerifiedAt: null, deletedAt: null },
+      data: { emailVerifiedAt: new Date() },
+    });
+  }
+
   async deleteAvatar(userId: number) {
     await this.supabase.deleteAvatar(userId);
     return this.prisma.user.update({
