@@ -81,28 +81,4 @@ export class UpdateProfileDto {
   @IsOptional()
   @IsEnum(ActivityLevel)
   activityLevel?: ActivityLevel;
-
-  @IsOptional()
-  @IsNumber({ maxDecimalPlaces: MAX_DECIMALS })
-  @IsPositive()
-  @Max(100)
-  bodyFat?: number;
-
-  @IsOptional()
-  @IsNumber({ maxDecimalPlaces: MAX_DECIMALS })
-  @IsPositive()
-  @Max(500)
-  fatFreeMass?: number;
-
-  @IsOptional()
-  @IsNumber({ maxDecimalPlaces: MAX_DECIMALS })
-  @IsPositive()
-  @Max(100)
-  bodyWater?: number;
-
-  @IsOptional()
-  @IsNumber({ maxDecimalPlaces: MAX_DECIMALS })
-  @IsPositive()
-  @Max(500)
-  muscleMass?: number;
 }

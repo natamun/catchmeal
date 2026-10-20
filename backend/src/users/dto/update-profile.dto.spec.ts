@@ -18,24 +18,26 @@ describe('UpdateProfileDto', () => {
     const dto = await parse({
       height: 180.5,
       targetWeight: 72.25,
-      bodyFat: 18.4,
     });
 
     expect(dto.targetWeight).toBe(72.25);
   });
 
-  it.each([
-    'height',
-    'targetWeight',
-    'bodyFat',
-    'fatFreeMass',
-    'bodyWater',
-    'muscleMass',
-  ])('should reject a %s with more than 2 decimals', async (field) => {
-    await expect(parse({ [field]: 50.123 })).rejects.toThrow(
-      BadRequestException,
-    );
-  });
+  it.each(['height', 'targetWeight'])(
+    'should reject a %s with more than 2 decimals',
+    async (field) => {
+      await expect(parse({ [field]: 50.123 })).rejects.toThrow(
+        BadRequestException,
+      );
+    },
+  );
+
+  it.each(['bodyFat', 'fatFreeMass', 'bodyWater', 'muscleMass'])(
+    'should refuse %s, which is only recorded on weigh-ins',
+    async (field) => {
+      await expect(parse({ [field]: 20 })).rejects.toThrow(BadRequestException);
+    },
+  );
 
   it('should accept whole numbers as goals', async () => {
     const dto = await parse({ dailyCalorieGoal: 2000, dailyProteinGoal: 150 });
