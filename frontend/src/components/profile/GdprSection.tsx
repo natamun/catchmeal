@@ -7,6 +7,7 @@ import { useTimeout } from '../../hooks/useTimeout';
 import { PATHS } from '../../routes';
 import { BaseDialog } from '../ui/BaseDialog';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
+import { LoadError } from '../ui/LoadError';
 import SummaryCard from '../ui/SummaryCard';
 import { Toast } from '../ui/Toast';
 import { deleteMyAccount, exportMyData, type DataExport } from './api';
@@ -373,16 +374,13 @@ export function GdprSection() {
         title="Erreur d'export"
         maxWidth="sm"
       >
-        <p className="text-sm text-red-500">
-          Impossible de récupérer vos données. Veuillez réessayer.
-        </p>
-        <button
-          type="button"
-          onClick={() => exportErrorDialogRef.current?.close()}
-          className="mt-2 w-full cursor-pointer rounded-xl bg-green-100 px-4 py-2.5 text-sm font-semibold text-green-700 transition-colors hover:bg-green-200"
-        >
-          Fermer
-        </button>
+        <LoadError
+          message="Impossible d'exporter vos données."
+          onRetry={() => {
+            exportErrorDialogRef.current?.close();
+            void handleExport(lastExportFormat);
+          }}
+        />
       </BaseDialog>
 
       <ConfirmDialog
