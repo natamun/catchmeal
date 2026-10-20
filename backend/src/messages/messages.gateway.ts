@@ -1,4 +1,4 @@
-import { UseFilters, UseGuards } from '@nestjs/common';
+import { HttpException, Logger, UseFilters, UseGuards } from '@nestjs/common';
 import { SkipThrottle } from '@nestjs/throttler';
 import {
   ConnectedSocket,
@@ -20,6 +20,8 @@ import { MessagesService } from './messages.service';
 @WebSocketGateway()
 @SkipThrottle()
 export class MessagesGateway {
+  private readonly logger = new Logger(MessagesGateway.name);
+
   @WebSocketServer()
   server: Server;
 
@@ -56,7 +58,14 @@ export class MessagesGateway {
         .emit('message:new', message);
       return message;
     } catch (err) {
-      return { error: err instanceof Error ? err.message : 'Erreur' };
+      if (err instanceof HttpException) {
+        return { error: err.message };
+      }
+      this.logger.error(
+        'Message not sent',
+        err instanceof Error ? err.stack : String(err),
+      );
+      return { error: 'Message non envoyé, réessayez.' };
     }
   }
 }
