@@ -108,7 +108,7 @@ export default function FriendsPage() {
   const list = activeTab === 'friends' ? friends : requests;
   const emptyMessage =
     activeTab === 'friends'
-      ? "Tu n'as pas encore d'amis. Utilise le bouton + pour en ajouter !"
+      ? "Vous n'avez pas encore d'amis. Utilisez le bouton + pour en ajouter !"
       : 'Aucune demande en attente.';
 
   return (
