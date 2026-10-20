@@ -451,7 +451,7 @@ export default function FoodItemForm({
       <ConfirmDialog
         dialogRef={confirmDialogRef}
         title="Supprimer cet aliment ?"
-        description={`${editingItem?.name ?? ''} sera retiré de ta liste.`}
+        description={`${editingItem?.name ?? ''} sera retiré de votre liste.`}
         confirmLabel="Supprimer"
         pendingLabel="Suppression..."
         isPending={isSubmitting}

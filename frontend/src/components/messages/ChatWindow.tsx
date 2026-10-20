@@ -80,7 +80,7 @@ export default function ChatWindow({
       setQuote(null);
     } catch (err) {
       setSendError(
-        err instanceof Error ? err.message : 'Message non envoyé, réessaye.',
+        err instanceof Error ? err.message : 'Message non envoyé, réessayez.',
       );
     } finally {
       setIsSending(false);

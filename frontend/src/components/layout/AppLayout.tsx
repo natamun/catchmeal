@@ -20,7 +20,7 @@ const TOAST_DURATION_MS = 3000;
 const WELCOME_MESSAGE: ChatMessage = {
   role: 'assistant',
   content:
-    "Salut ! Je peux t'aider à comprendre tes stats ou te conseiller sur tes repas 😊",
+    'Bonjour ! Je peux vous aider à comprendre vos stats ou vous conseiller sur vos repas 😊',
 };
 
 export interface AppLayoutContext {

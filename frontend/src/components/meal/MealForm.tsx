@@ -441,7 +441,7 @@ export default function MealForm({
       <ConfirmDialog
         dialogRef={confirmDialogRef}
         title="Supprimer ce repas ?"
-        description={`${editingMeal?.name ?? 'Ce repas'} sera retiré de ta liste.`}
+        description={`${editingMeal?.name ?? 'Ce repas'} sera retiré de votre liste.`}
         confirmLabel="Supprimer"
         pendingLabel="Suppression..."
         isPending={isSubmitting}

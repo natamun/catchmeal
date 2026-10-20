@@ -56,7 +56,7 @@ export default function AddFriendDialog({
           if (controller.signal.aborted) {
             return;
           }
-          setError('Recherche impossible, réessaye.');
+          setError('Recherche impossible, réessayez.');
         })
         .finally(() => {
           if (!controller.signal.aborted) {
@@ -165,7 +165,7 @@ export default function AddFriendDialog({
 
       {!canSearch && (
         <p className="text-sm text-green-400">
-          Tape au moins {MIN_QUERY_LENGTH} caractères pour chercher.
+          Saisissez au moins {MIN_QUERY_LENGTH} caractères pour chercher.
         </p>
       )}
 
