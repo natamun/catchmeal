@@ -6,8 +6,8 @@ import { useSocket } from '../socket/socketContext';
 
 /**
  * The friends activity feed: loaded once, then kept live by the socket (new
- * activities on top, deleted ones removed, full reload after a reconnection).
- * Keeps the 30 latest, like the backend.
+ * activities on top, edited ones replaced in place, deleted ones removed, full
+ * reload after a reconnection). Keeps the 30 latest, like the backend.
  */
 export function useActivityFeed(userId: number) {
   const { socket } = useSocket();
