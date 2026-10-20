@@ -2,18 +2,18 @@ import { useMemo, useRef, useState } from 'react';
 import * as Popover from '@radix-ui/react-popover';
 import { ChevronRight, Filter, Search } from 'lucide-react';
 
-import { BaseDialog } from '../ui/BaseDialog';
-import { DropdownPanel } from '../ui/DropdownPanel';
-import { Input } from '../ui/Input';
+import { BaseDialog } from './BaseDialog';
+import { DropdownPanel } from './DropdownPanel';
+import { Input } from './Input';
 import {
   EMPTY_FILTER_CRITERIA,
-  type FoodFilterCriteria,
-  type FoodItem,
+  type FilterCriteria,
   type MacroFilter,
+  type MacroKey,
+  type Macros,
   type SortOption,
-} from './types';
+} from './macroFilter';
 
-type MacroKey = 'kcal' | 'protein' | 'carbs' | 'fat';
 type MacroDraft = Record<MacroKey, MacroFilter>;
 
 const MACRO_FIELDS: {
@@ -81,7 +81,7 @@ const SORT_OPTIONS: { value: string; label: string; option: SortOption }[] = [
   },
 ];
 
-function boundsOf(items: FoodItem[], key: MacroKey): MacroFilter {
+function boundsOf(items: Macros[], key: MacroKey): MacroFilter {
   if (items.length === 0) {
     return { min: 0, max: 100 };
   }
@@ -99,17 +99,19 @@ function clampToBounds(filter: MacroFilter, bounds: MacroFilter): MacroFilter {
   };
 }
 
-interface FoodItemSearchBarProps {
-  items: FoodItem[];
-  criteria: FoodFilterCriteria;
-  onFilterChange: (criteria: FoodFilterCriteria) => void;
+interface MacroSearchBarProps {
+  items: Macros[];
+  placeholder: string;
+  criteria: FilterCriteria;
+  onFilterChange: (criteria: FilterCriteria) => void;
 }
 
-export default function FoodItemSearchBar({
+export function MacroSearchBar({
   items,
+  placeholder,
   criteria,
   onFilterChange,
-}: FoodItemSearchBarProps) {
+}: MacroSearchBarProps) {
   const [draftMacros, setDraftMacros] = useState<MacroDraft>(
     EMPTY_FILTER_CRITERIA,
   );
@@ -178,7 +180,7 @@ export default function FoodItemSearchBar({
       <Search className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-green-400" />
       <Input
         type="text"
-        placeholder="Rechercher un aliment..."
+        placeholder={placeholder}
         className="pr-10 pl-9"
         value={criteria.query}
         onChange={(e) => updateQuery(e.target.value)}

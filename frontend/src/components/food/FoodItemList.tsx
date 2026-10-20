@@ -6,18 +6,13 @@ import { roundDecimals } from '../../utils/decimals';
 import { ListCard, ListCardEmpty, ListCardLoading } from '../ui/ListCard';
 import { LoadError } from '../ui/LoadError';
 import { MacroBadge } from '../ui/MacroBadge';
-import FoodItemSearchBar from './FoodItemSearchBar';
 import {
   EMPTY_FILTER_CRITERIA,
-  UNIT_LABELS,
-  type FoodFilterCriteria,
-  type FoodItem,
-  type MacroFilter,
-} from './types';
-
-function matchesMacro(itemValue: number, filter: MacroFilter) {
-  return itemValue >= filter.min && itemValue <= filter.max;
-}
+  matchesMacro,
+  type FilterCriteria,
+} from '../ui/macroFilter';
+import { MacroSearchBar } from '../ui/MacroSearchBar';
+import { UNIT_LABELS, type FoodItem } from './types';
 
 interface FoodItemListProps {
   items: FoodItem[];
@@ -49,7 +44,7 @@ export default function FoodItemList({
   renderAction,
 }: FoodItemListProps) {
   const [expandedIds, setExpandedIds] = useState<Set<number>>(new Set());
-  const [criteria, setCriteria] = useState<FoodFilterCriteria>(
+  const [criteria, setCriteria] = useState<FilterCriteria>(
     EMPTY_FILTER_CRITERIA,
   );
 
@@ -96,8 +91,9 @@ export default function FoodItemList({
       className="@container"
       header={
         <>
-          <FoodItemSearchBar
+          <MacroSearchBar
             items={activeItems}
+            placeholder="Rechercher un aliment..."
             criteria={criteria}
             onFilterChange={setCriteria}
           />

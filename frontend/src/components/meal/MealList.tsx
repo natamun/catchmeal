@@ -5,14 +5,13 @@ import { MACROS } from '../../constants/macros';
 import { ListCard, ListCardEmpty, ListCardLoading } from '../ui/ListCard';
 import { LoadError } from '../ui/LoadError';
 import { MacroBadge } from '../ui/MacroBadge';
-import MealSearchBar from './MealSearchBar';
 import {
-  EMPTY_MEAL_FILTER_CRITERIA,
-  mealTotals,
-  type Meal,
-  type MealFilterCriteria,
-  type MealMacroFilter,
-} from './types';
+  EMPTY_FILTER_CRITERIA,
+  matchesMacro,
+  type FilterCriteria,
+} from '../ui/macroFilter';
+import { MacroSearchBar } from '../ui/MacroSearchBar';
+import { mealTotals, type Meal } from './types';
 
 interface MealListProps {
   meals: Meal[];
@@ -21,10 +20,6 @@ interface MealListProps {
   onRetry?: () => void;
   headerAction?: ReactNode;
   renderAction?: (meal: Meal) => ReactNode;
-}
-
-function matchesMacro(itemValue: number, filter: MealMacroFilter) {
-  return itemValue >= filter.min && itemValue <= filter.max;
 }
 
 function macrosOf(meal: Meal) {
@@ -49,8 +44,8 @@ export default function MealList({
   renderAction,
 }: MealListProps) {
   const [expandedIds, setExpandedIds] = useState<Set<number>>(new Set());
-  const [criteria, setCriteria] = useState<MealFilterCriteria>(
-    EMPTY_MEAL_FILTER_CRITERIA,
+  const [criteria, setCriteria] = useState<FilterCriteria>(
+    EMPTY_FILTER_CRITERIA,
   );
 
   const query = criteria.query.trim().toLowerCase();
@@ -93,8 +88,9 @@ export default function MealList({
       className="@container"
       header={
         <>
-          <MealSearchBar
-            meals={meals}
+          <MacroSearchBar
+            items={meals.map(mealTotals)}
+            placeholder="Rechercher un repas..."
             criteria={criteria}
             onFilterChange={setCriteria}
           />
