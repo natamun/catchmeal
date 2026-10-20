@@ -15,6 +15,7 @@ function isSameDay(a: Date, b: Date) {
   return a.toDateString() === b.toDateString();
 }
 
+/** "Aujourd'hui", "Hier", "Demain", or a short date. */
 function formatLabel(date: Date) {
   const today = new Date();
 
@@ -40,6 +41,10 @@ interface DateNavigatorProps {
   onChange: (date: Date) => void;
 }
 
+/**
+ * Day picker of the journal: arrows for the previous and next day, and the date
+ * in the middle, which opens a calendar.
+ */
 export function DateNavigator({ value, onChange }: DateNavigatorProps) {
   return (
     <div className="flex gap-1.5 self-start rounded-xl border border-green-200 bg-white p-1.5 max-2xs:w-full">

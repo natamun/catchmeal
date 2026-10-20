@@ -11,6 +11,7 @@ interface EditIconButtonProps {
   size?: keyof typeof SIZE;
 }
 
+/** Pencil button. On touch screens its tap area is larger than the icon. */
 export function EditIconButton({
   label,
   onClick,

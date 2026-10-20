@@ -10,6 +10,7 @@ interface QuantityStepperProps {
   onAdjust: (delta: number) => void;
 }
 
+/** Buttons that change a quantity by -10, -1, +1 or +10, around its value. */
 export function QuantityStepper({
   name,
   quantity,

@@ -9,6 +9,10 @@ interface FormFieldProps {
   children: (id: string) => ReactNode;
 }
 
+/**
+ * A label, a field and its error bubble, linked by a generated id that the
+ * field receives through `children(id)`.
+ */
 export function FormField({ label, error, children }: FormFieldProps) {
   const id = useId();
 

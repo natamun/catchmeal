@@ -1,5 +1,9 @@
 import { forwardRef, type ComponentProps } from 'react';
 
+/**
+ * Text input in the app's style; its border turns red when aria-invalid is
+ * true. The ref is forwarded so a form can focus it.
+ */
 export const Input = forwardRef<HTMLInputElement, ComponentProps<'input'>>(
   ({ className = '', ...props }, ref) => (
     <input

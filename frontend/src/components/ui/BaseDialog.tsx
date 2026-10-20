@@ -17,6 +17,15 @@ interface BaseDialogProps {
   children: ReactNode;
 }
 
+/**
+ * Modal used by every dialog of the app: a native <dialog> opened with
+ * showModal(), with a title, a close button and scrollable content. A click on
+ * the blurred backdrop closes it (that click lands on the <dialog> element
+ * itself).
+ *
+ * `onDialogNode` hands the <dialog> element to the dropdowns, which must render
+ * inside it to stay usable above the modal.
+ */
 export function BaseDialog({
   dialogRef,
   title,

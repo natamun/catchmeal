@@ -11,6 +11,10 @@ const SIZE = {
   lg: { container: 'h-16 w-16', text: 'text-2xl', initials: 2 },
 } as const;
 
+/**
+ * Profile picture, or the first letter(s) of the username when there is none.
+ * `online` adds a green dot.
+ */
 export function Avatar({
   username,
   avatarUrl,

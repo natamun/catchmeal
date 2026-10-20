@@ -12,6 +12,7 @@ import DatePicker from 'react-datepicker';
 
 import 'react-datepicker/dist/react-datepicker.css';
 
+/** A period from `from` to `to`, both days included. */
 export interface DateRange {
   from: Date;
   to: Date;
@@ -28,6 +29,10 @@ interface TriggerProps {
   ref?: Ref<HTMLButtonElement>;
 }
 
+/**
+ * The button that opens the calendar. Clicked again while the calendar is open,
+ * it closes it instead of reopening it.
+ */
 export function CalendarTrigger({
   children,
   isOpen,
@@ -80,6 +85,11 @@ interface RangeProps extends SharedProps {
   onRangeChange: (range: DateRange) => void;
 }
 
+/**
+ * A button that opens a French calendar (weeks start on Monday). Two modes: one
+ * day (`value` and `onChange`) or a period (`range` and `onRangeChange`). For a
+ * period, the first click is kept aside until the second one completes it.
+ */
 export function CalendarButton(props: DayProps | RangeProps) {
   const { children, className, wrapperClassName, min, max, placement } = props;
   const pickerRef = useRef<DatePicker>(null);

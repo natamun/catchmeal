@@ -1,3 +1,4 @@
+/** Pulsing block that holds the place of content while it loads. */
 export function Skeleton({ className = '' }: { className?: string }) {
   return (
     <span

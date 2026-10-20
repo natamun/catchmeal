@@ -81,6 +81,10 @@ const SORT_OPTIONS: { value: string; label: string; option: SortOption }[] = [
   },
 ];
 
+/**
+ * Smallest and largest value of a macro among the items, used as the slider
+ * ends; 0 to 100 for an empty list.
+ */
 function boundsOf(items: Macros[], key: MacroKey): MacroFilter {
   if (items.length === 0) {
     return { min: 0, max: 100 };
@@ -92,6 +96,7 @@ function boundsOf(items: Macros[], key: MacroKey): MacroFilter {
   };
 }
 
+/** An unlimited range (the default) is shown as the full slider. */
 function clampToBounds(filter: MacroFilter, bounds: MacroFilter): MacroFilter {
   return {
     min: Number.isFinite(filter.min) ? filter.min : bounds.min,
@@ -106,6 +111,11 @@ interface MacroSearchBarProps {
   onFilterChange: (criteria: FilterCriteria) => void;
 }
 
+/**
+ * Search bar of the food and meal lists. The text filters right away; the
+ * filter dialog (sort, one slider per macro) applies its choices only when
+ * "Appliquer" is pressed. The filter icon is filled while a range is narrowed.
+ */
 export function MacroSearchBar({
   items,
   placeholder,

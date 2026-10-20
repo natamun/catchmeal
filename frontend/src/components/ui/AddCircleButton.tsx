@@ -5,6 +5,10 @@ interface AddCircleButtonProps {
   onClick: () => void;
 }
 
+/**
+ * Round green "+" button. It only shows an icon, so `label` is what screen
+ * readers announce.
+ */
 export function AddCircleButton({ label, onClick }: AddCircleButtonProps) {
   return (
     <button

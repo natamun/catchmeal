@@ -16,6 +16,11 @@ const CONFIRM_TONE_CLASS = {
   primary: 'bg-green-500 hover:bg-green-600',
 };
 
+/**
+ * "Are you sure?" dialog with Cancel and a confirm button, red by default or
+ * green with tone="primary". While `isPending` the button is disabled and shows
+ * `pendingLabel`.
+ */
 export function ConfirmDialog({
   dialogRef,
   title,

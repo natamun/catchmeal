@@ -5,6 +5,10 @@ interface Props {
   onRetry?: () => void;
 }
 
+/**
+ * Block shown when data could not be loaded, with a "Réessayer" button when
+ * `onRetry` is given.
+ */
 export function LoadError({ message, onRetry }: Props) {
   return (
     <div

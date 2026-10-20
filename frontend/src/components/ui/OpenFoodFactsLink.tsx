@@ -1,3 +1,6 @@
+/**
+ * Link to the Open Food Facts website, credited wherever their data is used.
+ */
 export function OpenFoodFactsLink() {
   return (
     <a

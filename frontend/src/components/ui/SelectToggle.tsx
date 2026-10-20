@@ -6,6 +6,10 @@ interface SelectToggleProps {
   onToggle: () => void;
 }
 
+/**
+ * Square check button used to pick items in a list (role="checkbox" for screen
+ * readers).
+ */
 export function SelectToggle({ selected, label, onToggle }: SelectToggleProps) {
   return (
     <button

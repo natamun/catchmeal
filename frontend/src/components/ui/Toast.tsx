@@ -8,6 +8,10 @@ interface ToastProps {
   icon: LucideIcon;
 }
 
+/**
+ * The toast itself, displayed by ToastProvider. It uses the popover API, which
+ * puts it in the browser's top layer, above any open dialog.
+ */
 export function Toast({ message, icon: Icon }: ToastProps) {
   const displayedMessage = useDelayedUnmount(message, 150);
   const popoverRef = useRef<HTMLDivElement>(null);

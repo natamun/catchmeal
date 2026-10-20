@@ -8,6 +8,10 @@ interface ListCardProps {
   children: ReactNode;
 }
 
+/**
+ * White card holding a list, with an optional header (search bar, add button).
+ * With a `label` it becomes a <section> named for screen readers.
+ */
 export function ListCard({
   header,
   label,
@@ -31,6 +35,7 @@ export function ListCard({
   );
 }
 
+/** Spinner shown while a list loads; `label` is announced by screen readers. */
 export function ListCardLoading({ label }: { label: string }) {
   return (
     <div role="status" className="flex justify-center py-10">
@@ -40,6 +45,7 @@ export function ListCardLoading({ label }: { label: string }) {
   );
 }
 
+/** Message shown when a list is empty. */
 export function ListCardEmpty({ children }: { children: ReactNode }) {
   return (
     <p className="px-5 py-10 text-center text-sm text-green-400">{children}</p>
