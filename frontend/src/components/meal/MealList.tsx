@@ -2,6 +2,7 @@ import { useState, type ReactNode } from 'react';
 import { ChevronRight } from 'lucide-react';
 
 import { MACROS } from '../../constants/macros';
+import { useToggleSet } from '../../hooks/useToggleSet';
 import { ListCard, ListCardEmpty, ListCardLoading } from '../ui/ListCard';
 import { LoadError } from '../ui/LoadError';
 import { MacroBadge } from '../ui/MacroBadge';
@@ -43,7 +44,7 @@ export default function MealList({
   headerAction,
   renderAction,
 }: MealListProps) {
-  const [expandedIds, setExpandedIds] = useState<Set<number>>(new Set());
+  const [expandedIds, toggleExpanded] = useToggleSet<number>();
   const [criteria, setCriteria] = useState<FilterCriteria>(
     EMPTY_FILTER_CRITERIA,
   );
@@ -70,18 +71,6 @@ export default function MealList({
         ? (a.name ?? '').localeCompare(b.name ?? '') * dir
         : (mealTotals(a)[field] - mealTotals(b)[field]) * dir;
     });
-
-  const toggleExpanded = (id: number) => {
-    setExpandedIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) {
-        next.delete(id);
-      } else {
-        next.add(id);
-      }
-      return next;
-    });
-  };
 
   return (
     <ListCard

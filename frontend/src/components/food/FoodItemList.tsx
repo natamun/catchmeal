@@ -2,6 +2,7 @@ import { useState, type ReactNode } from 'react';
 import { ChevronRight } from 'lucide-react';
 
 import { MACROS } from '../../constants/macros';
+import { useToggleSet } from '../../hooks/useToggleSet';
 import { roundDecimals } from '../../utils/decimals';
 import { ListCard, ListCardEmpty, ListCardLoading } from '../ui/ListCard';
 import { LoadError } from '../ui/LoadError';
@@ -43,7 +44,7 @@ export default function FoodItemList({
   headerAction,
   renderAction,
 }: FoodItemListProps) {
-  const [expandedIds, setExpandedIds] = useState<Set<number>>(new Set());
+  const [expandedIds, toggleExpanded] = useToggleSet<number>();
   const [criteria, setCriteria] = useState<FilterCriteria>(
     EMPTY_FILTER_CRITERIA,
   );
@@ -73,18 +74,6 @@ export default function FoodItemList({
         ? a.name.localeCompare(b.name) * dir
         : (a[field] - b[field]) * dir;
     });
-
-  const toggleExpanded = (id: number) => {
-    setExpandedIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) {
-        next.delete(id);
-      } else {
-        next.add(id);
-      }
-      return next;
-    });
-  };
 
   return (
     <ListCard
