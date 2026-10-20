@@ -17,6 +17,11 @@ interface ChatBotPopupProps {
   activePage: Tab;
 }
 
+/**
+ * Floating assistant chat (Mistral) of the journal, food and stats pages. The
+ * conversation is kept by AppLayout, so it survives page changes. When a
+ * question fails, it is put back in the field with an error message.
+ */
 export function ChatBotPopup({
   isOpen,
   onToggle,
@@ -38,6 +43,8 @@ export function ChatBotPopup({
   }, [isOpen]);
 
   useEffect(() => {
+    // A new answer is scrolled to its start, so a long answer is read from the
+    // top.
     const lastMessage = messages[messages.length - 1];
     if (lastMessage?.role === 'assistant') {
       lastAssistantRef.current?.scrollIntoView({
@@ -50,6 +57,7 @@ export function ChatBotPopup({
   }, [messages]);
 
   useEffect(() => {
+    // Close the window when the user moves to another page.
     onToggle(false);
   }, [activePage, onToggle]);
 
@@ -89,6 +97,7 @@ export function ChatBotPopup({
 
   function handleInputChange(e: React.ChangeEvent<HTMLTextAreaElement>) {
     setInput(e.target.value);
+    // Grow the field with its text, up to 120 px.
     e.target.style.height = 'auto';
     e.target.style.height = `${Math.min(e.target.scrollHeight, 120)}px`;
   }

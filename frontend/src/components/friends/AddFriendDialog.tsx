@@ -21,6 +21,11 @@ interface AddFriendDialogProps {
   onSent: (username: string) => void;
 }
 
+/**
+ * Dialog to find users by username and send them a friend request. The search
+ * starts 300 ms after typing stops. Friends are hidden, and users already
+ * asked, or who asked me, cannot be asked again.
+ */
 export function AddFriendDialog({
   dialogRef,
   userId,

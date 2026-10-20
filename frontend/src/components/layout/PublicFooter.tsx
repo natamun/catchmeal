@@ -4,6 +4,7 @@ import { LEGAL_PAGES } from '../legal/legalPages';
 import { Brand } from '../ui/Brand';
 import { OpenFoodFactsLink } from '../ui/OpenFoodFactsLink';
 
+/** Footer of the public pages: legal links and the Open Food Facts credit. */
 export function PublicFooter() {
   return (
     <footer className="border-t border-green-200 px-8 py-10">

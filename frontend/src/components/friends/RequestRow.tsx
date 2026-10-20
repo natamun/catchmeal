@@ -10,6 +10,7 @@ interface RequestRowProps {
   onDecline: () => void;
 }
 
+/** A received friend request, with accept and decline buttons. */
 export function RequestRow({
   from,
   isBusy,

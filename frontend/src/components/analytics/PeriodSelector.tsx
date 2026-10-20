@@ -22,6 +22,7 @@ function formatDay(date: Date) {
   return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
 }
 
+/** Which shortcut (7, 30 or 90 days) matches the period, if it ends today. */
 function activePreset({ from, to }: DateRange, today: Date) {
   if (!isSameDay(to, today)) {
     return null;
@@ -37,6 +38,10 @@ interface PeriodSelectorProps {
   onChange: (period: DateRange) => void;
 }
 
+/**
+ * Period of the stats page: a calendar for any range (up to 90 days around
+ * today) and shortcuts for the last 7, 30 or 90 days.
+ */
 export function PeriodSelector({ period, onChange }: PeriodSelectorProps) {
   const today = new Date();
 

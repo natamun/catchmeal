@@ -56,6 +56,10 @@ const PROVIDERS = [
   },
 ];
 
+/**
+ * Google, GitHub and 42 sign-in buttons. They leave the app for the backend
+ * route /auth/<provider>, which redirects to the provider and back.
+ */
 export function OAuthButtons() {
   return (
     <div className="grid grid-cols-3 gap-3">
@@ -64,6 +68,8 @@ export function OAuthButtons() {
           key={path}
           type="button"
           onClick={() => {
+            // A full page change, not a fetch: the provider's login page must
+            // open in the browser.
             window.location.href = `${import.meta.env.VITE_API_URL}/auth/${path}`;
           }}
           aria-label={`Continuer avec ${name}`}

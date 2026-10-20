@@ -11,6 +11,10 @@ interface Props {
   children: ReactNode;
 }
 
+/**
+ * Frame of the legal pages: header with the three legal pages and a back
+ * button, the text, then the footer.
+ */
 export function LegalLayout({ children }: Props) {
   const goBack = useGoBack(PATHS.landing);
 

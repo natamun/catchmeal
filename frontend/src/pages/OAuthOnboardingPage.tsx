@@ -39,6 +39,7 @@ const SUBMIT_ERRORS: Record<number, string> = {
   409: "Ce nom d'utilisateur ou cet email est déjà pris.",
 };
 
+/** Username 3 to 30 characters, name required, valid email. */
 function validate(form: FormState): Partial<Record<keyof FormState, string>> {
   const errors: Partial<Record<keyof FormState, string>> = {};
   const name = form.name.trim();
@@ -62,6 +63,10 @@ function validate(form: FormState): Partial<Record<keyof FormState, string>> {
   return errors;
 }
 
+/**
+ * Welcome form of a new OAuth user: they choose a username and confirm their
+ * name and email before entering the app.
+ */
 export function OAuthOnboardingPage({ prefill, onComplete, onBack }: Props) {
   const { updateUser } = useAuth();
   const {

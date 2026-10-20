@@ -19,6 +19,10 @@ interface DailyMealFormProps {
   onSaved: () => void;
 }
 
+/**
+ * Review dialog of a journal section: adjust the quantities, then save. It adds
+ * a new meal, or saves the whole section when it already has meals.
+ */
 export function DailyMealForm({
   dialogRef,
   mealType,
@@ -34,6 +38,8 @@ export function DailyMealForm({
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Each opening gets a new sessionKey: the items are reset to the section's
+  // content during render, without an effect.
   if (sessionKey !== syncedKey) {
     setSyncedKey(sessionKey);
     setItems(initialItems);
@@ -74,6 +80,8 @@ export function DailyMealForm({
           existingMeals.map((meal) => deleteMeal(userId, meal.id)),
         );
       } else {
+        // A section may hold several meals: the first one receives every item
+        // and the others are deleted.
         const [first, ...others] = existingMeals;
         await updateMeal(userId, first.id, { items: draftsToInput(items) });
         await Promise.all(others.map((meal) => deleteMeal(userId, meal.id)));

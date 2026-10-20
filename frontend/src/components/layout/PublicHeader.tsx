@@ -25,6 +25,7 @@ interface PressableProps {
   children: ReactNode;
 }
 
+/** A NavLink for a route, or a button for a function, with the same look. */
 function Pressable({
   target,
   className,
@@ -60,6 +61,10 @@ function Pressable({
   );
 }
 
+/**
+ * Header of the public pages: logo, links, one action button, and a burger menu
+ * on small screens (Escape closes it).
+ */
 export function PublicHeader({ links, action }: Props) {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuVisible = useDelayedUnmount(menuOpen, 100);

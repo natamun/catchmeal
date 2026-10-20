@@ -24,10 +24,12 @@ interface FoodItemListProps {
   renderAction?: (item: FoodItem) => ReactNode;
 }
 
+/** Base quantity with its unit, e.g. "100g" or "1x". */
 function formatBaseQuantity(item: FoodItem) {
   return `${roundDecimals(item.baseQuantity, 1)}${UNIT_LABELS[item.baseUnit]}`;
 }
 
+/** Macro badges of a food, rounded to one decimal. */
 function macrosOf(item: FoodItem) {
   return MACROS.map(({ key, label, color }) => ({
     label,
@@ -36,6 +38,12 @@ function macrosOf(item: FoodItem) {
   }));
 }
 
+/**
+ * The food library: search and filters, one row per food with its calories, and
+ * the macro badges, which fold into an expandable row on narrow screens.
+ * Archived foods are hidden. `renderAction` adds a button to each row (edit or
+ * select).
+ */
 export function FoodItemList({
   items,
   isLoading,

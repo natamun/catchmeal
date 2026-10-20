@@ -11,6 +11,10 @@ import {
 import { useGoBack } from '../routing/navigation';
 import { PATHS } from '../routing/paths';
 
+/**
+ * /home/add/:mealType: adds foods to one section of a day's journal, then goes
+ * back to the journal. An unknown meal type redirects to the journal.
+ */
 export default function JournalAddPage() {
   const { mealType: slug } = useParams();
   const [searchParams] = useSearchParams();

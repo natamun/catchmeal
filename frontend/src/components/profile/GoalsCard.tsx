@@ -25,6 +25,11 @@ interface Props {
   latestWeight: number | null | undefined;
 }
 
+/**
+ * Current goals next to recommended ones, computed from the profile and the
+ * latest weight: the BMR and daily needs (bmr.ts), then the calories to reach
+ * the target weight in the chosen time.
+ */
 export function GoalsCard({ user, latestWeight }: Props) {
   const [duration, setDuration] = useState('90');
   const isLoading = latestWeight === undefined;
@@ -46,6 +51,8 @@ export function GoalsCard({ user, latestWeight }: Props) {
   const kcalToReachGoal = (() => {
     if (!tdee || !latestWeight || !user.targetWeight) return null;
     const diff = latestWeight - user.targetWeight;
+    // Calories per kg of body weight used here: 7700 to lose it, 4800 to gain
+    // it, spread over the chosen duration.
     const coefficient = diff > 0 ? 7700 : 4800;
     return Math.round(tdee - (diff * coefficient) / Number(duration));
   })();
@@ -54,6 +61,8 @@ export function GoalsCard({ user, latestWeight }: Props) {
 
   const recommendedMacros = (() => {
     if (!recommendedKcal || !latestWeight) return null;
+    // Protein: 2.2 g per kg of muscle when known, else 1.8 g per kg of body
+    // weight. Fat: 30% of the calories. Carbs: the calories left (4 kcal/g).
     const protein = Math.round(
       user.muscleMass ? 2.2 * user.muscleMass : 1.8 * latestWeight,
     );

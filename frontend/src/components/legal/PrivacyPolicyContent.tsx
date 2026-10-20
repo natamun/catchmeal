@@ -2,6 +2,10 @@ interface Props {
   heading?: 'h2' | 'h3';
 }
 
+/**
+ * Text of the privacy policy, shown on its page and in a dialog of the sign-up
+ * form; `heading` sets the title level for each place.
+ */
 export function PrivacyPolicyContent({ heading: Heading = 'h2' }: Props) {
   return (
     <>

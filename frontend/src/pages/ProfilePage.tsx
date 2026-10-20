@@ -6,6 +6,7 @@ import { GoalsCard } from '../components/profile/GoalsCard';
 import { ProfileIdentityCard } from '../components/profile/ProfileIdentityCard';
 import { WeightCard } from '../components/profile/WeightCard';
 
+/** Profile page: identity, body composition, goals and account settings. */
 export default function ProfilePage() {
   const user = useCurrentUser();
   const { updateUser } = useAuth();

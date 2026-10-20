@@ -17,6 +17,8 @@ import wasmUrl from 'zxing-wasm/reader/zxing_reader.wasm?url';
 import { BaseDialog } from '../ui/BaseDialog';
 import { findScannerCamera } from './scannerCamera';
 
+// The barcode decoder is WebAssembly. Vite bundles its .wasm file, and the
+// decoder must load it from there instead of a CDN.
 prepareZXingModule({
   overrides: {
     locateFile: (path: string, prefix: string) =>
@@ -26,8 +28,10 @@ prepareZXingModule({
 
 type ScannerProps = ComponentProps<typeof Scanner>;
 
+/** Product barcodes only (EAN and UPC), the ones printed on food packaging. */
 const FORMATS: ScannerProps['formats'] = ['ean_13', 'ean_8', 'upc_a', 'upc_e'];
 
+/** Asks the camera to keep focusing, otherwise close barcodes stay blurry. */
 const CONTINUOUS_FOCUS: MediaTrackConstraintSet & { focusMode?: string } = {
   focusMode: 'continuous',
 };
@@ -49,6 +53,10 @@ interface BarcodeScannerDialogProps {
   onClose: () => void;
 }
 
+/**
+ * Camera dialog that reads a product barcode and passes it to `onDetected`.
+ * Loaded on demand (lazy) because the decoder is heavy.
+ */
 export default function BarcodeScannerDialog({
   onDetected,
   onClose,

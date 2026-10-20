@@ -2,6 +2,7 @@ import { Fragment } from 'react';
 
 import { LegalLayout } from '../components/legal/LegalLayout';
 
+/** The team members credited in the legal notice, each linked to a profile. */
 const TEAM = [
   { name: 'Natalino Munari', url: 'https://github.com/natamun' },
   {
@@ -19,6 +20,7 @@ const TEAM = [
   },
 ];
 
+/** Legal notice page. */
 export function LegalNoticePage() {
   return (
     <LegalLayout>

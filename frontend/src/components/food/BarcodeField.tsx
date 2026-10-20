@@ -35,6 +35,11 @@ interface BarcodeFieldProps {
   onProduct: (product: OffProduct) => void;
 }
 
+/**
+ * Barcode field of the food form, typed or scanned with the camera, then looked
+ * up on Open Food Facts to fill the form. The number is checked in the browser
+ * first (isValidBarcode), so a typo never reaches the backend.
+ */
 export function BarcodeField({
   value,
   error,
@@ -54,6 +59,8 @@ export function BarcodeField({
     onField: boolean;
   } | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  // Each lookup gets a number: an answer that arrives after a newer lookup
+  // started, or after the form closed, is ignored.
   const lookupIdRef = useRef(0);
 
   if (showError && !isTouched) {

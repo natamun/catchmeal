@@ -29,6 +29,10 @@ const PROVIDER_LABELS: Record<string, string> = {
   github: 'GitHub',
 };
 
+/**
+ * How the user logs in: the stored OAuth provider, else a password, else a
+ * guess from the username prefix of older OAuth accounts.
+ */
 function getAuthMethod(user: AdminUser): string {
   if (user.oauthProvider) {
     return PROVIDER_LABELS[user.oauthProvider] ?? user.oauthProvider;
@@ -48,6 +52,10 @@ interface PanelProps {
   onUpdated: (changes: Partial<AdminUser>) => void;
 }
 
+/**
+ * Details of one user and the form to change their username and role. Remounted
+ * at each opening (key), so it always starts from the user's current values.
+ */
 function UserPanel({
   user,
   container,
@@ -184,6 +192,10 @@ interface Props {
   onUpdated: (changes: Partial<AdminUser>) => void;
 }
 
+/**
+ * Dialog of one user in the admin board: details, username and role editing,
+ * and account deletion behind a confirmation.
+ */
 export function AdminUserDialog({
   dialogRef,
   user,

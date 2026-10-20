@@ -11,6 +11,7 @@ import { Nav, type Tab } from './Nav';
 
 const TABS: Tab[] = ['home', 'food', 'stats', 'friends', 'profile', 'admin'];
 
+/** Pages where the assistant is offered. */
 const ASSISTANT_TABS: Tab[] = ['home', 'stats', 'food'];
 
 const WELCOME_MESSAGE: ChatMessage = {
@@ -19,6 +20,7 @@ const WELCOME_MESSAGE: ChatMessage = {
     'Bonjour ! Je peux vous aider à comprendre vos stats ou vous conseiller sur vos repas 😊',
 };
 
+/** Which tab the current URL belongs to; /home/add/lunch belongs to home. */
 function tabFromPath(pathname: string): Tab {
   return (
     TABS.find(
@@ -27,6 +29,11 @@ function tabFromPath(pathname: string): Tab {
   );
 }
 
+/**
+ * Frame of every logged-in page: navigation, the current page (Outlet), the
+ * assistant and the toasts. The assistant conversation is kept here so it
+ * survives page changes; the assistant is hidden while adding to the journal.
+ */
 export function AppLayout() {
   const user = useCurrentUser();
   const { pathname } = useLocation();

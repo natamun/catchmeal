@@ -49,6 +49,10 @@ const MEASURES: { value: MeasureKey; label: string; unit: string }[] = [
   { value: 'bodyWater', label: 'Eau corporelle', unit: '%' },
 ];
 
+/**
+ * Round graduations around the values, with 1 unit of margin and at most 8
+ * intervals.
+ */
 function measureScale(values: number[]) {
   const low = Math.max(0, Math.floor(Math.min(...values)) - SCALE_MARGIN);
   const high = Math.ceil(Math.max(...values)) + SCALE_MARGIN;
@@ -69,6 +73,7 @@ function measureScale(values: number[]) {
   };
 }
 
+/** Date on the axis, as DD-MM. */
 function formatTick(time: number) {
   return new Date(time)
     .toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' })
@@ -84,6 +89,11 @@ interface Props {
   isLoading?: boolean;
 }
 
+/**
+ * Line chart of one body measure over the period, chosen with a select (weight
+ * by default). For the weight, the target weight is drawn as a reference line.
+ * Dots are hidden beyond 31 points.
+ */
 export function MeasureChart({
   measure,
   onMeasureChange,

@@ -1,5 +1,9 @@
 import { useSocket } from '../../socket/socketContext';
 
+/**
+ * Warning shown while the live connection is lost, never before it was first
+ * established.
+ */
 export function ConnectionBanner() {
   const { isConnected, hasConnectedOnce } = useSocket();
 

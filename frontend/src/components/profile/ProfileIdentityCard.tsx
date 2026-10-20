@@ -55,6 +55,7 @@ interface FormState {
   activityLevel: string;
 }
 
+/** Allowed range of each daily goal. */
 const GOAL_LIMITS = [
   { field: 'dailyCalorieGoal', min: 500, max: 10000, unit: 'kcal' },
   { field: 'dailyProteinGoal', min: 10, max: 500, unit: 'g' },
@@ -76,6 +77,10 @@ const ACTIVITY_OPTIONS = [
   { value: 'EXTRA_ACTIVE', label: 'Extrêmement actif' },
 ];
 
+/**
+ * Username 3 to 30 characters; height, target weight and goals within their
+ * limits; goals as whole numbers.
+ */
 function validate(form: FormState): Partial<Record<Field, string>> {
   const errors: Partial<Record<Field, string>> = {};
   const usernameMessage = usernameError(form.username);
@@ -104,6 +109,11 @@ function validate(form: FormState): Partial<Record<Field, string>> {
   return errors;
 }
 
+/**
+ * Identity card of the profile: photo (upload or remove), name and username,
+ * and a dialog to edit the profile and the goals. Only the fields that changed
+ * are sent.
+ */
 export function ProfileIdentityCard({ user, onUpdate }: Props) {
   const [avatarBusy, setAvatarBusy] = useState(false);
   const [avatarError, setAvatarError] = useState<string | null>(null);

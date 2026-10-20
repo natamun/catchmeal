@@ -57,6 +57,7 @@ const MACRO_FIELDS = [
   { field: 'fat', label: 'Lipides (g)' },
 ] as const;
 
+/** Fills the form with the food being edited. */
 function itemToForm(item: FoodItem): FoodItemFormState {
   return {
     barcode: item.barcode ?? '',
@@ -71,8 +72,16 @@ function itemToForm(item: FoodItem): FoodItemFormState {
   };
 }
 
+/**
+ * Leading zeros do not count: the same product can be written with or without
+ * them (EAN-13 and UPC-A).
+ */
 const significantDigits = (barcode: string) => barcode.replace(/^0+/, '');
 
+/**
+ * Fills the form with an Open Food Facts product; the values they lack stay
+ * empty.
+ */
 function productToForm(product: OffProduct): FoodItemFormState {
   const toField = (value: number | null) =>
     value === null ? '' : String(value);
@@ -90,6 +99,10 @@ function productToForm(product: OffProduct): FoodItemFormState {
   };
 }
 
+/**
+ * Name required, base quantity above 0, macros 0 or more, 2 decimals at most.
+ * The barcode is optional.
+ */
 function validateForm(
   form: FoodItemFormState,
 ): Partial<Record<keyof FoodItemFormState, string>> {
@@ -132,6 +145,11 @@ interface FoodItemFormProps {
   onItemDeleted: (id: number) => void;
 }
 
+/**
+ * Dialog to create or edit a food: barcode lookup, name, brand, base quantity
+ * and macros. It warns before adding a second food with the same barcode.
+ * Deleting archives the food.
+ */
 export function FoodItemForm({
   dialogRef,
   editingItem,
@@ -164,6 +182,9 @@ export function FoodItemForm({
   const confirmDialogRef = useRef<HTMLDialogElement>(null);
   const duplicateDialogRef = useRef<HTMLDialogElement>(null);
 
+  // Updating state during render, the React way to react to a prop change
+  // without an effect: when the dialog opens on another food, the form is
+  // refilled before it is displayed.
   if ((editingItem?.id ?? null) !== syncedItemId) {
     setSyncedItemId(editingItem?.id ?? null);
     setForm(editingItem ? itemToForm(editingItem) : EMPTY_FORM);

@@ -59,6 +59,7 @@ const MENU_ITEM_CLASS =
 const NAV_ITEM_CLASS =
   'cursor-pointer transition-colors focus-visible:outline-2 focus-visible:outline-green-400 focus-visible:outline-offset-2';
 
+/** A tab link, in the top bar or in the bottom bar. */
 function NavItem({ tab, variant, icon }: NavItemProps) {
   const Icon = tab.icon;
 
@@ -104,6 +105,12 @@ function NavItem({ tab, variant, icon }: NavItemProps) {
   );
 }
 
+/**
+ * Navigation of the logged-in app. With a mouse: a top bar, whose tabs move
+ * into the avatar menu under 450 px wide. On touch screens: a bottom tab bar,
+ * hidden while typing on iPhone. The avatar menu holds the profile, the admin
+ * page and the logout.
+ */
 export function Nav({ isAdmin = false }: Props) {
   const user = useCurrentUser();
   const { logout } = useAuth();

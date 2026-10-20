@@ -15,6 +15,10 @@ import { toApiDate } from '../components/meal/api';
 import { LoadError } from '../components/ui/LoadError';
 import { useDashboard } from '../hooks/useDashboard';
 
+/**
+ * Stats page: a period, then averages, weight change, calorie chart, measure
+ * chart and JSON export, all from one dashboard request.
+ */
 export default function StatsPage() {
   const user = useCurrentUser();
   const [period, setPeriod] = useState(() => lastDays(7));

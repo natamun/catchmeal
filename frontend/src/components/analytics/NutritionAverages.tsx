@@ -14,6 +14,10 @@ interface Props {
   className?: string;
 }
 
+/**
+ * Average calories and macros per day over the period, counting only the days
+ * with something logged.
+ */
 export function NutritionAverages({
   days,
   isLoading = false,

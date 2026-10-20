@@ -52,6 +52,10 @@ const TOP_SERIES: string[] = [
   UNSPLIT_SERIES.dataKey,
 ];
 
+/**
+ * Groups the days so each bar keeps at least 24 px: one bar per day when it
+ * fits, else per week, else per two weeks.
+ */
 function grainForWidth(w: number, dataLength: number): Grain {
   const plotWidth = w - AXIS_WIDTH - KCAL_MARGIN.right;
   const maxPoints = Math.floor(plotWidth / PX_PER_POINT);
@@ -60,6 +64,10 @@ function grainForWidth(w: number, dataLength: number): Grain {
   return 'biWeek';
 }
 
+/**
+ * Round graduations for the calorie axis: the step (50, 100... 5000) that
+ * covers `max` in 5 intervals or fewer with the lowest top.
+ */
 function scaleTicks(max: number) {
   const largestStep = SCALE_STEPS[SCALE_STEPS.length - 1];
   const fallback = {
@@ -85,6 +93,11 @@ function scaleTicks(max: number) {
   };
 }
 
+/**
+ * Shares a bar's calories between the macros in proportion to their calories
+ * (4, 4 and 9 kcal per gram). A bar without any macro goes entirely to "Non
+ * réparti".
+ */
 function splitByMacro(point: DataGraph): KcalPoint {
   const protein = point.protein * KCAL_PER_GRAM.protein;
   const carbs = point.carbs * KCAL_PER_GRAM.carbs;
@@ -101,6 +114,10 @@ function splitByMacro(point: DataGraph): KcalPoint {
   };
 }
 
+/**
+ * One piece of a stacked bar; the other bars fade while the tooltip shows one
+ * of them.
+ */
 function MacroSegment(props: BarShapeProps) {
   const hovering = useIsTooltipActive();
   const activeLabel = useActiveTooltipLabel();
@@ -123,6 +140,10 @@ interface Props {
   isLoading?: boolean;
 }
 
+/**
+ * Stacked bar chart of the calories per day, split by macro. Days are grouped
+ * by week or two weeks when the period is too long for the width of the chart.
+ */
 export function CalorieChart({ days, isLoading = false }: Props) {
   const [width, setWidth] = useState(INITIAL_WIDTH);
 

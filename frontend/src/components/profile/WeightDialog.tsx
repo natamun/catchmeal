@@ -18,10 +18,15 @@ import { COMPOSITION, MEASURES, type MeasureKey } from './measures';
 
 const [WEIGHT] = MEASURES;
 
+/** Number shown with a comma in the field. */
 function toText(value: number | null | undefined) {
   return String(value ?? '').replace('.', ',');
 }
 
+/**
+ * Fills the form with the weigh-in being corrected, or leaves it empty for a
+ * new one.
+ */
 function toForm(entry: WeightEntry | null): Record<MeasureKey, string> {
   return {
     weight: toText(entry?.weight),
@@ -32,6 +37,7 @@ function toForm(entry: WeightEntry | null): Record<MeasureKey, string> {
   };
 }
 
+/** Weight required; every value within its range, with 2 decimals at most. */
 function validate(form: Record<MeasureKey, string>) {
   const errors: Partial<Record<MeasureKey, string>> = {};
 
@@ -58,6 +64,10 @@ interface WeightFormProps {
   onSaved: (entry: WeightEntry) => void;
 }
 
+/**
+ * The form inside the dialog, remounted at each opening (key) so it starts from
+ * the right weigh-in.
+ */
 function WeightForm({
   userId,
   entry,
@@ -190,6 +200,7 @@ interface Props extends WeightFormProps {
   onDeleted: (entryId: number) => void;
 }
 
+/** Dialog to add a weigh-in, or to correct or delete an existing one. */
 export function WeightDialog({
   dialogRef,
   openCount,

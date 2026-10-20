@@ -1,3 +1,4 @@
+/** Phone drawn in CSS on the landing page, waiting for a real screenshot. */
 export function PhoneMockup() {
   return (
     <div className="relative flex items-center justify-center">

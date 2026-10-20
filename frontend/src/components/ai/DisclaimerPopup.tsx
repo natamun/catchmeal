@@ -4,6 +4,10 @@ type DisclaimerPopupProps = {
   setDisclaimer: (x: boolean) => void;
 };
 
+/**
+ * The assistant's health warning, opened from its info button: it gives
+ * information, not medical advice.
+ */
 export function DisclaimerPopup({ setDisclaimer }: DisclaimerPopupProps) {
   return (
     <div className="max-h-full w-full overflow-y-auto rounded-2xl bg-white p-5 shadow-lg">

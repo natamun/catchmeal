@@ -26,6 +26,9 @@ import { Skeleton } from '../components/ui/Skeleton';
 import { StatTile } from '../components/ui/StatTile';
 import { SummaryCard } from '../components/ui/SummaryCard';
 
+/**
+ * Whether a user passes the search (username, name or email) and every filter.
+ */
 function matches(user: AdminUser, criteria: AdminFilterCriteria) {
   const query = criteria.query.trim().toLowerCase();
   const matchesQuery =
@@ -56,6 +59,7 @@ function matches(user: AdminUser, criteria: AdminFilterCriteria) {
   );
 }
 
+/** Order of the list: by username, role or creation date. */
 function compare(a: AdminUser, b: AdminUser, criteria: AdminFilterCriteria) {
   const { field, direction } = criteria.sort;
   const order = direction === 'asc' ? 1 : -1;
@@ -69,6 +73,10 @@ function compare(a: AdminUser, b: AdminUser, criteria: AdminFilterCriteria) {
   return a.createAt.localeCompare(b.createAt) * order;
 }
 
+/**
+ * Admin board: totals, the list of every account with search, filters and sort
+ * (all done in the browser), and a dialog per user.
+ */
 export default function AdminPage() {
   const {
     user: currentUser,

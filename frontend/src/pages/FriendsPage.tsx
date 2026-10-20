@@ -39,6 +39,11 @@ const TAB_OPTIONS: { value: Tab; label: string }[] = [
   { value: 'requests', label: 'Demandes' },
 ];
 
+/**
+ * Friends page: friends and received requests in two tabs, the activity feed,
+ * the add dialog and the chat. Coming from a reply on the home feed, the chat
+ * opens directly with the quoted activity.
+ */
 export default function FriendsPage() {
   const { userId } = useCurrentUser();
   const location = useLocation();
@@ -72,6 +77,8 @@ export default function FriendsPage() {
   const unreadIds = useUnreadMessages(userId, chatFriend?.id ?? null);
 
   useEffect(() => {
+    // Clear the reply from the history, so a reload or a back navigation does
+    // not open the chat again.
     if (replyTo) {
       void navigate(location.pathname, { replace: true });
     }

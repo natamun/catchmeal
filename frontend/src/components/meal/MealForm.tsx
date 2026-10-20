@@ -40,6 +40,10 @@ interface MealFormProps {
   onMealDeleted: (id: number) => void;
 }
 
+/**
+ * Dialog to create or edit a library meal: a name, foods searched in the
+ * library with their quantity, and quick adds.
+ */
 export function MealForm({
   dialogRef,
   foodItems,
@@ -70,6 +74,9 @@ export function MealForm({
   );
   const confirmDialogRef = useRef<HTMLDialogElement>(null);
 
+  // Updating state during render, the React way to react to a prop change
+  // without an effect: when the dialog opens on another meal, the form is
+  // refilled before it is displayed.
   if ((editingMeal?.id ?? null) !== syncedMealId) {
     setSyncedMealId(editingMeal?.id ?? null);
     setName(editingMeal?.name ?? '');

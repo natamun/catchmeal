@@ -22,6 +22,7 @@ function formatDate(isoDate: string) {
   });
 }
 
+/** BMI = weight / height² (in meters), with its WHO category. */
 function describeBmi(weight: number, height: number) {
   const bmi = weight / (height / 100) ** 2;
   const category =
@@ -42,6 +43,11 @@ interface Props {
   onLatestWeight?: (weight: number | null) => void;
 }
 
+/**
+ * Body composition card: latest weigh-in and BMI, the history, and a dialog to
+ * add, correct or delete a weigh-in. It reports the latest weight to the page,
+ * which GoalsCard needs.
+ */
 export function WeightCard({ userId, height, onLatestWeight }: Props) {
   const [history, setHistory] = useState<WeightEntry[] | null>(null);
   const [hasError, setHasError] = useState(false);

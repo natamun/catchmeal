@@ -8,6 +8,10 @@ interface Props {
   children: ReactNode;
 }
 
+/**
+ * Card of the landing page: icon, title and text; `inline` puts the icon on the
+ * side.
+ */
 export function FeatureCard({
   icon: Icon,
   title,

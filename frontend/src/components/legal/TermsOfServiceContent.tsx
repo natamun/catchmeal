@@ -2,6 +2,10 @@ interface Props {
   heading?: 'h2' | 'h3';
 }
 
+/**
+ * Text of the terms of service, shown on its page and in a dialog of the
+ * sign-up form; `heading` sets the title level for each place.
+ */
 export function TermsOfServiceContent({ heading: Heading = 'h2' }: Props) {
   return (
     <>

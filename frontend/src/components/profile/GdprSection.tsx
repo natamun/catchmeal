@@ -20,6 +20,10 @@ const chevron = (
   <ChevronRight className="h-4 w-4 opacity-40" aria-hidden="true" />
 );
 
+/**
+ * "Compte" card of the profile: password change, data export (HTML to read, or
+ * JSON for machines) and account deletion, each through its dialog.
+ */
 export function GdprSection() {
   const user = useCurrentUser();
   const { logout } = useAuth();

@@ -21,6 +21,7 @@ import { PublicHeader } from '../components/layout/PublicHeader';
 import { OpenFoodFactsLink } from '../components/ui/OpenFoodFactsLink';
 import { PATHS } from '../routing/paths';
 
+/** Header links of the landing page: they scroll to its sections. */
 const NAV_LINKS = [
   { label: 'Avantages', id: 'avantages' },
   { label: 'Fonctionnalités', id: 'fonctionnalites' },
@@ -94,6 +95,7 @@ const COMMITMENTS = [
   'Aucune publicité, aucune revente de données.',
 ];
 
+/** Public home page: what the app offers, its features and who made it. */
 export function LandingPage() {
   return (
     <div id="landing-page" className="bg-white">

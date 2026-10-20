@@ -22,6 +22,10 @@ const MEAL_TYPE_OPTIONS = (Object.keys(MEAL_TYPE_LABELS) as MealType[]).map(
   (value) => ({ value, label: MEAL_TYPE_LABELS[value] }),
 );
 
+/**
+ * Suggests a section from the time of day: breakfast before 10:00, lunch before
+ * 15:00, snack before 18:00, then dinner.
+ */
 function defaultMealType(): MealType {
   const hour = new Date().getHours();
   if (hour < 10) {
@@ -42,6 +46,10 @@ interface QuickAddDialogProps {
   onSaved: () => void;
 }
 
+/**
+ * Logs calories and macros typed by hand, without a food of the library, into
+ * one section of the day.
+ */
 export function QuickAddDialog({
   dialogRef,
   date,

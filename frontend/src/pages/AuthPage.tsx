@@ -47,6 +47,10 @@ const SUBMIT_ERRORS: Record<number, string> = {
   409: "Ce nom d'utilisateur ou cet email est déjà pris.",
 };
 
+/**
+ * Login only checks the minimum lengths of the username and password; register
+ * checks every field.
+ */
 function validateAuthForm(
   mode: Mode,
   form: AuthFormState,
@@ -85,6 +89,11 @@ function validateAuthForm(
   return errors;
 }
 
+/**
+ * Login and register on one page: the URL (/login or /register) decides the
+ * mode. Switching mode keeps the typed values and the page asked for before
+ * login.
+ */
 export function AuthPage() {
   const { login, register } = useAuth();
   const navigate = useNavigate();

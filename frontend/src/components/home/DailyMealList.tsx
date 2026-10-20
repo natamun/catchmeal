@@ -16,6 +16,10 @@ interface JournalRow {
   kcal: number;
 }
 
+/**
+ * Rows of a section: the same food logged in several meals becomes one row with
+ * its calories added up; each quick add keeps its own row.
+ */
 function rowsOf(sectionMeals: Meal[], foodItems: FoodItem[]): JournalRow[] {
   const rows: JournalRow[] = [];
   const rowByFoodId = new Map<number, JournalRow>();
@@ -62,6 +66,10 @@ interface DailyMealListProps {
   onEdit: (mealType: MealType) => void;
 }
 
+/**
+ * The four sections of the journal (breakfast, lunch, dinner, snack) with their
+ * foods and calories, an add button and, when not empty, an edit button.
+ */
 export function DailyMealList({
   meals,
   foodItems,
@@ -71,6 +79,8 @@ export function DailyMealList({
   onAdd,
   onEdit,
 }: DailyMealListProps) {
+  // While another day loads, the edit buttons follow the meals last shown, so
+  // they don't flicker.
   const [loadedMeals, setLoadedMeals] = useState(meals);
 
   if (!isLoading && loadedMeals !== meals) {

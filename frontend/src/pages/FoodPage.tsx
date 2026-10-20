@@ -24,6 +24,10 @@ const TAB_OPTIONS: { value: Tab; label: string }[] = [
   { value: 'meal', label: 'Repas' },
 ];
 
+/**
+ * Legend of the macro dots: shown on hover with a mouse, on tap on touch
+ * screens.
+ */
 function LegendBubble({ show }: { show: boolean }) {
   const displayed = useDelayedUnmount(show, 100);
 
@@ -51,6 +55,10 @@ function LegendBubble({ show }: { show: boolean }) {
   );
 }
 
+/**
+ * Food page with two tabs, the food library and the library meals, each with
+ * its create and edit dialog.
+ */
 export default function FoodPage() {
   const { userId } = useCurrentUser();
   const [activeTab, setActiveTab] = useState<Tab>('food');

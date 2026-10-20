@@ -23,6 +23,7 @@ interface MealListProps {
   renderAction?: (meal: Meal) => ReactNode;
 }
 
+/** Calories and macro badges of a meal, from its items. */
 function macrosOf(meal: Meal) {
   const totals = mealTotals(meal);
 
@@ -36,6 +37,10 @@ function macrosOf(meal: Meal) {
   };
 }
 
+/**
+ * The library meals, with the same search, filters and expandable rows as the
+ * food list.
+ */
 export function MealList({
   meals,
   isLoading,

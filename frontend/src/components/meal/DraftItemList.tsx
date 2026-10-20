@@ -17,6 +17,10 @@ interface DraftItemListProps {
   className?: string;
 }
 
+/**
+ * Items of a meal being edited: a food with its quantity buttons, or a quick
+ * add with its calories. Each one can be removed.
+ */
 export function DraftItemList({
   items,
   onAdjust,

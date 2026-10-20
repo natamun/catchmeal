@@ -34,6 +34,12 @@ interface SectionEdit {
   meals: Meal[];
 }
 
+/**
+ * The journal of a day (?date= in the URL): calorie and macro progress, latest
+ * weigh-in, the four meal sections and the friends feed. Adding to a section
+ * opens its own page; editing a section opens DailyMealForm with all its meals
+ * merged.
+ */
 export default function HomePage() {
   const user = useCurrentUser();
   const navigate = useNavigate();

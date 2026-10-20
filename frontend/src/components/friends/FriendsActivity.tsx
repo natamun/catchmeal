@@ -11,6 +11,10 @@ interface FriendsActivityProps {
   onReply: (activity: ActivityItem) => void;
 }
 
+/**
+ * Friends activity card of the home and friends pages. The reply button opens a
+ * chat that quotes the activity.
+ */
 export function FriendsActivity({
   activities,
   presence,

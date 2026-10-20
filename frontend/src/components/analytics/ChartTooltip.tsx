@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import type { TooltipContentProps } from 'recharts';
 
+/** White frame with a title, shared by the chart tooltips. */
 export function TooltipFrame({
   title,
   children,
@@ -16,6 +17,7 @@ export function TooltipFrame({
   );
 }
 
+/** One line of a tooltip: color dot, name and value. */
 export function TooltipRow({
   color,
   name,
@@ -40,6 +42,7 @@ export function TooltipRow({
   );
 }
 
+/** Default tooltip of the charts: one line per series at the hovered point. */
 export function ChartTooltip({ active, payload, label }: TooltipContentProps) {
   if (!active || payload.length === 0) {
     return null;

@@ -10,6 +10,10 @@ interface Props {
   isLoading?: boolean;
 }
 
+/**
+ * Weight change between the first and the last weigh-in of the period; under
+ * 0.05 kg it counts as stable.
+ */
 export function WeightVariation({ days, isLoading = false }: Props) {
   const weights = days.flatMap(({ weight }) =>
     weight === null ? [] : [weight],

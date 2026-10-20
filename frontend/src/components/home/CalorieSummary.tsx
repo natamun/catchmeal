@@ -12,6 +12,10 @@ interface Props {
 const RADIUS = 42;
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 
+/**
+ * Calories of the day in a ring: the calories left, or the excess drawn as a
+ * second lap in another color.
+ */
 export function CalorieSummary({
   consumed,
   goal,

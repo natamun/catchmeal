@@ -1,6 +1,7 @@
 import { LegalLayout } from '../components/legal/LegalLayout';
 import { PrivacyPolicyContent } from '../components/legal/PrivacyPolicyContent';
 
+/** Privacy policy page. */
 export function PrivacyPolicyPage() {
   return (
     <LegalLayout>

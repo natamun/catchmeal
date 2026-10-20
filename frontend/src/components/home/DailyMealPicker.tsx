@@ -20,6 +20,7 @@ const TAB_OPTIONS: { value: PickerTab; label: string }[] = [
   { value: 'meal', label: 'Repas' },
 ];
 
+/** Adds the id when it is missing, removes it when it is there. */
 function toggleInSet(prev: Set<number>, id: number) {
   const next = new Set(prev);
   if (next.has(id)) {
@@ -37,6 +38,11 @@ interface DailyMealPickerProps {
   onAdded: () => void;
 }
 
+/**
+ * Page content that adds foods and library meals to one section of the journal:
+ * select them in two tabs, then check the quantities in DailyMealForm before
+ * saving.
+ */
 export function DailyMealPicker({
   mealType,
   date,

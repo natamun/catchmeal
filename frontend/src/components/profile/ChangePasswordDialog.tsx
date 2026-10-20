@@ -27,6 +27,10 @@ const EMPTY_FORM: FormState = {
   confirmPassword: '',
 };
 
+/**
+ * Current password required; the new one 8 to 72 characters and different from
+ * the current one; the confirmation identical.
+ */
 function validate(form: FormState) {
   const errors: Partial<Record<Field, string>> = {};
 
@@ -50,6 +54,10 @@ function validate(form: FormState) {
   return errors;
 }
 
+/**
+ * A 400 is the backend saying the current password is wrong: its message is
+ * shown as is.
+ */
 function submitErrorMessage(error: unknown) {
   if (error instanceof ApiError && error.status === 400) {
     return error.message;
@@ -65,6 +73,10 @@ interface ChangePasswordDialogProps {
   onSuccess: () => void;
 }
 
+/**
+ * Dialog to change the password, offered to accounts that have one. Errors show
+ * only after a first submit.
+ */
 export function ChangePasswordDialog({
   dialogRef,
   onSuccess,

@@ -15,6 +15,11 @@ interface ChatWindowProps {
   onClose?: () => void;
 }
 
+/**
+ * Chat dialog with one friend, possibly quoting one of their activities.
+ * Messages go through the socket. The view follows new messages, unless the
+ * user scrolled up: then a "Nouveau message" button appears.
+ */
 export function ChatWindow({
   dialogRef,
   friend,
