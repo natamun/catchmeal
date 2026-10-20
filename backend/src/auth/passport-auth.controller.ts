@@ -19,6 +19,7 @@ import { AuthService, type SignInData } from './auth.service';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { CompleteOAuthProfileDto } from './dto/complete-oauth-profile.dto';
 import { RegisterDto } from './dto/register.dto';
+import { ResendVerificationDto } from './dto/resend-verification.dto';
 import { VerifyEmailDto } from './dto/verify-email.dto';
 import { OptionalJwtAuthGuard } from './guards/optional-jwt.guard';
 import { PassportJwtAuthGuard } from './guards/passport-jwt.guard';
@@ -89,6 +90,13 @@ export class PassportAuthController {
   @Post('verify-email')
   verifyEmail(@Body() dto: VerifyEmailDto) {
     return this.authService.verifyEmail(dto.token);
+  }
+
+  @Throttle({ default: { limit: 5, ttl: 3_600_000 } })
+  @HttpCode(HttpStatus.OK)
+  @Post('resend-verification')
+  resendVerification(@Body() dto: ResendVerificationDto) {
+    return this.authService.resendVerification(dto.email);
   }
 
   @Throttle({

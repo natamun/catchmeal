@@ -44,6 +44,22 @@ export class EmailTokenService {
     return token;
   }
 
+  async wasIssuedRecently(
+    userId: number,
+    type: EmailTokenType,
+    withinMs: number,
+  ): Promise<boolean> {
+    const count = await this.prisma.emailToken.count({
+      where: {
+        userId,
+        type,
+        createdAt: { gt: new Date(Date.now() - withinMs) },
+      },
+    });
+
+    return count > 0;
+  }
+
   async consume(token: string, type: EmailTokenType): Promise<TokenCheck> {
     const record = await this.prisma.emailToken.findUnique({
       where: { tokenHash: hashToken(token) },

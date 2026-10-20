@@ -18,6 +18,7 @@ describe('EmailTokenService', () => {
       create: jest.fn(),
       findUnique: jest.fn(),
       updateMany: jest.fn(),
+      count: jest.fn(),
     },
   };
 
@@ -174,6 +175,39 @@ describe('EmailTokenService', () => {
       const result = await service.consume('abc', EmailTokenType.VERIFY_EMAIL);
 
       expect(result).toEqual({ status: 'used', userId: 1 });
+    });
+  });
+
+  describe('wasIssuedRecently', () => {
+    it('should look for a token created within the given window', async () => {
+      prismaMock.emailToken.count.mockResolvedValue(1);
+
+      const result = await service.wasIssuedRecently(
+        1,
+        EmailTokenType.VERIFY_EMAIL,
+        60_000,
+      );
+
+      expect(result).toBe(true);
+      expect(prismaMock.emailToken.count).toHaveBeenCalledWith({
+        where: {
+          userId: 1,
+          type: EmailTokenType.VERIFY_EMAIL,
+          createdAt: { gt: new Date(now.getTime() - 60_000) },
+        },
+      });
+    });
+
+    it('should return false when no token was created within the window', async () => {
+      prismaMock.emailToken.count.mockResolvedValue(0);
+
+      const result = await service.wasIssuedRecently(
+        1,
+        EmailTokenType.VERIFY_EMAIL,
+        60_000,
+      );
+
+      expect(result).toBe(false);
     });
   });
 });

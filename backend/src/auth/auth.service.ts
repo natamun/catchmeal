@@ -15,6 +15,8 @@ import { RegisterDto } from './dto/register.dto';
 
 const SALT_ROUNDS = 10;
 
+const RESEND_COOLDOWN_MS = 60_000;
+
 const VERIFY_EMAIL_PATH = '/verify-email';
 
 type PendingVerification = { requiresVerification: true };
@@ -246,6 +248,24 @@ export class AuthService {
       case 'invalid':
         throw new BadRequestException('Ce lien est invalide.');
     }
+  }
+
+  async resendVerification(email: string): Promise<{ success: true }> {
+    const user = await this.usersService.findUserByEmail(email);
+
+    if (
+      user &&
+      !user.emailVerifiedAt &&
+      !(await this.emailTokenService.wasIssuedRecently(
+        user.id,
+        EmailTokenType.VERIFY_EMAIL,
+        RESEND_COOLDOWN_MS,
+      ))
+    ) {
+      void this.sendVerificationEmail(user.id, user.email);
+    }
+
+    return { success: true };
   }
 
   async signIn(user: SignInData): Promise<AuthResult> {

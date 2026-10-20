@@ -23,6 +23,7 @@ describe('AuthService', () => {
     create: jest.fn(),
     updatePasswordHash: jest.fn(),
     markEmailVerified: jest.fn(),
+    findUserByEmail: jest.fn(),
   };
 
   const jwtServiceMock = {
@@ -32,6 +33,7 @@ describe('AuthService', () => {
   const emailTokenServiceMock = {
     create: jest.fn(),
     consume: jest.fn(),
+    wasIssuedRecently: jest.fn(),
   };
 
   const emailServiceMock = {
@@ -371,5 +373,70 @@ describe('AuthService', () => {
         expect(usersServiceMock.markEmailVerified).not.toHaveBeenCalled();
       },
     );
+  });
+
+  describe('resendVerification', () => {
+    let sendSpy: jest.SpyInstance;
+
+    beforeEach(() => {
+      sendSpy = jest
+        .spyOn(service, 'sendVerificationEmail')
+        .mockResolvedValue(undefined);
+    });
+
+    it('should send a new link to an unverified account', async () => {
+      usersServiceMock.findUserByEmail.mockResolvedValue({
+        id: 1,
+        email: 'alice@example.com',
+        emailVerifiedAt: null,
+      });
+      emailTokenServiceMock.wasIssuedRecently.mockResolvedValue(false);
+
+      const result = await service.resendVerification('alice@example.com');
+
+      expect(result).toEqual({ success: true });
+      expect(emailTokenServiceMock.wasIssuedRecently).toHaveBeenCalledWith(
+        1,
+        EmailTokenType.VERIFY_EMAIL,
+        60_000,
+      );
+      expect(sendSpy).toHaveBeenCalledWith(1, 'alice@example.com');
+    });
+
+    it('should answer the same way and send nothing for an unknown address', async () => {
+      usersServiceMock.findUserByEmail.mockResolvedValue(null);
+
+      const result = await service.resendVerification('nobody@example.com');
+
+      expect(result).toEqual({ success: true });
+      expect(sendSpy).not.toHaveBeenCalled();
+    });
+
+    it('should answer the same way and send nothing when the address is already verified', async () => {
+      usersServiceMock.findUserByEmail.mockResolvedValue({
+        id: 1,
+        email: 'alice@example.com',
+        emailVerifiedAt: new Date(),
+      });
+
+      const result = await service.resendVerification('alice@example.com');
+
+      expect(result).toEqual({ success: true });
+      expect(sendSpy).not.toHaveBeenCalled();
+    });
+
+    it('should answer the same way and send nothing when a link was just sent', async () => {
+      usersServiceMock.findUserByEmail.mockResolvedValue({
+        id: 1,
+        email: 'alice@example.com',
+        emailVerifiedAt: null,
+      });
+      emailTokenServiceMock.wasIssuedRecently.mockResolvedValue(true);
+
+      const result = await service.resendVerification('alice@example.com');
+
+      expect(result).toEqual({ success: true });
+      expect(sendSpy).not.toHaveBeenCalled();
+    });
   });
 });
