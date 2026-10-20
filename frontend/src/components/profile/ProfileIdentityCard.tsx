@@ -528,24 +528,14 @@ export function ProfileIdentityCard({ user, onUpdate }: Props) {
             <p className="col-span-2 text-xs text-red-500">{saveError}</p>
           )}
 
-          <div className="col-span-2 flex gap-3 pt-2">
-            <button
-              type="button"
-              onClick={() => dialogRef.current?.close()}
-              disabled={saving}
-              className="flex-1 cursor-pointer rounded-xl border border-green-200 px-4 py-2.5 text-sm font-medium text-green-600 transition-colors hover:bg-green-50"
-            >
-              Annuler
-            </button>
-            <button
-              type="button"
-              onClick={() => void handleSave()}
-              disabled={saving}
-              className="flex-1 cursor-pointer rounded-xl bg-green-500 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-green-600 disabled:opacity-50"
-            >
-              {saving ? '...' : 'Sauver'}
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={() => void handleSave()}
+            disabled={saving}
+            className="col-span-2 mt-2 w-full cursor-pointer rounded-xl bg-green-500 px-6 py-3 font-semibold text-white transition-colors hover:bg-green-600 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {saving ? 'Enregistrement...' : 'Enregistrer'}
+          </button>
         </div>
       </BaseDialog>
     </>
