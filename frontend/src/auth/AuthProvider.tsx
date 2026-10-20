@@ -7,6 +7,7 @@ import { AuthContext, type AuthStatus } from './auth-context';
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [status, setStatus] = useState<AuthStatus>('loading');
+  const [loggedOut, setLoggedOut] = useState(false);
 
   useEffect(() => {
     authApi
@@ -23,18 +24,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = useCallback(async (input: authApi.LoginInput) => {
     const me = await authApi.login(input);
     setUser(me);
+    setLoggedOut(false);
     setStatus('authenticated');
   }, []);
 
   const register = useCallback(async (input: authApi.RegisterInput) => {
     const me = await authApi.register(input);
     setUser(me);
+    setLoggedOut(false);
     setStatus('authenticated');
   }, []);
 
   const logout = useCallback(async () => {
     await authApi.logout();
     setUser(null);
+    setLoggedOut(true);
     setStatus('unauthenticated');
   }, []);
 
@@ -44,7 +48,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, status, login, register, logout, updateUser }}
+      value={{ user, status, loggedOut, login, register, logout, updateUser }}
     >
       {children}
     </AuthContext.Provider>

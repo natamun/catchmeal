@@ -1,0 +1,16 @@
+export const PATHS = {
+  landing: '/',
+  login: '/login',
+  register: '/register',
+  legalNotice: '/legal-notice',
+  privacy: '/privacy',
+  terms: '/terms',
+  welcome: '/welcome',
+  home: '/home',
+  journalAdd: '/home/add/:mealType',
+  food: '/food',
+  stats: '/stats',
+  friends: '/friends',
+  profile: '/profile',
+  admin: '/admin',
+} as const;

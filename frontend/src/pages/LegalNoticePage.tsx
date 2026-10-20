@@ -1,17 +1,8 @@
-import { LegalLayout, type LegalPageId } from '../components/legal/LegalLayout';
+import { LegalLayout } from '../components/legal/LegalLayout';
 
-interface Props {
-  onBack: () => void;
-  onNavigate: (page: LegalPageId) => void;
-}
-
-export default function LegalNoticePage({ onBack, onNavigate }: Props) {
+export default function LegalNoticePage() {
   return (
-    <LegalLayout
-      current="mentions-legales"
-      onNavigate={onNavigate}
-      onBack={onBack}
-    >
+    <LegalLayout>
       <h1>Mentions légales</h1>
 
       <h2>1. Éditeur du service</h2>

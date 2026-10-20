@@ -1,22 +1,66 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { Menu, X, type LucideIcon } from 'lucide-react';
+import { Link, NavLink } from 'react-router';
 
 import { useDelayedUnmount } from '../../hooks/useDelayedUnmount';
+import { PATHS } from '../../routes';
 import { Brand } from '../ui/Brand';
 
-interface NavLink {
-  label: string;
-  onClick: () => void;
-  current?: boolean;
-}
+type Target = { to: string } | { onClick: () => void };
+
+type HeaderLink = Target & { label: string };
+
+type HeaderAction = Target & { label: string; icon: LucideIcon };
 
 interface Props {
-  links: NavLink[];
-  action: { label: string; icon: LucideIcon; onClick: () => void };
-  onBrandClick: () => void;
+  links: HeaderLink[];
+  action: HeaderAction;
 }
 
-export default function PublicHeader({ links, action, onBrandClick }: Props) {
+interface PressableProps {
+  target: Target;
+  className: string;
+  ariaLabel?: string;
+  onPress?: () => void;
+  children: ReactNode;
+}
+
+function Pressable({
+  target,
+  className,
+  ariaLabel,
+  onPress,
+  children,
+}: PressableProps) {
+  if ('to' in target) {
+    return (
+      <NavLink
+        to={target.to}
+        aria-label={ariaLabel}
+        onClick={onPress}
+        className={className}
+      >
+        {children}
+      </NavLink>
+    );
+  }
+
+  return (
+    <button
+      type="button"
+      aria-label={ariaLabel}
+      onClick={() => {
+        onPress?.();
+        target.onClick();
+      }}
+      className={`cursor-pointer ${className}`}
+    >
+      {children}
+    </button>
+  );
+}
+
+export default function PublicHeader({ links, action }: Props) {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuVisible = useDelayedUnmount(menuOpen, 100);
   const burgerRef = useRef<HTMLButtonElement>(null);
@@ -38,49 +82,45 @@ export default function PublicHeader({ links, action, onBrandClick }: Props) {
     return () => document.removeEventListener('keydown', closeOnEscape);
   }, [menuOpen]);
 
-  const closeMenuThen = (callback: () => void) => () => {
-    setMenuOpen(false);
-    callback();
-  };
+  const closeMenu = () => setMenuOpen(false);
 
   return (
     <header className="sticky top-0 z-10 h-header border-b border-green-200 bg-white/75 backdrop-blur-md">
       <div className="mx-auto flex h-full w-full max-w-6xl items-center justify-between px-8">
         <div className="flex">
-          <button
-            type="button"
-            onClick={closeMenuThen(onBrandClick)}
-            className="cursor-pointer"
+          <Link
+            to={PATHS.landing}
+            onClick={() => {
+              closeMenu();
+              window.scrollTo({ top: 0 });
+            }}
           >
             <Brand />
-          </button>
+          </Link>
         </div>
         <nav aria-label="Navigation principale" className="hidden md:block">
           <ul className="flex items-center gap-8 text-sm font-medium text-green-700">
             {links.map((link) => (
               <li key={link.label}>
-                <button
-                  type="button"
-                  onClick={link.onClick}
-                  aria-current={link.current ? 'page' : undefined}
-                  className="cursor-pointer transition-colors hover:text-green-500 aria-[current=page]:text-green-500"
+                <Pressable
+                  target={link}
+                  className="transition-colors hover:text-green-500 aria-[current=page]:text-green-500"
                 >
                   {link.label}
-                </button>
+                </Pressable>
               </li>
             ))}
           </ul>
         </nav>
         <div className="flex items-center gap-4">
-          <button
-            type="button"
-            onClick={action.onClick}
-            aria-label={action.label}
-            className="flex cursor-pointer text-sm font-medium text-green-700 transition-colors hover:text-green-500"
+          <Pressable
+            target={action}
+            ariaLabel={action.label}
+            className="flex text-sm font-medium text-green-700 transition-colors hover:text-green-500"
           >
             <ActionIcon className="h-6 w-6 md:hidden" />
             <span className="hidden md:inline">{action.label}</span>
-          </button>
+          </Pressable>
           <button
             ref={burgerRef}
             type="button"
@@ -107,14 +147,13 @@ export default function PublicHeader({ links, action, onBrandClick }: Props) {
           <ul className="flex flex-col divide-y divide-green-200 text-sm font-medium text-green-700">
             {links.map((link) => (
               <li key={link.label}>
-                <button
-                  type="button"
-                  onClick={closeMenuThen(link.onClick)}
-                  aria-current={link.current ? 'page' : undefined}
-                  className="block w-full cursor-pointer px-8 py-3 text-left transition-colors hover:text-green-500 aria-[current=page]:text-green-500"
+                <Pressable
+                  target={link}
+                  onPress={closeMenu}
+                  className="block w-full px-8 py-3 text-left transition-colors hover:text-green-500 aria-[current=page]:text-green-500"
                 >
                   {link.label}
-                </button>
+                </Pressable>
               </li>
             ))}
           </ul>

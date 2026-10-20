@@ -1,51 +1,27 @@
-import { useEffect, type ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { ArrowLeft } from 'lucide-react';
 
+import { PATHS } from '../../routes';
+import { useGoBack } from '../../routing/navigation';
 import PublicFooter from '../layout/PublicFooter';
 import PublicHeader from '../layout/PublicHeader';
-
-export type LegalPageId = 'confidentialite' | 'conditions' | 'mentions-legales';
-
-const LEGAL_PAGES: { id: LegalPageId; label: string; shortLabel: string }[] = [
-  {
-    id: 'confidentialite',
-    label: 'Politique de confidentialité',
-    shortLabel: 'Confidentialité',
-  },
-  {
-    id: 'conditions',
-    label: "Conditions d'utilisation",
-    shortLabel: 'Conditions',
-  },
-  {
-    id: 'mentions-legales',
-    label: 'Mentions légales',
-    shortLabel: 'Mentions légales',
-  },
-];
+import { LEGAL_PAGES } from './legalPages';
 
 interface Props {
-  current: LegalPageId;
-  onNavigate: (page: LegalPageId) => void;
-  onBack: () => void;
   children: ReactNode;
 }
 
-export function LegalLayout({ current, onNavigate, onBack, children }: Props) {
-  useEffect(() => {
-    window.scrollTo({ top: 0 });
-  }, []);
+export function LegalLayout({ children }: Props) {
+  const goBack = useGoBack(PATHS.landing);
 
   return (
     <div className="flex min-h-screen flex-col bg-white">
       <PublicHeader
-        links={LEGAL_PAGES.map(({ id, shortLabel }) => ({
+        links={LEGAL_PAGES.map(({ path, shortLabel }) => ({
           label: shortLabel,
-          onClick: () => onNavigate(id),
-          current: id === current,
+          to: path,
         }))}
-        action={{ label: 'Retour', icon: ArrowLeft, onClick: onBack }}
-        onBrandClick={onBack}
+        action={{ label: 'Retour', icon: ArrowLeft, onClick: goBack }}
       />
       <main
         id="main-content"
@@ -53,12 +29,7 @@ export function LegalLayout({ current, onNavigate, onBack, children }: Props) {
       >
         {children}
       </main>
-      <PublicFooter
-        legalLinks={LEGAL_PAGES.map(({ id, label }) => ({
-          label,
-          onClick: () => onNavigate(id),
-        }))}
-      />
+      <PublicFooter />
     </div>
   );
 }

@@ -11,6 +11,7 @@ import {
   UtensilsCrossed,
   Weight,
 } from 'lucide-react';
+import { Link } from 'react-router';
 
 import FeatureCard from '../components/landing/FeatureCard';
 import LandingSection from '../components/landing/LandingSection';
@@ -18,14 +19,7 @@ import PhoneMockup from '../components/landing/PhoneMockup';
 import PublicFooter from '../components/layout/PublicFooter';
 import PublicHeader from '../components/layout/PublicHeader';
 import { OpenFoodFactsLink } from '../components/ui/OpenFoodFactsLink';
-
-interface Props {
-  onLogin: () => void;
-  onRegister: () => void;
-  onMentionsLegales: () => void;
-  onConfidentialite: () => void;
-  onConditions: () => void;
-}
+import { PATHS } from '../routes';
 
 const NAV_LINKS = [
   { label: 'Avantages', id: 'avantages' },
@@ -100,19 +94,12 @@ const COMMITMENTS = [
   'Aucune publicité, aucune revente de données.',
 ];
 
-export default function LandingPage({
-  onLogin,
-  onRegister,
-  onMentionsLegales,
-  onConfidentialite,
-  onConditions,
-}: Props) {
+export default function LandingPage() {
   return (
     <div id="landing-page" className="bg-white">
       <PublicHeader
         links={NAV_LINKS}
-        action={{ label: 'Connexion', icon: LogIn, onClick: onLogin }}
-        onBrandClick={() => window.scrollTo({ top: 0 })}
+        action={{ label: 'Connexion', icon: LogIn, to: PATHS.login }}
       />
 
       <main id="main-content">
@@ -140,13 +127,12 @@ export default function LandingPage({
                 Scannez vos produits du quotidien, suivez vos repas et
                 motivez-vous entre amis.
               </p>
-              <button
-                type="button"
-                onClick={onRegister}
-                className="w-full max-w-xs cursor-pointer rounded-xl bg-green-500 py-3 font-semibold text-white shadow-sm transition-colors hover:bg-green-600"
+              <Link
+                to={PATHS.register}
+                className="inline-block w-full max-w-xs rounded-xl bg-green-500 py-3 text-center font-semibold text-white shadow-sm transition-colors hover:bg-green-600"
               >
                 Créer un compte
-              </button>
+              </Link>
               <p className="mt-4 text-sm text-green-600">
                 Gratuit · Sans publicité · Plus de 100&nbsp;000 produits suisses
               </p>
@@ -212,13 +198,12 @@ export default function LandingPage({
                   </li>
                 ))}
               </ul>
-              <button
-                type="button"
-                onClick={onConfidentialite}
-                className="mt-5 cursor-pointer text-sm font-medium text-green-700 underline underline-offset-2 transition-colors hover:text-green-500"
+              <Link
+                to={PATHS.privacy}
+                className="mt-5 inline-block text-sm font-medium text-green-700 underline underline-offset-2 transition-colors hover:text-green-500"
               >
                 Lire la politique de confidentialité
-              </button>
+              </Link>
             </div>
           </div>
         </LandingSection>
@@ -238,24 +223,17 @@ export default function LandingPage({
               Créez votre compte et commencez à suivre vos repas dès
               aujourd'hui.
             </p>
-            <button
-              type="button"
-              onClick={onRegister}
-              className="cursor-pointer rounded-xl bg-white px-8 py-3 font-semibold text-green-700 shadow-sm transition-colors hover:bg-green-100"
+            <Link
+              to={PATHS.register}
+              className="inline-block rounded-xl bg-white px-8 py-3 text-center font-semibold text-green-700 shadow-sm transition-colors hover:bg-green-100"
             >
               Créer un compte
-            </button>
+            </Link>
           </div>
         </section>
       </main>
 
-      <PublicFooter
-        legalLinks={[
-          { label: 'Politique de confidentialité', onClick: onConfidentialite },
-          { label: "Conditions d'utilisation", onClick: onConditions },
-          { label: 'Mentions légales', onClick: onMentionsLegales },
-        ]}
-      />
+      <PublicFooter />
     </div>
   );
 }

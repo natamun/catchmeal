@@ -1,5 +1,6 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { CheckCircle2 } from 'lucide-react';
+import { useLocation, useNavigate } from 'react-router';
 
 import { useAuth } from '../auth/auth-context.ts';
 import AddFriendDialog from '../components/friends/AddFriendDialog.tsx';
@@ -30,6 +31,7 @@ import { useFriends } from '../hooks/useFriends.ts';
 import { usePresence } from '../hooks/usePresence.ts';
 import { useTimeout } from '../hooks/useTimeout.ts';
 import { useUnreadMessages } from '../hooks/useUnreadMessages.ts';
+import { navigationState } from '../routing/navigation';
 import { requestErrorMessage } from '../utils/requestErrorMessage';
 
 type Tab = 'friends' | 'requests';
@@ -39,12 +41,11 @@ const TAB_OPTIONS: { value: Tab; label: string }[] = [
   { value: 'requests', label: 'Demandes' },
 ];
 
-interface FriendsPageProps {
-  pendingReply?: ActivityItem | null;
-}
-
-export default function FriendsPage({ pendingReply }: FriendsPageProps) {
+export default function FriendsPage() {
   const { user } = useAuth();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const replyTo = navigationState(location).replyTo ?? null;
   const userId = user!.userId;
   const {
     friends,
@@ -64,16 +65,22 @@ export default function FriendsPage({ pendingReply }: FriendsPageProps) {
   const addDialogRef = useRef<HTMLDialogElement>(null);
   const confirmDialogRef = useRef<HTMLDialogElement>(null);
   const [chatActivity, setChatActivity] = useState<ActivityItem | null>(
-    pendingReply ?? null,
+    replyTo,
   );
   const [chatFriend, setChatFriend] = useState<UserSummary | null>(
-    () => pendingReply?.user ?? null,
+    () => replyTo?.user ?? null,
   );
   const chatDialogRef = useRef<HTMLDialogElement>(null);
   const presence = usePresence(userId);
   const unreadIds = useUnreadMessages(userId, chatFriend?.id ?? null);
 
   useTimeout(() => setSuccessMessage(null), successMessage ? 3000 : null);
+
+  useEffect(() => {
+    if (replyTo) {
+      void navigate(location.pathname, { replace: true });
+    }
+  }, [replyTo, navigate, location.pathname]);
 
   const runAction = async (
     id: number,

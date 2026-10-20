@@ -1,26 +1,37 @@
-import { lazy, Suspense, useEffect, useState } from 'react';
+import { lazy, useEffect } from 'react';
+import {
+  BrowserRouter,
+  Navigate,
+  Route,
+  Routes,
+  useNavigate,
+  useSearchParams,
+} from 'react-router';
 
 import { useAuth } from './auth/auth-context';
 import { AuthProvider } from './auth/AuthProvider';
-import ChatBotPopup from './components/ai/ChatBotPopup';
-import type { ActivityItem } from './components/friends/types';
-import { ConnectionBanner } from './components/layout/ConnectionBanner';
-import Nav, { type Tab } from './components/layout/Nav';
+import AppLayout from './components/layout/AppLayout';
 import { deleteMyAccount } from './components/profile/api';
 import AuthPage from './pages/AuthPage';
 import LandingPage from './pages/LandingPage';
 import LegalNoticePage from './pages/LegalNoticePage';
+import NotFoundPage from './pages/NotFoundPage';
 import OAuthOnboardingPage from './pages/OAuthOnboardingPage';
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 import TermsOfServicePage from './pages/TermsOfServicePage';
+import { PATHS } from './routes';
+import { RequireAdmin, RequireAuth, RequireGuest } from './routing/guards';
+import type { NavigationState } from './routing/navigation';
+import { PageTitle } from './routing/PageTitle';
+import { ScrollToTop } from './routing/ScrollToTop';
 import { SocketProvider } from './socket/SocketProvider';
-import type { ChatMessage } from './types/ChatBotType';
 
 const SESSION_HINT_KEY = 'session-hint';
 const PRELOAD_DELAY_MS = 1000;
 
 const loaders = {
   home: () => import('./pages/HomePage'),
+  journalAdd: () => import('./pages/JournalAddPage'),
   food: () => import('./pages/FoodPage'),
   stats: () => import('./pages/StatsPage'),
   friends: () => import('./pages/FriendsPage'),
@@ -29,6 +40,7 @@ const loaders = {
 };
 
 const HomePage = lazy(loaders.home);
+const JournalAddPage = lazy(loaders.journalAdd);
 const FoodPage = lazy(loaders.food);
 const StatsPage = lazy(loaders.stats);
 const FriendsPage = lazy(loaders.friends);
@@ -58,49 +70,54 @@ function saveSessionHint(connected: boolean) {
 
 if (hasSessionHint()) preload(loaders.home);
 
-type Page =
-  | 'landing'
-  | 'login'
-  | 'register'
-  | 'mentions-legales'
-  | 'confidentialite'
-  | 'conditions';
+function LandingRoute() {
+  const { status } = useAuth();
+  const [params] = useSearchParams();
 
-function AppShell() {
-  const { status, user, logout } = useAuth();
-  const [page, setPage] = useState<Page>(() => {
-    const params = new URLSearchParams(window.location.search);
-    return params.get('error') === 'oauth_failed' ? 'login' : 'landing';
-  });
-  const [previousPage, setPreviousPage] = useState<Page>('landing');
-  const [activeTab, setActiveTab] = useState<Tab>('home');
-  const [pendingReply, setPendingReply] = useState<ActivityItem | null>(null);
-  const [oauthError] = useState<string | null>(() => {
-    const params = new URLSearchParams(window.location.search);
-    if (params.get('error') === 'oauth_failed') {
-      window.history.replaceState({}, '', window.location.pathname);
-      return 'La connexion a échoué. Réessayez.';
-    }
+  if (params.get('error') === 'oauth_failed') {
+    const state: NavigationState = { oauthFailed: true };
+
+    return <Navigate to={PATHS.login} replace state={state} />;
+  }
+
+  if (status === 'authenticated') {
+    return (
+      <Navigate
+        to={params.get('onboarding') === '1' ? PATHS.welcome : PATHS.home}
+        replace
+      />
+    );
+  }
+
+  return <LandingPage />;
+}
+
+function WelcomeRoute() {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  if (!user) {
     return null;
-  });
-  const [isOnboarding, setIsOnboarding] = useState<boolean>(() => {
-    const params = new URLSearchParams(window.location.search);
-    if (params.get('onboarding') === '1') {
-      window.history.replaceState({}, '', window.location.pathname);
-      return true;
-    }
-    return false;
-  });
-  const [isOpen, setIsOpen] = useState<boolean>(false);
-  const [isJournalPickerOpen, setIsJournalPickerOpen] = useState(false);
-  const [message, setMessage] = useState<ChatMessage[]>([
-    {
-      role: 'assistant',
-      content:
-        "Salut ! Je peux t'aider à comprendre tes stats ou te conseiller sur tes repas 😊",
-    },
-  ]);
+  }
 
+  return (
+    <OAuthOnboardingPage
+      prefill={{
+        username: '',
+        name: user.name ?? '',
+        email: user.email ?? '',
+      }}
+      onComplete={() => void navigate(PATHS.home, { replace: true })}
+      onBack={async () => {
+        await deleteMyAccount().catch(() => undefined);
+        await logout();
+      }}
+    />
+  );
+}
+
+function AppRoutes() {
+  const { status, user } = useAuth();
   const role = user?.role;
 
   useEffect(() => {
@@ -109,6 +126,7 @@ function AppShell() {
     if (status !== 'authenticated') return;
 
     const timer = window.setTimeout(() => {
+      preload(loaders.journalAdd);
       preload(loaders.food);
       preload(loaders.stats);
       preload(loaders.friends);
@@ -119,11 +137,6 @@ function AppShell() {
     return () => window.clearTimeout(timer);
   }, [status, role]);
 
-  const navigateTo = (dest: Page) => {
-    setPreviousPage(page);
-    setPage(dest);
-  };
-
   if (status === 'loading') {
     return (
       <div className="flex min-h-screen items-center justify-center text-sm text-green-500">
@@ -132,149 +145,73 @@ function AppShell() {
     );
   }
 
-  if (page === 'mentions-legales') {
-    return (
-      <LegalNoticePage
-        onBack={() => setPage(previousPage)}
-        onNavigate={setPage}
-      />
-    );
-  }
-
-  if (page === 'confidentialite') {
-    return (
-      <PrivacyPolicyPage
-        onBack={() => setPage(previousPage)}
-        onNavigate={setPage}
-      />
-    );
-  }
-
-  if (page === 'conditions') {
-    return (
-      <TermsOfServicePage
-        onBack={() => setPage(previousPage)}
-        onNavigate={setPage}
-      />
-    );
-  }
-
-  if (status === 'unauthenticated') {
-    if (page === 'login' || page === 'register') {
-      return (
-        <AuthPage
-          initialMode={page}
-          onCancel={() => setPage('landing')}
-          oauthError={oauthError}
-        />
-      );
-    }
-
-    return (
-      <LandingPage
-        onLogin={() => navigateTo('login')}
-        onRegister={() => navigateTo('register')}
-        onMentionsLegales={() => navigateTo('mentions-legales')}
-        onConfidentialite={() => navigateTo('confidentialite')}
-        onConditions={() => navigateTo('conditions')}
-      />
-    );
-  }
-
-  const isAdmin = user?.role === 'ADMIN';
-  const hasAssistant =
-    activeTab === 'stats' || activeTab === 'home' || activeTab === 'food';
-
-  if (isOnboarding && user) {
-    return (
-      <OAuthOnboardingPage
-        prefill={{
-          username: '',
-          name: user.name ?? '',
-          email: user.email ?? '',
-        }}
-        onComplete={() => setIsOnboarding(false)}
-        onBack={async () => {
-          try {
-            await deleteMyAccount();
-          } catch {
-            /* ignore */
-          }
-          await logout();
-        }}
-      />
-    );
-  }
-
-  const pages: Record<Tab, React.ReactNode> = {
-    home: (
-      <HomePage
-        onReplyToActivity={(activity) => {
-          setPendingReply(activity);
-          setActiveTab('friends');
-        }}
-        onPickerChange={setIsJournalPickerOpen}
-      />
-    ),
-    food: <FoodPage />,
-    stats: <StatsPage />,
-    friends: <FriendsPage pendingReply={pendingReply} />,
-    profile: (
-      <ProfilePage
-        onPolitiqueConfidentialite={() => navigateTo('confidentialite')}
-      />
-    ),
-    admin: isAdmin ? <AdminPage /> : <HomePage />,
-  };
-
   return (
-    <div className="min-h-screen bg-green-50">
-      <ConnectionBanner />
-      <Nav
-        active={activeTab}
-        onChange={(tab) => {
-          setPendingReply(null);
-          setActiveTab(tab);
-        }}
-        isAdmin={isAdmin}
+    <Routes>
+      <Route path={PATHS.landing} element={<LandingRoute />} />
+      <Route
+        path={PATHS.login}
+        element={
+          <RequireGuest>
+            <AuthPage />
+          </RequireGuest>
+        }
       />
-      <main
-        id="main-content"
-        className={`mx-auto max-w-6xl px-6 pt-6 ${
-          hasAssistant
-            ? 'pb-24 pointer-coarse:pb-[calc(var(--spacing-bottom-nav)+6rem+env(safe-area-inset-bottom))]'
-            : 'pb-8 pointer-coarse:pb-[calc(var(--spacing-bottom-nav)+2rem+env(safe-area-inset-bottom))]'
-        }`}
+      <Route
+        path={PATHS.register}
+        element={
+          <RequireGuest>
+            <AuthPage />
+          </RequireGuest>
+        }
+      />
+      <Route path={PATHS.legalNotice} element={<LegalNoticePage />} />
+      <Route path={PATHS.privacy} element={<PrivacyPolicyPage />} />
+      <Route path={PATHS.terms} element={<TermsOfServicePage />} />
+      <Route
+        path={PATHS.welcome}
+        element={
+          <RequireAuth>
+            <WelcomeRoute />
+          </RequireAuth>
+        }
+      />
+      <Route
+        element={
+          <RequireAuth>
+            <AppLayout />
+          </RequireAuth>
+        }
       >
-        <Suspense
-          fallback={
-            <div className="flex h-40 items-center justify-center text-sm text-green-500">
-              Chargement...
-            </div>
+        <Route path={PATHS.home} element={<HomePage />} />
+        <Route path={PATHS.journalAdd} element={<JournalAddPage />} />
+        <Route path={PATHS.food} element={<FoodPage />} />
+        <Route path={PATHS.stats} element={<StatsPage />} />
+        <Route path={PATHS.friends} element={<FriendsPage />} />
+        <Route path={PATHS.profile} element={<ProfilePage />} />
+        <Route
+          path={PATHS.admin}
+          element={
+            <RequireAdmin>
+              <AdminPage />
+            </RequireAdmin>
           }
-        >
-          {pages[activeTab]}
-        </Suspense>
-      </main>
-      {hasAssistant && !isJournalPickerOpen && (
-        <ChatBotPopup
-          isOpen={isOpen}
-          onToggle={setIsOpen}
-          messages={message}
-          onMessagesChange={setMessage}
-          activePage={activeTab}
         />
-      )}
-    </div>
+      </Route>
+      <Route path="*" element={<NotFoundPage />} />
+    </Routes>
   );
 }
 
 export default function App() {
   return (
-    <AuthProvider>
-      <SocketProvider>
-        <AppShell />
-      </SocketProvider>
-    </AuthProvider>
+    <BrowserRouter>
+      <ScrollToTop />
+      <PageTitle />
+      <AuthProvider>
+        <SocketProvider>
+          <AppRoutes />
+        </SocketProvider>
+      </AuthProvider>
+    </BrowserRouter>
   );
 }
