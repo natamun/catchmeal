@@ -12,6 +12,7 @@ import { requestErrorMessage } from '../../utils/requestErrorMessage';
 import { BaseDialog } from '../ui/BaseDialog';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
 import { FieldError } from '../ui/FieldError';
+import { LABEL_CLASS } from '../ui/fieldStyle';
 import { Input } from '../ui/Input';
 import { PillTabs } from '../ui/PillTabs';
 import { useToast } from '../ui/toast-context';
@@ -42,9 +43,6 @@ const EMPTY_FORM: FoodItemFormState = {
   carbs: '',
   fat: '',
 };
-
-const LABEL_CLASS =
-  'text-xs font-semibold tracking-wide text-green-500 uppercase';
 
 const UNIT_OPTIONS = [
   { value: 'GRAM', label: 'g' },

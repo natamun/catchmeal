@@ -4,6 +4,7 @@ import * as Popover from '@radix-ui/react-popover';
 import { requestErrorMessage } from '../../utils/requestErrorMessage';
 import { BaseDialog } from '../ui/BaseDialog';
 import { DropdownPanel } from '../ui/DropdownPanel';
+import { LABEL_CLASS } from '../ui/fieldStyle';
 import { Input } from '../ui/Input';
 import { searchUsers, sendFriendRequest } from './api';
 import type { UserSummary } from './types';
@@ -110,10 +111,7 @@ export default function AddFriendDialog({
     >
       <Popover.Root open={isSearchOpen} onOpenChange={() => {}}>
         <Popover.Anchor className="flex flex-col gap-1.5">
-          <label
-            htmlFor="friend-search"
-            className="text-xs font-semibold tracking-wide text-green-500 uppercase"
-          >
+          <label htmlFor="friend-search" className={LABEL_CLASS}>
             Pseudo
           </label>
           <Input

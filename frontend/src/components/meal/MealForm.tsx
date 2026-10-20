@@ -11,6 +11,7 @@ import { BaseDialog } from '../ui/BaseDialog';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
 import { DropdownPanel } from '../ui/DropdownPanel';
 import { FieldError } from '../ui/FieldError';
+import { LABEL_CLASS } from '../ui/fieldStyle';
 import { Input } from '../ui/Input';
 import { MacroSummary } from '../ui/MacroSummary';
 import { useToast } from '../ui/toast-context';
@@ -29,9 +30,6 @@ import {
   type QuickAddField,
 } from './quickMealAdd';
 import type { Meal, MealInput } from './types';
-
-const LABEL_CLASS =
-  'text-xs font-semibold tracking-wide text-green-500 uppercase';
 
 interface MealFormProps {
   dialogRef: RefObject<HTMLDialogElement | null>;

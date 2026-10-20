@@ -11,14 +11,12 @@ import { formatDayMonth } from '../../utils/format';
 import { BaseDialog } from '../ui/BaseDialog';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
 import { FieldError } from '../ui/FieldError';
+import { LABEL_CLASS } from '../ui/fieldStyle';
 import { Input } from '../ui/Input';
 import { deleteWeight, logWeight, updateWeight, type WeightEntry } from './api';
 import { COMPOSITION, MEASURES, type MeasureKey } from './measures';
 
 const [WEIGHT] = MEASURES;
-
-const LABEL_CLASS =
-  'text-xs font-semibold tracking-wide text-green-500 uppercase';
 
 function toText(value: number | null | undefined) {
   return String(value ?? '').replace('.', ',');

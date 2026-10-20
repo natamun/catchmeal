@@ -2,13 +2,16 @@ import { useState, type FormEvent, type RefObject } from 'react';
 
 import { ApiError } from '../../utils/request';
 import { requestErrorMessage } from '../../utils/requestErrorMessage';
+import {
+  MAX_LENGTH,
+  maxLengthMessage,
+  MIN_LENGTH,
+  minLengthMessage,
+} from '../../utils/validation';
 import { BaseDialog } from '../ui/BaseDialog';
 import { FormField } from '../ui/FormField';
 import { Input } from '../ui/Input';
 import { changePassword } from './api';
-
-const MIN_LENGTH = 8;
-const MAX_LENGTH = 72;
 
 interface FormState {
   currentPassword: string;
@@ -31,10 +34,10 @@ function validate(form: FormState) {
     errors.currentPassword = 'Saisissez votre mot de passe actuel';
   }
 
-  if (form.newPassword.length < MIN_LENGTH) {
-    errors.newPassword = `Le nouveau mot de passe doit faire au moins ${MIN_LENGTH} caractères`;
-  } else if (form.newPassword.length > MAX_LENGTH) {
-    errors.newPassword = `Le nouveau mot de passe doit faire ${MAX_LENGTH} caractères au maximum`;
+  if (form.newPassword.length < MIN_LENGTH.password) {
+    errors.newPassword = minLengthMessage(MIN_LENGTH.password);
+  } else if (form.newPassword.length > MAX_LENGTH.password) {
+    errors.newPassword = maxLengthMessage(MAX_LENGTH.password);
   } else if (form.newPassword === form.currentPassword) {
     errors.newPassword =
       "Le nouveau mot de passe doit être différent de l'ancien";
@@ -152,7 +155,7 @@ export function ChangePasswordDialog({
                 aria-describedby={`${id}-hint`}
               />
               <p id={`${id}-hint`} className="text-xs text-green-500">
-                {MIN_LENGTH} caractères minimum
+                {minLengthMessage(MIN_LENGTH.password)}
               </p>
             </>
           )}

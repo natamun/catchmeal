@@ -6,9 +6,18 @@ import { useAuth } from '../auth/auth-context';
 import AuthBrandPanel from '../components/auth/AuthBrandPanel';
 import { Brand } from '../components/ui/Brand';
 import { FieldError } from '../components/ui/FieldError';
+import { LABEL_CLASS } from '../components/ui/fieldStyle';
 import { Input } from '../components/ui/Input';
 import { useTimeout } from '../hooks/useTimeout';
 import { requestErrorMessage } from '../utils/requestErrorMessage';
+import {
+  isValidEmail,
+  MAX_LENGTH,
+  maxLengthMessage,
+  MIN_LENGTH,
+  minLengthMessage,
+  usernameError,
+} from '../utils/validation';
 
 interface Props {
   prefill: {
@@ -26,35 +35,27 @@ interface FormState {
   email: string;
 }
 
-const LABEL_CLASS =
-  'text-xs font-semibold tracking-wide text-green-500 uppercase';
-
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@.]{2,}$/;
-const MAX_LENGTH = { username: 30, name: 80, email: 255 };
-
 const SUBMIT_ERRORS: Record<number, string> = {
   409: "Ce nom d'utilisateur ou cet email est déjà pris.",
 };
 
 function validate(form: FormState): Partial<Record<keyof FormState, string>> {
   const errors: Partial<Record<keyof FormState, string>> = {};
-  const username = form.username.trim();
   const name = form.name.trim();
   const email = form.email.trim();
 
-  if (username.length < 3) {
-    errors.username = 'Au moins 3 caractères';
-  } else if (username.length > MAX_LENGTH.username) {
-    errors.username = `${MAX_LENGTH.username} caractères maximum`;
+  const usernameMessage = usernameError(form.username);
+  if (usernameMessage) {
+    errors.username = usernameMessage;
   }
 
   if (name === '') {
     errors.name = 'Nom requis';
   } else if (name.length > MAX_LENGTH.name) {
-    errors.name = `${MAX_LENGTH.name} caractères maximum`;
+    errors.name = maxLengthMessage(MAX_LENGTH.name);
   }
 
-  if (!EMAIL_PATTERN.test(email) || email.length > MAX_LENGTH.email) {
+  if (!isValidEmail(email)) {
     errors.email = 'Email invalide';
   }
 
@@ -184,7 +185,7 @@ export default function OAuthOnboardingPage({
               <Input
                 id="onboarding-username"
                 type="text"
-                placeholder="3 caractères minimum"
+                placeholder={minLengthMessage(MIN_LENGTH.username)}
                 value={form.username}
                 onChange={(e) => handleChange('username', e.target.value)}
                 onFocus={() => handleFocus('username')}

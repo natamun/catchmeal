@@ -10,6 +10,7 @@ import {
   WHOLE_NUMBER_ONLY,
 } from '../../utils/decimals';
 import { requestErrorMessage } from '../../utils/requestErrorMessage';
+import { usernameError } from '../../utils/validation';
 import { Avatar } from '../ui/Avatar';
 import { BaseDialog } from '../ui/BaseDialog';
 import { EditIconButton } from '../ui/EditIconButton';
@@ -62,9 +63,8 @@ const GOAL_LIMITS = [
 
 function validate(form: FormState): Partial<Record<Field, string>> {
   const errors: Partial<Record<Field, string>> = {};
-  if (form.username.trim().length < 3) errors.username = 'Minimum 3 caractères';
-  else if (form.username.trim().length > 30)
-    errors.username = 'Maximum 30 caractères';
+  const usernameMessage = usernameError(form.username);
+  if (usernameMessage) errors.username = usernameMessage;
   if (form.height) {
     const h = parseDecimal(form.height);
     if (h === null || isNaN(h)) errors.height = 'Valeur invalide';

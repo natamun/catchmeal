@@ -6,15 +6,13 @@ import { useHasCamera } from '../../hooks/useHasCamera';
 import { useTimeout } from '../../hooks/useTimeout';
 import { ApiError } from '../../utils/request';
 import { FieldError } from '../ui/FieldError';
+import { LABEL_CLASS } from '../ui/fieldStyle';
 import { Input } from '../ui/Input';
 import { lookupOffProduct } from './api';
 import { isValidBarcode } from './barcode';
 import type { OffProduct } from './types';
 
 const BarcodeScannerDialog = lazy(() => import('./BarcodeScannerDialog'));
-
-const LABEL_CLASS =
-  'text-xs font-semibold tracking-wide text-green-500 uppercase';
 
 const ICON_BUTTON_CLASS =
   'flex w-11 shrink-0 cursor-pointer items-center justify-center rounded-xl border border-green-200 text-green-600 transition-colors hover:bg-green-50 disabled:cursor-not-allowed disabled:opacity-60';

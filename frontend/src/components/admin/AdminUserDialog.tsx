@@ -2,10 +2,12 @@ import { useId, useRef, useState, type RefObject } from 'react';
 import { Trash2 } from 'lucide-react';
 
 import { requestErrorMessage } from '../../utils/requestErrorMessage';
+import { usernameError } from '../../utils/validation';
 import { Avatar } from '../ui/Avatar';
 import { BaseDialog } from '../ui/BaseDialog';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
 import { FieldError } from '../ui/FieldError';
+import { LABEL_CLASS } from '../ui/fieldStyle';
 import { Input } from '../ui/Input';
 import { SelectDropdown } from '../ui/SelectDropdown';
 import StatTile from '../ui/StatTile';
@@ -15,9 +17,6 @@ import {
   type AdminUser,
   type AdminUserChanges,
 } from './api';
-
-const LABEL_CLASS =
-  'text-xs font-semibold tracking-wide text-green-500 uppercase';
 
 const ROLE_OPTIONS = [
   { value: 'USER', label: 'Utilisateur' },
@@ -40,13 +39,6 @@ function getAuthMethod(user: AdminUser): string {
   if (user.username.startsWith('github_')) return 'GitHub';
   if (user.username.startsWith('42_')) return '42';
   return 'OAuth';
-}
-
-function usernameError(username: string) {
-  const length = username.trim().length;
-  if (length < 3) return 'Minimum 3 caractères';
-  if (length > 30) return 'Maximum 30 caractères';
-  return undefined;
 }
 
 interface PanelProps {

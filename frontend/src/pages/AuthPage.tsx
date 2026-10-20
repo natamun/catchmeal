@@ -10,11 +10,19 @@ import { TermsOfServiceContent } from '../components/legal/TermsOfServiceContent
 import { BaseDialog } from '../components/ui/BaseDialog';
 import { Brand } from '../components/ui/Brand';
 import { FieldError } from '../components/ui/FieldError';
+import { LABEL_CLASS } from '../components/ui/fieldStyle';
 import { Input } from '../components/ui/Input';
 import { useTimeout } from '../hooks/useTimeout';
 import { PATHS } from '../routes';
 import { navigationState } from '../routing/navigation';
 import { requestErrorMessage } from '../utils/requestErrorMessage';
+import {
+  isValidEmail,
+  MAX_LENGTH,
+  maxLengthMessage,
+  MIN_LENGTH,
+  minLengthMessage,
+} from '../utils/validation';
 
 type Mode = 'login' | 'register';
 
@@ -34,11 +42,6 @@ const EMPTY_FORM: AuthFormState = {
   password: '',
 };
 
-const LABEL_CLASS =
-  'text-xs font-semibold tracking-wide text-green-500 uppercase';
-
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@.]{2,}$/;
-const MAX_LENGTH = { username: 30, name: 80, email: 255, password: 72 };
 const SUBMIT_ERRORS: Record<number, string> = {
   401: "Nom d'utilisateur ou mot de passe incorrect.",
   409: "Ce nom d'utilisateur ou cet email est déjà pris.",
@@ -56,27 +59,27 @@ function validateAuthForm(
   const tooLong = (field: keyof AuthFormState, value: string) =>
     mode === 'register' && value.length > MAX_LENGTH[field];
 
-  if (username.length < 3) {
-    errors.username = 'Au moins 3 caractères';
+  if (username.length < MIN_LENGTH.username) {
+    errors.username = minLengthMessage(MIN_LENGTH.username);
   } else if (tooLong('username', username)) {
-    errors.username = `${MAX_LENGTH.username} caractères maximum`;
+    errors.username = maxLengthMessage(MAX_LENGTH.username);
   }
 
   if (mode === 'register') {
     if (name === '') {
       errors.name = 'Nom requis';
     } else if (tooLong('name', name)) {
-      errors.name = `${MAX_LENGTH.name} caractères maximum`;
+      errors.name = maxLengthMessage(MAX_LENGTH.name);
     }
-    if (!EMAIL_PATTERN.test(email) || tooLong('email', email)) {
+    if (!isValidEmail(email)) {
       errors.email = 'Email invalide';
     }
   }
 
-  if (form.password.length < 8) {
-    errors.password = 'Au moins 8 caractères';
+  if (form.password.length < MIN_LENGTH.password) {
+    errors.password = minLengthMessage(MIN_LENGTH.password);
   } else if (tooLong('password', form.password)) {
-    errors.password = `${MAX_LENGTH.password} caractères maximum`;
+    errors.password = maxLengthMessage(MAX_LENGTH.password);
   }
 
   return errors;
@@ -217,7 +220,7 @@ export default function AuthPage() {
                     id="auth-username"
                     type="text"
                     autoComplete="username"
-                    placeholder="3 caractères minimum"
+                    placeholder={minLengthMessage(MIN_LENGTH.username)}
                     value={form.username}
                     onChange={(e) => handleChange('username', e.target.value)}
                     onFocus={() => handleFocus('username')}
@@ -292,7 +295,7 @@ export default function AuthPage() {
                   placeholder={
                     mode === 'login'
                       ? 'Votre mot de passe'
-                      : '8 caractères minimum'
+                      : minLengthMessage(MIN_LENGTH.password)
                   }
                   value={form.password}
                   onChange={(e) => handleChange('password', e.target.value)}
