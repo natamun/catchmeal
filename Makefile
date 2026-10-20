@@ -1,7 +1,7 @@
 DEV = docker compose -f docker-compose.dev.yml
 PROD = docker compose -f docker-compose.prod.yml
 
-all: dev
+all: prod
 
 dev:
 	$(DEV) up --build -V -d
