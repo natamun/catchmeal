@@ -108,39 +108,23 @@ interface ExportFriend {
   lastTimeConnected: string | null;
 }
 
+interface ExportProfile extends Omit<UserProfile, 'id'> {
+  email: string;
+  createAt: string;
+  lastSeenAt: string | null;
+  meal: ExportMeal[];
+  foodItems: ExportFoodItem[];
+  weightLogs: ExportWeightLog[];
+  goalSettings: ExportGoalSetting[];
+  senderMessage: ExportMessage[];
+  receiverMessage: ExportMessage[];
+  activities: ExportActivity[];
+  userFriend: ExportFriend[];
+}
+
 export interface DataExport {
   exportedAt: string;
-  data: {
-    profile: {
-      username: string;
-      name: string;
-      email: string;
-      avatarUrl: string | null;
-      createAt: string;
-      lastSeenAt: string | null;
-      height: number | null;
-      targetWeight: number | null;
-      dailyCalorieGoal: number | null;
-      dailyProteinGoal: number | null;
-      dailyCarbsGoal: number | null;
-      dailyFatGoal: number | null;
-      gender: string | null;
-      birthDate: string | null;
-      activityLevel: string | null;
-      bodyFat: number | null;
-      fatFreeMass: number | null;
-      bodyWater: number | null;
-      muscleMass: number | null;
-      meal: ExportMeal[];
-      foodItems: ExportFoodItem[];
-      weightLogs: ExportWeightLog[];
-      goalSettings: ExportGoalSetting[];
-      senderMessage: ExportMessage[];
-      receiverMessage: ExportMessage[];
-      activities: ExportActivity[];
-      userFriend: ExportFriend[];
-    };
-  };
+  data: { profile: ExportProfile };
 }
 
 export interface ChangePasswordInput {

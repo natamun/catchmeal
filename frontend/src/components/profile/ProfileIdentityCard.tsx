@@ -20,6 +20,7 @@ import {
   removeAvatar,
   updateProfile,
   uploadAvatar,
+  type UpdateProfileInput,
   type UserProfile,
 } from './api';
 import { BirthDatePicker } from './BirthDatePicker';
@@ -212,19 +213,7 @@ export function ProfileIdentityCard({ user, onUpdate }: Props) {
       return;
     }
 
-    const input: {
-      username?: string;
-      name?: string;
-      height?: number;
-      targetWeight?: number;
-      dailyCalorieGoal?: number;
-      dailyProteinGoal?: number;
-      dailyCarbsGoal?: number;
-      dailyFatGoal?: number;
-      gender?: string;
-      birthDate?: string;
-      activityLevel?: string;
-    } = {};
+    const input: UpdateProfileInput = {};
 
     const trimmedUsername = form.username.trim();
     const trimmedName = form.name.trim();
