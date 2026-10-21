@@ -114,6 +114,7 @@ The project combines a React frontend with client-side routing, a NestJS backend
 erDiagram
     User ||--o{ Meal : "has"
     User ||--o{ FoodItem : "owns"
+    User ||--o{ MealFoodItem : "owns"
     User ||--o{ WeightLog : "logs"
     User ||--o{ GoalSetting : "sets"
     User ||--o{ Activity : "generates"
@@ -122,6 +123,7 @@ erDiagram
     User ||--o{ Message : "sends"
     User ||--o{ Message : "receives"
     Meal ||--o{ MealFoodItem : "contains"
+    Meal ||--o| Meal : "template of"
     FoodItem ||--o{ MealFoodItem : "used in"
     Activity ||--o{ Message : "quoted in"
 ```
@@ -130,13 +132,13 @@ erDiagram
 
 | Table | Key fields |
 |---|---|
-| `User` | id, username, email, passwordHash, oauthProvider, avatarUrl, height, targetWeight, dailyCalorieGoal, dailyProteinGoal, dailyCarbsGoal, dailyFatGoal, gender, birthDate, activityLevel, role, lastSeenAt, deletedAt |
+| `User` | id, username, name, email, passwordHash, oauthProvider, avatarUrl, height, targetWeight, dailyCalorieGoal, dailyProteinGoal, dailyCarbsGoal, dailyFatGoal, gender, birthDate, activityLevel, role, lastSeenAt, deletedAt, createAt |
 | `WeightLog` | id, userId, weight, bodyFat, fatFreeMass, bodyWater, muscleMass, loggedAt |
 | `GoalSetting` | id, userId, dailyCalories, dailyProtein, dailyCarbs, dailyFat, objective, startDate |
 | `Meal` | id, userId, name, typeMeal (BREAKFAST/LUNCH/DINNER/SNACK), loggedAt, sourceMealId |
-| `MealFoodItem` | id, mealId, foodItemId, quantity, kcal, protein, carbs, fat |
-| `FoodItem` | id, userId, name, brand, barcode, baseQuantity, baseUnit, kcal, protein, carbs, fat, archived |
-| `Friend` | id, userId, friendId, status (PENDING/ACCEPTED/DECLINED) |
+| `MealFoodItem` | id, userId, mealId, foodItemId, quantity, kcal, protein, carbs, fat |
+| `FoodItem` | id, userId, name, brand, barcode, baseQuantity, baseUnit (GRAM/PIECE/MILLILITER), kcal, protein, carbs, fat, archived |
+| `Friend` | id, userId, friendId, status (PENDING/ACCEPTED/DECLINED), lastTimeConnected |
 | `Message` | id, senderId, receiverId, content, sentAt, readAt, activityId |
 | `Activity` | id, userId, type (MEAL_LOGGED/WEIGHT_LOGGED/GOAL_REACHED/...), metadata, createdAt |
 
