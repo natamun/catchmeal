@@ -14,6 +14,7 @@ A full-stack nutrition and wellness tracking web application. Users can log meal
 ## Table of Contents
 
 - [Description](#description)
+- [Screenshots](#screenshots)
 - [Team](#team)
 - [Technical Stack](#technical-stack)
 - [Database Schema](#database-schema)
@@ -45,13 +46,36 @@ The project combines a React frontend with client-side routing, a NestJS backend
 - GDPR-compliant data export (JSON), account deletion with anonymization, and legal pages.
 - Accessibility: ARIA roles, labels, focus management, and keyboard navigation.
 
+---
+
+## Screenshots
+
+The home dashboard is your daily hub — log meals, monitor your calorie and macro progress, and stay connected with your friends' activity.
+
 <p align="center">
   <img src="./docs/acceuil.png" alt="CatCHMeal accueil" height="400" />
-  <img src="./docs/profile.png" alt="CatCHMeal profile screen" height="400" />
+  <br/><em>Macro rings update in real time as you add food items to your meals.</em>
 </p>
+
+The profile page centralizes everything about you — your personal details, your body composition history, and your nutrition goals.
+
+<p align="center">
+  <img src="./docs/profile.png" alt="CatCHMeal profile screen" height="400" />
+  <br/><em>BMR and TDEE are computed automatically from your stats to suggest a daily calorie target.</em>
+</p>
+
+The friends page keeps you connected — see who's online, browse their recent meals and weigh-ins, and chat in real time.
+
 <p align="center">
   <img src="./docs/amis.png" alt="CatCHMeal friends screen" height="400" />
+  <br/><em>Each activity card can be quoted directly in a chat message.</em>
+</p>
+
+The statistics page turns your logs into insights — visualize trends across any time period you choose.
+
+<p align="center">
   <img src="./docs/stat.png" alt="CatCHMeal statistics screen" height="400" />
+  <br/><em>Charts cover calories, protein, carbs, fat, and body composition metrics.</em>
 </p>
 
 ---
