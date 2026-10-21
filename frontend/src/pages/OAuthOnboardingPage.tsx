@@ -88,7 +88,7 @@ export function OAuthOnboardingPage({ prefill, onComplete, onBack }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
     setError(null);
 
@@ -141,7 +141,7 @@ export function OAuthOnboardingPage({ prefill, onComplete, onBack }: Props) {
           </div>
 
           <h1 className="mb-2 text-2xl font-bold text-green-800">
-            Bienvenue sur CatchMeal !
+            Bienvenue sur CatCHMeal !
           </h1>
           <p className="mb-6 text-sm text-green-600">
             Personnalisez votre profil avant de commencer.

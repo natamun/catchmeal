@@ -96,7 +96,7 @@ export function buildExportHtml(data: DataExport): string {
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <title>Mes données CatchMeal</title>
+  <title>Mes données CatCHMeal</title>
   <style>
     body { font-family: sans-serif; max-width: 900px; margin: 40px auto; padding: 0 20px; color: #1a2e1a; }
     h1 { color: #16a34a; }
@@ -110,7 +110,7 @@ export function buildExportHtml(data: DataExport): string {
   </style>
 </head>
 <body>
-  <h1>Mes données personnelles sur CatchMeal</h1>
+  <h1>Mes données personnelles sur CatCHMeal</h1>
   <p class="meta">Exporté le ${new Date(data.exportedAt).toLocaleString('fr-FR')}</p>
 
   <h2>Profil</h2>
