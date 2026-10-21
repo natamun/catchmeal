@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   ConflictException,
+  ForbiddenException,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -22,6 +23,8 @@ const VERIFY_EMAIL_PATH = '/verify-email';
 type PendingVerification = { requiresVerification: true };
 
 type AuthInput = { username: string; password: string };
+
+export const EMAIL_NOT_VERIFIED_CODE = 'EMAIL_NOT_VERIFIED';
 
 export type SignInData = {
   userId: number;
@@ -95,6 +98,15 @@ export class AuthService {
     );
     if (!passwordMatches) {
       return null;
+    }
+
+    if (this.emailVerificationRequired && !user.emailVerifiedAt) {
+      throw new ForbiddenException({
+        statusCode: 403,
+        message:
+          'Veuillez confirmer votre adresse e-mail avant de vous connecter.',
+        code: EMAIL_NOT_VERIFIED_CODE,
+      });
     }
 
     return {

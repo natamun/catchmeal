@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   ConflictException,
+  ForbiddenException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
@@ -108,6 +109,80 @@ describe('AuthService', () => {
         username: 'alice',
         hasPassword: true,
       });
+    });
+
+    it('should refuse an unverified account when verification is required', async () => {
+      process.env.EMAIL_VERIFICATION_REQUIRED = 'true';
+      const passwordHash = await bcrypt.hash('motdepasse123', 10);
+      usersServiceMock.findUserByName.mockResolvedValue({
+        id: 1,
+        username: 'alice',
+        passwordHash,
+        emailVerifiedAt: null,
+      });
+
+      const attempt = service.validateUser({
+        username: 'alice',
+        password: 'motdepasse123',
+      });
+
+      await expect(attempt).rejects.toBeInstanceOf(ForbiddenException);
+      await expect(attempt).rejects.toMatchObject({
+        response: { code: 'EMAIL_NOT_VERIFIED' },
+      });
+    });
+
+    it('should not reveal that an account is unverified when the password is wrong', async () => {
+      process.env.EMAIL_VERIFICATION_REQUIRED = 'true';
+      const passwordHash = await bcrypt.hash('rightpassword', 10);
+      usersServiceMock.findUserByName.mockResolvedValue({
+        id: 1,
+        username: 'alice',
+        passwordHash,
+        emailVerifiedAt: null,
+      });
+
+      const result = await service.validateUser({
+        username: 'alice',
+        password: 'wrongpassword',
+      });
+
+      expect(result).toBeNull();
+    });
+
+    it('should let a verified account sign in when verification is required', async () => {
+      process.env.EMAIL_VERIFICATION_REQUIRED = 'true';
+      const passwordHash = await bcrypt.hash('motdepasse123', 10);
+      usersServiceMock.findUserByName.mockResolvedValue({
+        id: 1,
+        username: 'alice',
+        passwordHash,
+        emailVerifiedAt: new Date(),
+      });
+
+      const result = await service.validateUser({
+        username: 'alice',
+        password: 'motdepasse123',
+      });
+
+      expect(result).toMatchObject({ userId: 1, username: 'alice' });
+    });
+
+    it('should let an unverified account sign in when verification is not required', async () => {
+      const passwordHash = await bcrypt.hash('motdepasse123', 10);
+      usersServiceMock.findUserByName.mockResolvedValue({
+        id: 1,
+        username: 'alice',
+        passwordHash,
+        emailVerifiedAt: null,
+      });
+
+      const result = await service.validateUser({
+        username: 'alice',
+        password: 'motdepasse123',
+      });
+
+      expect(result).toMatchObject({ userId: 1, username: 'alice' });
     });
   });
 
