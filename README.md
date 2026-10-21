@@ -17,6 +17,8 @@ A full-stack nutrition and wellness tracking web application. Users can log meal
 - [Modules](#modules)
 - [Instructions](#instructions)
 - [Resources](#resources)
+- [Individual Contributions](#individual-contributions)
+- [AI Usage](#ai-usage)
 
 ---
 
@@ -312,18 +314,6 @@ Requires additional environment variables: `VITE_API_URL`, `FRONTEND_URL`, `POST
 - [Recharts Documentation](https://recharts.org/en-US)
 - [WCAG 2.1 Accessibility Guidelines](https://www.w3.org/TR/WCAG21)
 
-### AI usage
-
-AI tools (GitHub Copilot, ChatGPT, Claude, Amazon Q) were used throughout the project for the following tasks:
-
-- **Code generation**: Boilerplate for NestJS modules (controllers, services, DTOs), React components, and Prisma queries
-- **Debugging**: Identifying root causes of TypeScript errors, Prisma migration conflicts, and Docker networking issues
-- **Code review**: Suggesting improvements to error handling, accessibility attributes, and query optimization
-- **Documentation**: Drafting JSDoc comments and this README
-- **Testing**: Generating unit test scaffolding for NestJS services and controllers
-
-All AI-generated code was reviewed, understood, and adapted by the team before being committed. No AI-generated code was merged without human validation.
-
 ---
 
 ## Individual Contributions
@@ -381,3 +371,17 @@ Challenge and resolution:
 Main areas:
 
 Challenge and resolution:
+
+---
+
+## AI Usage
+
+AI tools were used during the development of this project for the following purposes:
+
+- Understand the project stack and architecture.
+- Review code.
+- Assist with debugging.
+- Help implement some functions.
+- Documentation editing.
+
+All generated suggestions were reviewed, tested, and adapted before being integrated into the project.
