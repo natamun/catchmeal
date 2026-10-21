@@ -9,8 +9,6 @@
 
 A full-stack nutrition and wellness tracking web application. Users can log meals, track body composition, set calorie and macro goals, monitor progress through statistics, chat with friends, and get AI-powered dietary guidance.
 
----
-
 ## Table of Contents
 
 - [Description](#description)
@@ -21,8 +19,6 @@ A full-stack nutrition and wellness tracking web application. Users can log meal
 - [Features](#features)
 - [Instructions](#instructions)
 - [Resources](#resources)
-
----
 
 ## Description
 
@@ -45,8 +41,6 @@ The project combines a React frontend with client-side routing, a NestJS backend
 - Admin board for user management (view, edit role, delete).
 - GDPR-compliant data export (JSON), account deletion with anonymization, and legal pages.
 - Accessibility: ARIA roles, labels, focus management, and keyboard navigation.
-
----
 
 ## Screenshots
 
@@ -78,13 +72,9 @@ The statistics page turns your logs into insights — visualize trends across an
   <br/><em>Charts cover calories, protein, carbs, fat, and body composition metrics.</em>
 </p>
 
----
-
 ## Team
 
 [Natalino Munari](https://github.com/natamun), [Curtis Bezençon](https://github.com/CurtXY), [Diana Ramirez](https://www.linkedin.com/in/dianaramirezcarrillo), [Seully Trieste](https://www.linkedin.com/in/seully-trieste-dev/), [Maxime Martin](https://www.linkedin.com/in/maxime-martin-090731aa)
-
----
 
 ## Technical Stack
 
@@ -115,8 +105,6 @@ The statistics page turns your logs into insights — visualize trends across an
 - **Nginx** — static file serving and reverse proxy in production
 - **Caddy** — TLS termination in production
 - **GitHub Actions** — CI/CD pipeline
-
----
 
 ## Database Schema
 
@@ -211,8 +199,6 @@ erDiagram
 
 `FoodItem` is the cornerstone of the entire data model. It stores the nutritional values (kcal, protein, carbs, fat) for a given base quantity and unit (gram, milliliter, or piece). Every logged meal entry (`MealFoodItem`) references a `FoodItem` and records the actual quantity consumed — macros are then scaled proportionally at query time. Without a `FoodItem`, nothing can be logged. A `FoodItem` belongs to a user and can be created manually, filled from a barcode scan via Open Food Facts, or archived when no longer needed. This design keeps nutritional data centralized and reusable across multiple meals and days.
 
----
-
 ## Features
 
 | Feature | Description |
@@ -240,8 +226,6 @@ erDiagram
 | Admin board | Admin-only user management panel (view, edit role, delete users) |
 | GDPR | Data export (JSON), account deletion with anonymization, legal pages |
 | Accessibility | ARIA roles, labels, focus management, keyboard navigation |
-
----
 
 ## Instructions
 
@@ -330,8 +314,6 @@ make prod
 ```
 
 Requires additional environment variables: `VITE_API_URL`, `FRONTEND_URL`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`.
-
----
 
 ## Resources
 
