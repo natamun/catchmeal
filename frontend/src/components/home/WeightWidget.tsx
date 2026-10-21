@@ -1,8 +1,8 @@
 import { Minus, TrendingDown, TrendingUp } from 'lucide-react';
 
 import { formatKg } from '../../utils/format';
-import StatTile from '../ui/StatTile';
-import SummaryCard from '../ui/SummaryCard';
+import { StatTile } from '../ui/StatTile';
+import { SummaryCard } from '../ui/SummaryCard';
 
 interface Props {
   history: { weight: number; loggedAt: string }[] | null;
@@ -10,6 +10,7 @@ interface Props {
   goalWeight: number | null;
 }
 
+/** A day such as "1er octobre" or "20 octobre". */
 function formatDay(isoDate: string) {
   const date = new Date(isoDate);
   const day = date.getDate();
@@ -17,11 +18,11 @@ function formatDay(isoDate: string) {
   return `${day === 1 ? '1er' : day} ${month}`;
 }
 
-export default function WeightWidget({
-  history,
-  hasError = false,
-  goalWeight,
-}: Props) {
+/**
+ * Latest weigh-in, its change since the previous one, and what is left to reach
+ * the target weight.
+ */
+export function WeightWidget({ history, hasError = false, goalWeight }: Props) {
   const isLoading = history === null && !hasError;
   const current = history?.[0] ?? null;
   const previous = history?.[1] ?? null;

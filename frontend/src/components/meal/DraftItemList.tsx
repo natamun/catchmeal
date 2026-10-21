@@ -17,7 +17,11 @@ interface DraftItemListProps {
   className?: string;
 }
 
-export default function DraftItemList({
+/**
+ * Items of a meal being edited: a food with its quantity buttons, or a quick
+ * add with its calories. Each one can be removed.
+ */
+export function DraftItemList({
   items,
   onAdjust,
   onRemove,
@@ -30,7 +34,7 @@ export default function DraftItemList({
           return (
             <li key={item.id} className={ROW_CLASS}>
               <span className="min-w-0 flex-1 truncate text-sm font-medium text-green-800">
-                {item.kcal} kcal
+                {Math.round(item.kcal)} kcal
               </span>
               <button
                 type="button"

@@ -1,11 +1,17 @@
 export type QuantityUnit = 'GRAM' | 'MILLILITER' | 'PIECE';
 
+/** Short unit written after a quantity; "x" means pieces. */
 export const UNIT_LABELS: Record<QuantityUnit, string> = {
   GRAM: 'g',
   MILLILITER: 'ml',
   PIECE: 'x',
 };
 
+/**
+ * A food of the user's library. kcal and macros are given for baseQuantity of
+ * baseUnit (e.g. per 100 g). An archived food is hidden from the lists but kept
+ * for the meals that use it.
+ */
 export interface FoodItem {
   id: number;
   name: string;
@@ -22,6 +28,10 @@ export interface FoodItem {
 
 export type FoodItemInput = Omit<FoodItem, 'id' | 'archived'>;
 
+/**
+ * A product found on Open Food Facts. A null value is missing on their side;
+ * the form leaves that field empty.
+ */
 export interface OffProduct {
   barcode: string;
   name: string | null;
@@ -33,34 +43,3 @@ export interface OffProduct {
   carbs: number | null;
   fat: number | null;
 }
-
-export interface MacroFilter {
-  min: number;
-  max: number;
-}
-
-export type SortField = 'name' | 'kcal' | 'protein' | 'carbs' | 'fat';
-export type SortDirection = 'asc' | 'desc';
-
-export interface SortOption {
-  field: SortField;
-  direction: SortDirection;
-}
-
-export interface FoodFilterCriteria {
-  query: string;
-  kcal: MacroFilter;
-  protein: MacroFilter;
-  carbs: MacroFilter;
-  fat: MacroFilter;
-  sort: SortOption;
-}
-
-export const EMPTY_FILTER_CRITERIA: FoodFilterCriteria = {
-  query: '',
-  kcal: { min: -Infinity, max: Infinity },
-  protein: { min: -Infinity, max: Infinity },
-  carbs: { min: -Infinity, max: Infinity },
-  fat: { min: -Infinity, max: Infinity },
-  sort: { field: 'name', direction: 'asc' },
-};

@@ -1,3 +1,4 @@
+/** Sizes and colors shared by the stats charts, so they all look alike. */
 export const CHART_HEIGHT = 250;
 export const AXIS_WIDTH = 44;
 export const GRID_STROKE = 'var(--color-green-50)';

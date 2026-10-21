@@ -2,15 +2,15 @@ import { useState, type RefObject } from 'react';
 import * as Popover from '@radix-ui/react-popover';
 import { ChevronRight } from 'lucide-react';
 
-import { useAuth } from '../../auth/auth-context';
-import { useTimeout } from '../../hooks/useTimeout';
+import { useCurrentUser } from '../../auth/authContext';
+import { useFormValidation } from '../../hooks/useFormValidation';
+import { parseDecimal } from '../../utils/decimals';
 import { requestErrorMessage } from '../../utils/requestErrorMessage';
 import { createMeal, toApiDate } from '../meal/api';
 import {
   EMPTY_QUICK_ADD_FORM,
   QUICK_ADD_FIELDS,
   validateQuickAddForm,
-  type QuickAddField,
 } from '../meal/quickMealAdd';
 import { MEAL_TYPE_LABELS, type MealType } from '../meal/types';
 import { BaseDialog } from '../ui/BaseDialog';
@@ -22,6 +22,10 @@ const MEAL_TYPE_OPTIONS = (Object.keys(MEAL_TYPE_LABELS) as MealType[]).map(
   (value) => ({ value, label: MEAL_TYPE_LABELS[value] }),
 );
 
+/**
+ * Suggests a section from the time of day: breakfast before 10:00, lunch before
+ * 15:00, snack before 18:00, then dinner.
+ */
 function defaultMealType(): MealType {
   const hour = new Date().getHours();
   if (hour < 10) {
@@ -42,66 +46,45 @@ interface QuickAddDialogProps {
   onSaved: () => void;
 }
 
-export default function QuickAddDialog({
+/**
+ * Logs calories and macros typed by hand, without a food of the library, into
+ * one section of the day.
+ */
+export function QuickAddDialog({
   dialogRef,
   date,
   onSaved,
 }: QuickAddDialogProps) {
-  const { user } = useAuth();
-  const userId = user!.userId;
+  const { userId } = useCurrentUser();
   const [mealType, setMealType] = useState<MealType>(defaultMealType);
-  const [form, setForm] = useState(EMPTY_QUICK_ADD_FORM);
-  const [touched, setTouched] = useState<
-    Partial<Record<QuickAddField, boolean>>
-  >({});
-  const [focusedField, setFocusedField] = useState<QuickAddField | null>(null);
-  const [submitAttempted, setSubmitAttempted] = useState(false);
+  const {
+    form,
+    setForm,
+    handleFocus,
+    handleBlur,
+    handleChange,
+    isInvalid,
+    errorMessage,
+    attemptSubmit,
+    resetValidation,
+  } = useFormValidation(EMPTY_QUICK_ADD_FORM, validateQuickAddForm);
   const [dialogNode, setDialogNode] = useState<HTMLDialogElement | null>(null);
   const [categoryOpen, setCategoryOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  useTimeout(() => setSubmitAttempted(false), submitAttempted ? 5000 : null);
-
-  const errors = validateQuickAddForm(form);
-
   const reset = () => {
     setMealType(defaultMealType());
     setForm(EMPTY_QUICK_ADD_FORM);
-    setTouched({});
-    setFocusedField(null);
-    setSubmitAttempted(false);
+    resetValidation();
     setCategoryOpen(false);
     setError(null);
   };
 
-  const handleChange = (field: QuickAddField, value: string) => {
-    setForm((prev) => ({ ...prev, [field]: value }));
-    setTouched((prev) => ({ ...prev, [field]: true }));
-  };
-
-  const handleBlur = (field: QuickAddField) => {
-    setTouched((prev) => ({ ...prev, [field]: true }));
-    setFocusedField((current) => (current === field ? null : current));
-  };
-
-  const isInvalid = (field: QuickAddField) =>
-    Boolean(touched[field] && errors[field]);
-
-  const errorMessage = (field: QuickAddField) =>
-    touched[field] && (focusedField === field || submitAttempted)
-      ? errors[field]
-      : undefined;
-
   const handleSubmit = async (event: React.SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
     setError(null);
-    setTouched(
-      Object.fromEntries(QUICK_ADD_FIELDS.map(({ field }) => [field, true])),
-    );
-
-    if (Object.keys(errors).length > 0) {
-      setSubmitAttempted(true);
+    if (!attemptSubmit()) {
       return;
     }
 
@@ -113,10 +96,10 @@ export default function QuickAddDialog({
         items: [
           {
             quantity: 1,
-            kcal: Number(form.kcal),
-            protein: Number(form.protein),
-            carbs: Number(form.carbs),
-            fat: Number(form.fat),
+            kcal: parseDecimal(form.kcal) ?? 0,
+            protein: parseDecimal(form.protein) ?? 0,
+            carbs: parseDecimal(form.carbs) ?? 0,
+            fat: parseDecimal(form.fat) ?? 0,
           },
         ],
       });
@@ -201,7 +184,7 @@ export default function QuickAddDialog({
                 placeholder="0"
                 value={form[field]}
                 onChange={(e) => handleChange(field, e.target.value)}
-                onFocus={() => setFocusedField(field)}
+                onFocus={() => handleFocus(field)}
                 onBlur={() => handleBlur(field)}
                 aria-invalid={isInvalid(field)}
                 aria-describedby={`quick-add-${field}-error`}

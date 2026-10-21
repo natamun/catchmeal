@@ -1,20 +1,20 @@
 import { useEffect, useRef, useState } from 'react';
 
-import { useAuth } from '../auth/auth-context';
+import { useCurrentUser } from '../auth/authContext';
 import { listFoodItems } from '../components/food/api';
-import FoodItemForm from '../components/food/FoodItemForm';
-import FoodItemList from '../components/food/FoodItemList';
+import { FoodItemForm } from '../components/food/FoodItemForm';
+import { FoodItemList } from '../components/food/FoodItemList';
 import type { FoodItem } from '../components/food/types';
 import { listMeals } from '../components/meal/api';
-import MealForm from '../components/meal/MealForm';
-import MealList from '../components/meal/MealList';
+import { MealForm } from '../components/meal/MealForm';
+import { MealList } from '../components/meal/MealList';
 import type { Meal } from '../components/meal/types';
 import { AddCircleButton } from '../components/ui/AddCircleButton';
 import { EditIconButton } from '../components/ui/EditIconButton';
 import { PillTabs } from '../components/ui/PillTabs';
 import { MACROS } from '../constants/macros';
 import { useDelayedUnmount } from '../hooks/useDelayedUnmount';
-import { ApiError } from '../utils/request';
+import { useSupportsHover } from '../hooks/useSupportsHover';
 
 type Tab = 'food' | 'meal';
 
@@ -23,21 +23,10 @@ const TAB_OPTIONS: { value: Tab; label: string }[] = [
   { value: 'meal', label: 'Repas' },
 ];
 
-function useSupportsHover() {
-  const [supportsHover, setSupportsHover] = useState(
-    () => window.matchMedia('(hover: hover)').matches,
-  );
-
-  useEffect(() => {
-    const query = window.matchMedia('(hover: hover)');
-    const handleChange = () => setSupportsHover(query.matches);
-    query.addEventListener('change', handleChange);
-    return () => query.removeEventListener('change', handleChange);
-  }, []);
-
-  return supportsHover;
-}
-
+/**
+ * Legend of the macro dots: shown on hover with a mouse, on tap on touch
+ * screens.
+ */
 function LegendBubble({ show }: { show: boolean }) {
   const displayed = useDelayedUnmount(show, 100);
 
@@ -65,9 +54,12 @@ function LegendBubble({ show }: { show: boolean }) {
   );
 }
 
+/**
+ * Food page with two tabs, the food library and the library meals, each with
+ * its create and edit dialog.
+ */
 export default function FoodPage() {
-  const { user } = useAuth();
-  const userId = user!.userId;
+  const { userId } = useCurrentUser();
   const [activeTab, setActiveTab] = useState<Tab>('food');
   const [showLegend, setShowLegend] = useState(false);
   const [foodItems, setFoodItems] = useState<FoodItem[]>([]);
@@ -105,9 +97,8 @@ export default function FoodPage() {
     const controller = new AbortController();
     listFoodItems(userId, controller.signal)
       .then(setFoodItems)
-      .catch((err: unknown) => {
+      .catch(() => {
         if (controller.signal.aborted) return;
-        if (err instanceof ApiError && err.status === 403) return;
         setLoadError('Impossible de charger les aliments.');
       })
       .finally(() => {
@@ -122,9 +113,8 @@ export default function FoodPage() {
     const controller = new AbortController();
     listMeals(userId, false, controller.signal)
       .then(setMeals)
-      .catch((err: unknown) => {
+      .catch(() => {
         if (controller.signal.aborted) return;
-        if (err instanceof ApiError && err.status === 403) return;
         setMealsLoadError('Impossible de charger les repas.');
       })
       .finally(() => {

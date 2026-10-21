@@ -1,28 +1,28 @@
 import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { ArrowUpRight, LoaderCircle, ScanBarcode, Search } from 'lucide-react';
 
-import { useAuth } from '../../auth/auth-context';
+import { useCurrentUser } from '../../auth/authContext';
 import { useHasCamera } from '../../hooks/useHasCamera';
 import { useTimeout } from '../../hooks/useTimeout';
 import { ApiError } from '../../utils/request';
 import { FieldError } from '../ui/FieldError';
+import { LABEL_CLASS } from '../ui/fieldStyle';
 import { Input } from '../ui/Input';
 import { lookupOffProduct } from './api';
+import { isValidBarcode } from './barcode';
 import type { OffProduct } from './types';
 
 const BarcodeScannerDialog = lazy(() => import('./BarcodeScannerDialog'));
-
-const LABEL_CLASS =
-  'text-xs font-semibold tracking-wide text-green-500 uppercase';
 
 const ICON_BUTTON_CLASS =
   'flex w-11 shrink-0 cursor-pointer items-center justify-center rounded-xl border border-green-200 text-green-600 transition-colors hover:bg-green-50 disabled:cursor-not-allowed disabled:opacity-60';
 
 const OFF_URL = 'https://world.openfoodfacts.org';
 
+const INVALID_BARCODE = 'Code-barres invalide';
+
 const LOOKUP_ERRORS: Partial<Record<number, string>> = {
-  400: 'Code-barres invalide',
-  404: 'Produit introuvable',
+  400: INVALID_BARCODE,
   429: 'Trop de recherches, patientez 1 min',
   503: 'Open Food Facts ne répond pas',
 };
@@ -35,15 +35,19 @@ interface BarcodeFieldProps {
   onProduct: (product: OffProduct) => void;
 }
 
-export default function BarcodeField({
+/**
+ * Barcode field of the food form, typed or scanned with the camera, then looked
+ * up on Open Food Facts to fill the form. The number is checked in the browser
+ * first (isValidBarcode), so a typo never reaches the backend.
+ */
+export function BarcodeField({
   value,
   error,
   showError,
   onChange,
   onProduct,
 }: BarcodeFieldProps) {
-  const { user } = useAuth();
-  const userId = user!.userId;
+  const { userId } = useCurrentUser();
   const hasCamera = useHasCamera();
   const [isTouched, setIsTouched] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
@@ -55,6 +59,8 @@ export default function BarcodeField({
     onField: boolean;
   } | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  // Each lookup gets a number: an answer that arrives after a newer lookup
+  // started, or after the form closed, is ignored.
   const lookupIdRef = useRef(0);
 
   if (showError && !isTouched) {
@@ -75,10 +81,18 @@ export default function BarcodeField({
   const runLookup = async (code: string) => {
     lookupIdRef.current += 1;
     const lookupId = lookupIdRef.current;
+    if (!isValidBarcode(code)) {
+      setLookupError({ message: INVALID_BARCODE, onField: true });
+      return;
+    }
     setIsLookingUp(true);
     try {
       const product = await lookupOffProduct(userId, code);
       if (lookupId !== lookupIdRef.current) {
+        return;
+      }
+      if (!product) {
+        setLookupError({ message: 'Produit introuvable', onField: false });
         return;
       }
       setFoundBarcode(product.barcode);

@@ -7,6 +7,11 @@ export const MEAL_TYPE_LABELS: Record<MealType, string> = {
   SNACK: 'Collation',
 };
 
+/**
+ * One line of a saved meal. foodItemId is null for a quick add. Calories and
+ * macros are stored when the meal is saved, so editing the food later does not
+ * change past meals.
+ */
 export interface MealFoodItem {
   id: number;
   foodItemId: number | null;
@@ -17,6 +22,10 @@ export interface MealFoodItem {
   fat: number;
 }
 
+/**
+ * A meal. With a loggedAt date it belongs to the journal; with loggedAt null it
+ * is a library meal, reused later.
+ */
 export interface Meal {
   id: number;
   name: string | null;
@@ -25,6 +34,10 @@ export interface Meal {
   items: MealFoodItem[];
 }
 
+/**
+ * An item sent to the API: a food id with a quantity, or for a quick add the
+ * quantity and the macros.
+ */
 export interface MealItemInput {
   foodItemId?: number;
   quantity: number;
@@ -41,37 +54,7 @@ export interface MealInput {
   items: MealItemInput[];
 }
 
-export interface MealMacroFilter {
-  min: number;
-  max: number;
-}
-
-export type MealSortField = 'name' | 'kcal' | 'protein' | 'carbs' | 'fat';
-export type MealSortDirection = 'asc' | 'desc';
-
-export interface MealSortOption {
-  field: MealSortField;
-  direction: MealSortDirection;
-}
-
-export interface MealFilterCriteria {
-  query: string;
-  kcal: MealMacroFilter;
-  protein: MealMacroFilter;
-  carbs: MealMacroFilter;
-  fat: MealMacroFilter;
-  sort: MealSortOption;
-}
-
-export const EMPTY_MEAL_FILTER_CRITERIA: MealFilterCriteria = {
-  query: '',
-  kcal: { min: -Infinity, max: Infinity },
-  protein: { min: -Infinity, max: Infinity },
-  carbs: { min: -Infinity, max: Infinity },
-  fat: { min: -Infinity, max: Infinity },
-  sort: { field: 'name', direction: 'asc' },
-};
-
+/** Calories and macros of a meal: the sum of its items. */
 export function mealTotals(meal: Meal) {
   return meal.items.reduce(
     (acc, item) => ({

@@ -2,8 +2,12 @@ import { useEffect, useState } from 'react';
 
 import { getFriendsPresence } from '../components/friends/api';
 import type { FriendPresence } from '../components/friends/types';
-import { useSocket } from '../socket/socket-context';
+import { useSocket } from '../socket/socketContext';
 
+/**
+ * Online status of my friends, as a Map by user id: loaded once, then updated
+ * live by the socket online/offline events.
+ */
 export function usePresence(userId: number) {
   const { socket } = useSocket();
   const [presence, setPresence] = useState<Map<number, FriendPresence>>(

@@ -2,13 +2,22 @@ import { useState } from 'react';
 import { ArrowLeft } from 'lucide-react';
 
 import * as authApi from '../auth/api';
-import { useAuth } from '../auth/auth-context';
-import AuthBrandPanel from '../components/auth/AuthBrandPanel';
+import { useAuth } from '../auth/authContext';
+import { AuthBrandPanel } from '../components/auth/AuthBrandPanel';
 import { Brand } from '../components/ui/Brand';
 import { FieldError } from '../components/ui/FieldError';
+import { LABEL_CLASS } from '../components/ui/fieldStyle';
 import { Input } from '../components/ui/Input';
-import { useTimeout } from '../hooks/useTimeout';
+import { useFormValidation } from '../hooks/useFormValidation';
 import { requestErrorMessage } from '../utils/requestErrorMessage';
+import {
+  isValidEmail,
+  MAX_LENGTH,
+  maxLengthMessage,
+  MIN_LENGTH,
+  minLengthMessage,
+  usernameError,
+} from '../utils/validation';
 
 interface Props {
   prefill: {
@@ -26,97 +35,64 @@ interface FormState {
   email: string;
 }
 
-const LABEL_CLASS =
-  'text-xs font-semibold tracking-wide text-green-500 uppercase';
-
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@.]{2,}$/;
-const MAX_LENGTH = { username: 30, name: 80, email: 255 };
-
 const SUBMIT_ERRORS: Record<number, string> = {
   409: "Ce nom d'utilisateur ou cet email est déjà pris.",
 };
 
+/** Username 3 to 30 characters, name required, valid email. */
 function validate(form: FormState): Partial<Record<keyof FormState, string>> {
   const errors: Partial<Record<keyof FormState, string>> = {};
-  const username = form.username.trim();
   const name = form.name.trim();
   const email = form.email.trim();
 
-  if (username.length < 3) {
-    errors.username = 'Au moins 3 caractères';
-  } else if (username.length > MAX_LENGTH.username) {
-    errors.username = `${MAX_LENGTH.username} caractères maximum`;
+  const usernameMessage = usernameError(form.username);
+  if (usernameMessage) {
+    errors.username = usernameMessage;
   }
 
   if (name === '') {
     errors.name = 'Nom requis';
   } else if (name.length > MAX_LENGTH.name) {
-    errors.name = `${MAX_LENGTH.name} caractères maximum`;
+    errors.name = maxLengthMessage(MAX_LENGTH.name);
   }
 
-  if (!EMAIL_PATTERN.test(email) || email.length > MAX_LENGTH.email) {
+  if (!isValidEmail(email)) {
     errors.email = 'Email invalide';
   }
 
   return errors;
 }
 
-export default function OAuthOnboardingPage({
-  prefill,
-  onComplete,
-  onBack,
-}: Props) {
+/**
+ * Welcome form of a new OAuth user: they choose a username and confirm their
+ * name and email before entering the app.
+ */
+export function OAuthOnboardingPage({ prefill, onComplete, onBack }: Props) {
   const { updateUser } = useAuth();
-  const [form, setForm] = useState<FormState>({
-    username: prefill.username,
-    name: prefill.name,
-    email: prefill.email,
-  });
-  const [touched, setTouched] = useState<
-    Partial<Record<keyof FormState, boolean>>
-  >({});
-  const [focusedField, setFocusedField] = useState<keyof FormState | null>(
-    null,
+  const {
+    form,
+    handleFocus,
+    handleBlur,
+    handleChange,
+    isInvalid,
+    errorMessage,
+    attemptSubmit,
+  } = useFormValidation<FormState>(
+    {
+      username: prefill.username,
+      name: prefill.name,
+      email: prefill.email,
+    },
+    validate,
   );
-  const [submitAttempted, setSubmitAttempted] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const errors = validate(form);
-
-  useTimeout(() => setSubmitAttempted(false), submitAttempted ? 5000 : null);
-
-  const handleFocus = (field: keyof FormState) => setFocusedField(field);
-
-  const handleBlur = (field: keyof FormState) => {
-    setTouched((prev) => ({ ...prev, [field]: true }));
-    setFocusedField((current) => (current === field ? null : current));
-  };
-
-  const handleChange = (field: keyof FormState, value: string) => {
-    setForm((prev) => ({ ...prev, [field]: value }));
-    setTouched((prev) => ({ ...prev, [field]: true }));
-  };
-
-  const isInvalid = (field: keyof FormState) =>
-    Boolean(touched[field] && errors[field]);
-
-  const errorMessage = (field: keyof FormState) =>
-    touched[field] && (focusedField === field || submitAttempted)
-      ? errors[field]
-      : undefined;
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setError(null);
 
-    const allTouched = Object.fromEntries(
-      Object.keys(form).map((key) => [key, true]),
-    ) as Record<keyof FormState, boolean>;
-    setTouched(allTouched);
-
-    if (Object.keys(errors).length > 0) {
-      setSubmitAttempted(true);
+    if (!attemptSubmit()) {
       return;
     }
 
@@ -184,7 +160,7 @@ export default function OAuthOnboardingPage({
               <Input
                 id="onboarding-username"
                 type="text"
-                placeholder="3 caractères minimum"
+                placeholder={minLengthMessage(MIN_LENGTH.username)}
                 value={form.username}
                 onChange={(e) => handleChange('username', e.target.value)}
                 onFocus={() => handleFocus('username')}

@@ -2,12 +2,12 @@ import { useEffect, useRef, useState } from 'react';
 import { ArrowUp, Bot, LoaderCircle, X } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 
-import { useAuth } from '../../auth/auth-context';
-import type { ChatMessage, ResponseMistral } from '../../types/ChatBotType';
-import { JSON_HEADERS, request } from '../../utils/request';
+import { useCurrentUser } from '../../auth/authContext';
 import { requestErrorMessage } from '../../utils/requestErrorMessage';
 import type { Tab } from '../layout/Nav';
-import DisclamerPopup from './DisclamerPopup';
+import { askAssistant } from './api';
+import { DisclaimerPopup } from './DisclaimerPopup';
+import type { ChatMessage } from './types';
 
 interface ChatBotPopupProps {
   isOpen: boolean;
@@ -17,7 +17,12 @@ interface ChatBotPopupProps {
   activePage: Tab;
 }
 
-export default function ChatBotPopup({
+/**
+ * Floating assistant chat (Mistral) of the journal, food and stats pages. The
+ * conversation is kept by AppLayout, so it survives page changes. When a
+ * question fails, it is put back in the field with an error message.
+ */
+export function ChatBotPopup({
   isOpen,
   onToggle,
   messages,
@@ -29,17 +34,17 @@ export default function ChatBotPopup({
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const lastAssistantRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const [disclamer, setDisclamer] = useState<boolean>(false);
+  const [disclaimer, setDisclaimer] = useState<boolean>(false);
   const [sendError, setSendError] = useState<string | null>(null);
-  const { user } = useAuth();
-  const CURRENT_USER_ID = user?.userId;
-  const API_URL = import.meta.env.VITE_API_URL;
+  const { userId } = useCurrentUser();
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [isOpen]);
 
   useEffect(() => {
+    // A new answer is scrolled to its start, so a long answer is read from the
+    // top.
     const lastMessage = messages[messages.length - 1];
     if (lastMessage?.role === 'assistant') {
       lastAssistantRef.current?.scrollIntoView({
@@ -52,6 +57,7 @@ export default function ChatBotPopup({
   }, [messages]);
 
   useEffect(() => {
+    // Close the window when the user moves to another page.
     onToggle(false);
   }, [activePage, onToggle]);
 
@@ -67,19 +73,7 @@ export default function ChatBotPopup({
       textareaRef.current.style.height = 'auto';
     }
     try {
-      if (!CURRENT_USER_ID) {
-        throw new Error('UID is not defined');
-      }
-      const data = await request<ResponseMistral>(
-        `${API_URL}/users/${CURRENT_USER_ID}/chat`,
-        {
-          method: 'POST',
-          headers: JSON_HEADERS,
-          body: JSON.stringify({
-            message: addMessage.content,
-          }),
-        },
-      );
+      const data = await askAssistant(userId, addMessage.content);
       if (data) {
         const addResponse: ChatMessage = {
           role: 'assistant',
@@ -103,21 +97,22 @@ export default function ChatBotPopup({
 
   function handleInputChange(e: React.ChangeEvent<HTMLTextAreaElement>) {
     setInput(e.target.value);
+    // Grow the field with its text, up to 120 px.
     e.target.style.height = 'auto';
     e.target.style.height = `${Math.min(e.target.scrollHeight, 120)}px`;
   }
 
   return (
-    <div className="fixed right-6 bottom-6 z-20 pointer-coarse:bottom-[calc(var(--spacing-bottom-nav)+1rem+env(safe-area-inset-bottom))]">
+    <div className="fixed right-6 bottom-6 z-20 pointer-coarse:bottom-[calc(var(--spacing-bottom-nav)+1rem+env(safe-area-inset-bottom))] ios-typing:top-[calc(var(--visible-top)+1rem)] ios-typing:bottom-auto">
       {isOpen && (
         <div
           role="dialog"
           aria-label="Assistant CatCHMeal"
-          className="relative flex h-128 max-h-[calc(100dvh-var(--spacing-header)-4rem-env(safe-area-inset-bottom))] w-[min(24rem,calc(100vw-3rem))] animate-fade-in-up flex-col overflow-hidden rounded-2xl border border-green-200 bg-white shadow-lg pointer-coarse:max-h-[calc(100dvh-var(--spacing-bottom-nav)-4rem-env(safe-area-inset-bottom))]"
+          className="relative flex h-128 max-h-[calc(100dvh-var(--spacing-header)-4rem-env(safe-area-inset-bottom))] w-[min(24rem,calc(100vw-3rem))] animate-fade-in-up flex-col overflow-hidden rounded-2xl border border-green-200 bg-white shadow-lg pointer-coarse:max-h-[calc(100dvh-var(--spacing-bottom-nav)-4rem-env(safe-area-inset-bottom))] ios-typing:h-[calc(var(--visible-height)-2rem)] ios-typing:max-h-none"
         >
-          {disclamer && (
+          {disclaimer && (
             <div className="absolute inset-0 z-10 flex items-center bg-black/30 p-4 backdrop-blur-sm">
-              <DisclamerPopup setDisclamer={setDisclamer} />
+              <DisclaimerPopup setDisclaimer={setDisclaimer} />
             </div>
           )}
           <div className="flex items-center justify-between px-4 pt-4 pb-3">
@@ -163,7 +158,7 @@ export default function ChatBotPopup({
               className="max-h-20 min-w-0 flex-1 resize-none self-center overflow-y-auto text-sm text-green-800 outline-none"
               value={input}
               maxLength={250}
-              disabled={disclamer}
+              disabled={disclaimer}
               minLength={1}
               rows={1}
               ref={textareaRef}
@@ -203,7 +198,7 @@ export default function ChatBotPopup({
             Par votre utilisation du chat, vous acceptez cette{' '}
             <button
               type="button"
-              onClick={() => setDisclamer(true)}
+              onClick={() => setDisclaimer(true)}
               className="cursor-pointer font-medium text-green-600 underline underline-offset-2 transition-colors hover:text-green-800"
             >
               clause de non-responsabilité
@@ -217,7 +212,7 @@ export default function ChatBotPopup({
           type="button"
           onClick={() => onToggle(true)}
           aria-label="Ouvrir l'assistant"
-          className="flex h-12 w-12 cursor-pointer items-center justify-center rounded-full bg-green-500 text-white shadow-lg ring-2 ring-white transition-colors hover:bg-green-600 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-green-400"
+          className="flex h-12 w-12 cursor-pointer items-center justify-center rounded-full bg-green-500 text-white shadow-lg ring-2 ring-white transition-colors hover:bg-green-600 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-green-400 ios-typing:hidden"
         >
           <Bot className="h-6 w-6" />
         </button>

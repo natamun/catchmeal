@@ -17,7 +17,11 @@ interface QuotedActivityProps {
   onDismiss?: () => void;
 }
 
-export default function QuotedActivity({
+/**
+ * A friend's activity quoted in the chat: in the message being written
+ * (removable), or inside a sent or received message.
+ */
+export function QuotedActivity({
   activity,
   variant,
   onDismiss,

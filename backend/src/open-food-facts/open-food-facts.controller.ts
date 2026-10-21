@@ -27,6 +27,8 @@ export class OpenFoodFactsController {
     @Request() req: { user: { userId: number } },
   ) {
     this.checkOwnership(userId, req.user.userId);
-    return this.openFoodFactsService.lookup(barcode);
+    return this.openFoodFactsService
+      .lookup(barcode)
+      .then((product) => ({ product }));
   }
 }

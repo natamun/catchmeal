@@ -1,21 +1,26 @@
 import { useState } from 'react';
 
-import { useAuth } from '../auth/auth-context';
-import CalorieChart from '../components/analytics/CalorieChart';
-import DataExport from '../components/analytics/DataExport';
-import MeasureChart, {
+import { useCurrentUser } from '../auth/authContext';
+import { CalorieChart } from '../components/analytics/CalorieChart';
+import { DataExport } from '../components/analytics/DataExport';
+import {
+  MeasureChart,
   type MeasureKey,
 } from '../components/analytics/MeasureChart';
-import NutritionAverages from '../components/analytics/NutritionAverages';
+import { NutritionAverages } from '../components/analytics/NutritionAverages';
 import { lastDays } from '../components/analytics/period';
-import PeriodSelector from '../components/analytics/PeriodSelector';
-import WeightVariation from '../components/analytics/WeightVariation';
+import { PeriodSelector } from '../components/analytics/PeriodSelector';
+import { WeightVariation } from '../components/analytics/WeightVariation';
 import { toApiDate } from '../components/meal/api';
 import { LoadError } from '../components/ui/LoadError';
-import useDashboard from '../hooks/useDashboard';
+import { useDashboard } from '../hooks/useDashboard';
 
+/**
+ * Stats page: a period, then averages, weight change, calorie chart, measure
+ * chart and JSON export, all from one dashboard request.
+ */
 export default function StatsPage() {
-  const { user } = useAuth();
+  const user = useCurrentUser();
   const [period, setPeriod] = useState(() => lastDays(7));
   const [measure, setMeasure] = useState<MeasureKey>('weight');
   const from = toApiDate(period.from);
@@ -52,7 +57,7 @@ export default function StatsPage() {
           <MeasureChart
             measure={measure}
             onMeasureChange={setMeasure}
-            targetWeight={user?.targetWeight ?? null}
+            targetWeight={user.targetWeight ?? null}
             days={days}
             period={period}
             isLoading={isLoading}

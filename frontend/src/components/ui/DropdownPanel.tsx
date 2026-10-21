@@ -13,6 +13,12 @@ interface DropdownPanelProps {
   children: ReactNode;
 }
 
+/**
+ * Floating list (Radix Popover) rendered inside `container`, usually the open
+ * dialog, so it stays usable above a modal. Focus stays in the field that
+ * opened it, so typing can go on, unless `moveFocus` is set. Its height is
+ * capped, or fits the screen with `fitViewport`.
+ */
 export function DropdownPanel({
   container,
   align = 'start',

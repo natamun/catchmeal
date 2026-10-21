@@ -1,5 +1,5 @@
-import StatTile from '../ui/StatTile';
-import SummaryCard from '../ui/SummaryCard';
+import { StatTile } from '../ui/StatTile';
+import { SummaryCard } from '../ui/SummaryCard';
 import { progressLaps } from './progress';
 
 interface Props {
@@ -12,7 +12,11 @@ interface Props {
 const RADIUS = 42;
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 
-export default function CalorieSummary({
+/**
+ * Calories of the day in a ring: the calories left, or the excess drawn as a
+ * second lap in another color.
+ */
+export function CalorieSummary({
   consumed,
   goal,
   isLoading = false,

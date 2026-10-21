@@ -22,6 +22,8 @@ import { DATE_ONLY_PATTERN } from '../pipes/parse-date-only.pipe';
 const trimOrNull = ({ value }: { value: unknown }) =>
   typeof value === 'string' ? value.trim() || null : value;
 
+const MAX_DECIMALS = 2;
+
 const isQuickAdd = (dto: CreateMealItemDto) => dto.foodItemId === undefined;
 
 const isDefined = (_: unknown, value: unknown) => value !== undefined;
@@ -32,27 +34,27 @@ export class CreateMealItemDto {
   @IsPositive()
   foodItemId?: number;
 
-  @IsNumber()
+  @IsNumber({ maxDecimalPlaces: MAX_DECIMALS })
   @IsPositive()
   quantity: number;
 
   @ValidateIf(isQuickAdd)
-  @IsNumber()
+  @IsNumber({ maxDecimalPlaces: MAX_DECIMALS })
   @Min(0)
   kcal?: number;
 
   @ValidateIf(isQuickAdd)
-  @IsNumber()
+  @IsNumber({ maxDecimalPlaces: MAX_DECIMALS })
   @Min(0)
   protein?: number;
 
   @ValidateIf(isQuickAdd)
-  @IsNumber()
+  @IsNumber({ maxDecimalPlaces: MAX_DECIMALS })
   @Min(0)
   carbs?: number;
 
   @ValidateIf(isQuickAdd)
-  @IsNumber()
+  @IsNumber({ maxDecimalPlaces: MAX_DECIMALS })
   @Min(0)
   fat?: number;
 }

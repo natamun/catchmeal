@@ -1,9 +1,9 @@
 import { MessageCircle } from 'lucide-react';
 
 import { formatRelativeTime } from '../../utils/formatRelativeTime';
-import type { ActivityItem, FriendPresence } from '../friends/types';
 import { Avatar } from '../ui/Avatar';
 import { ListCard } from '../ui/ListCard';
+import type { ActivityItem, FriendPresence } from './types';
 
 interface FriendsActivityProps {
   activities: ActivityItem[];
@@ -11,7 +11,11 @@ interface FriendsActivityProps {
   onReply: (activity: ActivityItem) => void;
 }
 
-export default function FriendsActivity({
+/**
+ * Friends activity card of the home and friends pages. The reply button opens a
+ * chat that quotes the activity.
+ */
+export function FriendsActivity({
   activities,
   presence,
   onReply,

@@ -1,9 +1,10 @@
 import { Link } from 'react-router';
 
 import { Brand } from '../components/ui/Brand';
-import { PATHS } from '../routes';
+import { PATHS } from '../routing/paths';
 
-export default function NotFoundPage() {
+/** Page shown for any unknown URL. */
+export function NotFoundPage() {
   return (
     <main className="flex min-h-screen flex-col items-center justify-center gap-6 bg-green-50 px-6 text-center">
       <Brand size="lg" />

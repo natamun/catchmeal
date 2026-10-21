@@ -2,19 +2,27 @@ import { useRef, useState } from 'react';
 import { ArrowLeft } from 'lucide-react';
 import { Link, useLocation, useMatch, useNavigate } from 'react-router';
 
-import { useAuth } from '../auth/auth-context';
-import AuthBrandPanel from '../components/auth/AuthBrandPanel';
-import OAuthButtons from '../components/auth/OAuthButtons';
+import { useAuth } from '../auth/authContext';
+import { AuthBrandPanel } from '../components/auth/AuthBrandPanel';
+import { OAuthButtons } from '../components/auth/OAuthButtons';
 import { PrivacyPolicyContent } from '../components/legal/PrivacyPolicyContent';
 import { TermsOfServiceContent } from '../components/legal/TermsOfServiceContent';
 import { BaseDialog } from '../components/ui/BaseDialog';
 import { Brand } from '../components/ui/Brand';
 import { FieldError } from '../components/ui/FieldError';
+import { LABEL_CLASS } from '../components/ui/fieldStyle';
 import { Input } from '../components/ui/Input';
-import { useTimeout } from '../hooks/useTimeout';
-import { PATHS } from '../routes';
+import { useFormValidation } from '../hooks/useFormValidation';
 import { navigationState } from '../routing/navigation';
+import { PATHS } from '../routing/paths';
 import { requestErrorMessage } from '../utils/requestErrorMessage';
+import {
+  isValidEmail,
+  MAX_LENGTH,
+  maxLengthMessage,
+  MIN_LENGTH,
+  minLengthMessage,
+} from '../utils/validation';
 
 type Mode = 'login' | 'register';
 
@@ -34,16 +42,15 @@ const EMPTY_FORM: AuthFormState = {
   password: '',
 };
 
-const LABEL_CLASS =
-  'text-xs font-semibold tracking-wide text-green-500 uppercase';
-
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@.]{2,}$/;
-const MAX_LENGTH = { username: 30, name: 80, email: 255, password: 72 };
 const SUBMIT_ERRORS: Record<number, string> = {
   401: "Nom d'utilisateur ou mot de passe incorrect.",
   409: "Ce nom d'utilisateur ou cet email est déjà pris.",
 };
 
+/**
+ * Login only checks the minimum lengths of the username and password; register
+ * checks every field.
+ */
 function validateAuthForm(
   mode: Mode,
   form: AuthFormState,
@@ -56,83 +63,65 @@ function validateAuthForm(
   const tooLong = (field: keyof AuthFormState, value: string) =>
     mode === 'register' && value.length > MAX_LENGTH[field];
 
-  if (username.length < 3) {
-    errors.username = 'Au moins 3 caractères';
+  if (username.length < MIN_LENGTH.username) {
+    errors.username = minLengthMessage(MIN_LENGTH.username);
   } else if (tooLong('username', username)) {
-    errors.username = `${MAX_LENGTH.username} caractères maximum`;
+    errors.username = maxLengthMessage(MAX_LENGTH.username);
   }
 
   if (mode === 'register') {
     if (name === '') {
       errors.name = 'Nom requis';
     } else if (tooLong('name', name)) {
-      errors.name = `${MAX_LENGTH.name} caractères maximum`;
+      errors.name = maxLengthMessage(MAX_LENGTH.name);
     }
-    if (!EMAIL_PATTERN.test(email) || tooLong('email', email)) {
+    if (!isValidEmail(email)) {
       errors.email = 'Email invalide';
     }
   }
 
-  if (form.password.length < 8) {
-    errors.password = 'Au moins 8 caractères';
+  if (form.password.length < MIN_LENGTH.password) {
+    errors.password = minLengthMessage(MIN_LENGTH.password);
   } else if (tooLong('password', form.password)) {
-    errors.password = `${MAX_LENGTH.password} caractères maximum`;
+    errors.password = maxLengthMessage(MAX_LENGTH.password);
   }
 
   return errors;
 }
 
-export default function AuthPage() {
+/**
+ * Login and register on one page: the URL (/login or /register) decides the
+ * mode. Switching mode keeps the typed values and the page asked for before
+ * login.
+ */
+export function AuthPage() {
   const { login, register } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const mode: Mode = useMatch(PATHS.register) ? 'register' : 'login';
   const oauthError =
     navigationState(location).oauthFailed === true ? OAUTH_ERROR_MESSAGE : null;
-  const [form, setForm] = useState<AuthFormState>(EMPTY_FORM);
-  const [touched, setTouched] = useState<
-    Partial<Record<keyof AuthFormState, boolean>>
-  >({});
-  const [focusedField, setFocusedField] = useState<keyof AuthFormState | null>(
-    null,
-  );
-  const [submitAttempted, setSubmitAttempted] = useState(false);
+  const {
+    form,
+    handleFocus,
+    handleBlur,
+    handleChange,
+    isInvalid,
+    errorMessage,
+    attemptSubmit,
+    resetValidation,
+  } = useFormValidation(EMPTY_FORM, (values) => validateAuthForm(mode, values));
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const conditionsDialogRef = useRef<HTMLDialogElement>(null);
   const confidentialiteDialogRef = useRef<HTMLDialogElement>(null);
-
-  const errors = validateAuthForm(mode, form);
-
-  useTimeout(() => setSubmitAttempted(false), submitAttempted ? 5000 : null);
-
-  const handleFocus = (field: keyof AuthFormState) => setFocusedField(field);
-
-  const handleBlur = (field: keyof AuthFormState) => {
-    setTouched((prev) => ({ ...prev, [field]: true }));
-    setFocusedField((current) => (current === field ? null : current));
-  };
-
-  const handleChange = (field: keyof AuthFormState, value: string) => {
-    setForm((prev) => ({ ...prev, [field]: value }));
-    setTouched((prev) => ({ ...prev, [field]: true }));
-  };
-
-  const isInvalid = (field: keyof AuthFormState) =>
-    Boolean(touched[field] && errors[field]);
-
-  const errorMessage = (field: keyof AuthFormState) =>
-    touched[field] && (focusedField === field || submitAttempted)
-      ? errors[field]
-      : undefined;
 
   const switchMode = (nextMode: Mode) => {
     void navigate(nextMode === 'login' ? PATHS.login : PATHS.register, {
       replace: true,
       state: navigationState(location),
     });
-    setTouched({});
-    setSubmitAttempted(false);
+    resetValidation();
     setError(null);
   };
 
@@ -140,13 +129,7 @@ export default function AuthPage() {
     event.preventDefault();
     setError(null);
 
-    const allTouched = Object.fromEntries(
-      Object.keys(form).map((key) => [key, true]),
-    ) as Record<keyof AuthFormState, boolean>;
-    setTouched(allTouched);
-
-    if (Object.keys(errors).length > 0) {
-      setSubmitAttempted(true);
+    if (!attemptSubmit()) {
       return;
     }
 
@@ -204,7 +187,6 @@ export default function AuthPage() {
             <form
               onSubmit={(e) => void handleSubmit(e)}
               noValidate
-              autoComplete="off"
               className="flex flex-col gap-4"
             >
               <div className="grid gap-4 sm:grid-cols-2">
@@ -217,7 +199,8 @@ export default function AuthPage() {
                   <Input
                     id="auth-username"
                     type="text"
-                    placeholder="3 caractères minimum"
+                    autoComplete="username"
+                    placeholder={minLengthMessage(MIN_LENGTH.username)}
                     value={form.username}
                     onChange={(e) => handleChange('username', e.target.value)}
                     onFocus={() => handleFocus('username')}
@@ -238,6 +221,7 @@ export default function AuthPage() {
                     <Input
                       id="auth-name"
                       type="text"
+                      autoComplete="name"
                       placeholder="Prénom et nom"
                       value={form.name}
                       onChange={(e) => handleChange('name', e.target.value)}
@@ -262,6 +246,7 @@ export default function AuthPage() {
                   <Input
                     id="auth-email"
                     type="email"
+                    autoComplete="email"
                     placeholder="nom@exemple.ch"
                     value={form.email}
                     onChange={(e) => handleChange('email', e.target.value)}
@@ -284,10 +269,13 @@ export default function AuthPage() {
                 <Input
                   id="auth-password"
                   type="password"
+                  autoComplete={
+                    mode === 'login' ? 'current-password' : 'new-password'
+                  }
                   placeholder={
                     mode === 'login'
                       ? 'Votre mot de passe'
-                      : '8 caractères minimum'
+                      : minLengthMessage(MIN_LENGTH.password)
                   }
                   value={form.password}
                   onChange={(e) => handleChange('password', e.target.value)}

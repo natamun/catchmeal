@@ -9,7 +9,11 @@ interface Props {
   children: ReactNode;
 }
 
-export default function SummaryCard({
+/**
+ * White card with a small title and optional content next to it (`aside`).
+ * `busy` tells screen readers it is loading.
+ */
+export function SummaryCard({
   title,
   aside,
   inlineAside = false,

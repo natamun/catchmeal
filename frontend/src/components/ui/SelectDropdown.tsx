@@ -35,6 +35,11 @@ interface SelectDropdownProps {
   className?: string;
 }
 
+/**
+ * A select in the app's style: a button that opens the options in a
+ * DropdownPanel. `container` must be the dialog it lives in, if any. A click on
+ * the field's label toggles the list like the button does.
+ */
 export function SelectDropdown({
   id,
   value,

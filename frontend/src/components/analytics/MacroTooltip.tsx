@@ -1,19 +1,18 @@
 import type { TooltipContentProps } from 'recharts';
 
-import type { KcalPoint } from '../../types/dashboard-analytics';
 import { TooltipFrame, TooltipRow } from './ChartTooltip';
 import { MACRO_SERIES } from './macroSeries';
+import type { KcalPoint } from './types';
 
 interface Props extends TooltipContentProps {
   averaged: boolean;
 }
 
-export default function MacroTooltip({
-  active,
-  payload,
-  label,
-  averaged,
-}: Props) {
+/**
+ * Tooltip of the calorie chart: grams of each macro and the calories, for the
+ * day or averaged over the grouped days.
+ */
+export function MacroTooltip({ active, payload, label, averaged }: Props) {
   const point = payload[0]?.payload as KcalPoint | undefined;
 
   if (!active || !point) {

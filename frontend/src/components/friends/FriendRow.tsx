@@ -13,7 +13,11 @@ interface FriendRowProps {
   onRemove: () => void;
 }
 
-export default function FriendRow({
+/**
+ * A friend in the list: online or last seen, a message button with a dot for
+ * unread messages, and a remove button.
+ */
+export function FriendRow({
   friend,
   online,
   lastSeenAt,

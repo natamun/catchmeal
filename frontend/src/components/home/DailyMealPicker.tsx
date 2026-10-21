@@ -1,17 +1,18 @@
 import { useEffect, useRef, useState } from 'react';
 import { ChevronLeft } from 'lucide-react';
 
-import { useAuth } from '../../auth/auth-context';
+import { useCurrentUser } from '../../auth/authContext';
+import { useToggleSet } from '../../hooks/useToggleSet';
 import { listFoodItems } from '../food/api';
-import FoodItemList from '../food/FoodItemList';
+import { FoodItemList } from '../food/FoodItemList';
 import type { FoodItem } from '../food/types';
 import { listMeals } from '../meal/api';
 import { buildDrafts, type MealItemDraft } from '../meal/draft';
-import MealList from '../meal/MealList';
+import { MealList } from '../meal/MealList';
 import { MEAL_TYPE_LABELS, type Meal, type MealType } from '../meal/types';
 import { PillTabs } from '../ui/PillTabs';
 import { SelectToggle } from '../ui/SelectToggle';
-import DailyMealForm from './DailyMealForm';
+import { DailyMealForm } from './DailyMealForm';
 
 type PickerTab = 'food' | 'meal';
 
@@ -20,16 +21,6 @@ const TAB_OPTIONS: { value: PickerTab; label: string }[] = [
   { value: 'meal', label: 'Repas' },
 ];
 
-function toggleInSet(prev: Set<number>, id: number) {
-  const next = new Set(prev);
-  if (next.has(id)) {
-    next.delete(id);
-  } else {
-    next.add(id);
-  }
-  return next;
-}
-
 interface DailyMealPickerProps {
   mealType: MealType;
   date: Date;
@@ -37,25 +28,25 @@ interface DailyMealPickerProps {
   onAdded: () => void;
 }
 
-export default function DailyMealPicker({
+/**
+ * Page content that adds foods and library meals to one section of the journal:
+ * select them in two tabs, then check the quantities in DailyMealForm before
+ * saving.
+ */
+export function DailyMealPicker({
   mealType,
   date,
   onClose,
   onAdded,
 }: DailyMealPickerProps) {
-  const { user } = useAuth();
-  const userId = user!.userId;
+  const { userId } = useCurrentUser();
   const [foodItems, setFoodItems] = useState<FoodItem[]>([]);
   const [templates, setTemplates] = useState<Meal[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [tab, setTab] = useState<PickerTab>('food');
-  const [selectedFoodIds, setSelectedFoodIds] = useState<Set<number>>(
-    new Set(),
-  );
-  const [selectedMealIds, setSelectedMealIds] = useState<Set<number>>(
-    new Set(),
-  );
+  const [selectedFoodIds, toggleFood] = useToggleSet<number>();
+  const [selectedMealIds, toggleMeal] = useToggleSet<number>();
   const [review, setReview] = useState<{
     key: number;
     items: MealItemDraft[];
@@ -129,9 +120,7 @@ export default function DailyMealPicker({
                 <SelectToggle
                   selected={selectedFoodIds.has(food.id)}
                   label={`Sélectionner ${food.name}`}
-                  onToggle={() =>
-                    setSelectedFoodIds((prev) => toggleInSet(prev, food.id))
-                  }
+                  onToggle={() => toggleFood(food.id)}
                 />
               )}
             />
@@ -144,16 +133,14 @@ export default function DailyMealPicker({
                 <SelectToggle
                   selected={selectedMealIds.has(meal.id)}
                   label={`Sélectionner ${meal.name ?? 'ce repas'}`}
-                  onToggle={() =>
-                    setSelectedMealIds((prev) => toggleInSet(prev, meal.id))
-                  }
+                  onToggle={() => toggleMeal(meal.id)}
                 />
               )}
             />
           )}
         </div>
 
-        <div className="sticky bottom-[calc(var(--spacing-bottom-nav)+1rem+env(safe-area-inset-bottom))] z-20 mx-3 flex items-center justify-between gap-3 rounded-2xl border border-green-200 bg-white p-3 shadow-lg md:mx-auto md:w-full md:max-w-md md:pointer-fine:bottom-4">
+        <div className="sticky bottom-[calc(var(--spacing-bottom-nav)+1rem+env(safe-area-inset-bottom))] z-20 mx-3 flex items-center justify-between gap-3 rounded-2xl border border-green-200 bg-white p-3 shadow-lg md:mx-auto md:w-full md:max-w-md md:pointer-fine:bottom-4 ios-typing:hidden">
           <span className="text-sm text-green-600">
             {selectedCount === 0
               ? 'Aucune sélection'

@@ -3,7 +3,7 @@ import { Menu, X, type LucideIcon } from 'lucide-react';
 import { Link, NavLink } from 'react-router';
 
 import { useDelayedUnmount } from '../../hooks/useDelayedUnmount';
-import { PATHS } from '../../routes';
+import { PATHS } from '../../routing/paths';
 import { Brand } from '../ui/Brand';
 
 type Target = { to: string } | { onClick: () => void };
@@ -25,6 +25,7 @@ interface PressableProps {
   children: ReactNode;
 }
 
+/** A NavLink for a route, or a button for a function, with the same look. */
 function Pressable({
   target,
   className,
@@ -60,7 +61,11 @@ function Pressable({
   );
 }
 
-export default function PublicHeader({ links, action }: Props) {
+/**
+ * Header of the public pages: logo, links, one action button, and a burger menu
+ * on small screens (Escape closes it).
+ */
+export function PublicHeader({ links, action }: Props) {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuVisible = useDelayedUnmount(menuOpen, 100);
   const burgerRef = useRef<HTMLButtonElement>(null);

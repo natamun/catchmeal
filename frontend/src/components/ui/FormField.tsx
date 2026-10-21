@@ -1,6 +1,7 @@
 import { useId, type ReactNode } from 'react';
 
 import { FieldError } from './FieldError';
+import { LABEL_CLASS } from './fieldStyle';
 
 interface FormFieldProps {
   label: string;
@@ -8,12 +9,16 @@ interface FormFieldProps {
   children: (id: string) => ReactNode;
 }
 
+/**
+ * A label, a field and its error bubble, linked by a generated id that the
+ * field receives through `children(id)`.
+ */
 export function FormField({ label, error, children }: FormFieldProps) {
   const id = useId();
 
   return (
     <div className="relative flex flex-col gap-1">
-      <label htmlFor={id} className="text-sm font-semibold text-green-600">
+      <label htmlFor={id} className={LABEL_CLASS}>
         {label}
       </label>
       {children(id)}

@@ -2,6 +2,11 @@ import { AlertCircle } from 'lucide-react';
 
 import { useDelayedUnmount } from '../../hooks/useDelayedUnmount';
 
+/**
+ * Red bubble under a field with its error. It stays 100 ms after the message
+ * disappears so it can fade out. `id` is what the field's aria-describedby
+ * points to.
+ */
 export function FieldError({
   id,
   message,

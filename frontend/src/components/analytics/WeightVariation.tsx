@@ -1,16 +1,20 @@
 import { Minus, TrendingDown, TrendingUp } from 'lucide-react';
 
-import type { DashboardDay } from '../../types/dashboard-analytics';
 import { formatKg } from '../../utils/format';
-import Skeleton from '../ui/Skeleton';
-import SummaryCard from '../ui/SummaryCard';
+import { Skeleton } from '../ui/Skeleton';
+import { SummaryCard } from '../ui/SummaryCard';
+import type { DashboardDay } from './types';
 
 interface Props {
   days: DashboardDay[];
   isLoading?: boolean;
 }
 
-export default function WeightVariation({ days, isLoading = false }: Props) {
+/**
+ * Weight change between the first and the last weigh-in of the period; under
+ * 0.05 kg it counts as stable.
+ */
+export function WeightVariation({ days, isLoading = false }: Props) {
   const weights = days.flatMap(({ weight }) =>
     weight === null ? [] : [weight],
   );

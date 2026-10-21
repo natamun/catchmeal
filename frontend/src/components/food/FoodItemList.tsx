@@ -2,21 +2,18 @@ import { useState, type ReactNode } from 'react';
 import { ChevronRight } from 'lucide-react';
 
 import { MACROS } from '../../constants/macros';
+import { useToggleSet } from '../../hooks/useToggleSet';
+import { roundDecimals } from '../../utils/decimals';
 import { ListCard, ListCardEmpty, ListCardLoading } from '../ui/ListCard';
 import { LoadError } from '../ui/LoadError';
 import { MacroBadge } from '../ui/MacroBadge';
-import FoodItemSearchBar from './FoodItemSearchBar';
 import {
   EMPTY_FILTER_CRITERIA,
-  UNIT_LABELS,
-  type FoodFilterCriteria,
-  type FoodItem,
-  type MacroFilter,
-} from './types';
-
-function matchesMacro(itemValue: number, filter: MacroFilter) {
-  return itemValue >= filter.min && itemValue <= filter.max;
-}
+  matchesMacro,
+  type FilterCriteria,
+} from '../ui/macroFilter';
+import { MacroSearchBar } from '../ui/MacroSearchBar';
+import { UNIT_LABELS, type FoodItem } from './types';
 
 interface FoodItemListProps {
   items: FoodItem[];
@@ -27,19 +24,27 @@ interface FoodItemListProps {
   renderAction?: (item: FoodItem) => ReactNode;
 }
 
+/** Base quantity with its unit, e.g. "100g" or "1x". */
 function formatBaseQuantity(item: FoodItem) {
-  return `${item.baseQuantity}${UNIT_LABELS[item.baseUnit]}`;
+  return `${roundDecimals(item.baseQuantity, 1)}${UNIT_LABELS[item.baseUnit]}`;
 }
 
+/** Macro badges of a food, rounded to one decimal. */
 function macrosOf(item: FoodItem) {
   return MACROS.map(({ key, label, color }) => ({
     label,
     color,
-    value: item[key],
+    value: roundDecimals(item[key], 1),
   }));
 }
 
-export default function FoodItemList({
+/**
+ * The food library: search and filters, one row per food with its calories, and
+ * the macro badges, which fold into an expandable row on narrow screens.
+ * Archived foods are hidden. `renderAction` adds a button to each row (edit or
+ * select).
+ */
+export function FoodItemList({
   items,
   isLoading,
   loadError,
@@ -47,8 +52,8 @@ export default function FoodItemList({
   headerAction,
   renderAction,
 }: FoodItemListProps) {
-  const [expandedIds, setExpandedIds] = useState<Set<number>>(new Set());
-  const [criteria, setCriteria] = useState<FoodFilterCriteria>(
+  const [expandedIds, toggleExpanded] = useToggleSet<number>();
+  const [criteria, setCriteria] = useState<FilterCriteria>(
     EMPTY_FILTER_CRITERIA,
   );
 
@@ -78,25 +83,14 @@ export default function FoodItemList({
         : (a[field] - b[field]) * dir;
     });
 
-  const toggleExpanded = (id: number) => {
-    setExpandedIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) {
-        next.delete(id);
-      } else {
-        next.add(id);
-      }
-      return next;
-    });
-  };
-
   return (
     <ListCard
       className="@container"
       header={
         <>
-          <FoodItemSearchBar
+          <MacroSearchBar
             items={activeItems}
+            placeholder="Rechercher un aliment..."
             criteria={criteria}
             onFilterChange={setCriteria}
           />
@@ -156,7 +150,7 @@ export default function FoodItemList({
                   ))}
                 </div>
                 <span className="min-w-20 shrink-0 rounded-full bg-green-50 px-2.5 py-0.5 text-center text-sm font-semibold text-green-800">
-                  {item.kcal} kcal
+                  {Math.round(item.kcal)} kcal
                 </span>
                 {renderAction?.(item)}
               </div>

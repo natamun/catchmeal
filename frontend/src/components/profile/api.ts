@@ -2,6 +2,7 @@ import { JSON_HEADERS, request } from '../../utils/request';
 
 const BASE_URL = import.meta.env.VITE_API_URL;
 
+/** The profile as the users routes return it. */
 export interface UserProfile {
   id: number;
   username: string;
@@ -16,12 +17,9 @@ export interface UserProfile {
   gender: string | null;
   birthDate: string | null;
   activityLevel: string | null;
-  bodyFat: number | null;
-  fatFreeMass: number | null;
-  bodyWater: number | null;
-  muscleMass: number | null;
 }
 
+/** Fields to change in the profile; the fields left out stay as they are. */
 export interface UpdateProfileInput {
   username?: string;
   name?: string;
@@ -34,10 +32,6 @@ export interface UpdateProfileInput {
   gender?: string;
   birthDate?: string;
   activityLevel?: string;
-  bodyFat?: number;
-  fatFreeMass?: number;
-  bodyWater?: number;
-  muscleMass?: number;
 }
 
 export interface WeightEntry {
@@ -77,6 +71,8 @@ interface ExportFoodItem {
 interface ExportWeightLog {
   weight: number;
   bodyFat: number | null;
+  fatFreeMass: number | null;
+  bodyWater: number | null;
   muscleMass: number | null;
   loggedAt: string;
 }
@@ -108,39 +104,27 @@ interface ExportFriend {
   lastTimeConnected: string | null;
 }
 
+interface ExportProfile extends Omit<UserProfile, 'id'> {
+  email: string;
+  createAt: string;
+  lastSeenAt: string | null;
+  meal: ExportMeal[];
+  foodItems: ExportFoodItem[];
+  weightLogs: ExportWeightLog[];
+  goalSettings: ExportGoalSetting[];
+  senderMessage: ExportMessage[];
+  receiverMessage: ExportMessage[];
+  activities: ExportActivity[];
+  userFriend: ExportFriend[];
+}
+
+/**
+ * What GET /gdpr/export returns: the profile with everything linked to it
+ * (meals, foods, weigh-ins, messages, friends, activities).
+ */
 export interface DataExport {
   exportedAt: string;
-  data: {
-    profile: {
-      username: string;
-      name: string;
-      email: string;
-      avatarUrl: string | null;
-      createAt: string;
-      lastSeenAt: string | null;
-      height: number | null;
-      targetWeight: number | null;
-      dailyCalorieGoal: number | null;
-      dailyProteinGoal: number | null;
-      dailyCarbsGoal: number | null;
-      dailyFatGoal: number | null;
-      gender: string | null;
-      birthDate: string | null;
-      activityLevel: string | null;
-      bodyFat: number | null;
-      fatFreeMass: number | null;
-      bodyWater: number | null;
-      muscleMass: number | null;
-      meal: ExportMeal[];
-      foodItems: ExportFoodItem[];
-      weightLogs: ExportWeightLog[];
-      goalSettings: ExportGoalSetting[];
-      senderMessage: ExportMessage[];
-      receiverMessage: ExportMessage[];
-      activities: ExportActivity[];
-      userFriend: ExportFriend[];
-    };
-  };
+  data: { profile: ExportProfile };
 }
 
 export interface ChangePasswordInput {
@@ -148,16 +132,28 @@ export interface ChangePasswordInput {
   newPassword: string;
 }
 
+/**
+ * GET /gdpr/export: all the data of the user; GdprSection turns it into an HTML
+ * or JSON file.
+ */
 export function exportMyData() {
   return request<DataExport>(`${BASE_URL}/gdpr/export`);
 }
 
+/**
+ * DELETE /gdpr/account: anonymizes the account. The caller logs the user out
+ * afterwards.
+ */
 export function deleteMyAccount() {
   return request<{ message: string }>(`${BASE_URL}/gdpr/account`, {
     method: 'DELETE',
   });
 }
 
+/**
+ * PATCH /auth/password: needs the current password; the backend answers 400
+ * when it is wrong.
+ */
 export function changePassword(input: ChangePasswordInput) {
   return request<{ success: boolean }>(`${BASE_URL}/auth/password`, {
     method: 'PATCH',
@@ -166,6 +162,10 @@ export function changePassword(input: ChangePasswordInput) {
   });
 }
 
+/**
+ * PATCH /users/:id/avatar: sends the image as multipart form data. No JSON
+ * header here: the browser sets the multipart one itself.
+ */
 export function uploadAvatar(userId: number, file: File) {
   const form = new FormData();
   form.append('file', file);
@@ -175,12 +175,14 @@ export function uploadAvatar(userId: number, file: File) {
   });
 }
 
+/** DELETE /users/:id/avatar: removes the profile picture. */
 export function removeAvatar(userId: number) {
   return request<UserProfile>(`${BASE_URL}/users/${userId}/avatar`, {
     method: 'DELETE',
   });
 }
 
+/** PATCH /users/:id: saves the profile fields that changed. */
 export function updateProfile(userId: number, input: UpdateProfileInput) {
   return request<UserProfile>(`${BASE_URL}/users/${userId}`, {
     method: 'PATCH',
@@ -189,6 +191,7 @@ export function updateProfile(userId: number, input: UpdateProfileInput) {
   });
 }
 
+/** PATCH /users/:id/weight/:entryId: corrects a weigh-in. */
 export function updateWeight(
   userId: number,
   entryId: number,
@@ -201,12 +204,14 @@ export function updateWeight(
   });
 }
 
+/** DELETE /users/:id/weight/:entryId: deletes a weigh-in. */
 export function deleteWeight(userId: number, entryId: number) {
   return request<WeightEntry>(`${BASE_URL}/users/${userId}/weight/${entryId}`, {
     method: 'DELETE',
   });
 }
 
+/** POST /users/:id/weight: records a new weigh-in, dated now by the backend. */
 export function logWeight(userId: number, input: LogWeightInput) {
   return request<WeightEntry>(`${BASE_URL}/users/${userId}/weight`, {
     method: 'POST',
@@ -215,6 +220,7 @@ export function logWeight(userId: number, input: LogWeightInput) {
   });
 }
 
+/** GET /users/:id/weight: every weigh-in of the user. */
 export function getWeightHistory(userId: number, signal?: AbortSignal) {
   return request<WeightEntry[]>(`${BASE_URL}/users/${userId}/weight`, {
     signal,

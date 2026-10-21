@@ -1,6 +1,12 @@
+import { MAX_DECIMALS, roundDecimals } from '../../utils/decimals';
 import type { FoodItem } from '../food/types';
 import type { Meal, MealItemInput } from './types';
 
+/**
+ * An item of a meal being edited: a food of the library with a quantity, or a
+ * quick add (calories and macros typed by hand). `id` is only a local key for
+ * React lists.
+ */
 export type MealItemDraft =
   | { id: string; kind: 'food'; foodItem: FoodItem; quantity: number }
   | {
@@ -13,6 +19,10 @@ export type MealItemDraft =
       fat: number;
     };
 
+/**
+ * Turns a saved meal back into editable drafts. An item whose food can't be
+ * found any more is skipped.
+ */
 export function mealToItems(
   meal: Meal,
   foodItems: FoodItem[],
@@ -49,6 +59,10 @@ export function mealToItems(
   return drafts;
 }
 
+/**
+ * Adds `extra` to `base`: a food present in both becomes one line with the
+ * quantities added up.
+ */
 export function mergeDrafts(
   base: MealItemDraft[],
   extra: MealItemDraft[],
@@ -76,6 +90,10 @@ export function mergeDrafts(
   return merged;
 }
 
+/**
+ * One list of drafts from foods and whole meals, with repeated foods merged.
+ * Used to fill a journal section.
+ */
 export function buildDrafts(
   foods: FoodItem[],
   meals: Meal[],
@@ -95,6 +113,10 @@ export function buildDrafts(
   return drafts;
 }
 
+/**
+ * Calories and macros of the drafts: a food is scaled by quantity / base
+ * quantity, a quick add counts as typed.
+ */
 export function draftTotals(items: MealItemDraft[]) {
   return items.reduce(
     (acc, item) => {
@@ -118,16 +140,24 @@ export function draftTotals(items: MealItemDraft[]) {
   );
 }
 
+/**
+ * Converts drafts to the API format, rounded to the decimals the backend
+ * accepts. A food only sends its id and quantity: the backend computes its
+ * macros.
+ */
 export function draftsToInput(items: MealItemDraft[]): MealItemInput[] {
   return items.map((item) =>
     item.kind === 'food'
-      ? { foodItemId: item.foodItem.id, quantity: item.quantity }
+      ? {
+          foodItemId: item.foodItem.id,
+          quantity: roundDecimals(item.quantity, MAX_DECIMALS),
+        }
       : {
-          quantity: item.quantity,
-          kcal: item.kcal,
-          protein: item.protein,
-          carbs: item.carbs,
-          fat: item.fat,
+          quantity: roundDecimals(item.quantity, MAX_DECIMALS),
+          kcal: roundDecimals(item.kcal, MAX_DECIMALS),
+          protein: roundDecimals(item.protein, MAX_DECIMALS),
+          carbs: roundDecimals(item.carbs, MAX_DECIMALS),
+          fat: roundDecimals(item.fat, MAX_DECIMALS),
         },
   );
 }

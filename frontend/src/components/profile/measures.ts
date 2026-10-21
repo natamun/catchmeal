@@ -1,5 +1,9 @@
 import { formatKg } from '../../utils/format';
 
+/**
+ * The body composition values a weigh-in can include, with their allowed range
+ * and the example shown as placeholder.
+ */
 export const COMPOSITION = [
   {
     key: 'bodyFat',
@@ -35,6 +39,7 @@ export const COMPOSITION = [
   },
 ] as const;
 
+/** Every value of a weigh-in: the weight, then the body composition. */
 export const MEASURES = [
   {
     key: 'weight',
@@ -49,6 +54,7 @@ export const MEASURES = [
 
 export type MeasureKey = (typeof MEASURES)[number]['key'];
 
+/** "72,5 kg" with a non-breaking space, or "–" when there is no value. */
 export function formatMeasure(value: number | null, unit: string) {
   return value === null ? '–' : `${formatKg(value)}\u00a0${unit}`;
 }

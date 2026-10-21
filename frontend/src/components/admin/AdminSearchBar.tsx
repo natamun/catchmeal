@@ -78,7 +78,12 @@ interface AdminSearchBarProps {
   onFilterChange: (criteria: AdminFilterCriteria) => void;
 }
 
-export default function AdminSearchBar({
+/**
+ * Search field and filter dialog of the admin user list: role, status, online
+ * state, login method and sort. The text filters right away; the dialog applies
+ * its choices only when confirmed.
+ */
+export function AdminSearchBar({
   criteria,
   onFilterChange,
 }: AdminSearchBarProps) {

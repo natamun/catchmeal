@@ -4,6 +4,7 @@ interface MacroBadgeProps {
   color: string;
 }
 
+/** A colored dot and a number of grams; the full label shows on hover. */
 export function MacroBadge({ label, value, color }: MacroBadgeProps) {
   return (
     <span

@@ -4,6 +4,7 @@ interface Props {
   size?: 'md' | 'lg';
 }
 
+/** The logo with the app name, in two sizes. */
 export function Brand({ size = 'md' }: Props) {
   const large = size === 'lg';
 

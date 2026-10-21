@@ -6,6 +6,10 @@ interface PillTabsProps<T extends string> {
   className?: string;
 }
 
+/**
+ * A choice between a few options shown as pills. They are real radio buttons
+ * underneath, so the keyboard and screen readers handle them natively.
+ */
 export function PillTabs<T extends string>({
   name,
   options,

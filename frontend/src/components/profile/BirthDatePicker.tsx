@@ -8,6 +8,7 @@ import 'react-datepicker/dist/react-datepicker.css';
 
 import { toApiDate } from '../meal/api';
 import { CalendarTrigger } from '../ui/CalendarButton';
+import { LABEL_CLASS } from '../ui/fieldStyle';
 
 type View = 'year' | 'month' | 'day';
 
@@ -15,6 +16,10 @@ const YEARS_PER_PAGE = 20;
 const ARROW_CLASS =
   'flex h-6 w-6 cursor-pointer items-center justify-center text-green-400 transition-colors hover:text-green-600 disabled:pointer-events-none disabled:opacity-30';
 
+/**
+ * Clicks on the label don't count as clicks outside, so they don't close the
+ * calendar.
+ */
 const KEEP_OPEN_CLASS = 'birth-date-keep-open';
 
 interface Props {
@@ -24,6 +29,11 @@ interface Props {
   onChange: (value: string) => void;
 }
 
+/**
+ * Birth date picker that goes year, then month, then day, so an old date takes
+ * three clicks instead of hundreds. It opens 20 years back when empty, and the
+ * future is blocked.
+ */
 export function BirthDatePicker({ id, label, value, onChange }: Props) {
   const pickerRef = useRef<DatePicker>(null);
   const [isOpen, setIsOpen] = useState(false);
@@ -33,10 +43,7 @@ export function BirthDatePicker({ id, label, value, onChange }: Props) {
 
   return (
     <div className="flex flex-col gap-1">
-      <label
-        htmlFor={id}
-        className={`text-sm font-semibold text-green-600 ${KEEP_OPEN_CLASS}`}
-      >
+      <label htmlFor={id} className={`${LABEL_CLASS} ${KEEP_OPEN_CLASS}`}>
         {label}
       </label>
       <div className="flex flex-col">

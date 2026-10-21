@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import * as nodemailer from 'nodemailer';
 
 const BASE_STYLE = `
@@ -67,15 +67,16 @@ const BASE_STYLE = `
 
 @Injectable()
 export class EmailService {
+  private readonly logger = new Logger(EmailService.name);
   private readonly transporter: nodemailer.Transporter;
 
   constructor() {
-    const isProduction = process.env.NODE_ENV === 'production';
+    const port = Number(process.env.MAILTRAP_PORT);
     this.transporter = nodemailer.createTransport({
       host: process.env.MAILTRAP_HOST,
-      port: Number(process.env.MAILTRAP_PORT),
-      secure: isProduction,
-      requireTLS: isProduction,
+      port,
+      secure: port === 465,
+      requireTLS: process.env.NODE_ENV === 'production',
       auth: {
         user: process.env.MAILTRAP_USER,
         pass: process.env.MAILTRAP_PASS,
@@ -87,8 +88,17 @@ export class EmailService {
     return process.env.EMAIL_FROM ?? '"KcalApp" <noreply@kcalapp.dev>';
   }
 
+  private async send(mail: nodemailer.SendMailOptions): Promise<void> {
+    try {
+      await this.transporter.sendMail(mail);
+    } catch (error) {
+      const reason = error instanceof Error ? error.message : String(error);
+      this.logger.error(`Email "${String(mail.subject)}" not sent: ${reason}`);
+    }
+  }
+
   async sendDataExportConfirmation(userEmail: string): Promise<void> {
-    await this.transporter.sendMail({
+    await this.send({
       from: this.fromAddress,
       to: userEmail,
       subject: 'Vos données ont été exportées',
@@ -123,7 +133,7 @@ export class EmailService {
   }
 
   async sendAccountDeletionConfirmation(userEmail: string): Promise<void> {
-    await this.transporter.sendMail({
+    await this.send({
       from: this.fromAddress,
       to: userEmail,
       subject: 'Votre compte a été supprimé',

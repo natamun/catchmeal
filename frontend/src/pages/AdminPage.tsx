@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 
-import { useAuth } from '../auth/auth-context';
-import AdminSearchBar from '../components/admin/AdminSearchBar';
+import { useAuth } from '../auth/authContext';
+import { AdminSearchBar } from '../components/admin/AdminSearchBar';
 import { AdminUserDialog } from '../components/admin/AdminUserDialog';
 import {
   getStats,
@@ -22,10 +22,13 @@ import {
   ListCardLoading,
 } from '../components/ui/ListCard';
 import { LoadError } from '../components/ui/LoadError';
-import Skeleton from '../components/ui/Skeleton';
-import StatTile from '../components/ui/StatTile';
-import SummaryCard from '../components/ui/SummaryCard';
+import { Skeleton } from '../components/ui/Skeleton';
+import { StatTile } from '../components/ui/StatTile';
+import { SummaryCard } from '../components/ui/SummaryCard';
 
+/**
+ * Whether a user passes the search (username, name or email) and every filter.
+ */
 function matches(user: AdminUser, criteria: AdminFilterCriteria) {
   const query = criteria.query.trim().toLowerCase();
   const matchesQuery =
@@ -56,6 +59,7 @@ function matches(user: AdminUser, criteria: AdminFilterCriteria) {
   );
 }
 
+/** Order of the list: by username, role or creation date. */
 function compare(a: AdminUser, b: AdminUser, criteria: AdminFilterCriteria) {
   const { field, direction } = criteria.sort;
   const order = direction === 'asc' ? 1 : -1;
@@ -69,8 +73,16 @@ function compare(a: AdminUser, b: AdminUser, criteria: AdminFilterCriteria) {
   return a.createAt.localeCompare(b.createAt) * order;
 }
 
+/**
+ * Admin board: totals, the list of every account with search, filters and sort
+ * (all done in the browser), and a dialog per user.
+ */
 export default function AdminPage() {
-  const { user: currentUser, logout } = useAuth();
+  const {
+    user: currentUser,
+    logout,
+    updateUser: updateCurrentUser,
+  } = useAuth();
   const [criteria, setCriteria] =
     useState<AdminFilterCriteria>(EMPTY_ADMIN_FILTER);
   const [users, setUsers] = useState<AdminUser[] | null>(null);
@@ -236,6 +248,9 @@ export default function AdminPage() {
             return;
           }
           mergeUser(selected.id, changes);
+          if (changes.username && selected.id === currentUser?.userId) {
+            updateCurrentUser({ username: changes.username });
+          }
           if (changes.deletedAt && selected.id === currentUser?.userId) {
             void logout();
           }

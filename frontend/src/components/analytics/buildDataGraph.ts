@@ -1,12 +1,11 @@
-import type {
-  DashboardDay,
-  DataGraph,
-  Grain,
-  NumericKey,
-} from '../types/dashboard-analytics';
+import type { DashboardDay, DataGraph, Grain, NumericKey } from './types';
 
 const STEP: Record<Grain, number> = { day: 1, week: 7, biWeek: 14 };
 
+/**
+ * Rounded average of one value over days, skipping the days without data; 0
+ * when no day has any.
+ */
 export function averageOf(days: DashboardDay[], key: NumericKey) {
   const values = days.flatMap((day) => day[key] ?? []);
 
@@ -19,9 +18,14 @@ export function averageOf(days: DashboardDay[], key: NumericKey) {
   );
 }
 
+/** "2026-10-20" becomes "20-10". */
 const shortDate = (day: string) => day.slice(5).split('-').reverse().join('-');
 
-export default function buildDataGraph(
+/**
+ * Groups consecutive days by `grain` (1, 7 or 14 days) and averages each value
+ * per group: one point per bar of the chart.
+ */
+export function buildDataGraph(
   dashboard: DashboardDay[],
   grain: Grain,
 ): DataGraph[] {

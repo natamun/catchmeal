@@ -1,6 +1,7 @@
 import { CHART_HEIGHT } from './chartStyle';
 
-export default function ChartSkeleton() {
+/** Pulsing block the size of a chart, shown while the stats load. */
+export function ChartSkeleton() {
   return (
     <div
       className="animate-pulse rounded-xl bg-green-50"

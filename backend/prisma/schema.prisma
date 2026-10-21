@@ -49,10 +49,6 @@ model User {
   gender            Gender?
   birthDate         DateTime?
   activityLevel     ActivityLevel?
-  bodyFat           Float?
-  fatFreeMass       Float?
-  bodyWater         Float?
-  muscleMass        Float?
   role              Role          @default(USER)
   createAt          DateTime      @default(now())
   deletedAt          DateTime?

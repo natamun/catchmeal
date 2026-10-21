@@ -11,6 +11,7 @@ type AdminStatusFilter = 'all' | 'active' | 'deleted';
 type AdminOnlineFilter = 'all' | 'online' | 'offline';
 type AdminOAuthFilter = 'all' | 'local' | 'google' | 'github' | '42';
 
+/** Search, filters and sort chosen in the admin user list. */
 export interface AdminFilterCriteria {
   query: string;
   role: AdminRoleFilter;
@@ -20,6 +21,7 @@ export interface AdminFilterCriteria {
   sort: AdminSortOption;
 }
 
+/** No filter, sorted by name. */
 export const EMPTY_ADMIN_FILTER: AdminFilterCriteria = {
   query: '',
   role: 'all',

@@ -56,4 +56,25 @@ describe('CreateMealDto', () => {
 
     expect(dto.name).toBeNull();
   });
+
+  it('should accept a food line quantity with 2 decimals', async () => {
+    const dto = await parse({ items: [{ foodItemId: 3, quantity: 150.25 }] });
+
+    expect(dto.items[0].quantity).toBe(150.25);
+  });
+
+  it('should reject a quantity with more than 2 decimals', async () => {
+    await expect(
+      parse({ items: [{ foodItemId: 3, quantity: 1.005 }] }),
+    ).rejects.toThrow(BadRequestException);
+  });
+
+  it.each(['kcal', 'protein', 'carbs', 'fat'])(
+    'should reject a quick add %s with more than 2 decimals',
+    async (field) => {
+      await expect(
+        parse({ items: [{ ...items[0], [field]: 1.234 }] }),
+      ).rejects.toThrow(BadRequestException);
+    },
+  );
 });

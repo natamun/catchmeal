@@ -2,8 +2,13 @@ import { useEffect, useState } from 'react';
 
 import { getFriendsActivity } from '../components/friends/api';
 import type { ActivityItem } from '../components/friends/types';
-import { useSocket } from '../socket/socket-context';
+import { useSocket } from '../socket/socketContext';
 
+/**
+ * The friends activity feed: loaded once, then kept live by the socket (new
+ * activities on top, edited ones replaced in place, deleted ones removed, full
+ * reload after a reconnection). Keeps the 30 latest, like the backend.
+ */
 export function useActivityFeed(userId: number) {
   const { socket } = useSocket();
   const [activities, setActivities] = useState<ActivityItem[]>([]);

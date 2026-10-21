@@ -1,36 +1,34 @@
 import { useEffect, useRef, useState } from 'react';
-import { CheckCircle2 } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router';
 
-import { useAuth } from '../auth/auth-context.ts';
-import AddFriendDialog from '../components/friends/AddFriendDialog.tsx';
+import { useCurrentUser } from '../auth/authContext';
+import { AddFriendDialog } from '../components/friends/AddFriendDialog';
 import {
   acceptFriendRequest,
   removeFriendship,
-} from '../components/friends/api.ts';
-import FriendRow from '../components/friends/FriendRow.tsx';
-import RequestRow from '../components/friends/RequestRow.tsx';
+} from '../components/friends/api';
+import { FriendRow } from '../components/friends/FriendRow';
+import { FriendsActivity } from '../components/friends/FriendsActivity';
+import { RequestRow } from '../components/friends/RequestRow';
 import type {
   ActivityItem,
   Friend,
   UserSummary,
-} from '../components/friends/types.ts';
-import FriendsActivity from '../components/home/FriendsActivity.tsx';
-import ChatWindow from '../components/messages/ChatWindow.tsx';
+} from '../components/friends/types';
+import { ChatWindow } from '../components/messages/ChatWindow';
 import { AddCircleButton } from '../components/ui/AddCircleButton';
-import { ConfirmDialog } from '../components/ui/ConfirmDialog.tsx';
+import { ConfirmDialog } from '../components/ui/ConfirmDialog';
 import {
   ListCard,
   ListCardEmpty,
   ListCardLoading,
 } from '../components/ui/ListCard';
-import { LoadError } from '../components/ui/LoadError.tsx';
-import { Toast } from '../components/ui/Toast.tsx';
-import { useActivityFeed } from '../hooks/useActivityFeed.ts';
-import { useFriends } from '../hooks/useFriends.ts';
-import { usePresence } from '../hooks/usePresence.ts';
-import { useTimeout } from '../hooks/useTimeout.ts';
-import { useUnreadMessages } from '../hooks/useUnreadMessages.ts';
+import { LoadError } from '../components/ui/LoadError';
+import { useToast } from '../components/ui/toastContext';
+import { useActivityFeed } from '../hooks/useActivityFeed';
+import { useFriends } from '../hooks/useFriends';
+import { usePresence } from '../hooks/usePresence';
+import { useUnreadMessages } from '../hooks/useUnreadMessages';
 import { navigationState } from '../routing/navigation';
 import { requestErrorMessage } from '../utils/requestErrorMessage';
 
@@ -41,12 +39,16 @@ const TAB_OPTIONS: { value: Tab; label: string }[] = [
   { value: 'requests', label: 'Demandes' },
 ];
 
+/**
+ * Friends page: friends and received requests in two tabs, the activity feed,
+ * the add dialog and the chat. Coming from a reply on the home feed, the chat
+ * opens directly with the quoted activity.
+ */
 export default function FriendsPage() {
-  const { user } = useAuth();
+  const { userId } = useCurrentUser();
   const location = useLocation();
   const navigate = useNavigate();
   const replyTo = navigationState(location).replyTo ?? null;
-  const userId = user!.userId;
   const {
     friends,
     requests,
@@ -60,7 +62,7 @@ export default function FriendsPage() {
   const [activeTab, setActiveTab] = useState<Tab>('friends');
   const [busyId, setBusyId] = useState<number | null>(null);
   const [friendToRemove, setFriendToRemove] = useState<Friend | null>(null);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const showToast = useToast();
   const [actionError, setActionError] = useState<string | null>(null);
   const addDialogRef = useRef<HTMLDialogElement>(null);
   const confirmDialogRef = useRef<HTMLDialogElement>(null);
@@ -74,9 +76,9 @@ export default function FriendsPage() {
   const presence = usePresence(userId);
   const unreadIds = useUnreadMessages(userId, chatFriend?.id ?? null);
 
-  useTimeout(() => setSuccessMessage(null), successMessage ? 3000 : null);
-
   useEffect(() => {
+    // Clear the reply from the history, so a reload or a back navigation does
+    // not open the chat again.
     if (replyTo) {
       void navigate(location.pathname, { replace: true });
     }
@@ -91,7 +93,7 @@ export default function FriendsPage() {
     setBusyId(id);
     try {
       await action();
-      setSuccessMessage(message);
+      showToast(message);
       reload();
     } catch (err: unknown) {
       setActionError(
@@ -106,7 +108,7 @@ export default function FriendsPage() {
   const list = activeTab === 'friends' ? friends : requests;
   const emptyMessage =
     activeTab === 'friends'
-      ? "Tu n'as pas encore d'amis. Utilise le bouton + pour en ajouter !"
+      ? "Vous n'avez pas encore d'amis. Utilisez le bouton + pour en ajouter !"
       : 'Aucune demande en attente.';
 
   return (
@@ -211,8 +213,9 @@ export default function FriendsPage() {
         dialogRef={addDialogRef}
         friendIds={friends.map((f) => f.friend.id)}
         sentRequestIds={sentRequestIds}
+        receivedRequestIds={requests.map((r) => r.from.id)}
         onSent={(username) => {
-          setSuccessMessage(`Demande envoyée à ${username}`);
+          showToast(`Demande envoyée à ${username}`);
           reload();
         }}
       />
@@ -231,7 +234,7 @@ export default function FriendsPage() {
       <ConfirmDialog
         dialogRef={confirmDialogRef}
         title="Retirer cet ami ?"
-        description={`${friendToRemove?.friend.name ?? 'Cet ami'} sera retiré de ta liste.`}
+        description={`${friendToRemove?.friend.name ?? 'Cet ami'} sera retiré de votre liste.`}
         confirmLabel="Retirer"
         pendingLabel="Suppression..."
         isPending={busyId === friendToRemove?.friendshipId}
@@ -245,8 +248,6 @@ export default function FriendsPage() {
           }
         }}
       />
-
-      <Toast message={successMessage} icon={CheckCircle2} />
     </>
   );
 }

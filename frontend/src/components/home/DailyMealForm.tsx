@@ -1,10 +1,10 @@
 import { useState, type RefObject } from 'react';
 
-import { useAuth } from '../../auth/auth-context';
+import { useCurrentUser } from '../../auth/authContext';
 import { requestErrorMessage } from '../../utils/requestErrorMessage';
 import { createMeal, deleteMeal, toApiDate, updateMeal } from '../meal/api';
 import { draftsToInput, draftTotals, type MealItemDraft } from '../meal/draft';
-import DraftItemList from '../meal/DraftItemList';
+import { DraftItemList } from '../meal/DraftItemList';
 import { MEAL_TYPE_LABELS, type Meal, type MealType } from '../meal/types';
 import { BaseDialog } from '../ui/BaseDialog';
 import { MacroSummary } from '../ui/MacroSummary';
@@ -19,7 +19,11 @@ interface DailyMealFormProps {
   onSaved: () => void;
 }
 
-export default function DailyMealForm({
+/**
+ * Review dialog of a journal section: adjust the quantities, then save. It adds
+ * a new meal, or saves the whole section when it already has meals.
+ */
+export function DailyMealForm({
   dialogRef,
   mealType,
   date,
@@ -28,13 +32,14 @@ export default function DailyMealForm({
   existingMeals = [],
   onSaved,
 }: DailyMealFormProps) {
-  const { user } = useAuth();
-  const userId = user!.userId;
+  const { userId } = useCurrentUser();
   const [items, setItems] = useState<MealItemDraft[]>(initialItems);
   const [syncedKey, setSyncedKey] = useState(sessionKey);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Each opening gets a new sessionKey: the items are reset to the section's
+  // content during render, without an effect.
   if (sessionKey !== syncedKey) {
     setSyncedKey(sessionKey);
     setItems(initialItems);
@@ -75,6 +80,8 @@ export default function DailyMealForm({
           existingMeals.map((meal) => deleteMeal(userId, meal.id)),
         );
       } else {
+        // A section may hold several meals: the first one receives every item
+        // and the others are deleted.
         const [first, ...others] = existingMeals;
         await updateMeal(userId, first.id, { items: draftsToInput(items) });
         await Promise.all(others.map((meal) => deleteMeal(userId, meal.id)));

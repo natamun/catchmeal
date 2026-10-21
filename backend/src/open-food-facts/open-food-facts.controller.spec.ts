@@ -32,11 +32,20 @@ describe('OpenFoodFactsController', () => {
   it('should look up a product by its barcode', async () => {
     openFoodFactsServiceMock.lookup.mockResolvedValue({ name: 'Nutella' });
 
-    await controller.lookup(7, '3017620422003', req);
-
+    await expect(controller.lookup(7, '3017620422003', req)).resolves.toEqual({
+      product: { name: 'Nutella' },
+    });
     expect(openFoodFactsServiceMock.lookup).toHaveBeenCalledWith(
       '3017620422003',
     );
+  });
+
+  it('should answer no product, without an error, for an unknown barcode', async () => {
+    openFoodFactsServiceMock.lookup.mockResolvedValue(null);
+
+    await expect(controller.lookup(7, '4000000000006', req)).resolves.toEqual({
+      product: null,
+    });
   });
 
   it('should refuse to look up a product for another user', () => {

@@ -3,7 +3,6 @@ import {
   HttpException,
   HttpStatus,
   Injectable,
-  NotFoundException,
   ServiceUnavailableException,
 } from '@nestjs/common';
 
@@ -62,18 +61,16 @@ export class OpenFoodFactsService {
   >();
   private callTimes: number[] = [];
 
-  async lookup(rawBarcode: string): Promise<OffProduct> {
+  async lookup(rawBarcode: string): Promise<OffProduct | null> {
     const barcode = this.normalizeBarcode(rawBarcode);
 
     const cached = this.cache.get(barcode);
     if (cached && cached.expiresAt > Date.now()) {
-      if (!cached.product) throw new NotFoundException('Product not found');
       return cached.product;
     }
 
     const product = await this.fetchProduct(barcode);
     this.remember(barcode, product);
-    if (!product) throw new NotFoundException('Product not found');
     return product;
   }
 

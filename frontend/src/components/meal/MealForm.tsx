@@ -1,18 +1,21 @@
 import { useRef, useState, type RefObject } from 'react';
 import * as Popover from '@radix-ui/react-popover';
-import { CheckCircle2, Trash2 } from 'lucide-react';
+import { Trash2 } from 'lucide-react';
 
-import { useAuth } from '../../auth/auth-context';
+import { useCurrentUser } from '../../auth/authContext';
+import { useFormValidation } from '../../hooks/useFormValidation';
 import { useTimeout } from '../../hooks/useTimeout';
+import { parseDecimal } from '../../utils/decimals';
 import { requestErrorMessage } from '../../utils/requestErrorMessage';
 import type { FoodItem } from '../food/types';
 import { BaseDialog } from '../ui/BaseDialog';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
 import { DropdownPanel } from '../ui/DropdownPanel';
 import { FieldError } from '../ui/FieldError';
+import { LABEL_CLASS } from '../ui/fieldStyle';
 import { Input } from '../ui/Input';
 import { MacroSummary } from '../ui/MacroSummary';
-import { Toast } from '../ui/Toast';
+import { useToast } from '../ui/toastContext';
 import { createMeal, deleteMeal, updateMeal } from './api';
 import {
   draftsToInput,
@@ -20,17 +23,13 @@ import {
   mealToItems,
   type MealItemDraft,
 } from './draft';
-import DraftItemList from './DraftItemList';
+import { DraftItemList } from './DraftItemList';
 import {
   EMPTY_QUICK_ADD_FORM,
   QUICK_ADD_FIELDS,
   validateQuickAddForm,
-  type QuickAddField,
 } from './quickMealAdd';
 import type { Meal, MealInput } from './types';
-
-const LABEL_CLASS =
-  'text-xs font-semibold tracking-wide text-green-500 uppercase';
 
 interface MealFormProps {
   dialogRef: RefObject<HTMLDialogElement | null>;
@@ -41,7 +40,11 @@ interface MealFormProps {
   onMealDeleted: (id: number) => void;
 }
 
-export default function MealForm({
+/**
+ * Dialog to create or edit a library meal: a name, foods searched in the
+ * library with their quantity, and quick adds.
+ */
+export function MealForm({
   dialogRef,
   foodItems,
   editingMeal,
@@ -49,8 +52,7 @@ export default function MealForm({
   onMealUpdated,
   onMealDeleted,
 }: MealFormProps) {
-  const { user } = useAuth();
-  const userId = user!.userId;
+  const { userId } = useCurrentUser();
   const [name, setName] = useState('');
   const [nameTouched, setNameTouched] = useState(false);
   const [nameFocused, setNameFocused] = useState(false);
@@ -59,22 +61,22 @@ export default function MealForm({
   const [searchFocused, setSearchFocused] = useState(false);
   const [dialogNode, setDialogNode] = useState<HTMLDialogElement | null>(null);
   const [quickAddOpen, setQuickAddOpen] = useState(false);
-  const [quickAddForm, setQuickAddForm] = useState(EMPTY_QUICK_ADD_FORM);
-  const [quickAddTouched, setQuickAddTouched] = useState<
-    Partial<Record<QuickAddField, boolean>>
-  >({});
-  const [quickAddFocusedField, setQuickAddFocusedField] =
-    useState<QuickAddField | null>(null);
-  const [quickAddSubmitAttempted, setQuickAddSubmitAttempted] = useState(false);
+  const quickAdd = useFormValidation(
+    EMPTY_QUICK_ADD_FORM,
+    validateQuickAddForm,
+  );
   const [error, setError] = useState<string | null>(null);
   const [submitAttempted, setSubmitAttempted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const showToast = useToast();
   const [syncedMealId, setSyncedMealId] = useState<number | null>(
     editingMeal?.id ?? null,
   );
   const confirmDialogRef = useRef<HTMLDialogElement>(null);
 
+  // Updating state during render, the React way to react to a prop change
+  // without an effect: when the dialog opens on another meal, the form is
+  // refilled before it is displayed.
   if ((editingMeal?.id ?? null) !== syncedMealId) {
     setSyncedMealId(editingMeal?.id ?? null);
     setName(editingMeal?.name ?? '');
@@ -84,12 +86,7 @@ export default function MealForm({
     setError(null);
   }
 
-  useTimeout(
-    () => setQuickAddSubmitAttempted(false),
-    quickAddSubmitAttempted ? 5000 : null,
-  );
   useTimeout(() => setSubmitAttempted(false), submitAttempted ? 5000 : null);
-  useTimeout(() => setSuccessMessage(null), successMessage ? 3000 : null);
 
   const nameError = name.trim() === '' ? 'Nom requis' : undefined;
   const showNameError =
@@ -111,8 +108,6 @@ export default function MealForm({
   const isSearchOpen = searchFocused && searchResults.length > 0;
 
   const rawTotals = draftTotals(items);
-
-  const quickAddErrors = validateQuickAddForm(quickAddForm);
 
   const closeDialog = () => {
     dialogRef.current?.close();
@@ -145,37 +140,8 @@ export default function MealForm({
     );
   };
 
-  const handleQuickAddFocus = (field: QuickAddField) => {
-    setQuickAddFocusedField(field);
-  };
-
-  const handleQuickAddBlur = (field: QuickAddField) => {
-    setQuickAddTouched((prev) => ({ ...prev, [field]: true }));
-    setQuickAddFocusedField((current) => (current === field ? null : current));
-  };
-
-  const handleQuickAddChange = (field: QuickAddField, value: string) => {
-    setQuickAddForm((prev) => ({ ...prev, [field]: value }));
-    setQuickAddTouched((prev) => ({ ...prev, [field]: true }));
-  };
-
-  const isQuickAddInvalid = (field: QuickAddField) =>
-    Boolean(quickAddTouched[field] && quickAddErrors[field]);
-
-  const quickAddErrorMessage = (field: QuickAddField) =>
-    quickAddTouched[field] &&
-    (quickAddFocusedField === field || quickAddSubmitAttempted)
-      ? quickAddErrors[field]
-      : undefined;
-
   const addQuickItem = () => {
-    const allTouched = Object.fromEntries(
-      QUICK_ADD_FIELDS.map(({ field }) => [field, true]),
-    ) as Record<QuickAddField, boolean>;
-    setQuickAddTouched(allTouched);
-
-    if (Object.keys(quickAddErrors).length > 0) {
-      setQuickAddSubmitAttempted(true);
+    if (!quickAdd.attemptSubmit()) {
       return;
     }
 
@@ -185,15 +151,14 @@ export default function MealForm({
         id: crypto.randomUUID(),
         kind: 'quick',
         quantity: 1,
-        kcal: Number(quickAddForm.kcal),
-        protein: Number(quickAddForm.protein),
-        carbs: Number(quickAddForm.carbs),
-        fat: Number(quickAddForm.fat),
+        kcal: parseDecimal(quickAdd.form.kcal) ?? 0,
+        protein: parseDecimal(quickAdd.form.protein) ?? 0,
+        carbs: parseDecimal(quickAdd.form.carbs) ?? 0,
+        fat: parseDecimal(quickAdd.form.fat) ?? 0,
       },
     ]);
-    setQuickAddForm(EMPTY_QUICK_ADD_FORM);
-    setQuickAddTouched({});
-    setQuickAddSubmitAttempted(false);
+    quickAdd.setForm(EMPTY_QUICK_ADD_FORM);
+    quickAdd.resetValidation();
     setQuickAddOpen(false);
   };
 
@@ -227,7 +192,7 @@ export default function MealForm({
       setNameTouched(false);
       setSubmitAttempted(false);
       closeDialog();
-      setSuccessMessage(
+      showToast(
         editingMeal
           ? 'Repas modifié avec succès'
           : 'Repas enregistré avec succès',
@@ -249,7 +214,7 @@ export default function MealForm({
       await deleteMeal(userId, editingMeal.id);
       onMealDeleted(editingMeal.id);
       closeDialog();
-      setSuccessMessage('Repas supprimé');
+      showToast('Repas supprimé');
     } catch {
       setError('Suppression impossible, réessayez.');
     } finally {
@@ -346,19 +311,19 @@ export default function MealForm({
                                 type="text"
                                 inputMode="decimal"
                                 placeholder="0"
-                                value={quickAddForm[field]}
+                                value={quickAdd.form[field]}
                                 onChange={(e) =>
-                                  handleQuickAddChange(field, e.target.value)
+                                  quickAdd.handleChange(field, e.target.value)
                                 }
-                                onFocus={() => handleQuickAddFocus(field)}
-                                onBlur={() => handleQuickAddBlur(field)}
-                                aria-invalid={isQuickAddInvalid(field)}
+                                onFocus={() => quickAdd.handleFocus(field)}
+                                onBlur={() => quickAdd.handleBlur(field)}
+                                aria-invalid={quickAdd.isInvalid(field)}
                                 aria-describedby={`quick-${field}-error`}
                                 autoComplete="off"
                               />
                               <FieldError
                                 id={`quick-${field}-error`}
-                                message={quickAddErrorMessage(field)}
+                                message={quickAdd.errorMessage(field)}
                               />
                             </div>
                           ))}
@@ -440,14 +405,12 @@ export default function MealForm({
       <ConfirmDialog
         dialogRef={confirmDialogRef}
         title="Supprimer ce repas ?"
-        description={`${editingMeal?.name ?? 'Ce repas'} sera retiré de ta liste.`}
+        description={`${editingMeal?.name ?? 'Ce repas'} sera retiré de votre liste.`}
         confirmLabel="Supprimer"
         pendingLabel="Suppression..."
         isPending={isSubmitting}
         onConfirm={() => void handleDelete()}
       />
-
-      <Toast message={successMessage} icon={CheckCircle2} />
     </>
   );
 }

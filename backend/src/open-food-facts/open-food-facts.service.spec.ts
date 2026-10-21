@@ -1,7 +1,6 @@
 import {
   BadRequestException,
   HttpException,
-  NotFoundException,
   ServiceUnavailableException,
 } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
@@ -236,17 +235,13 @@ describe('OpenFoodFactsService', () => {
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
-  it('should report a product Open Food Facts does not know, and remember it', async () => {
+  it('should answer no product for a barcode Open Food Facts does not know, and remember it', async () => {
     fetchMock.mockImplementation(() =>
       Promise.resolve(json(notFoundBody, 404)),
     );
 
-    await expect(service.lookup('4000000000006')).rejects.toThrow(
-      NotFoundException,
-    );
-    await expect(service.lookup('4000000000006')).rejects.toThrow(
-      NotFoundException,
-    );
+    await expect(service.lookup('4000000000006')).resolves.toBeNull();
+    await expect(service.lookup('4000000000006')).resolves.toBeNull();
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 

@@ -97,10 +97,6 @@ export class UsersService {
         gender: true,
         birthDate: true,
         activityLevel: true,
-        bodyFat: true,
-        fatFreeMass: true,
-        bodyWater: true,
-        muscleMass: true,
       },
     });
   }
@@ -149,10 +145,6 @@ export class UsersService {
             gender: true,
             birthDate: true,
             activityLevel: true,
-            bodyFat: true,
-            fatFreeMass: true,
-            bodyWater: true,
-            muscleMass: true,
           },
         });
 
@@ -389,10 +381,6 @@ export class UsersService {
           gender: true,
           birthDate: true,
           activityLevel: true,
-          bodyFat: true,
-          fatFreeMass: true,
-          bodyWater: true,
-          muscleMass: true,
         },
       });
     } catch (error) {

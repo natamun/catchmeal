@@ -5,6 +5,7 @@ interface MacroSummaryProps {
   totals: { kcal: number; protein: number; carbs: number; fat: number };
 }
 
+/** Macros and calories of a meal being edited, on one line. */
 export function MacroSummary({ totals }: MacroSummaryProps) {
   return (
     <div className="mb-2 flex items-center justify-between rounded-xl border border-green-200 px-3 py-2">

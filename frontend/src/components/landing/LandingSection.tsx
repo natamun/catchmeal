@@ -7,12 +7,11 @@ interface Props {
   children: ReactNode;
 }
 
-export default function LandingSection({
-  id,
-  title,
-  tinted = false,
-  children,
-}: Props) {
+/**
+ * Section of the landing page with its title; `id` is the anchor the header
+ * links scroll to.
+ */
+export function LandingSection({ id, title, tinted = false, children }: Props) {
   return (
     <section
       id={id}

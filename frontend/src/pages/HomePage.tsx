@@ -1,32 +1,31 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { CheckCircle2, Zap } from 'lucide-react';
+import { Zap } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router';
 
-import { useAuth } from '../auth/auth-context';
-import CalorieSummary from '../components/home/CalorieSummary';
-import DailyMealForm from '../components/home/DailyMealForm';
-import DailyMealList from '../components/home/DailyMealList';
-import FriendsActivity from '../components/home/FriendsActivity';
-import MacroBreakdown from '../components/home/MacroBreakdown';
-import QuickAddDialog from '../components/home/QuickAddDialog';
-import WeightWidget from '../components/home/WeightWidget';
+import { useCurrentUser } from '../auth/authContext';
+import { FriendsActivity } from '../components/friends/FriendsActivity';
+import { latestActivityPerFriend } from '../components/friends/latestActivityPerFriend';
+import { CalorieSummary } from '../components/home/CalorieSummary';
+import { DailyMealForm } from '../components/home/DailyMealForm';
+import { DailyMealList } from '../components/home/DailyMealList';
+import { MacroBreakdown } from '../components/home/MacroBreakdown';
+import { QuickAddDialog } from '../components/home/QuickAddDialog';
+import { WeightWidget } from '../components/home/WeightWidget';
 import { buildDrafts, type MealItemDraft } from '../components/meal/draft';
 import { mealTotals, type Meal, type MealType } from '../components/meal/types';
 import { getWeightHistory, type WeightEntry } from '../components/profile/api';
-import DateNavigator from '../components/ui/DateNavigator';
-import { Toast } from '../components/ui/Toast';
+import { DateNavigator } from '../components/ui/DateNavigator';
+import { useToast } from '../components/ui/toastContext';
 import { useActivityFeed } from '../hooks/useActivityFeed';
 import { useDailyMeals } from '../hooks/useDailyMeals';
 import { usePresence } from '../hooks/usePresence';
-import { useTimeout } from '../hooks/useTimeout';
-import { PATHS } from '../routes';
 import {
   journalAddPath,
   journalPath,
   parseDateParam,
 } from '../routing/journal';
 import type { NavigationState } from '../routing/navigation';
-import { latestActivityPerFriend } from '../utils/latestActivityPerFriend';
+import { PATHS } from '../routing/paths';
 
 interface SectionEdit {
   mealType: MealType;
@@ -35,13 +34,19 @@ interface SectionEdit {
   meals: Meal[];
 }
 
+/**
+ * The journal of a day (?date= in the URL): calorie and macro progress, latest
+ * weigh-in, the four meal sections and the friends feed. Adding to a section
+ * opens its own page; editing a section opens DailyMealForm with all its meals
+ * merged.
+ */
 export default function HomePage() {
-  const { user } = useAuth();
+  const user = useCurrentUser();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const dateParam = searchParams.get('date');
   const selectedDate = useMemo(() => parseDateParam(dateParam), [dateParam]);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const showToast = useToast();
   const { meals, foodItems, isReady, isLoading, loadError, reload, retry } =
     useDailyMeals(selectedDate);
   const unavailable = !isReady && !isLoading;
@@ -51,7 +56,6 @@ export default function HomePage() {
   const [weightError, setWeightError] = useState(false);
 
   useEffect(() => {
-    if (!user) return;
     const controller = new AbortController();
     getWeightHistory(user.userId, controller.signal)
       .then(setWeightHistory)
@@ -81,13 +85,9 @@ export default function HomePage() {
   });
   const editDialogRef = useRef<HTMLDialogElement>(null);
   const quickAddDialogRef = useRef<HTMLDialogElement>(null);
-  const presence = usePresence(user!.userId);
-  const activities = useActivityFeed(user!.userId);
+  const presence = usePresence(user.userId);
+  const activities = useActivityFeed(user.userId);
   const latestActivities = latestActivityPerFriend(activities);
-
-  useTimeout(() => setSuccessMessage(null), successMessage ? 3000 : null);
-
-  if (!user) return null;
 
   const openSectionEditor = (mealType: MealType) => {
     const sectionMeals = meals
@@ -185,7 +185,7 @@ export default function HomePage() {
         sessionKey={sectionEdit.key}
         existingMeals={sectionEdit.meals}
         onSaved={() => {
-          setSuccessMessage('Journal mis à jour');
+          showToast('Journal mis à jour');
           reload();
         }}
       />
@@ -193,11 +193,10 @@ export default function HomePage() {
         dialogRef={quickAddDialogRef}
         date={selectedDate}
         onSaved={() => {
-          setSuccessMessage('Ajouté au journal');
+          showToast('Ajouté au journal');
           reload();
         }}
       />
-      <Toast message={successMessage} icon={CheckCircle2} />
     </>
   );
 }

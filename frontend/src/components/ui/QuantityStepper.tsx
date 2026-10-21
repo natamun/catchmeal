@@ -1,3 +1,5 @@
+import { roundDecimals } from '../../utils/decimals';
+
 const STEP_BUTTON_CLASS =
   'flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-md bg-green-50 text-xs font-bold text-green-600 transition-colors hover:bg-green-100';
 
@@ -8,6 +10,7 @@ interface QuantityStepperProps {
   onAdjust: (delta: number) => void;
 }
 
+/** Buttons that change a quantity by -10, -1, +1 or +10, around its value. */
 export function QuantityStepper({
   name,
   quantity,
@@ -30,7 +33,7 @@ export function QuantityStepper({
       {stepButton(-10, '--')}
       {stepButton(-1, '-')}
       <span className="min-w-10 text-center text-xs font-semibold text-green-800">
-        {quantity}
+        {roundDecimals(quantity, 1)}
         {unitLabel}
       </span>
       {stepButton(1, '+')}

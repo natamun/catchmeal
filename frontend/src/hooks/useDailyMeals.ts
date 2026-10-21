@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { useAuth } from '../auth/auth-context';
+import { useCurrentUser } from '../auth/authContext';
 import { listFoodItems } from '../components/food/api';
 import type { FoodItem } from '../components/food/types';
 import { listMealsOnDate, toApiDate } from '../components/meal/api';
@@ -9,15 +9,23 @@ import type { Meal } from '../components/meal/types';
 const PREFETCH_DELAY_MS = 200;
 const NO_MEALS: Meal[] = [];
 
+/**
+ * Date key of the day before (-1) or after (+1). Noon avoids any shift around
+ * daylight saving time.
+ */
 function neighbourKey(dateKey: string, offset: number) {
   const day = new Date(`${dateKey}T12:00:00`);
   day.setDate(day.getDate() + offset);
   return toApiDate(day);
 }
 
+/**
+ * The journal of one day plus the food library. Each day is cached once loaded,
+ * and the days before and after are prefetched right after, so moving from day
+ * to day is instant.
+ */
 export function useDailyMeals(date: Date) {
-  const { user } = useAuth();
-  const userId = user!.userId;
+  const { userId } = useCurrentUser();
   const dateKey = toApiDate(date);
   const [foodItems, setFoodItems] = useState<FoodItem[]>([]);
   const [foodsError, setFoodsError] = useState<string | null>(null);
@@ -26,6 +34,8 @@ export function useDailyMeals(date: Date) {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const loaded = useRef(new Set<string>());
   const pending = useRef(new Set<string>());
+  // One controller for the whole life of the hook: a day still loading when the
+  // user moves on is kept, it is only cancelled when the page closes.
   const lifetime = useRef<AbortController | null>(null);
 
   useEffect(() => {

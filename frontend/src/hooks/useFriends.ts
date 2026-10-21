@@ -6,9 +6,13 @@ import {
   listSentRequests,
 } from '../components/friends/api';
 import type { Friend, FriendRequest } from '../components/friends/types';
-import { useSocket } from '../socket/socket-context';
-import { ApiError } from '../utils/request';
+import { useSocket } from '../socket/socketContext';
 
+/**
+ * Friends, received requests and sent requests, loaded together and reloaded
+ * whenever the socket announces a change (new request, acceptance, removal) or
+ * reconnects.
+ */
 export function useFriends(userId: number) {
   const [friends, setFriends] = useState<Friend[]>([]);
   const [requests, setRequests] = useState<FriendRequest[]>([]);
@@ -31,9 +35,8 @@ export function useFriends(userId: number) {
         setSentRequestIds(loadedSentIds);
         setLoadError(null);
       })
-      .catch((err: unknown) => {
+      .catch(() => {
         if (controller.signal.aborted) return;
-        if (err instanceof ApiError && err.status === 403) return;
         setLoadError('Impossible de charger les amis.');
       })
       .finally(() => {

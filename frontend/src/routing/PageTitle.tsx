@@ -3,8 +3,8 @@ import { matchPath, useLocation } from 'react-router';
 
 import { LEGAL_PAGES } from '../components/legal/legalPages';
 import { MEAL_TYPE_LABELS } from '../components/meal/types';
-import { PATHS } from '../routes';
 import { mealTypeFromSlug } from './journal';
+import { PATHS } from './paths';
 
 const APP_NAME = 'CatCHMeal';
 
@@ -37,6 +37,10 @@ function titleFor(pathname: string) {
   return TITLES[pathname] ?? 'Page introuvable';
 }
 
+/**
+ * Keeps the browser tab title in sync with the page ("Amis | CatCHMeal"). The
+ * landing page keeps the title written in index.html.
+ */
 export function PageTitle() {
   const { pathname } = useLocation();
   const title = titleFor(pathname);

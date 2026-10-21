@@ -12,8 +12,8 @@ import {
 } from 'lucide-react';
 import { NavLink, useMatch } from 'react-router';
 
-import { useAuth } from '../../auth/auth-context';
-import { PATHS } from '../../routes';
+import { useAuth, useCurrentUser } from '../../auth/authContext';
+import { PATHS } from '../../routing/paths';
 import { Avatar } from '../ui/Avatar';
 import { Brand } from '../ui/Brand';
 import { DropdownPanel } from '../ui/DropdownPanel';
@@ -59,6 +59,7 @@ const MENU_ITEM_CLASS =
 const NAV_ITEM_CLASS =
   'cursor-pointer transition-colors focus-visible:outline-2 focus-visible:outline-green-400 focus-visible:outline-offset-2';
 
+/** A tab link, in the top bar or in the bottom bar. */
 function NavItem({ tab, variant, icon }: NavItemProps) {
   const Icon = tab.icon;
 
@@ -104,18 +105,21 @@ function NavItem({ tab, variant, icon }: NavItemProps) {
   );
 }
 
-export default function Nav({ isAdmin = false }: Props) {
-  const { user, logout } = useAuth();
+/**
+ * Navigation of the logged-in app. With a mouse: a top bar, whose tabs move
+ * into the avatar menu under 450 px wide. On touch screens: a bottom tab bar,
+ * hidden while typing on iPhone. The avatar menu holds the profile, the admin
+ * page and the logout.
+ */
+export function Nav({ isAdmin = false }: Props) {
+  const user = useCurrentUser();
+  const { logout } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
   const [menuContainer, setMenuContainer] = useState<HTMLDivElement | null>(
     null,
   );
   const profileMatch = useMatch(PATHS.profile);
   const adminMatch = useMatch(PATHS.admin);
-
-  if (!user) {
-    return null;
-  }
 
   const onAccountPage = profileMatch !== null || adminMatch !== null;
   const bottomTabs = isAdmin
@@ -218,7 +222,7 @@ export default function Nav({ isAdmin = false }: Props) {
         </div>
       </header>
 
-      <footer className="fixed right-0 bottom-0 left-0 z-10 hidden border-t border-green-200 bg-white pr-[max(0.5rem,env(safe-area-inset-right))] pb-[env(safe-area-inset-bottom)] pl-[max(0.5rem,env(safe-area-inset-left))] pointer-coarse:block">
+      <footer className="fixed right-0 bottom-0 left-0 z-10 hidden border-t border-green-200 bg-white pr-[max(0.5rem,env(safe-area-inset-right))] pb-[env(safe-area-inset-bottom)] pl-[max(0.5rem,env(safe-area-inset-left))] pointer-coarse:block ios-typing:hidden">
         <nav aria-label="Navigation principale">
           <ul className="flex h-bottom-nav">
             {bottomTabs.map((tab) => (

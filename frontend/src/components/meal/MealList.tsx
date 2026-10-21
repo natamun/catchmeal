@@ -2,17 +2,17 @@ import { useState, type ReactNode } from 'react';
 import { ChevronRight } from 'lucide-react';
 
 import { MACROS } from '../../constants/macros';
+import { useToggleSet } from '../../hooks/useToggleSet';
 import { ListCard, ListCardEmpty, ListCardLoading } from '../ui/ListCard';
 import { LoadError } from '../ui/LoadError';
 import { MacroBadge } from '../ui/MacroBadge';
-import MealSearchBar from './MealSearchBar';
 import {
-  EMPTY_MEAL_FILTER_CRITERIA,
-  mealTotals,
-  type Meal,
-  type MealFilterCriteria,
-  type MealMacroFilter,
-} from './types';
+  EMPTY_FILTER_CRITERIA,
+  matchesMacro,
+  type FilterCriteria,
+} from '../ui/macroFilter';
+import { MacroSearchBar } from '../ui/MacroSearchBar';
+import { mealTotals, type Meal } from './types';
 
 interface MealListProps {
   meals: Meal[];
@@ -23,10 +23,7 @@ interface MealListProps {
   renderAction?: (meal: Meal) => ReactNode;
 }
 
-function matchesMacro(itemValue: number, filter: MealMacroFilter) {
-  return itemValue >= filter.min && itemValue <= filter.max;
-}
-
+/** Calories and macro badges of a meal, from its items. */
 function macrosOf(meal: Meal) {
   const totals = mealTotals(meal);
 
@@ -40,7 +37,11 @@ function macrosOf(meal: Meal) {
   };
 }
 
-export default function MealList({
+/**
+ * The library meals, with the same search, filters and expandable rows as the
+ * food list.
+ */
+export function MealList({
   meals,
   isLoading,
   loadError,
@@ -48,9 +49,9 @@ export default function MealList({
   headerAction,
   renderAction,
 }: MealListProps) {
-  const [expandedIds, setExpandedIds] = useState<Set<number>>(new Set());
-  const [criteria, setCriteria] = useState<MealFilterCriteria>(
-    EMPTY_MEAL_FILTER_CRITERIA,
+  const [expandedIds, toggleExpanded] = useToggleSet<number>();
+  const [criteria, setCriteria] = useState<FilterCriteria>(
+    EMPTY_FILTER_CRITERIA,
   );
 
   const query = criteria.query.trim().toLowerCase();
@@ -76,25 +77,14 @@ export default function MealList({
         : (mealTotals(a)[field] - mealTotals(b)[field]) * dir;
     });
 
-  const toggleExpanded = (id: number) => {
-    setExpandedIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) {
-        next.delete(id);
-      } else {
-        next.add(id);
-      }
-      return next;
-    });
-  };
-
   return (
     <ListCard
       className="@container"
       header={
         <>
-          <MealSearchBar
-            meals={meals}
+          <MacroSearchBar
+            items={meals.map(mealTotals)}
+            placeholder="Rechercher un repas..."
             criteria={criteria}
             onFilterChange={setCriteria}
           />

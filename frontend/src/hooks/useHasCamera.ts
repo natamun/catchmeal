@@ -1,5 +1,9 @@
 import { useEffect, useState } from 'react';
 
+/**
+ * Whether the device has a camera, to show the barcode scan button only when
+ * scanning is possible. Listing the devices asks no permission.
+ */
 export function useHasCamera() {
   const [hasCamera, setHasCamera] = useState(false);
 

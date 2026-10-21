@@ -1,12 +1,16 @@
 import { isSameDay } from 'date-fns';
 import { Download } from 'lucide-react';
 
-import type { DashboardDay } from '../../types/dashboard-analytics';
 import { formatDayMonth } from '../../utils/format';
 import { toApiDate } from '../meal/api';
 import type { DateRange } from '../ui/CalendarButton';
-import SummaryCard from '../ui/SummaryCard';
+import { SummaryCard } from '../ui/SummaryCard';
+import type { DashboardDay } from './types';
 
+/**
+ * Makes the browser download `data` as a JSON file, without any request to the
+ * server.
+ */
 function downloadJson(data: unknown, filename: string) {
   const blob = new Blob([JSON.stringify(data, null, 2)], {
     type: 'application/json',
@@ -34,7 +38,8 @@ interface Props {
   isLoading?: boolean;
 }
 
-export default function DataExport({ period, days, isLoading = false }: Props) {
+/** Card that downloads the stats of the chosen period as JSON. */
+export function DataExport({ period, days, isLoading = false }: Props) {
   const isEmpty = !isLoading && days.length === 0;
 
   return (

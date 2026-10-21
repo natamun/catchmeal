@@ -10,7 +10,8 @@ interface RequestRowProps {
   onDecline: () => void;
 }
 
-export default function RequestRow({
+/** A received friend request, with accept and decline buttons. */
+export function RequestRow({
   from,
   isBusy,
   onAccept,

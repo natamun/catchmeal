@@ -4,9 +4,9 @@ import { formatKg } from '../../utils/format';
 import { AddCircleButton } from '../ui/AddCircleButton';
 import { EditIconButton } from '../ui/EditIconButton';
 import { LoadError } from '../ui/LoadError';
-import Skeleton from '../ui/Skeleton';
-import StatTile from '../ui/StatTile';
-import SummaryCard from '../ui/SummaryCard';
+import { Skeleton } from '../ui/Skeleton';
+import { StatTile } from '../ui/StatTile';
+import { SummaryCard } from '../ui/SummaryCard';
 import { getWeightHistory, type WeightEntry } from './api';
 import { COMPOSITION, formatMeasure } from './measures';
 import { WeightDialog } from './WeightDialog';
@@ -22,6 +22,7 @@ function formatDate(isoDate: string) {
   });
 }
 
+/** BMI = weight / height² (in meters), with its WHO category. */
 function describeBmi(weight: number, height: number) {
   const bmi = weight / (height / 100) ** 2;
   const category =
@@ -39,10 +40,15 @@ function describeBmi(weight: number, height: number) {
 interface Props {
   userId: number;
   height?: number | null;
-  onLatestWeight?: (weight: number | null) => void;
+  onLatestEntry?: (entry: WeightEntry | null) => void;
 }
 
-export function WeightCard({ userId, height, onLatestWeight }: Props) {
+/**
+ * Body composition card: latest weigh-in and BMI, the history, and a dialog to
+ * add, correct or delete a weigh-in. It reports the latest weigh-in to the
+ * page, which GoalsCard needs.
+ */
+export function WeightCard({ userId, height, onLatestEntry }: Props) {
   const [history, setHistory] = useState<WeightEntry[] | null>(null);
   const [hasError, setHasError] = useState(false);
   const [attempt, setAttempt] = useState(0);
@@ -58,17 +64,17 @@ export function WeightCard({ userId, height, onLatestWeight }: Props) {
     getWeightHistory(userId, controller.signal)
       .then((entries) => {
         setHistory(entries);
-        onLatestWeight?.(entries[0]?.weight ?? null);
+        onLatestEntry?.(entries[0] ?? null);
       })
       .catch(() => {
         if (!controller.signal.aborted) {
           setHasError(true);
-          onLatestWeight?.(null);
+          onLatestEntry?.(null);
         }
       });
 
     return () => controller.abort();
-  }, [userId, onLatestWeight, attempt]);
+  }, [userId, onLatestEntry, attempt]);
 
   const retry = () => {
     setHasError(false);
@@ -92,14 +98,14 @@ export function WeightCard({ userId, height, onLatestWeight }: Props) {
     ].sort((a, b) => b.loggedAt.localeCompare(a.loggedAt));
 
     setHistory(next);
-    onLatestWeight?.(next[0].weight);
+    onLatestEntry?.(next[0]);
   };
 
   const handleDeleted = (entryId: number) => {
     const next = (history ?? []).filter((entry) => entry.id !== entryId);
 
     setHistory(next);
-    onLatestWeight?.(next[0]?.weight ?? null);
+    onLatestEntry?.(next[0] ?? null);
   };
 
   const latest = history?.[0];

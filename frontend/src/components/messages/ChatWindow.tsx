@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState, type RefObject } from 'react';
 import { Send } from 'lucide-react';
 
-import { useAuth } from '../../auth/auth-context';
+import { useCurrentUser } from '../../auth/authContext';
 import { useConversation } from '../../hooks/useConversation';
 import type { ActivityItem, UserSummary } from '../friends/types';
 import { BaseDialog } from '../ui/BaseDialog';
 import { Input } from '../ui/Input';
-import QuotedActivity from './QuotedActivity';
+import { QuotedActivity } from './QuotedActivity';
 
 interface ChatWindowProps {
   dialogRef: RefObject<HTMLDialogElement | null>;
@@ -15,14 +15,18 @@ interface ChatWindowProps {
   onClose?: () => void;
 }
 
-export default function ChatWindow({
+/**
+ * Chat dialog with one friend, possibly quoting one of their activities.
+ * Messages go through the socket. The view follows new messages, unless the
+ * user scrolled up: then a "Nouveau message" button appears.
+ */
+export function ChatWindow({
   dialogRef,
   friend,
   quotedActivity,
   onClose,
 }: ChatWindowProps) {
-  const { user } = useAuth();
-  const userId = user!.userId;
+  const { userId } = useCurrentUser();
   const { messages, isLoading, loadError, send, isConnected } = useConversation(
     userId,
     friend.id,
@@ -80,7 +84,7 @@ export default function ChatWindow({
       setQuote(null);
     } catch (err) {
       setSendError(
-        err instanceof Error ? err.message : 'Message non envoyé, réessaye.',
+        err instanceof Error ? err.message : 'Message non envoyé, réessayez.',
       );
     } finally {
       setIsSending(false);
@@ -89,7 +93,7 @@ export default function ChatWindow({
 
   return (
     <BaseDialog dialogRef={dialogRef} title={friend.name} onClose={onClose}>
-      <div className="relative -mb-4 flex h-[480px] flex-col sm:-mb-6">
+      <div className="relative -mb-4 flex h-120 flex-col sm:-mb-6 ios-typing:h-[min(--spacing(120),calc(var(--visible-height)-6rem))]">
         {isLoading && (
           <p className="p-4 text-sm text-green-400">Chargement...</p>
         )}

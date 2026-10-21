@@ -1,30 +1,32 @@
 import { useId, useRef, useState, type RefObject } from 'react';
 import { Trash2 } from 'lucide-react';
 
-import { useTimeout } from '../../hooks/useTimeout';
+import { useFormValidation } from '../../hooks/useFormValidation';
+import {
+  hasTooManyDecimals,
+  parseDecimal,
+  TOO_MANY_DECIMALS,
+} from '../../utils/decimals';
 import { formatDayMonth } from '../../utils/format';
 import { BaseDialog } from '../ui/BaseDialog';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
 import { FieldError } from '../ui/FieldError';
+import { LABEL_CLASS } from '../ui/fieldStyle';
 import { Input } from '../ui/Input';
 import { deleteWeight, logWeight, updateWeight, type WeightEntry } from './api';
 import { COMPOSITION, MEASURES, type MeasureKey } from './measures';
 
 const [WEIGHT] = MEASURES;
 
-const LABEL_CLASS =
-  'text-xs font-semibold tracking-wide text-green-500 uppercase';
-
+/** Number shown with a comma in the field. */
 function toText(value: number | null | undefined) {
   return String(value ?? '').replace('.', ',');
 }
 
-function toNumber(text: string) {
-  const trimmed = text.trim();
-
-  return trimmed === '' ? null : Number(trimmed.replace(',', '.'));
-}
-
+/**
+ * Fills the form with the weigh-in being corrected, or leaves it empty for a
+ * new one.
+ */
 function toForm(entry: WeightEntry | null): Record<MeasureKey, string> {
   return {
     weight: toText(entry?.weight),
@@ -35,11 +37,12 @@ function toForm(entry: WeightEntry | null): Record<MeasureKey, string> {
   };
 }
 
+/** Weight required; every value within its range, with 2 decimals at most. */
 function validate(form: Record<MeasureKey, string>) {
   const errors: Partial<Record<MeasureKey, string>> = {};
 
   for (const { key, unit, min, max } of MEASURES) {
-    const value = toNumber(form[key]);
+    const value = parseDecimal(form[key]);
 
     if (value === null) {
       if (key === 'weight') {
@@ -47,6 +50,8 @@ function validate(form: Record<MeasureKey, string>) {
       }
     } else if (Number.isNaN(value) || value < min || value > max) {
       errors[key] = `Entre ${min} et ${max} ${unit}`;
+    } else if (hasTooManyDecimals(form[key])) {
+      errors[key] = TOO_MANY_DECIMALS;
     }
   }
 
@@ -59,6 +64,10 @@ interface WeightFormProps {
   onSaved: (entry: WeightEntry) => void;
 }
 
+/**
+ * The form inside the dialog, remounted at each opening (key) so it starts from
+ * the right weigh-in.
+ */
 function WeightForm({
   userId,
   entry,
@@ -66,52 +75,33 @@ function WeightForm({
   hasDeleteFailed,
 }: WeightFormProps & { hasDeleteFailed: boolean }) {
   const formId = useId();
-  const [form, setForm] = useState(() => toForm(entry));
-  const [touched, setTouched] = useState<Partial<Record<MeasureKey, boolean>>>(
-    {},
-  );
-  const [focusedField, setFocusedField] = useState<MeasureKey | null>(null);
-  const [submitAttempted, setSubmitAttempted] = useState(false);
+  const {
+    form,
+    handleFocus,
+    handleBlur,
+    handleChange,
+    isInvalid,
+    errorMessage,
+    attemptSubmit,
+  } = useFormValidation(() => toForm(entry), validate);
   const [hasFailed, setHasFailed] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  useTimeout(() => setSubmitAttempted(false), submitAttempted ? 5000 : null);
-
-  const errors = validate(form);
-
-  const handleChange = (field: MeasureKey, value: string) => {
-    setForm((prev) => ({ ...prev, [field]: value }));
-    setTouched((prev) => ({ ...prev, [field]: true }));
-  };
-
-  const handleBlur = (field: MeasureKey) => {
-    setTouched((prev) => ({ ...prev, [field]: true }));
-    setFocusedField((current) => (current === field ? null : current));
-  };
-
-  const errorMessage = (field: MeasureKey) =>
-    touched[field] && (focusedField === field || submitAttempted)
-      ? errors[field]
-      : undefined;
 
   const handleSubmit = async (event: React.SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
     setHasFailed(false);
-    setTouched(Object.fromEntries(MEASURES.map(({ key }) => [key, true])));
+    const weight = parseDecimal(form.weight);
 
-    const weight = toNumber(form.weight);
-
-    if (weight === null || Object.keys(errors).length > 0) {
-      setSubmitAttempted(true);
+    if (!attemptSubmit() || weight === null) {
       return;
     }
 
     const input = {
       weight,
-      bodyFat: toNumber(form.bodyFat),
-      fatFreeMass: toNumber(form.fatFreeMass),
-      bodyWater: toNumber(form.bodyWater),
-      muscleMass: toNumber(form.muscleMass),
+      bodyFat: parseDecimal(form.bodyFat),
+      fatFreeMass: parseDecimal(form.fatFreeMass),
+      bodyWater: parseDecimal(form.bodyWater),
+      muscleMass: parseDecimal(form.muscleMass),
     };
 
     setIsSubmitting(true);
@@ -137,9 +127,9 @@ function WeightForm({
         placeholder={`Ex : ${example}`}
         value={form[field]}
         onChange={(e) => handleChange(field, e.target.value)}
-        onFocus={() => setFocusedField(field)}
+        onFocus={() => handleFocus(field)}
         onBlur={() => handleBlur(field)}
-        aria-invalid={Boolean(touched[field] && errors[field])}
+        aria-invalid={isInvalid(field)}
         aria-describedby={`${formId}-${field}-error`}
       />
       <FieldError
@@ -210,6 +200,7 @@ interface Props extends WeightFormProps {
   onDeleted: (entryId: number) => void;
 }
 
+/** Dialog to add a weigh-in, or to correct or delete an existing one. */
 export function WeightDialog({
   dialogRef,
   openCount,

@@ -2,6 +2,7 @@ import { Transform } from 'class-transformer';
 import {
   IsDateString,
   IsEnum,
+  IsInt,
   IsNumber,
   IsOptional,
   IsPositive,
@@ -12,6 +13,8 @@ import {
 } from 'class-validator';
 
 import { ActivityLevel, Gender } from '../../generated/prisma/client';
+
+const MAX_DECIMALS = 2;
 
 const trim = ({ value }: { value: unknown }) =>
   typeof value === 'string' ? value.trim() : value;
@@ -32,37 +35,37 @@ export class UpdateProfileDto {
   name?: string;
 
   @IsOptional()
-  @IsNumber()
+  @IsNumber({ maxDecimalPlaces: MAX_DECIMALS })
   @IsPositive()
   @Max(300)
   height?: number;
 
   @IsOptional()
-  @IsNumber()
+  @IsNumber({ maxDecimalPlaces: MAX_DECIMALS })
   @IsPositive()
   @Max(500)
   targetWeight?: number;
 
   @IsOptional()
-  @IsNumber()
+  @IsInt()
   @IsPositive()
   @Max(10000)
   dailyCalorieGoal?: number;
 
   @IsOptional()
-  @IsNumber()
+  @IsInt()
   @IsPositive()
   @Max(1000)
   dailyProteinGoal?: number;
 
   @IsOptional()
-  @IsNumber()
+  @IsInt()
   @IsPositive()
   @Max(2000)
   dailyCarbsGoal?: number;
 
   @IsOptional()
-  @IsNumber()
+  @IsInt()
   @IsPositive()
   @Max(1000)
   dailyFatGoal?: number;
@@ -78,28 +81,4 @@ export class UpdateProfileDto {
   @IsOptional()
   @IsEnum(ActivityLevel)
   activityLevel?: ActivityLevel;
-
-  @IsOptional()
-  @IsNumber()
-  @IsPositive()
-  @Max(100)
-  bodyFat?: number;
-
-  @IsOptional()
-  @IsNumber()
-  @IsPositive()
-  @Max(500)
-  fatFreeMass?: number;
-
-  @IsOptional()
-  @IsNumber()
-  @IsPositive()
-  @Max(100)
-  bodyWater?: number;
-
-  @IsOptional()
-  @IsNumber()
-  @IsPositive()
-  @Max(500)
-  muscleMass?: number;
 }

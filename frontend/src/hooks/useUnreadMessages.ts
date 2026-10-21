@@ -5,8 +5,13 @@ import {
   markConversationRead,
 } from '../components/messages/api';
 import type { Message } from '../components/messages/types';
-import { useSocket } from '../socket/socket-context';
+import { useSocket } from '../socket/socketContext';
 
+/**
+ * Ids of the friends who sent me unread messages, for the badges. Opening a
+ * chat marks it as read, and a message arriving in the open chat is marked as
+ * read right away.
+ */
 export function useUnreadMessages(
   userId: number,
   openChatFriendId: number | null,
@@ -27,7 +32,7 @@ export function useUnreadMessages(
           return next;
         }),
       )
-      .catch(console.error);
+      .catch(() => undefined);
   }, [userId, openChatFriendId]);
 
   useEffect(() => {
@@ -36,7 +41,7 @@ export function useUnreadMessages(
         .then((ids) =>
           setUnreadIds(new Set(ids.filter((id) => id !== openChatRef.current))),
         )
-        .catch(console.error);
+        .catch(() => undefined);
     };
 
     load();
@@ -47,7 +52,7 @@ export function useUnreadMessages(
       if (message.receiverId !== userId) return;
 
       if (message.senderId === openChatRef.current) {
-        markConversationRead(userId, message.senderId).catch(console.error);
+        markConversationRead(userId, message.senderId).catch(() => undefined);
         return;
       }
       setUnreadIds((prev) => new Set(prev).add(message.senderId));

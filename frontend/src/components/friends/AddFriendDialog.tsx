@@ -4,6 +4,7 @@ import * as Popover from '@radix-ui/react-popover';
 import { requestErrorMessage } from '../../utils/requestErrorMessage';
 import { BaseDialog } from '../ui/BaseDialog';
 import { DropdownPanel } from '../ui/DropdownPanel';
+import { LABEL_CLASS } from '../ui/fieldStyle';
 import { Input } from '../ui/Input';
 import { searchUsers, sendFriendRequest } from './api';
 import type { UserSummary } from './types';
@@ -16,14 +17,21 @@ interface AddFriendDialogProps {
   userId: number;
   friendIds: number[];
   sentRequestIds: number[];
+  receivedRequestIds: number[];
   onSent: (username: string) => void;
 }
 
-export default function AddFriendDialog({
+/**
+ * Dialog to find users by username and send them a friend request. The search
+ * starts 300 ms after typing stops. Friends are hidden, and users already
+ * asked, or who asked me, cannot be asked again.
+ */
+export function AddFriendDialog({
   dialogRef,
   userId,
   friendIds,
   sentRequestIds,
+  receivedRequestIds,
   onSent,
 }: AddFriendDialogProps) {
   const [query, setQuery] = useState('');
@@ -54,7 +62,7 @@ export default function AddFriendDialog({
           if (controller.signal.aborted) {
             return;
           }
-          setError('Recherche impossible, réessaye.');
+          setError('Recherche impossible, réessayez.');
         })
         .finally(() => {
           if (!controller.signal.aborted) {
@@ -108,10 +116,7 @@ export default function AddFriendDialog({
     >
       <Popover.Root open={isSearchOpen} onOpenChange={() => {}}>
         <Popover.Anchor className="flex flex-col gap-1.5">
-          <label
-            htmlFor="friend-search"
-            className="text-xs font-semibold tracking-wide text-green-500 uppercase"
-          >
+          <label htmlFor="friend-search" className={LABEL_CLASS}>
             Pseudo
           </label>
           <Input
@@ -130,6 +135,7 @@ export default function AddFriendDialog({
           {visibleResults.map((user) => {
             const isSent =
               sentIds.has(user.id) || sentRequestIds.includes(user.id);
+            const isReceived = receivedRequestIds.includes(user.id);
             return (
               <div
                 key={user.id}
@@ -147,10 +153,10 @@ export default function AddFriendDialog({
                   type="button"
                   onMouseDown={(e) => e.preventDefault()}
                   onClick={() => void handleSend(user)}
-                  disabled={isSent || pendingId === user.id}
+                  disabled={isSent || isReceived || pendingId === user.id}
                   className="shrink-0 cursor-pointer rounded-xl bg-green-500 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-green-600 disabled:cursor-not-allowed disabled:bg-green-100 disabled:text-green-500"
                 >
-                  {isSent ? 'Envoyée' : 'Ajouter'}
+                  {isReceived ? 'Reçue' : isSent ? 'Envoyée' : 'Ajouter'}
                 </button>
               </div>
             );
@@ -162,7 +168,7 @@ export default function AddFriendDialog({
 
       {!canSearch && (
         <p className="text-sm text-green-400">
-          Tape au moins {MIN_QUERY_LENGTH} caractères pour chercher.
+          Saisissez au moins {MIN_QUERY_LENGTH} caractères pour chercher.
         </p>
       )}
 

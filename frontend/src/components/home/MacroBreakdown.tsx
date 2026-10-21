@@ -1,4 +1,4 @@
-import SummaryCard from '../ui/SummaryCard';
+import { SummaryCard } from '../ui/SummaryCard';
 import { progressLaps } from './progress';
 
 interface Macros {
@@ -12,6 +12,9 @@ interface Macros {
   unavailable?: boolean;
 }
 
+/**
+ * Progress bar of one macro; beyond the goal, a second color shows the excess.
+ */
 function Bar({
   label,
   value,
@@ -73,7 +76,8 @@ function Bar({
   );
 }
 
-export default function MacroBreakdown({
+/** Protein, carbs and fat of the day against their goals. */
+export function MacroBreakdown({
   protein,
   carbs,
   fat,

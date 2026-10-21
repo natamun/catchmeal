@@ -2,8 +2,13 @@ import { useCallback, useEffect, useState, type ReactNode } from 'react';
 
 import * as authApi from './api';
 import type { AuthUser } from './api';
-import { AuthContext, type AuthStatus } from './auth-context';
+import { AuthContext, type AuthStatus } from './authContext';
 
+/**
+ * Holds the session for the whole app. It asks /auth/me once when the app
+ * starts, then keeps the user up to date after login, register, logout and
+ * profile edits (updateUser).
+ */
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [status, setStatus] = useState<AuthStatus>('loading');
@@ -42,7 +47,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setStatus('unauthenticated');
   }, []);
 
-  const updateUser = useCallback((partial: Partial<authApi.AuthUser>) => {
+  const updateUser = useCallback((partial: Partial<AuthUser>) => {
     setUser((prev) => (prev ? { ...prev, ...partial } : prev));
   }, []);
 

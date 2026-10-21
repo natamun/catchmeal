@@ -1,14 +1,18 @@
 import { useEffect, useState } from 'react';
 
-import { useAuth } from '../auth/auth-context';
+import { useCurrentUser } from '../auth/authContext';
 import { getDashboard } from '../components/analytics/api';
-import type { DashboardDay } from '../types/dashboard-analytics';
+import type { DashboardDay } from '../components/analytics/types';
 
 const NO_DAYS: DashboardDay[] = [];
 
-export default function useDashboard(from: string, to: string) {
-  const { user } = useAuth();
-  const userId = user?.userId;
+/**
+ * Stats of a date range for the stats page. Each range is cached, so coming
+ * back to a period already seen shows it instantly; `retry` reloads after an
+ * error.
+ */
+export function useDashboard(from: string, to: string) {
+  const { userId } = useCurrentUser();
   const key = `${userId}:${from}:${to}`;
   const [loaded, setLoaded] = useState<Record<string, DashboardDay[]>>({});
   const [failedKey, setFailedKey] = useState<string | null>(null);
@@ -17,7 +21,7 @@ export default function useDashboard(from: string, to: string) {
   const isCached = days !== undefined;
 
   useEffect(() => {
-    if (!userId || isCached) return;
+    if (isCached) return;
     const controller = new AbortController();
 
     getDashboard(userId, from, to, controller.signal)

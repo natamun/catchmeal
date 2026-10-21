@@ -12,12 +12,11 @@ import {
   type TooltipContentProps,
 } from 'recharts';
 
-import type { DashboardDay } from '../../types/dashboard-analytics';
 import { formatWeekday } from '../../utils/format';
 import type { DateRange } from '../ui/CalendarButton';
 import { SelectDropdown } from '../ui/SelectDropdown';
-import SummaryCard from '../ui/SummaryCard';
-import ChartSkeleton from './ChartSkeleton';
+import { SummaryCard } from '../ui/SummaryCard';
+import { ChartSkeleton } from './ChartSkeleton';
 import {
   AXIS_WIDTH,
   CHART_HEIGHT,
@@ -27,7 +26,8 @@ import {
   X_TICK,
   Y_TICK,
 } from './chartStyle';
-import ChartTooltip from './ChartTooltip';
+import { ChartTooltip } from './ChartTooltip';
+import type { DashboardDay } from './types';
 
 const TITLE = 'Évolution';
 const SELECT_ID = 'stats-measure';
@@ -49,6 +49,10 @@ const MEASURES: { value: MeasureKey; label: string; unit: string }[] = [
   { value: 'bodyWater', label: 'Eau corporelle', unit: '%' },
 ];
 
+/**
+ * Round graduations around the values, with 1 unit of margin and at most 8
+ * intervals.
+ */
 function measureScale(values: number[]) {
   const low = Math.max(0, Math.floor(Math.min(...values)) - SCALE_MARGIN);
   const high = Math.ceil(Math.max(...values)) + SCALE_MARGIN;
@@ -69,6 +73,7 @@ function measureScale(values: number[]) {
   };
 }
 
+/** Date on the axis, as DD-MM. */
 function formatTick(time: number) {
   return new Date(time)
     .toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' })
@@ -84,7 +89,12 @@ interface Props {
   isLoading?: boolean;
 }
 
-export default function MeasureChart({
+/**
+ * Line chart of one body measure over the period, chosen with a select (weight
+ * by default). For the weight, the target weight is drawn as a reference line.
+ * Dots are hidden beyond 31 points.
+ */
+export function MeasureChart({
   measure,
   onMeasureChange,
   targetWeight,

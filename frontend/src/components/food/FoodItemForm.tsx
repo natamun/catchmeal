@@ -1,17 +1,23 @@
 import { useRef, useState, type RefObject } from 'react';
-import { CheckCircle2, Trash2 } from 'lucide-react';
+import { Trash2 } from 'lucide-react';
 
-import { useAuth } from '../../auth/auth-context';
-import { useTimeout } from '../../hooks/useTimeout';
+import { useCurrentUser } from '../../auth/authContext';
+import { useFormValidation } from '../../hooks/useFormValidation';
+import {
+  hasTooManyDecimals,
+  parseDecimal,
+  TOO_MANY_DECIMALS,
+} from '../../utils/decimals';
 import { requestErrorMessage } from '../../utils/requestErrorMessage';
 import { BaseDialog } from '../ui/BaseDialog';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
 import { FieldError } from '../ui/FieldError';
+import { LABEL_CLASS } from '../ui/fieldStyle';
 import { Input } from '../ui/Input';
 import { PillTabs } from '../ui/PillTabs';
-import { Toast } from '../ui/Toast';
+import { useToast } from '../ui/toastContext';
 import { createFoodItem, deleteFoodItem, updateFoodItem } from './api';
-import BarcodeField from './BarcodeField';
+import { BarcodeField } from './BarcodeField';
 import type { FoodItem, OffProduct, QuantityUnit } from './types';
 
 interface FoodItemFormState {
@@ -38,9 +44,6 @@ const EMPTY_FORM: FoodItemFormState = {
   fat: '',
 };
 
-const LABEL_CLASS =
-  'text-xs font-semibold tracking-wide text-green-500 uppercase';
-
 const UNIT_OPTIONS = [
   { value: 'GRAM', label: 'g' },
   { value: 'MILLILITER', label: 'ml' },
@@ -54,6 +57,7 @@ const MACRO_FIELDS = [
   { field: 'fat', label: 'Lipides (g)' },
 ] as const;
 
+/** Fills the form with the food being edited. */
 function itemToForm(item: FoodItem): FoodItemFormState {
   return {
     barcode: item.barcode ?? '',
@@ -68,8 +72,16 @@ function itemToForm(item: FoodItem): FoodItemFormState {
   };
 }
 
+/**
+ * Leading zeros do not count: the same product can be written with or without
+ * them (EAN-13 and UPC-A).
+ */
 const significantDigits = (barcode: string) => barcode.replace(/^0+/, '');
 
+/**
+ * Fills the form with an Open Food Facts product; the values they lack stay
+ * empty.
+ */
 function productToForm(product: OffProduct): FoodItemFormState {
   const toField = (value: number | null) =>
     value === null ? '' : String(value);
@@ -87,6 +99,10 @@ function productToForm(product: OffProduct): FoodItemFormState {
   };
 }
 
+/**
+ * Name required, base quantity above 0, macros 0 or more, 2 decimals at most.
+ * The barcode is optional.
+ */
 function validateForm(
   form: FoodItemFormState,
 ): Partial<Record<keyof FoodItemFormState, string>> {
@@ -101,19 +117,19 @@ function validateForm(
     errors.name = 'Nom requis';
   }
 
-  const quantity = Number(form.baseQuantity);
-  if (
-    form.baseQuantity.trim() === '' ||
-    Number.isNaN(quantity) ||
-    quantity <= 0
-  ) {
+  const quantity = parseDecimal(form.baseQuantity);
+  if (quantity === null || Number.isNaN(quantity) || quantity <= 0) {
     errors.baseQuantity = 'Supérieur à 0';
+  } else if (hasTooManyDecimals(form.baseQuantity)) {
+    errors.baseQuantity = TOO_MANY_DECIMALS;
   }
 
   for (const field of ['kcal', 'protein', 'carbs', 'fat'] as const) {
-    const value = Number(form[field]);
-    if (form[field].trim() === '' || Number.isNaN(value) || value < 0) {
+    const value = parseDecimal(form[field]);
+    if (value === null || Number.isNaN(value) || value < 0) {
       errors[field] = 'Minimum 0';
+    } else if (hasTooManyDecimals(form[field])) {
+      errors[field] = TOO_MANY_DECIMALS;
     }
   }
 
@@ -129,7 +145,12 @@ interface FoodItemFormProps {
   onItemDeleted: (id: number) => void;
 }
 
-export default function FoodItemForm({
+/**
+ * Dialog to create or edit a food: barcode lookup, name, brand, base quantity
+ * and macros. It warns before adding a second food with the same barcode.
+ * Deleting archives the food.
+ */
+export function FoodItemForm({
   dialogRef,
   editingItem,
   foodItems,
@@ -137,19 +158,23 @@ export default function FoodItemForm({
   onItemUpdated,
   onItemDeleted,
 }: FoodItemFormProps) {
-  const { user } = useAuth();
-  const userId = user!.userId;
-  const [form, setForm] = useState<FoodItemFormState>(EMPTY_FORM);
-  const [touched, setTouched] = useState<
-    Partial<Record<keyof FoodItemFormState, boolean>>
-  >({});
+  const { userId } = useCurrentUser();
+  const {
+    form,
+    setForm,
+    errors,
+    submitAttempted,
+    handleFocus,
+    handleBlur,
+    handleChange,
+    isInvalid,
+    errorMessage,
+    attemptSubmit,
+    resetValidation,
+  } = useFormValidation(EMPTY_FORM, validateForm);
   const [error, setError] = useState<string | null>(null);
-  const [focusedField, setFocusedField] = useState<
-    keyof FoodItemFormState | null
-  >(null);
-  const [submitAttempted, setSubmitAttempted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const showToast = useToast();
   const [barcodeFieldKey, setBarcodeFieldKey] = useState(0);
   const [syncedItemId, setSyncedItemId] = useState<number | null>(
     editingItem?.id ?? null,
@@ -157,19 +182,19 @@ export default function FoodItemForm({
   const confirmDialogRef = useRef<HTMLDialogElement>(null);
   const duplicateDialogRef = useRef<HTMLDialogElement>(null);
 
+  // Updating state during render, the React way to react to a prop change
+  // without an effect: when the dialog opens on another food, the form is
+  // refilled before it is displayed.
   if ((editingItem?.id ?? null) !== syncedItemId) {
     setSyncedItemId(editingItem?.id ?? null);
     setForm(editingItem ? itemToForm(editingItem) : EMPTY_FORM);
-    setTouched({});
+    resetValidation();
     setError(null);
-    setSubmitAttempted(false);
   }
 
   const closeDialog = () => {
     dialogRef.current?.close();
   };
-
-  const errors = validateForm(form);
 
   const barcode = form.barcode.trim();
   const duplicates =
@@ -182,35 +207,9 @@ export default function FoodItemForm({
             significantDigits(item.barcode) === significantDigits(barcode),
         );
 
-  useTimeout(() => setSubmitAttempted(false), submitAttempted ? 5000 : null);
-  useTimeout(() => setSuccessMessage(null), successMessage ? 3000 : null);
-
-  const handleFocus = (field: keyof FoodItemFormState) => {
-    setFocusedField(field);
-  };
-
-  const handleBlur = (field: keyof FoodItemFormState) => {
-    setTouched((prev) => ({ ...prev, [field]: true }));
-    setFocusedField((current) => (current === field ? null : current));
-  };
-
-  const handleChange = (field: keyof FoodItemFormState, value: string) => {
-    setForm((prev) => ({ ...prev, [field]: value }));
-    setTouched((prev) => ({ ...prev, [field]: true }));
-  };
-
-  const isInvalid = (field: keyof FoodItemFormState) =>
-    Boolean(touched[field] && errors[field]);
-
-  const errorMessage = (field: keyof FoodItemFormState) =>
-    touched[field] && (focusedField === field || submitAttempted)
-      ? errors[field]
-      : undefined;
-
   const handleProduct = (product: OffProduct) => {
     setForm(productToForm(product));
-    setTouched({});
-    setSubmitAttempted(false);
+    resetValidation();
     setError(null);
   };
 
@@ -218,13 +217,7 @@ export default function FoodItemForm({
     event.preventDefault();
     setError(null);
 
-    const allTouched = Object.fromEntries(
-      Object.keys(form).map((key) => [key, true]),
-    ) as Record<keyof FoodItemFormState, boolean>;
-    setTouched(allTouched);
-
-    if (Object.keys(errors).length > 0) {
-      setSubmitAttempted(true);
+    if (!attemptSubmit()) {
       return;
     }
     if (duplicates.length > 0) {
@@ -242,12 +235,12 @@ export default function FoodItemForm({
         name: form.name,
         brand: form.brand.trim() === '' ? null : form.brand,
         barcode: barcode === '' ? null : barcode,
-        baseQuantity: Number(form.baseQuantity),
+        baseQuantity: parseDecimal(form.baseQuantity) ?? 0,
         baseUnit: form.baseUnit,
-        kcal: Number(form.kcal),
-        protein: Number(form.protein),
-        carbs: Number(form.carbs),
-        fat: Number(form.fat),
+        kcal: parseDecimal(form.kcal) ?? 0,
+        protein: parseDecimal(form.protein) ?? 0,
+        carbs: parseDecimal(form.carbs) ?? 0,
+        fat: parseDecimal(form.fat) ?? 0,
       };
       const savedItem = editingItem
         ? await updateFoodItem(userId, editingItem.id, input)
@@ -260,10 +253,9 @@ export default function FoodItemForm({
         setForm(EMPTY_FORM);
         setBarcodeFieldKey((key) => key + 1);
       }
-      setTouched({});
-      setSubmitAttempted(false);
+      resetValidation();
       closeDialog();
-      setSuccessMessage(
+      showToast(
         editingItem
           ? 'Produit modifié avec succès'
           : 'Produit enregistré avec succès',
@@ -286,7 +278,7 @@ export default function FoodItemForm({
       await deleteFoodItem(userId, editingItem.id);
       onItemDeleted(editingItem.id);
       closeDialog();
-      setSuccessMessage('Produit supprimé');
+      showToast('Produit supprimé');
     } catch {
       setError('Suppression impossible, réessayez.');
     } finally {
@@ -446,7 +438,7 @@ export default function FoodItemForm({
       <ConfirmDialog
         dialogRef={confirmDialogRef}
         title="Supprimer cet aliment ?"
-        description={`${editingItem?.name ?? ''} sera retiré de ta liste.`}
+        description={`${editingItem?.name ?? ''} sera retiré de votre liste.`}
         confirmLabel="Supprimer"
         pendingLabel="Suppression..."
         isPending={isSubmitting}
@@ -467,8 +459,6 @@ export default function FoodItemForm({
         onConfirm={() => void save()}
         tone="primary"
       />
-
-      <Toast message={successMessage} icon={CheckCircle2} />
     </>
   );
 }
