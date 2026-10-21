@@ -126,7 +126,9 @@ export class UsersController {
   }
 
   @Patch('avatar')
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(
+    FileInterceptor('file', { limits: { fileSize: 5 * 1024 * 1024 } }),
+  )
   uploadAvatar(
     @Param('userId', ParseIntPipe) userId: number,
     @UploadedFile() file: Express.Multer.File | undefined,
