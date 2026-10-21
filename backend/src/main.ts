@@ -34,9 +34,14 @@ async function bootstrap() {
       .setVersion('1.0')
       .addCookieAuth('jwt')
       .build();
-    SwaggerModule.setup('api/docs', app, SwaggerModule.createDocument(app, config), {
-      swaggerOptions: { defaultModelsExpandDepth: -1 },
-    });
+    SwaggerModule.setup(
+      'api/docs',
+      app,
+      SwaggerModule.createDocument(app, config),
+      {
+        swaggerOptions: { defaultModelsExpandDepth: -1 },
+      },
+    );
   }
   await app.listen(process.env.PORT ?? 3000);
 }
