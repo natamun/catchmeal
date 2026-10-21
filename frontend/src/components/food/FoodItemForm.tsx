@@ -9,6 +9,7 @@ import {
   TOO_MANY_DECIMALS,
 } from '../../utils/decimals';
 import { requestErrorMessage } from '../../utils/requestErrorMessage';
+import { MAX_LENGTH, maxLengthMessage } from '../../utils/validation';
 import { BaseDialog } from '../ui/BaseDialog';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
 import { FieldError } from '../ui/FieldError';
@@ -100,8 +101,8 @@ function productToForm(product: OffProduct): FoodItemFormState {
 }
 
 /**
- * Name required, base quantity above 0, macros 0 or more, 2 decimals at most.
- * The barcode is optional.
+ * Name required, name and brand within the backend limits, base quantity above
+ * 0, macros 0 or more, 2 decimals at most. The barcode is optional.
  */
 function validateForm(
   form: FoodItemFormState,
@@ -113,8 +114,15 @@ function validateForm(
     errors.barcode = '8 à 14 chiffres';
   }
 
-  if (form.name.trim() === '') {
+  const name = form.name.trim();
+  if (name === '') {
     errors.name = 'Nom requis';
+  } else if (name.length > MAX_LENGTH.foodName) {
+    errors.name = maxLengthMessage(MAX_LENGTH.foodName);
+  }
+
+  if (form.brand.trim().length > MAX_LENGTH.brand) {
+    errors.brand = maxLengthMessage(MAX_LENGTH.brand);
   }
 
   const quantity = parseDecimal(form.baseQuantity);
@@ -333,6 +341,7 @@ export function FoodItemForm({
                 id="food-name"
                 type="text"
                 placeholder="Ex : Riz blanc"
+                maxLength={MAX_LENGTH.foodName}
                 value={form.name}
                 onChange={(e) => handleChange('name', e.target.value)}
                 onFocus={() => handleFocus('name')}
@@ -351,8 +360,17 @@ export function FoodItemForm({
                 id="food-brand"
                 type="text"
                 placeholder="Ex : Knorr"
+                maxLength={MAX_LENGTH.brand}
                 value={form.brand}
                 onChange={(e) => handleChange('brand', e.target.value)}
+                onFocus={() => handleFocus('brand')}
+                onBlur={() => handleBlur('brand')}
+                aria-invalid={isInvalid('brand')}
+                aria-describedby="food-brand-error"
+              />
+              <FieldError
+                id="food-brand-error"
+                message={errorMessage('brand')}
               />
             </div>
           </div>

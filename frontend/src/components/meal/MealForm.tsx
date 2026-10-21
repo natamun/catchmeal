@@ -7,6 +7,7 @@ import { useFormValidation } from '../../hooks/useFormValidation';
 import { useTimeout } from '../../hooks/useTimeout';
 import { parseDecimal } from '../../utils/decimals';
 import { requestErrorMessage } from '../../utils/requestErrorMessage';
+import { MAX_LENGTH, maxLengthMessage } from '../../utils/validation';
 import type { FoodItem } from '../food/types';
 import { BaseDialog } from '../ui/BaseDialog';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
@@ -88,7 +89,13 @@ export function MealForm({
 
   useTimeout(() => setSubmitAttempted(false), submitAttempted ? 5000 : null);
 
-  const nameError = name.trim() === '' ? 'Nom requis' : undefined;
+  const trimmedName = name.trim();
+  const nameError =
+    trimmedName === ''
+      ? 'Nom requis'
+      : trimmedName.length > MAX_LENGTH.mealName
+        ? maxLengthMessage(MAX_LENGTH.mealName)
+        : undefined;
   const showNameError =
     nameTouched && (nameFocused || submitAttempted) ? nameError : undefined;
   const itemsError = items.length === 0 ? 'Minimum un aliment' : undefined;
@@ -256,6 +263,7 @@ export function MealForm({
               id="meal-name"
               type="text"
               placeholder="Ex : Poulet riz"
+              maxLength={MAX_LENGTH.mealName}
               value={name}
               onChange={(e) => setName(e.target.value)}
               onFocus={() => setNameFocused(true)}
