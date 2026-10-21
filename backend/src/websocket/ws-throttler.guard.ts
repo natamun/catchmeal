@@ -24,7 +24,7 @@ export class WsThrottlerGuard implements CanActivate {
     );
     if (totalHits > 20) {
       throw new WsException(
-        'Trop de messages envoyés, réessayez dans quelques secondes.',
+        'Trop de messages envoyés, réessayez dans un instant.',
       );
     }
     return true;
