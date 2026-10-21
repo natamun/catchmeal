@@ -27,8 +27,8 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     _refreshToken: string,
     profile: GoogleProfile,
   ) {
-    const email =
-      profile.emails?.[0]?.value ?? `google${profile.id}@noemail.invalid`;
+    const emailEntry = profile.emails?.[0];
+    const email = emailEntry?.value ?? `google${profile.id}@noemail.invalid`;
     const displayName =
       profile.displayName ?? profile.name?.givenName ?? `google${profile.id}`;
 
@@ -36,6 +36,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
       username: `google_${profile.id}`,
       name: displayName,
       email,
+      emailVerified: emailEntry?.verified === true,
       provider: 'google',
     });
   }

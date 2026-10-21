@@ -8,7 +8,7 @@ interface GitHubProfile {
   id: string;
   username?: string;
   displayName?: string;
-  emails?: Array<{ value: string }>;
+  emails?: Array<{ value: string; verified?: boolean }>;
 }
 
 @Injectable()
@@ -27,8 +27,8 @@ export class GitHubStrategy extends PassportStrategy(Strategy, 'github') {
     _refreshToken: string,
     profile: GitHubProfile,
   ) {
-    const email =
-      profile.emails?.[0]?.value ?? `github_${profile.id}@noemail.invalid`;
+    const emailEntry = profile.emails?.[0];
+    const email = emailEntry?.value ?? `github_${profile.id}@noemail.invalid`;
     const name =
       profile.displayName ?? profile.username ?? `github_${profile.id}`;
 
@@ -36,6 +36,7 @@ export class GitHubStrategy extends PassportStrategy(Strategy, 'github') {
       username: `github_${profile.id}`,
       name,
       email,
+      emailVerified: emailEntry?.verified === true,
       provider: 'github',
     });
   }

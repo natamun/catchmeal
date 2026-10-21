@@ -389,4 +389,27 @@ describe('UsersService', () => {
       expect(calls[0][0].data.emailVerifiedAt).toBeInstanceOf(Date);
     });
   });
+
+  describe('claimWithOAuth', () => {
+    it('should mark the email verified and remove the password', async () => {
+      prismaMock.user.update.mockResolvedValue({ id: 1 });
+
+      await service.claimWithOAuth(1, 'google');
+
+      const calls = prismaMock.user.update.mock.calls as [
+        {
+          where: object;
+          data: {
+            passwordHash: string;
+            oauthProvider: string;
+            emailVerifiedAt: Date;
+          };
+        },
+      ][];
+      expect(calls[0][0].where).toEqual({ id: 1 });
+      expect(calls[0][0].data.passwordHash).toBe('');
+      expect(calls[0][0].data.oauthProvider).toBe('google');
+      expect(calls[0][0].data.emailVerifiedAt).toBeInstanceOf(Date);
+    });
+  });
 });

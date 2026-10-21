@@ -25,6 +25,7 @@ describe('AuthService', () => {
     updatePasswordHash: jest.fn(),
     markEmailVerified: jest.fn(),
     findUserByEmail: jest.fn(),
+    claimWithOAuth: jest.fn(),
   };
 
   const jwtServiceMock = {
@@ -512,6 +513,87 @@ describe('AuthService', () => {
 
       expect(result).toEqual({ success: true });
       expect(sendSpy).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('findOrCreateFromOAuth', () => {
+    const params = {
+      username: 'google_1',
+      name: 'Alice',
+      email: 'alice@example.com',
+      emailVerified: true,
+      provider: 'google' as const,
+    };
+
+    const createdData = () => {
+      const calls = usersServiceMock.create.mock.calls as [
+        { emailVerifiedAt?: Date },
+      ][];
+      return calls[0][0];
+    };
+
+    it('should create a verified account when the provider verified the email', async () => {
+      usersServiceMock.findUserByEmail.mockResolvedValue(null);
+      usersServiceMock.create.mockResolvedValue({
+        id: 1,
+        username: 'google_1',
+      });
+
+      await service.findOrCreateFromOAuth(params);
+
+      expect(createdData().emailVerifiedAt).toBeInstanceOf(Date);
+    });
+
+    it('should create an unverified account when the provider did not verify the email', async () => {
+      usersServiceMock.findUserByEmail.mockResolvedValue(null);
+      usersServiceMock.create.mockResolvedValue({
+        id: 1,
+        username: 'google_1',
+      });
+
+      await service.findOrCreateFromOAuth({ ...params, emailVerified: false });
+
+      expect(createdData().emailVerifiedAt).toBeUndefined();
+    });
+
+    it('should claim an unverified account and drop its password when the provider verified the email', async () => {
+      usersServiceMock.findUserByEmail.mockResolvedValue({
+        id: 7,
+        username: 'alice',
+        email: 'alice@example.com',
+        emailVerifiedAt: null,
+        oauthProvider: null,
+      });
+
+      await service.findOrCreateFromOAuth(params);
+
+      expect(usersServiceMock.claimWithOAuth).toHaveBeenCalledWith(7, 'google');
+    });
+
+    it('should not touch an already verified account', async () => {
+      usersServiceMock.findUserByEmail.mockResolvedValue({
+        id: 7,
+        username: 'alice',
+        email: 'alice@example.com',
+        emailVerifiedAt: new Date(),
+      });
+
+      await service.findOrCreateFromOAuth(params);
+
+      expect(usersServiceMock.claimWithOAuth).not.toHaveBeenCalled();
+    });
+
+    it('should not claim an unverified account when the provider did not verify the email', async () => {
+      usersServiceMock.findUserByEmail.mockResolvedValue({
+        id: 7,
+        username: 'alice',
+        email: 'alice@example.com',
+        emailVerifiedAt: null,
+      });
+
+      await service.findOrCreateFromOAuth({ ...params, emailVerified: false });
+
+      expect(usersServiceMock.claimWithOAuth).not.toHaveBeenCalled();
     });
   });
 });

@@ -69,6 +69,7 @@ interface OAuthUserParams {
   username: string;
   name: string;
   email: string;
+  emailVerified: boolean;
   provider: 'google' | 'github' | '42';
 }
 
@@ -129,11 +130,17 @@ export class AuthService {
   }
 
   async findOrCreateFromOAuth(params: OAuthUserParams): Promise<SignInData> {
-    const { username, name, email, provider } = params;
+    const { username, name, email, emailVerified, provider } = params;
 
     const existingUser = await this.usersService.findUserByEmail(email);
 
     if (existingUser) {
+      if (emailVerified && !existingUser.emailVerifiedAt) {
+        await this.usersService.claimWithOAuth(
+          existingUser.id,
+          existingUser.oauthProvider ?? provider,
+        );
+      }
       return {
         userId: existingUser.id,
         username: existingUser.username,
@@ -160,6 +167,7 @@ export class AuthService {
         email,
         passwordHash: '',
         oauthProvider: provider,
+        emailVerifiedAt: emailVerified ? new Date() : undefined,
       });
 
       return {
