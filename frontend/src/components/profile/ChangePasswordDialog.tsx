@@ -1,4 +1,4 @@
-import { useState, type FormEvent, type RefObject } from 'react';
+import { useState, type RefObject } from 'react';
 
 import { ApiError } from '../../utils/request';
 import { requestErrorMessage } from '../../utils/requestErrorMessage';
@@ -104,7 +104,7 @@ export function ChangePasswordDialog({
     setServerError(null);
   }
 
-  async function handleSubmit(event: FormEvent) {
+  async function handleSubmit(event: React.SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
     if (saving) return;
 
@@ -187,7 +187,7 @@ export function ChangePasswordDialog({
         </FormField>
 
         {visibleError && (
-          <p role="alert" className="test-sm test-red-500">
+          <p role="alert" className="text-sm text-red-500">
             {visibleError}
           </p>
         )}
