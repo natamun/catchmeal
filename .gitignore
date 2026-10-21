@@ -9,3 +9,7 @@
 
 # Personal notes
 PROGRESS.md
+
+# Logs Caddy
+./logs
+./logs/*
