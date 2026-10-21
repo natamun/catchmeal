@@ -33,7 +33,12 @@ export interface ActivityItem {
   id: number;
   user: UserSummary;
   type:
-    'MEAL_LOGGED' | 'WEIGHT_LOGGED' | 'GOAL_REACHED' | 'CALORIE_GOAL_CHANGED';
+    | 'MEAL_LOGGED'
+    | 'WEIGHT_LOGGED'
+    | 'GOAL_REACHED'
+    | 'CALORIE_GOAL_CHANGED'
+    | 'WEIGHT_GOAL_REACHED'
+    | 'STREAK_REACHED';
   message: string;
   createdAt: string;
 }
