@@ -112,6 +112,77 @@ The project combines a React frontend with client-side routing, a NestJS backend
 
 ```mermaid
 erDiagram
+    User {
+        int id PK
+        text username
+        text email
+        text role
+        timestamp lastSeenAt
+        timestamp deletedAt
+    }
+    WeightLog {
+        int id PK
+        int userId FK
+        float weight
+        float bodyFat
+        float muscleMass
+        timestamp loggedAt
+    }
+    GoalSetting {
+        int id PK
+        int userId FK
+        int dailyCalories
+        int dailyProtein
+        int dailyCarbs
+        int dailyFat
+        timestamp startDate
+    }
+    Meal {
+        int id PK
+        int userId FK
+        int sourceMealId FK
+        text name
+        text typeMeal
+        date loggedAt
+    }
+    MealFoodItem {
+        int id PK
+        int userId FK
+        int mealId FK
+        int foodItemId FK
+        float quantity
+        float kcal
+    }
+    FoodItem {
+        int id PK
+        int userId FK
+        text name
+        text barcode
+        float kcal
+        bool archived
+    }
+    Friend {
+        int id PK
+        int userId FK
+        int friendId FK
+        text status
+    }
+    Message {
+        int id PK
+        int senderId FK
+        int receiverId FK
+        int activityId FK
+        text content
+        timestamp sentAt
+    }
+    Activity {
+        int id PK
+        int userId FK
+        text type
+        jsonb metadata
+        timestamp createdAt
+    }
+
     User ||--o{ Meal : "has"
     User ||--o{ FoodItem : "owns"
     User ||--o{ MealFoodItem : "owns"
