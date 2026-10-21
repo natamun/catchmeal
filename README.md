@@ -1,5 +1,3 @@
-*This project has been created as part of the 42 curriculum by nmunari, cbezenco, diramire, strieste, maxmarti*
-
 # CatCHMeal
 
 A full-stack nutrition and wellness tracking web application. Users can log meals, track body composition, set calorie and macro goals, monitor progress through statistics, chat with friends, and get AI-powered dietary guidance.
@@ -9,22 +7,18 @@ A full-stack nutrition and wellness tracking web application. Users can log meal
 ## Table of Contents
 
 - [Description](#description)
-- [Team Information](#team-information)
-- [Project Management](#project-management)
+- [Team](#team)
 - [Technical Stack](#technical-stack)
 - [Database Schema](#database-schema)
-- [Features List](#features-list)
-- [Modules](#modules)
+- [Features](#features)
 - [Instructions](#instructions)
 - [Resources](#resources)
-- [Individual Contributions](#individual-contributions)
-- [AI Usage](#ai-usage)
 
 ---
 
 ## Description
 
-CatCHMeal is a full-stack nutrition and wellness tracking web application built as the final project of the 42 Common Core (ft_transcendence). The application is centered around a personal health dashboard where users log meals, track their body composition over time, and receive AI-powered dietary guidance tailored to their goals.
+CatCHMeal is a full-stack nutrition and wellness tracking web application. The application is centered around a personal health dashboard where users log meals, track their body composition over time, and receive AI-powered dietary guidance tailored to their goals.
 
 The project combines a React frontend with client-side routing, a NestJS backend, a PostgreSQL database hosted on Supabase, WebSocket communication, HTTPS deployment through Nginx and Caddy, user accounts, OAuth login, barcode scanning via Open Food Facts, calorie and macro goal setting with BMR/TDEE recommendations, body composition history, real-time chat, friend system with presence tracking, activity feed, statistics and charts, GDPR data export, and an integrated Mistral AI assistant.
 
@@ -46,25 +40,9 @@ The project combines a React frontend with client-side routing, a NestJS backend
 
 ---
 
-## Team Information
+## Team
 
-| Login | Name | Role | Responsibilities |
-|---|---|---|---|
-| nmunari | Natalino Munari | (To Update) | (To Update)  |
-| cbezenco | Curtis Bezençon | (To Update)  | (To Update)  |
-| diramire | Diana Carrillo |(To Update)  | (To Update)  |
-| strieste | Seully Trieste | (To Update)  | (To Update)  |
-| maxmarti | Maxime Martin | (To Update) | User profile, body composition tracking, calorie & macro goals, JWT guards and ownership checks, accessibility |
-
----
-
-## Project Management
-
-- **Task distribution**: GitHub Issues with umbrella issues broken into sub-issues. Each sub-issue maps to one PR.
-- **Meetings**: Regular syncs via Discord voice channels.
-- **Communication**: Discord (primary), GitHub PR comments (code review).
-- **Workflow**: Feature branches rebased onto `main`, reviewed by codeowners, merged with merge commits to preserve individual author history. CI must pass before merge.
-- **CI/CD**: GitHub Actions runs format check, lint, build, unit tests, and e2e tests on every PR. Automatic deployment to production on merge to `main`.
+[Natalino Munari](https://github.com/natamun), [Curtis Bezençon](https://github.com/CurtXY), [Diana Ramirez](https://www.linkedin.com/in/dianaramirezcarrillo), [Seully Trieste](https://www.linkedin.com/in/seully-trieste-dev/), [Maxime Martin](https://www.linkedin.com/in/maxime-martin-090731aa)
 
 ---
 
@@ -89,7 +67,7 @@ The project combines a React frontend with client-side routing, a NestJS backend
 - **@nestjs/throttler** — rate limiting
 
 ### Database
-- **PostgreSQL** (hosted on Supabase) — chosen for its relational model, which fits the structured relationships between users, meals, food items, goals, and weight logs. Supabase provides a managed instance with built-in Storage for avatar files.
+- **PostgreSQL** (hosted on Supabase) — relational model fitting the structured relationships between users, meals, food items, goals, and weight logs. Supabase provides a managed instance with built-in Storage for avatar files.
 - **Prisma 7** — type-safe ORM with migration management
 
 ### Infrastructure
@@ -98,17 +76,9 @@ The project combines a React frontend with client-side routing, a NestJS backend
 - **Caddy** — TLS termination in production
 - **GitHub Actions** — CI/CD pipeline
 
-### Key technical choices
-- **Cookie-based JWT sessions** over localStorage — more secure against XSS
-- **Prisma migrations** as the single source of truth for schema changes — no manual SQL
-- **Supabase Storage** for avatar files — avoids storing binary data in PostgreSQL
-- **Shared Socket.IO connection** across the app — one connection per user instead of one per conversation
-
 ---
 
 ## Database Schema
-
-### Models and relationships
 
 ```mermaid
 erDiagram
@@ -199,92 +169,37 @@ erDiagram
     Activity ||--o{ Message : "quoted in"
 ```
 
-### Key tables
+`FoodItem` is the cornerstone of the entire data model. It stores the nutritional values (kcal, protein, carbs, fat) for a given base quantity and unit (gram, milliliter, or piece). Every logged meal entry (`MealFoodItem`) references a `FoodItem` and records the actual quantity consumed — macros are then scaled proportionally at query time. Without a `FoodItem`, nothing can be logged. A `FoodItem` belongs to a user and can be created manually, filled from a barcode scan via Open Food Facts, or archived when no longer needed. This design keeps nutritional data centralized and reusable across multiple meals and days.
 
-| Table | Key fields |
+---
+
+## Features
+
+| Feature | Description |
 |---|---|
-| `User` | id, username, name, email, passwordHash, oauthProvider, avatarUrl, height, targetWeight, dailyCalorieGoal, dailyProteinGoal, dailyCarbsGoal, dailyFatGoal, gender, birthDate, activityLevel, role, lastSeenAt, deletedAt, createAt |
-| `WeightLog` | id, userId, weight, bodyFat, fatFreeMass, bodyWater, muscleMass, loggedAt |
-| `GoalSetting` | id, userId, dailyCalories, dailyProtein, dailyCarbs, dailyFat, objective, startDate |
-| `Meal` | id, userId, name, typeMeal (BREAKFAST/LUNCH/DINNER/SNACK), loggedAt, sourceMealId |
-| `MealFoodItem` | id, userId, mealId, foodItemId, quantity, kcal, protein, carbs, fat |
-| `FoodItem` | id, userId, name, brand, barcode, baseQuantity, baseUnit (GRAM/PIECE/MILLILITER), kcal, protein, carbs, fat, archived |
-| `Friend` | id, userId, friendId, status (PENDING/ACCEPTED/DECLINED), lastTimeConnected |
-| `Message` | id, senderId, receiverId, content, sentAt, readAt, activityId |
-| `Activity` | id, userId, type (MEAL_LOGGED/WEIGHT_LOGGED/GOAL_REACHED/...), metadata, createdAt |
-
----
-
-## Features List
-
-| Feature | Description | Author(s) |
-|---|---|---|
-| JWT Authentication | Register, login, logout with cookie-based JWT sessions | maxmarti |
-| OAuth Login | Sign in with 42, Google, or GitHub | (To Update) |
-| OAuth Onboarding | Complete profile after first OAuth login | (To Update) |
-| Password change | Change password from profile | (To Update) |
-| User profile | Edit name, username, height, weight, gender, birth date, activity level, goals | maxmarti |
-| Avatar upload/delete | Upload and remove profile picture stored on Supabase Storage | maxmarti |
-| Body composition tracking | Log and track body fat, muscle mass, fat-free mass, body water per weigh-in | maxmarti |
-| Weight history | Full immutable weigh-in history with edit and delete | (To Update) |
-| Calorie & macro goals | Set daily calorie, protein, carbs, fat targets with BMR/TDEE recommendations | maxmarti |
-| Food item CRUD | Create, edit, archive, and search personal food items | (To Update) |
-| Barcode scanner | Scan a barcode with the camera to look up a product on Open Food Facts | (To Update) |
-| Open Food Facts integration | Auto-fill food form from barcode lookup | (To Update) |
-| Meal logging | Log meals with food items, quantities, and macro scaling | (To Update) |
-| Meal templates | Reuse a previous meal as a template | (To Update) |
-| Daily journal | View and manage meals logged on a specific day from the home page | (To Update) |
-| Statistics & charts | Calorie, macro, and body composition charts over a selected period | (To Update) |
-| Data export | Export nutrition data as JSON for a selected period | (To Update) |
-| Friend system | Send, accept, and decline friend requests | (To Update) |
-| Real-time presence | See which friends are online and their last seen time | (To Update) |
-| Friend activity feed | See friends' recent meals, weight logs, and goal changes on Home and Friends pages | (To Update) |
-| Real-time chat | WebSocket-based chat with friends, with activity quoting | (To Update) |
-| AI assistant | Mistral-powered chatbot with access to user data (meals, goals, weight, analytics) | (To Update) |
-| Admin board | Admin-only user management panel (view, edit role, delete users) | (To Update) |
-| GDPR | Data export (JSON), account deletion with anonymization, legal pages | (To Update) |
-| Accessibility | ARIA roles, labels, focus management, keyboard navigation | maxmarti |
-| Legal pages | Terms of service, privacy policy, cookie notice | (To Update) |
-
----
-
-## Modules
-
-| Module | Type | Points | Description | Author(s) |
-|---|---|---|---|---|
-| Major module: Use a Framework as backend | Major | 2 | NestJS as the backend framework | (To Update) |
-| Minor module: Use a front-end framework or toolkit | Minor | 1 | React + TypeScript + Tailwind CSS | (To Update) |
-| Major module: Standard user management | Major | 2 | Registration, login, profile, avatar, OAuth | (To Update) |
-| Major module: Implementing a remote authentication | Major | 2 | OAuth with 42, Google, GitHub via Passport.js | (To Update) |
-| Major module: Live chat | Major | 2 | Real-time WebSocket chat between friends | (To Update) |
-| Major module: Introduce an AI opponent | Major | 2 | Mistral AI assistant with user data context | (To Update) |
-| Minor module: User and Game Stats Dashboards | Minor | 1 | Nutrition and body composition statistics with charts | (To Update) |
-| Major module: Server-Side Rendering (SSR) integration | Major | 2 | NestJS REST API serving a React SPA | (To Update) |
-| Minor module: Multiple language support | Minor | 1 | French UI throughout the application | all |
-| Major module: Implement Two-Factor Authentication (2FA) and JWT | Major | 2 | JWT-based session management with cookie auth | maxmarti, (To Update) |
-| Minor module: Expanding Browser Compatibility | Minor | 1 | Tested on Chrome, Firefox, Safari | all |
-| Major module: Accessibility | Major | 2 | WCAG-compliant ARIA attributes, keyboard nav, focus management | maxmarti |
-| Minor module: Server-Side Rendering (SSR) | Minor | 1 | Nginx serving the built React app in production | (To Update) |
-| Major module: GDPR compliance | Major | 2 | Data export, account deletion, privacy policy, cookie notice | (To Update) |
-
-**Total: 24 points**
-
-### Module choice rationale
-
-- **NestJS as backend framework**: NestJS provides a modular, decorator-based architecture that scales well with the number of features in this project. Its built-in support for guards, interceptors, and Passport.js made implementing JWT authentication and role-based access straightforward.
-- **React + TypeScript + Tailwind CSS**: React's component model fits a data-heavy UI with many interactive forms, charts, and real-time updates. TypeScript catches integration errors between frontend and backend early. Tailwind CSS v4 allows rapid, consistent styling without a separate design system.
-- **Standard user management**: Required to support the full user lifecycle — registration, login, profile editing, avatar upload, and OAuth — which underpins every other feature in the app.
-- **Remote authentication (OAuth)**: Allows users to sign in with existing accounts (42, Google, GitHub), reducing friction at registration and covering the 42 intra requirement.
-- **Live chat**: Real-time messaging between friends is a core social feature. WebSockets were chosen over polling to keep latency low and avoid unnecessary server load.
-- **AI assistant (Mistral)**: Provides personalized dietary guidance by giving the model access to the user's meals, goals, and weight history. Mistral's agent API was chosen for its function-calling support, which allows the assistant to query live user data.
-- **User and game stats dashboards**: Nutrition and body composition charts give users actionable feedback on their progress over time, which is the primary value proposition of the app.
-- **Server-Side Rendering (SSR) integration**: NestJS serves the REST API while Nginx serves the built React SPA in production, giving a clean separation between API and static asset delivery.
-- **Multiple language support**: The application targets French-speaking users (42 school context), so a French UI was the natural choice.
-- **JWT with cookie-based sessions**: Storing the JWT in an HttpOnly cookie instead of localStorage protects against XSS attacks. The module covers session management across all protected routes.
-- **Expanding browser compatibility**: Tested on Chrome, Firefox, and Safari to ensure the app works for the widest possible audience during evaluation.
-- **Accessibility**: WCAG-compliant ARIA attributes, keyboard navigation, and focus management ensure the app is usable by people with disabilities and meets the 42 evaluation criteria.
-- **Nginx in production**: Nginx serves the built React app as static files and proxies API requests to the NestJS backend, which is the standard production setup for a SPA + REST API.
-- **GDPR compliance**: Required by French and European law for any app that stores personal data. Implemented as data export (JSON), account deletion with anonymization, and legal pages (privacy policy, terms of service, cookie notice).
+| JWT Authentication | Register, login, logout with cookie-based JWT sessions |
+| OAuth Login | Sign in with 42, Google, or GitHub |
+| User profile | Edit name, username, height, weight, gender, birth date, activity level, goals |
+| Avatar upload/delete | Upload and remove profile picture stored on Supabase Storage |
+| Body composition tracking | Log and track body fat, muscle mass, fat-free mass, body water per weigh-in |
+| Weight history | Full immutable weigh-in history with edit and delete |
+| Calorie & macro goals | Set daily calorie, protein, carbs, fat targets with BMR/TDEE recommendations |
+| Food item CRUD | Create, edit, archive, and search personal food items |
+| Barcode scanner | Scan a barcode with the camera to look up a product on Open Food Facts |
+| Open Food Facts integration | Auto-fill food form from barcode lookup |
+| Meal logging | Log meals with food items, quantities, and macro scaling |
+| Meal templates | Reuse a previous meal as a template |
+| Daily journal | View and manage meals logged on a specific day |
+| Statistics & charts | Calorie, macro, and body composition charts over a selected period |
+| Data export | Export nutrition data as JSON for a selected period |
+| Friend system | Send, accept, and decline friend requests |
+| Real-time presence | See which friends are online and their last seen time |
+| Friend activity feed | See friends' recent meals, weight logs, and goal changes |
+| Real-time chat | WebSocket-based chat with friends, with activity quoting |
+| AI assistant | Mistral-powered chatbot with access to user data (meals, goals, weight, analytics) |
+| Admin board | Admin-only user management panel (view, edit role, delete users) |
+| GDPR | Data export (JSON), account deletion with anonymization, legal pages |
+| Accessibility | ARIA roles, labels, focus management, keyboard navigation |
 
 ---
 
@@ -296,7 +211,7 @@ erDiagram
 - Make
 - A Supabase project (for the database and avatar storage)
 - A Mailtrap account (for transactional emails in dev)
-- OAuth app credentials for 42, Google, and/or GitHub (optional)
+- OAuth app credentials for Google and/or GitHub (optional)
 - A Mistral API key and agent ID (for the AI assistant)
 
 ### Environment setup
@@ -322,9 +237,8 @@ Key variables to set in `backend/.env`:
 | `SUPABASE_URL` | Your Supabase project URL |
 | `SUPABASE_SERVICE_ROLE_KEY` | Supabase service role key (for Storage) |
 | `MAILTRAP_HOST/PORT/USER/PASS` | Mailtrap SMTP credentials |
-| `FORTY_TWO_CLIENT_ID/SECRET` | 42 OAuth app credentials |
-| `GOOGLE_CLIENT_ID/SECRET` | Google OAuth app credentials |
-| `GITHUB_CLIENT_ID/SECRET` | GitHub OAuth app credentials |
+| `GOOGLE_CLIENT_ID/SECRET` | Google OAuth app credentials (optional) |
+| `GITHUB_CLIENT_ID/SECRET` | GitHub OAuth app credentials (optional) |
 | `MISTRAL_API_KEY` | Mistral API key |
 | `MISTRAL_AGENT_ID` | Mistral agent ID |
 
@@ -333,6 +247,13 @@ Key variables to set in `backend/.env`:
 ```bash
 cp frontend/.env.example frontend/.env
 ```
+
+Key variables to set in `frontend/.env`:
+
+| Variable | Description |
+|---|---|
+| `VITE_API_URL` | Backend API base URL (e.g. `http://localhost:3000`) |
+| `VITE_SOCKET_URL` | WebSocket server URL (e.g. `http://localhost:3000`) |
 
 ### Running in development
 
@@ -374,7 +295,6 @@ Requires additional environment variables: `VITE_API_URL`, `FRONTEND_URL`, `POST
 
 ## Resources
 
-### Documentation
 - [NestJS Documentation](https://docs.nestjs.com)
 - [Prisma Documentation](https://www.prisma.io/docs)
 - [React Documentation](https://react.dev)
@@ -385,76 +305,5 @@ Requires additional environment variables: `VITE_API_URL`, `FRONTEND_URL`, `POST
 - [Open Food Facts API](https://openfoodfacts.github.io/openfoodfacts-server/api)
 - [Mistral AI Documentation](https://docs.mistral.ai)
 - [Recharts Documentation](https://recharts.org/en-US)
-- [WCAG 2.1 Accessibility Guidelines](https://www.w3.org/TR/WCAG21)
 
----
-
-## Individual Contributions
-
-### maxmarti / Maxime Martin
-
-Maxime worked mainly on the user profile, JWT guards and ownership checks across the project, body composition tracking, and accessibility.
-
-Main areas:
-
-- User profile: editable fields (name, username, height, weight, gender, birth date, activity level), avatar upload and deletion via Supabase Storage, BMI and weight progress display.
-- Calorie and macro goal setting with BMR/TDEE recommendations using the Mifflin-St Jeor and Katch-McArdle formulas.
-- Body composition tracking: moved body fat, muscle mass, fat-free mass, and body water from the static profile into the `WeightLog` model, with full history preservation and last-known-value carry-forward per field on edit.
-- JWT guards and ownership checks across all protected routes, ensuring users can only access and modify their own data.
-- Accessibility: ARIA roles, labels, focus management, and keyboard navigation across the application.
-
-Challenge and resolution: securing every route with JWT guards and ownership checks required a consistent pattern across all controllers. Early in the project some routes derived the `userId` from the URL parameter instead of the authenticated token, which opened ownership bypass vulnerabilities. Maxime systematically audited and refactored all controllers to derive the `userId` exclusively from the JWT payload, added ownership checks on every sensitive operation, and covered the behavior with unit tests.
-
----
-
-### nmunari / Natalino Munari
-
-*To be filled in by nmunari.*
-
-Main areas:
-
-Challenge and resolution:
-
----
-
-### cbezenco / Curtis Bezençon
-
-*To be filled in by cbezenco.*
-
-Main areas:
-
-Challenge and resolution:
-
----
-
-### diramire / Diana Carrillo
-
-*To be filled in by diramire.*
-
-Main areas:
-
-Challenge and resolution:
-
----
-
-### strieste / Seully Trieste
-
-*To be filled in by strieste.*
-
-Main areas:
-
-Challenge and resolution:
-
----
-
-## AI Usage
-
-AI tools were used during the development of this project for the following purposes:
-
-- Understand the project stack and architecture.
-- Review code.
-- Assist with debugging.
-- Help implement some functions.
-- Documentation editing.
-
-All generated suggestions were reviewed, tested, and adapted before being integrated into the project.
+> Food product data is sourced from [Open Food Facts](https://world.openfoodfacts.org), a free, open and collaborative database licensed under the [Open Database License (ODbL)](https://opendatacommons.org/licenses/odbl/1-0/).
