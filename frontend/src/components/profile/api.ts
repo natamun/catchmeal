@@ -19,16 +19,19 @@ export interface UserProfile {
   activityLevel: string | null;
 }
 
-/** Fields to change in the profile; the fields left out stay as they are. */
+/**
+ * Fields to change in the profile; the fields left out stay as they are, and
+ * null clears a measure or a goal.
+ */
 export interface UpdateProfileInput {
   username?: string;
   name?: string;
-  height?: number;
-  targetWeight?: number;
-  dailyCalorieGoal?: number;
-  dailyProteinGoal?: number;
-  dailyCarbsGoal?: number;
-  dailyFatGoal?: number;
+  height?: number | null;
+  targetWeight?: number | null;
+  dailyCalorieGoal?: number | null;
+  dailyProteinGoal?: number | null;
+  dailyCarbsGoal?: number | null;
+  dailyFatGoal?: number | null;
   gender?: string;
   birthDate?: string;
   activityLevel?: string;

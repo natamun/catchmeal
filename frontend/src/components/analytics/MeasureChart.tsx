@@ -4,7 +4,6 @@ import {
   CartesianGrid,
   Line,
   LineChart,
-  ReferenceLine,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -36,7 +35,7 @@ const MAX_INTERVALS = 8;
 const SCALE_STEPS = [1, 2, 5, 10, 20];
 const MAX_DOTS = 31;
 const DAY_MS = 24 * 60 * 60 * 1000;
-const [LINE_COLOR, TARGET_COLOR] = SERIES_COLORS;
+const [LINE_COLOR] = SERIES_COLORS;
 
 export type MeasureKey =
   'weight' | 'bodyFat' | 'fatFreeMass' | 'bodyWater' | 'muscleMass';
@@ -83,7 +82,6 @@ function formatTick(time: number) {
 interface Props {
   measure: MeasureKey;
   onMeasureChange: (measure: MeasureKey) => void;
-  targetWeight: number | null;
   days: DashboardDay[];
   period: DateRange;
   isLoading?: boolean;
@@ -91,13 +89,11 @@ interface Props {
 
 /**
  * Line chart of one body measure over the period, chosen with a select (weight
- * by default). For the weight, the target weight is drawn as a reference line.
- * Dots are hidden beyond 31 points.
+ * by default). Dots are hidden beyond 31 points.
  */
 export function MeasureChart({
   measure,
   onMeasureChange,
-  targetWeight,
   days,
   period,
   isLoading = false,
@@ -192,19 +188,6 @@ export function MeasureChart({
               />
             )}
           />
-          {measure === 'weight' && targetWeight !== null && (
-            <ReferenceLine
-              y={targetWeight}
-              stroke={TARGET_COLOR}
-              strokeDasharray="4 4"
-              label={{
-                value: 'Objectif',
-                position: 'insideBottomRight',
-                fontSize: 11,
-                fill: TARGET_COLOR,
-              }}
-            />
-          )}
           <Line
             type="linear"
             dataKey="value"

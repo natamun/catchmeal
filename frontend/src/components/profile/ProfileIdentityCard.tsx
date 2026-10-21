@@ -198,25 +198,23 @@ export function ProfileIdentityCard({ user, onUpdate }: Props) {
     const trimmedName = form.name.trim();
     if (trimmedUsername !== user.username) input.username = trimmedUsername;
     if (trimmedName !== (user.name ?? '')) input.name = trimmedName;
-    const parsedHeight = parseDecimal(form.height) ?? undefined;
-    if (parsedHeight !== (user.height ?? undefined))
-      input.height = parsedHeight;
-    const parsedTargetWeight = parseDecimal(form.targetWeight) ?? undefined;
-    if (parsedTargetWeight !== (user.targetWeight ?? undefined))
+    // An emptied field sends null, so the backend clears the value.
+    const parsedHeight = parseDecimal(form.height);
+    if (parsedHeight !== (user.height ?? null)) input.height = parsedHeight;
+    const parsedTargetWeight = parseDecimal(form.targetWeight);
+    if (parsedTargetWeight !== (user.targetWeight ?? null))
       input.targetWeight = parsedTargetWeight;
-    const parsedDailyCalorieGoal =
-      parseDecimal(form.dailyCalorieGoal) ?? undefined;
-    if (parsedDailyCalorieGoal !== (user.dailyCalorieGoal ?? undefined))
+    const parsedDailyCalorieGoal = parseDecimal(form.dailyCalorieGoal);
+    if (parsedDailyCalorieGoal !== (user.dailyCalorieGoal ?? null))
       input.dailyCalorieGoal = parsedDailyCalorieGoal;
-    const parsedDailyProteinGoal =
-      parseDecimal(form.dailyProteinGoal) ?? undefined;
-    if (parsedDailyProteinGoal !== (user.dailyProteinGoal ?? undefined))
+    const parsedDailyProteinGoal = parseDecimal(form.dailyProteinGoal);
+    if (parsedDailyProteinGoal !== (user.dailyProteinGoal ?? null))
       input.dailyProteinGoal = parsedDailyProteinGoal;
-    const parsedDailyCarbsGoal = parseDecimal(form.dailyCarbsGoal) ?? undefined;
-    if (parsedDailyCarbsGoal !== (user.dailyCarbsGoal ?? undefined))
+    const parsedDailyCarbsGoal = parseDecimal(form.dailyCarbsGoal);
+    if (parsedDailyCarbsGoal !== (user.dailyCarbsGoal ?? null))
       input.dailyCarbsGoal = parsedDailyCarbsGoal;
-    const parsedDailyFatGoal = parseDecimal(form.dailyFatGoal) ?? undefined;
-    if (parsedDailyFatGoal !== (user.dailyFatGoal ?? undefined))
+    const parsedDailyFatGoal = parseDecimal(form.dailyFatGoal);
+    if (parsedDailyFatGoal !== (user.dailyFatGoal ?? null))
       input.dailyFatGoal = parsedDailyFatGoal;
     if (form.gender !== (user.gender ?? ''))
       input.gender = form.gender || undefined;

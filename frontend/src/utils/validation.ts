@@ -6,6 +6,9 @@ export const MAX_LENGTH = {
   name: 80,
   email: 255,
   password: 72,
+  foodName: 120,
+  brand: 80,
+  mealName: 120,
 } as const;
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@.]{2,}$/;

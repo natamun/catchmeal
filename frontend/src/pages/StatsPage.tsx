@@ -1,6 +1,5 @@
 import { useState } from 'react';
 
-import { useCurrentUser } from '../auth/authContext';
 import { CalorieChart } from '../components/analytics/CalorieChart';
 import { DataExport } from '../components/analytics/DataExport';
 import {
@@ -20,7 +19,6 @@ import { useDashboard } from '../hooks/useDashboard';
  * chart and JSON export, all from one dashboard request.
  */
 export default function StatsPage() {
-  const user = useCurrentUser();
   const [period, setPeriod] = useState(() => lastDays(7));
   const [measure, setMeasure] = useState<MeasureKey>('weight');
   const from = toApiDate(period.from);
@@ -57,7 +55,6 @@ export default function StatsPage() {
           <MeasureChart
             measure={measure}
             onMeasureChange={setMeasure}
-            targetWeight={user.targetWeight ?? null}
             days={days}
             period={period}
             isLoading={isLoading}
