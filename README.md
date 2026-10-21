@@ -45,6 +45,12 @@ The project combines a React frontend with client-side routing, a NestJS backend
 - GDPR-compliant data export (JSON), account deletion with anonymization, and legal pages.
 - Accessibility: ARIA roles, labels, focus management, and keyboard navigation.
 
+<p align="center">
+  <img src="./docs/home-screenshot.webp" alt="CatCHMeal home screen" height="400" />
+  <img src="./docs/profile.png" alt="CatCHMeal profile screen" height="400" />
+  <img src="./docs/amis.png" alt="CatCHMeal friends screen" height="400" />
+</p>
+
 ---
 
 ## Team
