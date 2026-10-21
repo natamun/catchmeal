@@ -110,11 +110,7 @@ export function ChatBotPopup({
           aria-label="Assistant CatCHMeal"
           className="relative flex h-128 max-h-[calc(100dvh-var(--spacing-header)-4rem-env(safe-area-inset-bottom))] w-[min(24rem,calc(100vw-3rem))] animate-fade-in-up flex-col overflow-hidden rounded-2xl border border-green-200 bg-white shadow-lg pointer-coarse:max-h-[calc(100dvh-var(--spacing-bottom-nav)-4rem-env(safe-area-inset-bottom))] ios-typing:h-[calc(var(--visible-height)-2rem)] ios-typing:max-h-none"
         >
-          {disclaimer && (
-            <div className="absolute inset-0 z-10 flex items-center bg-black/30 p-4 backdrop-blur-sm">
-              <DisclaimerPopup setDisclaimer={setDisclaimer} />
-            </div>
-          )}
+          {disclaimer && <DisclaimerPopup setDisclaimer={setDisclaimer} />}
           <div className="flex items-center justify-between px-4 pt-4 pb-3">
             <h2 className="text-lg font-bold text-green-800">
               Assistant CatCHMeal
@@ -140,6 +136,7 @@ export function ChatBotPopup({
                 className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
               >
                 <div
+                  aria-label={msg.role === 'user' ? 'Vous' : 'Assistant'}
                   className={`max-w-[85%] rounded-2xl px-3 py-2 text-sm wrap-break-word ${msg.role === 'user' ? 'bg-green-500 text-white' : 'bg-green-50 text-green-800'}`}
                 >
                   <ReactMarkdown>{msg.content}</ReactMarkdown>

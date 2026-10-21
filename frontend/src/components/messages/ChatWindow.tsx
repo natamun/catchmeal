@@ -97,7 +97,11 @@ export function ChatWindow({
         {isLoading && (
           <p className="p-4 text-sm text-green-400">Chargement...</p>
         )}
-        {loadError && <p role="alert" className="p-4 text-sm text-red-500">{loadError}</p>}
+        {loadError && (
+          <p role="alert" className="p-4 text-sm text-red-500">
+            {loadError}
+          </p>
+        )}
 
         <div
           ref={threadRef}
@@ -146,7 +150,9 @@ export function ChatWindow({
         )}
 
         {sendError && (
-          <p role="alert" className="px-4 pb-2 text-xs text-red-500">{sendError}</p>
+          <p role="alert" className="px-4 pb-2 text-xs text-red-500">
+            {sendError}
+          </p>
         )}
 
         {!isConnected && (
