@@ -44,6 +44,7 @@ export type SignInData = {
   activityLevel?: string | null;
   hasPassword?: boolean;
   isNewUser?: boolean;
+  emailVerified?: boolean;
 };
 
 type AuthResult = {
@@ -63,6 +64,7 @@ type AuthResult = {
   birthDate?: Date | null;
   activityLevel?: string | null;
   hasPassword?: boolean;
+  emailVerified?: boolean;
 };
 
 interface OAuthUserParams {
@@ -126,6 +128,7 @@ export class AuthService {
       birthDate: user.birthDate,
       activityLevel: user.activityLevel,
       hasPassword: true,
+      emailVerified: Boolean(user.emailVerifiedAt),
     };
   }
 
@@ -215,6 +218,7 @@ export class AuthService {
         userId: user.id,
         username: user.username,
         hasPassword: true,
+        emailVerified: false,
       });
     } catch (error) {
       if (
@@ -314,6 +318,7 @@ export class AuthService {
       birthDate: user.birthDate,
       activityLevel: user.activityLevel,
       hasPassword: user.hasPassword,
+      emailVerified: user.emailVerified,
     };
   }
 

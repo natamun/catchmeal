@@ -109,6 +109,7 @@ describe('AuthService', () => {
         userId: 1,
         username: 'alice',
         hasPassword: true,
+        emailVerified: false,
       });
     });
 
@@ -185,6 +186,23 @@ describe('AuthService', () => {
 
       expect(result).toMatchObject({ userId: 1, username: 'alice' });
     });
+
+    it('should report a verified email when the account is verified', async () => {
+      const passwordHash = await bcrypt.hash('motdepasse123', 10);
+      usersServiceMock.findUserByName.mockResolvedValue({
+        id: 1,
+        username: 'alice',
+        passwordHash,
+        emailVerifiedAt: new Date(),
+      });
+
+      const result = await service.validateUser({
+        username: 'alice',
+        password: 'motdepasse123',
+      });
+
+      expect(result).toMatchObject({ emailVerified: true });
+    });
   });
 
   describe('register', () => {
@@ -223,6 +241,7 @@ describe('AuthService', () => {
         userId: 1,
         username: 'alice',
         hasPassword: true,
+        emailVerified: false,
       });
     });
 

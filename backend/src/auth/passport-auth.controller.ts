@@ -48,6 +48,7 @@ function toUserResponse(data: SignInData): UserResponse {
     birthDate: data.birthDate,
     activityLevel: data.activityLevel,
     hasPassword: data.hasPassword,
+    emailVerified: data.emailVerified,
   };
 }
 
