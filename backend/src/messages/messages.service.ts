@@ -66,6 +66,19 @@ export class MessagesService {
         'Impossible de vous envoyer un message à vous-même',
       );
     }
+
+    // No messages to or from a deleted account. Both HTTP and websocket go
+    // through send(), so this single check covers both transports.
+    const recipient = await this.prisma.user.findUnique({
+      where: { id: toUserId },
+      select: { deletedAt: true },
+    });
+    if (!recipient || recipient.deletedAt) {
+      throw new ForbiddenException(
+        'Ce compte a été supprimé, vous ne pouvez plus lui écrire',
+      );
+    }
+
     await this.assertAreFriends(userId, toUserId);
 
     if (activityId !== undefined) {
