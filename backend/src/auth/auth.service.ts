@@ -20,6 +20,8 @@ const RESEND_COOLDOWN_MS = 60_000;
 
 const VERIFY_EMAIL_PATH = '/verify-email';
 
+const RESET_PASSWORD_PATH = '/reset-password';
+
 type PendingVerification = { requiresVerification: true };
 
 type AuthInput = { username: string; password: string };
@@ -87,6 +89,12 @@ export class AuthService {
 
   private get emailVerificationRequired(): boolean {
     return process.env.EMAIL_VERIFICATION_REQUIRED === 'true';
+  }
+
+  private frontendUrl(path: string, token: string): string {
+    const url = new URL(path, process.env.FRONTEND_URL);
+    url.searchParams.set('token', token);
+    return url.toString();
   }
 
   async validateUser(input: AuthInput): Promise<SignInData | null> {
@@ -242,10 +250,11 @@ export class AuthService {
         userId,
         EmailTokenType.VERIFY_EMAIL,
       );
-      const url = new URL(VERIFY_EMAIL_PATH, process.env.FRONTEND_URL);
-      url.searchParams.set('token', token);
 
-      await this.emailService.sendVerificationEmail(email, url.toString());
+      await this.emailService.sendVerificationEmail(
+        email,
+        this.frontendUrl(VERIFY_EMAIL_PATH, token),
+      );
     } catch (error) {
       console.error('Failed to send the verification email', error);
     }
@@ -293,6 +302,74 @@ export class AuthService {
     }
 
     return { success: true };
+  }
+
+  async forgotPassword(email: string): Promise<{ success: true }> {
+    const user = await this.usersService.findUserByEmail(email);
+
+    if (
+      user?.passwordHash &&
+      !(await this.emailTokenService.wasIssuedRecently(
+        user.id,
+        EmailTokenType.RESET_PASSWORD,
+        RESEND_COOLDOWN_MS,
+      ))
+    ) {
+      void this.sendPasswordResetEmail(user.id, user.email);
+    }
+
+    return { success: true };
+  }
+
+  async sendPasswordResetEmail(userId: number, email: string): Promise<void> {
+    try {
+      const token = await this.emailTokenService.create(
+        userId,
+        EmailTokenType.RESET_PASSWORD,
+      );
+
+      await this.emailService.sendPasswordResetEmail(
+        email,
+        this.frontendUrl(RESET_PASSWORD_PATH, token),
+      );
+    } catch (error) {
+      console.error('Failed to send the password reset email', error);
+    }
+  }
+
+  async resetPassword(
+    token: string,
+    newPassword: string,
+  ): Promise<{ success: true }> {
+    const check = await this.emailTokenService.consume(
+      token,
+      EmailTokenType.RESET_PASSWORD,
+    );
+
+    switch (check.status) {
+      case 'valid': {
+        const user = await this.usersService.findById(check.userId);
+        if (!user) {
+          throw new BadRequestException('Ce lien est invalide.');
+        }
+
+        const passwordHash = await bcrypt.hash(newPassword, SALT_ROUNDS);
+        await this.usersService.updatePasswordHash(user.id, passwordHash);
+        // Opening the link proves the user reads this mailbox.
+        await this.usersService.markEmailVerified(user.id);
+        await this.emailService.sendPasswordChangedEmail(user.email);
+
+        return { success: true };
+      }
+      case 'used':
+        throw new BadRequestException('Ce lien a déjà été utilisé.');
+      case 'expired':
+        throw new BadRequestException(
+          'Ce lien a expiré. Demandez-en un nouveau.',
+        );
+      case 'invalid':
+        throw new BadRequestException('Ce lien est invalide.');
+    }
   }
 
   async signIn(user: SignInData): Promise<AuthResult> {

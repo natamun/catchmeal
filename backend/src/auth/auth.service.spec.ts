@@ -42,6 +42,8 @@ describe('AuthService', () => {
 
   const emailServiceMock = {
     sendVerificationEmail: jest.fn(),
+    sendPasswordResetEmail: jest.fn(),
+    sendPasswordChangedEmail: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -551,6 +553,162 @@ describe('AuthService', () => {
       expect(result).toEqual({ success: true });
       expect(sendSpy).not.toHaveBeenCalled();
     });
+  });
+
+  describe('forgotPassword', () => {
+    let sendSpy: jest.SpyInstance;
+
+    beforeEach(() => {
+      sendSpy = jest
+        .spyOn(service, 'sendPasswordResetEmail')
+        .mockResolvedValue(undefined);
+    });
+
+    it('should send a reset link to an account that has a password', async () => {
+      usersServiceMock.findUserByEmail.mockResolvedValue({
+        id: 1,
+        email: 'alice@example.com',
+        passwordHash: 'hash',
+      });
+      emailTokenServiceMock.wasIssuedRecently.mockResolvedValue(false);
+
+      const result = await service.forgotPassword('alice@example.com');
+
+      expect(result).toEqual({ success: true });
+      expect(emailTokenServiceMock.wasIssuedRecently).toHaveBeenCalledWith(
+        1,
+        EmailTokenType.RESET_PASSWORD,
+        60_000,
+      );
+      expect(sendSpy).toHaveBeenCalledWith(1, 'alice@example.com');
+    });
+
+    it('should answer the same way and send nothing for an unknown address', async () => {
+      usersServiceMock.findUserByEmail.mockResolvedValue(null);
+
+      const result = await service.forgotPassword('nobody@example.com');
+
+      expect(result).toEqual({ success: true });
+      expect(sendSpy).not.toHaveBeenCalled();
+    });
+
+    it('should answer the same way and send nothing for an account without a password', async () => {
+      usersServiceMock.findUserByEmail.mockResolvedValue({
+        id: 1,
+        email: 'alice@example.com',
+        passwordHash: '',
+      });
+
+      const result = await service.forgotPassword('alice@example.com');
+
+      expect(result).toEqual({ success: true });
+      expect(sendSpy).not.toHaveBeenCalled();
+    });
+
+    it('should answer the same way and send nothing when a link was just sent', async () => {
+      usersServiceMock.findUserByEmail.mockResolvedValue({
+        id: 1,
+        email: 'alice@example.com',
+        passwordHash: 'hash',
+      });
+      emailTokenServiceMock.wasIssuedRecently.mockResolvedValue(true);
+
+      const result = await service.forgotPassword('alice@example.com');
+
+      expect(result).toEqual({ success: true });
+      expect(sendSpy).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('sendPasswordResetEmail', () => {
+    it('should email a link built from a new reset token', async () => {
+      emailTokenServiceMock.create.mockResolvedValue('tok123');
+
+      await service.sendPasswordResetEmail(1, 'alice@example.com');
+
+      expect(emailTokenServiceMock.create).toHaveBeenCalledWith(
+        1,
+        EmailTokenType.RESET_PASSWORD,
+      );
+      expect(emailServiceMock.sendPasswordResetEmail).toHaveBeenCalledWith(
+        'alice@example.com',
+        'http://localhost:5173/reset-password?token=tok123',
+      );
+    });
+
+    it('should not throw and send nothing when the token cannot be created', async () => {
+      const errorSpy = jest
+        .spyOn(console, 'error')
+        .mockImplementation(() => undefined);
+      emailTokenServiceMock.create.mockRejectedValue(new Error('db down'));
+
+      await expect(
+        service.sendPasswordResetEmail(1, 'alice@example.com'),
+      ).resolves.toBeUndefined();
+
+      expect(emailServiceMock.sendPasswordResetEmail).not.toHaveBeenCalled();
+      errorSpy.mockRestore();
+    });
+  });
+
+  describe('resetPassword', () => {
+    it('should set the new password, confirm the email and notify the user', async () => {
+      emailTokenServiceMock.consume.mockResolvedValue({
+        status: 'valid',
+        userId: 1,
+      });
+      usersServiceMock.findById.mockResolvedValue({
+        id: 1,
+        email: 'alice@example.com',
+      });
+
+      const result = await service.resetPassword('tok123', 'nouveaumotdepasse');
+
+      expect(emailTokenServiceMock.consume).toHaveBeenCalledWith(
+        'tok123',
+        EmailTokenType.RESET_PASSWORD,
+      );
+      const calls = usersServiceMock.updatePasswordHash.mock.calls as [
+        number,
+        string,
+      ][];
+      expect(calls[0][0]).toBe(1);
+      expect(await bcrypt.compare('nouveaumotdepasse', calls[0][1])).toBe(true);
+      expect(usersServiceMock.markEmailVerified).toHaveBeenCalledWith(1);
+      expect(emailServiceMock.sendPasswordChangedEmail).toHaveBeenCalledWith(
+        'alice@example.com',
+      );
+      expect(result).toEqual({ success: true });
+    });
+
+    it('should refuse a valid token when the account no longer exists', async () => {
+      emailTokenServiceMock.consume.mockResolvedValue({
+        status: 'valid',
+        userId: 1,
+      });
+      usersServiceMock.findById.mockResolvedValue(null);
+
+      await expect(
+        service.resetPassword('tok123', 'nouveaumotdepasse'),
+      ).rejects.toBeInstanceOf(BadRequestException);
+      expect(usersServiceMock.updatePasswordHash).not.toHaveBeenCalled();
+    });
+
+    it.each(['used', 'expired', 'invalid'])(
+      'should refuse a %s link without changing anything',
+      async (status) => {
+        emailTokenServiceMock.consume.mockResolvedValue({ status, userId: 1 });
+
+        await expect(
+          service.resetPassword('tok123', 'nouveaumotdepasse'),
+        ).rejects.toBeInstanceOf(BadRequestException);
+        expect(usersServiceMock.updatePasswordHash).not.toHaveBeenCalled();
+        expect(usersServiceMock.markEmailVerified).not.toHaveBeenCalled();
+        expect(
+          emailServiceMock.sendPasswordChangedEmail,
+        ).not.toHaveBeenCalled();
+      },
+    );
   });
 
   describe('findOrCreateFromOAuth', () => {
