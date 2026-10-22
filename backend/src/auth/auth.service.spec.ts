@@ -97,6 +97,7 @@ describe('AuthService', () => {
       usersServiceMock.findUserByName.mockResolvedValue({
         id: 1,
         username: 'alice',
+        email: 'alice@example.com',
         passwordHash,
       });
 
@@ -108,6 +109,7 @@ describe('AuthService', () => {
       expect(result).toEqual({
         userId: 1,
         username: 'alice',
+        email: 'alice@example.com',
         hasPassword: true,
         emailVerified: false,
       });
@@ -231,7 +233,11 @@ describe('AuthService', () => {
     });
 
     it('should sign in the newly created user and return a token', async () => {
-      usersServiceMock.create.mockResolvedValue({ id: 1, username: 'alice' });
+      usersServiceMock.create.mockResolvedValue({
+        id: 1,
+        username: 'alice',
+        email: 'alice@example.com',
+      });
       jwtServiceMock.signAsync.mockResolvedValue('signed-token');
 
       const result = await service.register(dto);
@@ -240,6 +246,7 @@ describe('AuthService', () => {
         accessToken: 'signed-token',
         userId: 1,
         username: 'alice',
+        email: 'alice@example.com',
         hasPassword: true,
         emailVerified: false,
       });
@@ -316,6 +323,15 @@ describe('AuthService', () => {
 
       expect(emailTokenServiceMock.create).not.toHaveBeenCalled();
       expect(emailServiceMock.sendVerificationEmail).not.toHaveBeenCalled();
+    });
+
+    it('should return the email address so the client can offer to resend the link', async () => {
+      usersServiceMock.create.mockResolvedValue({ id: 1, username: 'alice' });
+      jwtServiceMock.signAsync.mockResolvedValue('signed-token');
+
+      const result = await service.register(dto);
+
+      expect(result).toMatchObject({ email: 'alice@example.com' });
     });
   });
 

@@ -65,6 +65,7 @@ type AuthResult = {
   activityLevel?: string | null;
   hasPassword?: boolean;
   emailVerified?: boolean;
+  email?: string;
 };
 
 interface OAuthUserParams {
@@ -129,6 +130,7 @@ export class AuthService {
       activityLevel: user.activityLevel,
       hasPassword: true,
       emailVerified: Boolean(user.emailVerifiedAt),
+      email: user.email,
     };
   }
 
@@ -217,6 +219,7 @@ export class AuthService {
       return this.signIn({
         userId: user.id,
         username: user.username,
+        email: dto.email,
         hasPassword: true,
         emailVerified: false,
       });
@@ -319,6 +322,7 @@ export class AuthService {
       activityLevel: user.activityLevel,
       hasPassword: user.hasPassword,
       emailVerified: user.emailVerified,
+      email: user.email,
     };
   }
 
