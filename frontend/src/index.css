@@ -4,9 +4,14 @@
   @supports (-webkit-touch-callout: none) {
     :root:has(
         :is(
-            input:not([type='checkbox'], [type='radio'], [type='range'], [type='file']),
-            textarea
-          ):focus
+          input:not(
+            [type='checkbox'],
+            [type='radio'],
+            [type='range'],
+            [type='file']
+          ),
+          textarea
+        ):focus
       )
       & {
       @slot;
@@ -135,6 +140,8 @@
   --color-green-600: #2d6a4f;
   --color-green-700: #1b4332;
   --color-green-800: #081c15;
+  /* Red of the Swiss cross: brand only (logo, "CH" of the name), never for UI states */
+  --color-swiss-red: #c92215;
 
   /* Fonts */
   --font-sans: 'Inter', -apple-system, sans-serif;

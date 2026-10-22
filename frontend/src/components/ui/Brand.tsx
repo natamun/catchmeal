@@ -4,7 +4,10 @@ interface Props {
   size?: 'md' | 'lg';
 }
 
-/** The logo with the app name, in two sizes. */
+/**
+ * The logo with the app name, in two sizes. "CH" is in the red of the logo's
+ * Swiss cross.
+ */
 export function Brand({ size = 'md' }: Props) {
   const large = size === 'lg';
 
@@ -14,7 +17,7 @@ export function Brand({ size = 'md' }: Props) {
       <span
         className={`font-bold tracking-tight text-green-700 ${large ? 'text-3xl' : 'text-lg'}`}
       >
-        CatCHMeal
+        Cat<span className="text-swiss-red">CH</span>Meal
       </span>
     </span>
   );
