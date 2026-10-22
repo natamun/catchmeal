@@ -126,4 +126,53 @@ describe('EmailService', () => {
       );
     });
   });
+
+  describe('sendPasswordResetEmail', () => {
+    const url = 'http://localhost:5173/reset-password?token=abc123';
+
+    it('sends the reset link in both the html and the text version', async () => {
+      sendMail.mockResolvedValue({});
+
+      await service.sendPasswordResetEmail('alice@example.com', url);
+
+      const [mail] = sendMail.mock.calls[0] as [nodemailer.SendMailOptions];
+      expect(mail.to).toBe('alice@example.com');
+      expect(mail.subject).toBe('Réinitialisation de votre mot de passe');
+      expect(mail.html).toContain(`href="${url}"`);
+      expect(mail.text).toContain(url);
+    });
+
+    it('logs instead of throwing when the reset email fails', async () => {
+      sendMail.mockRejectedValue(new Error('535 The email limit is reached'));
+
+      await expect(
+        service.sendPasswordResetEmail('alice@example.com', url),
+      ).resolves.toBeUndefined();
+      expect(logError).toHaveBeenCalledWith(
+        expect.stringContaining('535 The email limit is reached'),
+      );
+    });
+  });
+
+  describe('sendPasswordChangedEmail', () => {
+    it('sends the notification to the user', async () => {
+      sendMail.mockResolvedValue({});
+
+      await service.sendPasswordChangedEmail('alice@example.com');
+
+      const [mail] = sendMail.mock.calls[0] as [nodemailer.SendMailOptions];
+      expect(mail.to).toBe('alice@example.com');
+      expect(mail.subject).toBe('Votre mot de passe a été modifié');
+      expect(mail.text).toContain('Mot de passe modifié');
+    });
+
+    it('logs instead of throwing when the notification fails', async () => {
+      sendMail.mockRejectedValue(new Error('535 The email limit is reached'));
+
+      await expect(
+        service.sendPasswordChangedEmail('alice@example.com'),
+      ).resolves.toBeUndefined();
+      expect(logError).toHaveBeenCalled();
+    });
+  });
 });

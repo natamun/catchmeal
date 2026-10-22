@@ -253,4 +253,95 @@ Ce lien est valable 24 heures. Si vous n'êtes pas à l'origine de cette inscrip
 — L'équipe ${APP_NAME}`,
     });
   }
+
+  async sendPasswordResetEmail(
+    userEmail: string,
+    resetUrl: string,
+  ): Promise<void> {
+    await this.send({
+      from: this.fromAddress,
+      to: userEmail,
+      subject: 'Réinitialisation de votre mot de passe',
+      html: `<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  ${BASE_STYLE}
+</head>
+<body>
+  <div class="card">
+    <div class="header">
+      <h1>Mot de passe oublié</h1>
+      <p>${APP_NAME} — Sécurité</p>
+    </div>
+    <div class="body">
+      <p>Vous avez demandé à réinitialiser votre mot de passe. Cliquez sur le bouton ci-dessous pour en choisir un nouveau.</p>
+      <div class="actions">
+        <a class="button" href="${resetUrl}">Choisir un nouveau mot de passe</a>
+      </div>
+      <p class="link">Si le bouton ne fonctionne pas, copiez ce lien dans votre navigateur :<br />${resetUrl}</p>
+      <div class="notice">
+        Ce lien est valable 1 heure. Si vous n'êtes pas à l'origine de cette demande, ignorez simplement ce message : votre mot de passe ne sera pas modifié.
+      </div>
+      <p>— L'équipe ${APP_NAME}</p>
+    </div>
+    <div class="footer">
+      Cet email a été envoyé automatiquement, merci de ne pas y répondre.
+    </div>
+  </div>
+</body>
+</html>`,
+      text: `Mot de passe oublié
+
+Vous avez demandé à réinitialiser votre mot de passe. Ouvrez ce lien pour en choisir un nouveau :
+
+${resetUrl}
+
+Ce lien est valable 1 heure. Si vous n'êtes pas à l'origine de cette demande, ignorez simplement ce message : votre mot de passe ne sera pas modifié.
+
+— L'équipe ${APP_NAME}`,
+    });
+  }
+
+  async sendPasswordChangedEmail(userEmail: string): Promise<void> {
+    await this.send({
+      from: this.fromAddress,
+      to: userEmail,
+      subject: 'Votre mot de passe a été modifié',
+      html: `<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  ${BASE_STYLE}
+</head>
+<body>
+  <div class="card">
+    <div class="header">
+      <h1>Mot de passe modifié</h1>
+      <p>${APP_NAME} — Sécurité</p>
+    </div>
+    <div class="body">
+      <p>Le mot de passe de votre compte vient d'être modifié.</p>
+      <div class="notice">
+        Si vous n'êtes pas à l'origine de cette modification, contactez-nous immédiatement.
+      </div>
+      <p>— L'équipe ${APP_NAME}</p>
+    </div>
+    <div class="footer">
+      Cet email a été envoyé automatiquement, merci de ne pas y répondre.
+    </div>
+  </div>
+</body>
+</html>`,
+      text: `Mot de passe modifié
+
+Le mot de passe de votre compte vient d'être modifié.
+
+Si vous n'êtes pas à l'origine de cette modification, contactez-nous immédiatement.
+
+— L'équipe ${APP_NAME}`,
+    });
+  }
 }
