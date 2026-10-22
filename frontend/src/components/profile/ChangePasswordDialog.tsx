@@ -150,6 +150,7 @@ export function ChangePasswordDialog({
               value={form.currentPassword}
               onChange={(e) => handleChange('currentPassword', e.target.value)}
               aria-invalid={isInvalid('currentPassword')}
+              aria-describedby={isInvalid('currentPassword') ? 'pwd-error' : undefined}
             />
           )}
         </FormField>
@@ -164,7 +165,7 @@ export function ChangePasswordDialog({
                 value={form.newPassword}
                 onChange={(e) => handleChange('newPassword', e.target.value)}
                 aria-invalid={isInvalid('newPassword')}
-                aria-describedby={`${id}-hint`}
+                aria-describedby={isInvalid('newPassword') ? 'pwd-error' : `${id}-hint`}
               />
               <p id={`${id}-hint`} className="text-xs text-green-500">
                 {minLengthMessage(MIN_LENGTH.password)}
@@ -182,12 +183,13 @@ export function ChangePasswordDialog({
               value={form.confirmPassword}
               onChange={(e) => handleChange('confirmPassword', e.target.value)}
               aria-invalid={isInvalid('confirmPassword')}
+              aria-describedby={isInvalid('confirmPassword') ? 'pwd-error' : undefined}
             />
           )}
         </FormField>
 
         {visibleError && (
-          <p role="alert" className="text-sm text-red-500">
+          <p id="pwd-error" role="alert" className="text-sm text-red-500">
             {visibleError}
           </p>
         )}
