@@ -1,7 +1,7 @@
 import { ConflictException, Injectable } from '@nestjs/common';
 
-import { Prisma } from '../generated/prisma/client';
 import { GdprService } from '../gdpr/gdpr.service';
+import { Prisma } from '../generated/prisma/client';
 import { PresenceService } from '../presence/presence.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { UpdateAdminUserDto } from './dto/update-admin-user.dto';
