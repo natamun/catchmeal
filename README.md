@@ -18,6 +18,7 @@ A full-stack nutrition and wellness tracking web application. Users can log meal
 - [Database Schema](#database-schema)
 - [Features](#features)
 - [Instructions](#instructions)
+- [API Documentation](#api-documentation)
 - [Resources](#resources)
 
 ## Description
@@ -286,6 +287,18 @@ make dev
 ```
 
 This starts the frontend (http://localhost:5173) and backend (http://localhost:3000) with hot reload.
+
+### API Documentation
+
+The backend exposes a Swagger UI in development mode. Once `make dev` is running, open:
+
+```
+http://localhost:3000/api/docs
+```
+
+It lists every REST endpoint with its parameters, request body, and response schema. To test authenticated routes, log in through the app first — the JWT cookie is automatically sent by the browser.
+
+> Swagger is disabled in production.
 
 ### Running database migrations
 
