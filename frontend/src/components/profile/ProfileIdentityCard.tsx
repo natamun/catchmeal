@@ -294,7 +294,9 @@ export function ProfileIdentityCard({ user, onUpdate }: Props) {
                 </p>
               ) : (
                 avatarBusy && (
-                  <p className="text-xs text-green-500">Envoi en cours...</p>
+                  <p role="status" className="text-xs text-green-500">
+                    Envoi en cours...
+                  </p>
                 )
               )}
             </div>
@@ -309,6 +311,11 @@ export function ProfileIdentityCard({ user, onUpdate }: Props) {
               type="button"
               onClick={() => fileInputRef.current?.click()}
               disabled={avatarBusy}
+              aria-label={
+                user.avatarUrl
+                  ? 'Changer la photo de profil'
+                  : 'Ajouter une photo de profil'
+              }
               className="cursor-pointer rounded-xl border border-green-200 px-4 py-2.5 text-sm font-medium text-green-600 transition-colors hover:bg-green-50 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {user.avatarUrl ? 'Changer' : 'Ajouter'}
@@ -338,6 +345,7 @@ export function ProfileIdentityCard({ user, onUpdate }: Props) {
               onFocus={() => handleFocus('username')}
               onBlur={() => handleBlur('username')}
               aria-invalid={isInvalid('username')}
+              aria-describedby="pf-username-error"
             />
             <FieldError
               id="pf-username-error"

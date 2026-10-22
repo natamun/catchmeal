@@ -128,6 +128,7 @@ export function AddFriendDialog({
             onFocus={() => setSearchFocused(true)}
             onBlur={() => setSearchFocused(false)}
             autoComplete="off"
+            aria-busy={isSearching}
           />
         </Popover.Anchor>
 

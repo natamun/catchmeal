@@ -1,3 +1,4 @@
+import { useId } from 'react';
 import { X } from 'lucide-react';
 
 type DisclaimerPopupProps = {
@@ -9,10 +10,17 @@ type DisclaimerPopupProps = {
  * information, not medical advice.
  */
 export function DisclaimerPopup({ setDisclaimer }: DisclaimerPopupProps) {
+  const titleId = useId();
+
   return (
-    <div className="max-h-full w-full overflow-y-auto rounded-2xl bg-white p-5 shadow-lg">
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby={titleId}
+      className="max-h-full w-full overflow-y-auto rounded-2xl bg-white p-5 shadow-lg"
+    >
       <div className="flex items-center justify-between gap-3">
-        <h3 className="text-lg font-bold text-green-800">
+        <h3 id={titleId} className="text-lg font-bold text-green-800">
           Avertissement important
         </h3>
         <button

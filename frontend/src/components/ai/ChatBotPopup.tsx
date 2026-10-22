@@ -140,6 +140,7 @@ export function ChatBotPopup({
                 className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
               >
                 <div
+                  aria-label={msg.role === 'user' ? 'Vous' : 'Assistant'}
                   className={`max-w-[85%] rounded-2xl px-3 py-2 text-sm wrap-break-word ${msg.role === 'user' ? 'bg-green-500 text-white' : 'bg-green-50 text-green-800'}`}
                 >
                   <ReactMarkdown>{msg.content}</ReactMarkdown>
@@ -155,6 +156,7 @@ export function ChatBotPopup({
           )}
           <div className="mx-4 flex items-end gap-2 rounded-xl border border-green-200 px-3 py-2 focus-within:border-green-400">
             <textarea
+              aria-label="Message à l'assistant"
               className="max-h-20 min-w-0 flex-1 resize-none self-center overflow-y-auto text-sm text-green-800 outline-none"
               value={input}
               maxLength={250}
