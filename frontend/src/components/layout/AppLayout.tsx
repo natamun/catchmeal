@@ -7,6 +7,7 @@ import { ChatBotPopup } from '../ai/ChatBotPopup';
 import type { ChatMessage } from '../ai/types';
 import { ToastProvider } from '../ui/ToastProvider';
 import { ConnectionBanner } from './ConnectionBanner';
+import { EmailVerificationBanner } from './EmailVerificationBanner';
 import { Nav, type Tab } from './Nav';
 
 const TABS: Tab[] = ['home', 'food', 'stats', 'friends', 'profile', 'admin'];
@@ -50,6 +51,7 @@ export function AppLayout() {
     <ToastProvider>
       <div className="min-h-screen bg-green-50">
         <ConnectionBanner />
+        <EmailVerificationBanner />
         <Nav isAdmin={user.role === 'ADMIN'} />
         <main
           id="main-content"
