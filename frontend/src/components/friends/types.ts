@@ -4,6 +4,8 @@ export interface UserSummary {
   username: string;
   name: string;
   avatarUrl: string | null;
+  /** Set when the account was deleted; the UI then shows a neutral placeholder. */
+  deletedAt?: string | null;
 }
 
 /** An accepted friendship; friendshipId is what removeFriendship needs. */

@@ -91,8 +91,14 @@ export function ChatWindow({
     }
   };
 
+  const isDeleted = Boolean(friend.deletedAt);
+
   return (
-    <BaseDialog dialogRef={dialogRef} title={friend.name} onClose={onClose}>
+    <BaseDialog
+      dialogRef={dialogRef}
+      title={isDeleted ? 'Utilisateur supprimé' : friend.name}
+      onClose={onClose}
+    >
       <div className="relative -mb-4 flex h-120 flex-col sm:-mb-6 ios-typing:h-[min(--spacing(120),calc(var(--visible-height)-6rem))]">
         {isLoading && (
           <p className="p-4 text-sm text-green-400">Chargement...</p>
@@ -161,38 +167,44 @@ export function ChatWindow({
           </p>
         )}
 
-        <form
-          onSubmit={(e) => void handleSend(e)}
-          className="flex shrink-0 flex-col gap-2 border-t border-green-100 p-3"
-        >
-          {quote && (
-            <QuotedActivity
-              activity={quote}
-              variant="composer"
-              onDismiss={() => setQuote(null)}
-            />
-          )}
-          <div className="flex items-center gap-2">
-            <Input
-              type="text"
-              placeholder="Écrire un message..."
-              aria-label="Message"
-              value={draft}
-              onChange={(e) => setDraft(e.target.value)}
-              maxLength={2000}
-              readOnly={isSending}
-              aria-disabled={isSending}
-            />
-            <button
-              type="submit"
-              disabled={isSending || !draft.trim()}
-              aria-label="Envoyer"
-              className="flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-full bg-green-500 text-white transition-colors hover:bg-green-600 disabled:opacity-50"
-            >
-              <Send className="h-4 w-4" />
-            </button>
-          </div>
-        </form>
+        {isDeleted ? (
+          <p className="shrink-0 border-t border-green-100 p-4 text-center text-sm text-gray-400 italic">
+            Ce compte a été supprimé.
+          </p>
+        ) : (
+          <form
+            onSubmit={(e) => void handleSend(e)}
+            className="flex shrink-0 flex-col gap-2 border-t border-green-100 p-3"
+          >
+            {quote && (
+              <QuotedActivity
+                activity={quote}
+                variant="composer"
+                onDismiss={() => setQuote(null)}
+              />
+            )}
+            <div className="flex items-center gap-2">
+              <Input
+                type="text"
+                placeholder="Écrire un message..."
+                aria-label="Message"
+                value={draft}
+                onChange={(e) => setDraft(e.target.value)}
+                maxLength={2000}
+                readOnly={isSending}
+                aria-disabled={isSending}
+              />
+              <button
+                type="submit"
+                disabled={isSending || !draft.trim()}
+                aria-label="Envoyer"
+                className="flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-full bg-green-500 text-white transition-colors hover:bg-green-600 disabled:opacity-50"
+              >
+                <Send className="h-4 w-4" />
+              </button>
+            </div>
+          </form>
+        )}
       </div>
     </BaseDialog>
   );

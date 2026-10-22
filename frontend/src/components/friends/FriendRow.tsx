@@ -25,23 +25,30 @@ export function FriendRow({
   onMessage,
   onRemove,
 }: FriendRowProps) {
+  const isDeleted = Boolean(friend.deletedAt);
+
   return (
     <li className="flex items-center gap-4 border-b border-green-200 px-5 py-4 last:border-b-0">
       <Avatar
         username={friend.username}
         avatarUrl={friend.avatarUrl}
-        online={online}
+        online={isDeleted ? false : online}
+        deleted={isDeleted}
       />
       <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-semibold text-green-800">
-          {friend.name}
+        <p
+          className={`truncate text-sm font-semibold ${isDeleted ? 'text-gray-400 italic' : 'text-green-800'}`}
+        >
+          {isDeleted ? 'Utilisateur supprimé' : friend.name}
         </p>
         <p className="truncate text-xs text-green-500">
-          {online
-            ? 'En ligne'
-            : lastSeenAt
-              ? formatRelativeTime(lastSeenAt)
-              : `@${friend.username}`}
+          {isDeleted
+            ? 'Compte supprimé'
+            : online
+              ? 'En ligne'
+              : lastSeenAt
+                ? formatRelativeTime(lastSeenAt)
+                : `@${friend.username}`}
         </p>
       </div>
       <button
