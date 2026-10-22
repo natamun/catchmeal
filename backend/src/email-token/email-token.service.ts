@@ -8,6 +8,7 @@ const HOUR_MS = 60 * 60 * 1000;
 
 const TOKEN_TTL_MS: Record<EmailTokenType, number> = {
   [EmailTokenType.VERIFY_EMAIL]: 24 * HOUR_MS,
+  [EmailTokenType.RESET_PASSWORD]: HOUR_MS,
 };
 
 export type TokenCheck =

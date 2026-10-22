@@ -218,6 +218,7 @@ model GoalSetting {
 
 enum EmailTokenType {
   VERIFY_EMAIL
+  RESET_PASSWORD
 }
 
 model EmailToken {
