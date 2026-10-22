@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef } from 'react';
+import { useId } from 'react';
 import { X } from 'lucide-react';
 
 type DisclaimerPopupProps = {
@@ -7,31 +7,17 @@ type DisclaimerPopupProps = {
 
 /**
  * The assistant's health warning, opened from its info button: it gives
- * information, not medical advice. Uses a native <dialog> for focus trap and
- * Escape key support.
+ * information, not medical advice.
  */
 export function DisclaimerPopup({ setDisclaimer }: DisclaimerPopupProps) {
-  const dialogRef = useRef<HTMLDialogElement>(null);
   const titleId = useId();
 
-  useEffect(() => {
-    const dialog = dialogRef.current;
-    if (dialog && !dialog.open) {
-      dialog.showModal();
-    }
-  }, []);
-
-  const close = () => {
-    dialogRef.current?.close();
-    setDisclaimer(false);
-  };
-
   return (
-    <dialog
-      ref={dialogRef}
+    <div
+      role="dialog"
+      aria-modal="true"
       aria-labelledby={titleId}
-      onClose={close}
-      className="m-auto max-h-full w-full max-w-sm overflow-y-auto rounded-2xl border-none bg-white p-5 shadow-lg backdrop:bg-black/30 backdrop:backdrop-blur-sm"
+      className="max-h-full w-full overflow-y-auto rounded-2xl bg-white p-5 shadow-lg"
     >
       <div className="flex items-center justify-between gap-3">
         <h3 id={titleId} className="text-lg font-bold text-green-800">
@@ -39,7 +25,7 @@ export function DisclaimerPopup({ setDisclaimer }: DisclaimerPopupProps) {
         </h3>
         <button
           type="button"
-          onClick={close}
+          onClick={() => setDisclaimer(false)}
           aria-label="Fermer"
           className="cursor-pointer text-green-400 transition-colors hover:text-green-600"
         >
@@ -54,6 +40,6 @@ export function DisclaimerPopup({ setDisclaimer }: DisclaimerPopupProps) {
         de santé avant d'apporter des changements radicaux à votre régime
         alimentaire.
       </p>
-    </dialog>
+    </div>
   );
 }
