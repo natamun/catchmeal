@@ -1,13 +1,16 @@
 import {
   BadRequestException,
   ConflictException,
+  ForbiddenException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
 import * as bcrypt from 'bcryptjs';
 
-import { Prisma } from '../generated/prisma/client';
+import { EmailTokenService } from '../email-token/email-token.service';
+import { EmailService } from '../email/email.service';
+import { EmailTokenType, Prisma } from '../generated/prisma/client';
 import { UsersService } from '../users/users.service';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
@@ -20,10 +23,23 @@ describe('AuthService', () => {
     findById: jest.fn(),
     create: jest.fn(),
     updatePasswordHash: jest.fn(),
+    markEmailVerified: jest.fn(),
+    findUserByEmail: jest.fn(),
+    claimWithOAuth: jest.fn(),
   };
 
   const jwtServiceMock = {
     signAsync: jest.fn(),
+  };
+
+  const emailTokenServiceMock = {
+    create: jest.fn(),
+    consume: jest.fn(),
+    wasIssuedRecently: jest.fn(),
+  };
+
+  const emailServiceMock = {
+    sendVerificationEmail: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -33,10 +49,15 @@ describe('AuthService', () => {
         AuthService,
         { provide: UsersService, useValue: usersServiceMock },
         { provide: JwtService, useValue: jwtServiceMock },
+        { provide: EmailTokenService, useValue: emailTokenServiceMock },
+        { provide: EmailService, useValue: emailServiceMock },
       ],
     }).compile();
 
     service = module.get<AuthService>(AuthService);
+
+    process.env.FRONTEND_URL = 'http://localhost:5173';
+    delete process.env.EMAIL_VERIFICATION_REQUIRED;
   });
 
   it('should be defined', () => {
@@ -76,6 +97,7 @@ describe('AuthService', () => {
       usersServiceMock.findUserByName.mockResolvedValue({
         id: 1,
         username: 'alice',
+        email: 'alice@example.com',
         passwordHash,
       });
 
@@ -87,8 +109,101 @@ describe('AuthService', () => {
       expect(result).toEqual({
         userId: 1,
         username: 'alice',
+        email: 'alice@example.com',
         hasPassword: true,
+        emailVerified: false,
       });
+    });
+
+    it('should refuse an unverified account when verification is required', async () => {
+      process.env.EMAIL_VERIFICATION_REQUIRED = 'true';
+      const passwordHash = await bcrypt.hash('motdepasse123', 10);
+      usersServiceMock.findUserByName.mockResolvedValue({
+        id: 1,
+        username: 'alice',
+        passwordHash,
+        emailVerifiedAt: null,
+      });
+
+      const attempt = service.validateUser({
+        username: 'alice',
+        password: 'motdepasse123',
+      });
+
+      await expect(attempt).rejects.toBeInstanceOf(ForbiddenException);
+      await expect(attempt).rejects.toMatchObject({
+        response: { code: 'EMAIL_NOT_VERIFIED' },
+      });
+    });
+
+    it('should not reveal that an account is unverified when the password is wrong', async () => {
+      process.env.EMAIL_VERIFICATION_REQUIRED = 'true';
+      const passwordHash = await bcrypt.hash('rightpassword', 10);
+      usersServiceMock.findUserByName.mockResolvedValue({
+        id: 1,
+        username: 'alice',
+        passwordHash,
+        emailVerifiedAt: null,
+      });
+
+      const result = await service.validateUser({
+        username: 'alice',
+        password: 'wrongpassword',
+      });
+
+      expect(result).toBeNull();
+    });
+
+    it('should let a verified account sign in when verification is required', async () => {
+      process.env.EMAIL_VERIFICATION_REQUIRED = 'true';
+      const passwordHash = await bcrypt.hash('motdepasse123', 10);
+      usersServiceMock.findUserByName.mockResolvedValue({
+        id: 1,
+        username: 'alice',
+        passwordHash,
+        emailVerifiedAt: new Date(),
+      });
+
+      const result = await service.validateUser({
+        username: 'alice',
+        password: 'motdepasse123',
+      });
+
+      expect(result).toMatchObject({ userId: 1, username: 'alice' });
+    });
+
+    it('should let an unverified account sign in when verification is not required', async () => {
+      const passwordHash = await bcrypt.hash('motdepasse123', 10);
+      usersServiceMock.findUserByName.mockResolvedValue({
+        id: 1,
+        username: 'alice',
+        passwordHash,
+        emailVerifiedAt: null,
+      });
+
+      const result = await service.validateUser({
+        username: 'alice',
+        password: 'motdepasse123',
+      });
+
+      expect(result).toMatchObject({ userId: 1, username: 'alice' });
+    });
+
+    it('should report a verified email when the account is verified', async () => {
+      const passwordHash = await bcrypt.hash('motdepasse123', 10);
+      usersServiceMock.findUserByName.mockResolvedValue({
+        id: 1,
+        username: 'alice',
+        passwordHash,
+        emailVerifiedAt: new Date(),
+      });
+
+      const result = await service.validateUser({
+        username: 'alice',
+        password: 'motdepasse123',
+      });
+
+      expect(result).toMatchObject({ emailVerified: true });
     });
   });
 
@@ -118,7 +233,11 @@ describe('AuthService', () => {
     });
 
     it('should sign in the newly created user and return a token', async () => {
-      usersServiceMock.create.mockResolvedValue({ id: 1, username: 'alice' });
+      usersServiceMock.create.mockResolvedValue({
+        id: 1,
+        username: 'alice',
+        email: 'alice@example.com',
+      });
       jwtServiceMock.signAsync.mockResolvedValue('signed-token');
 
       const result = await service.register(dto);
@@ -127,7 +246,9 @@ describe('AuthService', () => {
         accessToken: 'signed-token',
         userId: 1,
         username: 'alice',
+        email: 'alice@example.com',
         hasPassword: true,
+        emailVerified: false,
       });
     });
 
@@ -149,6 +270,68 @@ describe('AuthService', () => {
       usersServiceMock.create.mockRejectedValue(unexpectedError);
 
       await expect(service.register(dto)).rejects.toBe(unexpectedError);
+    });
+
+    it('should send a verification link built from the new token', async () => {
+      usersServiceMock.create.mockResolvedValue({ id: 1, username: 'alice' });
+      jwtServiceMock.signAsync.mockResolvedValue('signed-token');
+      emailTokenServiceMock.create.mockResolvedValue('tok123');
+
+      await service.register(dto);
+
+      expect(emailTokenServiceMock.create).toHaveBeenCalledWith(
+        1,
+        EmailTokenType.VERIFY_EMAIL,
+      );
+      expect(emailServiceMock.sendVerificationEmail).toHaveBeenCalledWith(
+        'alice@example.com',
+        'http://localhost:5173/verify-email?token=tok123',
+      );
+    });
+
+    it('should not sign in and ask for verification when it is required', async () => {
+      process.env.EMAIL_VERIFICATION_REQUIRED = 'true';
+      usersServiceMock.create.mockResolvedValue({ id: 1, username: 'alice' });
+      emailTokenServiceMock.create.mockResolvedValue('tok123');
+
+      const result = await service.register(dto);
+
+      expect(result).toEqual({ requiresVerification: true });
+      expect(jwtServiceMock.signAsync).not.toHaveBeenCalled();
+      expect(emailServiceMock.sendVerificationEmail).toHaveBeenCalled();
+    });
+
+    it('should still register the user when the verification email cannot be prepared', async () => {
+      const errorSpy = jest
+        .spyOn(console, 'error')
+        .mockImplementation(() => undefined);
+      usersServiceMock.create.mockResolvedValue({ id: 1, username: 'alice' });
+      jwtServiceMock.signAsync.mockResolvedValue('signed-token');
+      emailTokenServiceMock.create.mockRejectedValue(new Error('db down'));
+
+      const result = await service.register(dto);
+
+      expect(result).toMatchObject({ accessToken: 'signed-token' });
+      expect(emailServiceMock.sendVerificationEmail).not.toHaveBeenCalled();
+      errorSpy.mockRestore();
+    });
+
+    it('should not send any email when the account cannot be created', async () => {
+      usersServiceMock.create.mockRejectedValue(new Error('database is down'));
+
+      await expect(service.register(dto)).rejects.toThrow('database is down');
+
+      expect(emailTokenServiceMock.create).not.toHaveBeenCalled();
+      expect(emailServiceMock.sendVerificationEmail).not.toHaveBeenCalled();
+    });
+
+    it('should return the email address so the client can offer to resend the link', async () => {
+      usersServiceMock.create.mockResolvedValue({ id: 1, username: 'alice' });
+      jwtServiceMock.signAsync.mockResolvedValue('signed-token');
+
+      const result = await service.register(dto);
+
+      expect(result).toMatchObject({ email: 'alice@example.com' });
     });
   });
 
@@ -238,6 +421,214 @@ describe('AuthService', () => {
       ).rejects.toBeInstanceOf(UnauthorizedException);
 
       expect(usersServiceMock.updatePasswordHash).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('verifyEmail', () => {
+    it('should mark the email as verified when the token is valid', async () => {
+      emailTokenServiceMock.consume.mockResolvedValue({
+        status: 'valid',
+        userId: 1,
+      });
+
+      const result = await service.verifyEmail('tok123');
+
+      expect(emailTokenServiceMock.consume).toHaveBeenCalledWith(
+        'tok123',
+        EmailTokenType.VERIFY_EMAIL,
+      );
+      expect(usersServiceMock.markEmailVerified).toHaveBeenCalledWith(1);
+      expect(result).toEqual({ verified: true });
+    });
+
+    it('should answer verified when an already used link belongs to a verified account', async () => {
+      emailTokenServiceMock.consume.mockResolvedValue({
+        status: 'used',
+        userId: 1,
+      });
+      usersServiceMock.findById.mockResolvedValue({
+        id: 1,
+        emailVerifiedAt: new Date(),
+      });
+
+      const result = await service.verifyEmail('tok123');
+
+      expect(result).toEqual({ verified: true });
+      expect(usersServiceMock.markEmailVerified).not.toHaveBeenCalled();
+    });
+
+    it('should refuse a used link when the account is not verified', async () => {
+      emailTokenServiceMock.consume.mockResolvedValue({
+        status: 'used',
+        userId: 1,
+      });
+      usersServiceMock.findById.mockResolvedValue({
+        id: 1,
+        emailVerifiedAt: null,
+      });
+
+      await expect(service.verifyEmail('tok123')).rejects.toBeInstanceOf(
+        BadRequestException,
+      );
+      expect(usersServiceMock.markEmailVerified).not.toHaveBeenCalled();
+    });
+
+    it.each(['expired', 'invalid'])(
+      'should refuse a %s link without verifying anything',
+      async (status) => {
+        emailTokenServiceMock.consume.mockResolvedValue({ status });
+
+        await expect(service.verifyEmail('tok123')).rejects.toBeInstanceOf(
+          BadRequestException,
+        );
+        expect(usersServiceMock.markEmailVerified).not.toHaveBeenCalled();
+      },
+    );
+  });
+
+  describe('resendVerification', () => {
+    let sendSpy: jest.SpyInstance;
+
+    beforeEach(() => {
+      sendSpy = jest
+        .spyOn(service, 'sendVerificationEmail')
+        .mockResolvedValue(undefined);
+    });
+
+    it('should send a new link to an unverified account', async () => {
+      usersServiceMock.findUserByEmail.mockResolvedValue({
+        id: 1,
+        email: 'alice@example.com',
+        emailVerifiedAt: null,
+      });
+      emailTokenServiceMock.wasIssuedRecently.mockResolvedValue(false);
+
+      const result = await service.resendVerification('alice@example.com');
+
+      expect(result).toEqual({ success: true });
+      expect(emailTokenServiceMock.wasIssuedRecently).toHaveBeenCalledWith(
+        1,
+        EmailTokenType.VERIFY_EMAIL,
+        60_000,
+      );
+      expect(sendSpy).toHaveBeenCalledWith(1, 'alice@example.com');
+    });
+
+    it('should answer the same way and send nothing for an unknown address', async () => {
+      usersServiceMock.findUserByEmail.mockResolvedValue(null);
+
+      const result = await service.resendVerification('nobody@example.com');
+
+      expect(result).toEqual({ success: true });
+      expect(sendSpy).not.toHaveBeenCalled();
+    });
+
+    it('should answer the same way and send nothing when the address is already verified', async () => {
+      usersServiceMock.findUserByEmail.mockResolvedValue({
+        id: 1,
+        email: 'alice@example.com',
+        emailVerifiedAt: new Date(),
+      });
+
+      const result = await service.resendVerification('alice@example.com');
+
+      expect(result).toEqual({ success: true });
+      expect(sendSpy).not.toHaveBeenCalled();
+    });
+
+    it('should answer the same way and send nothing when a link was just sent', async () => {
+      usersServiceMock.findUserByEmail.mockResolvedValue({
+        id: 1,
+        email: 'alice@example.com',
+        emailVerifiedAt: null,
+      });
+      emailTokenServiceMock.wasIssuedRecently.mockResolvedValue(true);
+
+      const result = await service.resendVerification('alice@example.com');
+
+      expect(result).toEqual({ success: true });
+      expect(sendSpy).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('findOrCreateFromOAuth', () => {
+    const params = {
+      username: 'google_1',
+      name: 'Alice',
+      email: 'alice@example.com',
+      emailVerified: true,
+      provider: 'google' as const,
+    };
+
+    const createdData = () => {
+      const calls = usersServiceMock.create.mock.calls as [
+        { emailVerifiedAt?: Date },
+      ][];
+      return calls[0][0];
+    };
+
+    it('should create a verified account when the provider verified the email', async () => {
+      usersServiceMock.findUserByEmail.mockResolvedValue(null);
+      usersServiceMock.create.mockResolvedValue({
+        id: 1,
+        username: 'google_1',
+      });
+
+      await service.findOrCreateFromOAuth(params);
+
+      expect(createdData().emailVerifiedAt).toBeInstanceOf(Date);
+    });
+
+    it('should create an unverified account when the provider did not verify the email', async () => {
+      usersServiceMock.findUserByEmail.mockResolvedValue(null);
+      usersServiceMock.create.mockResolvedValue({
+        id: 1,
+        username: 'google_1',
+      });
+
+      await service.findOrCreateFromOAuth({ ...params, emailVerified: false });
+
+      expect(createdData().emailVerifiedAt).toBeUndefined();
+    });
+
+    it('should claim an unverified account and drop its password when the provider verified the email', async () => {
+      usersServiceMock.findUserByEmail.mockResolvedValue({
+        id: 7,
+        username: 'alice',
+        email: 'alice@example.com',
+        emailVerifiedAt: null,
+        oauthProvider: null,
+      });
+
+      await service.findOrCreateFromOAuth(params);
+
+      expect(usersServiceMock.claimWithOAuth).toHaveBeenCalledWith(7, 'google');
+    });
+
+    it('should not touch an already verified account', async () => {
+      usersServiceMock.findUserByEmail.mockResolvedValue({
+        id: 7,
+        username: 'alice',
+        email: 'alice@example.com',
+        emailVerifiedAt: new Date(),
+      });
+
+      await service.findOrCreateFromOAuth(params);
+
+      expect(usersServiceMock.claimWithOAuth).not.toHaveBeenCalled();
+    });
+
+    it('should not claim an unverified account when the provider did not verify the email', async () => {
+      usersServiceMock.findUserByEmail.mockResolvedValue({
+        id: 7,
+        username: 'alice',
+        email: 'alice@example.com',
+        emailVerifiedAt: null,
+      });
+
+      await service.findOrCreateFromOAuth({ ...params, emailVerified: false });
+
+      expect(usersServiceMock.claimWithOAuth).not.toHaveBeenCalled();
     });
   });
 });

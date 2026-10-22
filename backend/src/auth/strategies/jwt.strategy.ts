@@ -43,6 +43,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       birthDate: user.birthDate,
       activityLevel: user.activityLevel,
       hasPassword: Boolean(user.passwordHash),
+      emailVerified: Boolean(user.emailVerifiedAt),
     };
   }
 }

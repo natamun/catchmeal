@@ -45,6 +45,7 @@ export class UsersService {
     email: string;
     passwordHash: string;
     oauthProvider?: string;
+    emailVerifiedAt?: Date;
   }) {
     return this.prisma.user.create({ data });
   }
@@ -65,6 +66,25 @@ export class UsersService {
     return this.prisma.user.update({
       where: { id: userId },
       data: { passwordHash },
+      select: { id: true },
+    });
+  }
+
+  markEmailVerified(userId: number) {
+    return this.prisma.user.updateMany({
+      where: { id: userId, emailVerifiedAt: null, deletedAt: null },
+      data: { emailVerifiedAt: new Date() },
+    });
+  }
+
+  claimWithOAuth(userId: number, provider: string) {
+    return this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        emailVerifiedAt: new Date(),
+        passwordHash: '',
+        oauthProvider: provider,
+      },
       select: { id: true },
     });
   }

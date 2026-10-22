@@ -58,16 +58,19 @@ export class GdprService {
     const userEmail = user.email;
 
     // Soft delete + anonymize all PII while preserving relational integrity
-    await this.prisma.user.update({
-      where: { id: userId },
-      data: {
-        username: `deleted_user_${userId}`,
-        name: 'Deleted User',
-        email: `deleted_${userId}@deleted.invalid`,
-        passwordHash: '',
-        deletedAt: new Date(),
-      },
-    });
+    await this.prisma.$transaction([
+      this.prisma.emailToken.deleteMany({ where: { userId } }),
+      this.prisma.user.update({
+        where: { id: userId },
+        data: {
+          username: `deleted_user_${userId}`,
+          name: 'Deleted User',
+          email: `deleted_${userId}@deleted.invalid`,
+          passwordHash: '',
+          deletedAt: new Date(),
+        },
+      }),
+    ]);
 
     await this.emailService.sendAccountDeletionConfirmation(userEmail);
 

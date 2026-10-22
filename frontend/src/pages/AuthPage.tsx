@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import { ArrowLeft } from 'lucide-react';
 import { Link, useLocation, useMatch, useNavigate } from 'react-router';
 
+import { EMAIL_NOT_VERIFIED } from '../auth/api';
 import { useAuth } from '../auth/authContext';
 import { AuthBrandPanel } from '../components/auth/AuthBrandPanel';
 import { OAuthButtons } from '../components/auth/OAuthButtons';
@@ -13,8 +14,9 @@ import { FieldError } from '../components/ui/FieldError';
 import { LABEL_CLASS } from '../components/ui/fieldStyle';
 import { Input } from '../components/ui/Input';
 import { useFormValidation } from '../hooks/useFormValidation';
-import { navigationState } from '../routing/navigation';
+import { navigationState, type NavigationState } from '../routing/navigation';
 import { PATHS } from '../routing/paths';
+import { ApiError } from '../utils/request';
 import { requestErrorMessage } from '../utils/requestErrorMessage';
 import {
   isValidEmail,
@@ -138,14 +140,22 @@ export function AuthPage() {
       if (mode === 'login') {
         await login({ username: form.username, password: form.password });
       } else {
-        await register({
+        const outcome = await register({
           username: form.username,
           name: form.name,
           email: form.email,
           password: form.password,
         });
+        if (outcome === 'verification-required') {
+          const state: NavigationState = { email: form.email.trim() };
+          void navigate(PATHS.checkEmail, { replace: true, state });
+        }
       }
     } catch (err: unknown) {
+      if (err instanceof ApiError && err.code === EMAIL_NOT_VERIFIED) {
+        void navigate(PATHS.checkEmail, { replace: true });
+        return;
+      }
       setError(
         requestErrorMessage(
           err,

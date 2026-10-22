@@ -1,19 +1,30 @@
 import {
   BadRequestException,
   ConflictException,
+  ForbiddenException,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
 
-import { Prisma } from '../generated/prisma/client';
+import { EmailTokenService } from '../email-token/email-token.service';
+import { EmailService } from '../email/email.service';
+import { EmailTokenType, Prisma } from '../generated/prisma/client';
 import { UsersService } from '../users/users.service';
 import { RegisterDto } from './dto/register.dto';
 
 const SALT_ROUNDS = 10;
 
+const RESEND_COOLDOWN_MS = 60_000;
+
+const VERIFY_EMAIL_PATH = '/verify-email';
+
+type PendingVerification = { requiresVerification: true };
+
 type AuthInput = { username: string; password: string };
+
+export const EMAIL_NOT_VERIFIED_CODE = 'EMAIL_NOT_VERIFIED';
 
 export type SignInData = {
   userId: number;
@@ -33,6 +44,7 @@ export type SignInData = {
   activityLevel?: string | null;
   hasPassword?: boolean;
   isNewUser?: boolean;
+  emailVerified?: boolean;
 };
 
 type AuthResult = {
@@ -52,12 +64,15 @@ type AuthResult = {
   birthDate?: Date | null;
   activityLevel?: string | null;
   hasPassword?: boolean;
+  emailVerified?: boolean;
+  email?: string;
 };
 
 interface OAuthUserParams {
   username: string;
   name: string;
   email: string;
+  emailVerified: boolean;
   provider: 'google' | 'github' | '42';
 }
 
@@ -66,7 +81,13 @@ export class AuthService {
   constructor(
     private usersService: UsersService,
     private jwtService: JwtService,
+    private readonly emailTokenService: EmailTokenService,
+    private readonly emailService: EmailService,
   ) {}
+
+  private get emailVerificationRequired(): boolean {
+    return process.env.EMAIL_VERIFICATION_REQUIRED === 'true';
+  }
 
   async validateUser(input: AuthInput): Promise<SignInData | null> {
     const user = await this.usersService.findUserByName(input.username);
@@ -81,6 +102,15 @@ export class AuthService {
     );
     if (!passwordMatches) {
       return null;
+    }
+
+    if (this.emailVerificationRequired && !user.emailVerifiedAt) {
+      throw new ForbiddenException({
+        statusCode: 403,
+        message:
+          'Veuillez confirmer votre adresse e-mail avant de vous connecter.',
+        code: EMAIL_NOT_VERIFIED_CODE,
+      });
     }
 
     return {
@@ -99,15 +129,23 @@ export class AuthService {
       birthDate: user.birthDate,
       activityLevel: user.activityLevel,
       hasPassword: true,
+      emailVerified: Boolean(user.emailVerifiedAt),
+      email: user.email,
     };
   }
 
   async findOrCreateFromOAuth(params: OAuthUserParams): Promise<SignInData> {
-    const { username, name, email, provider } = params;
+    const { username, name, email, emailVerified, provider } = params;
 
     const existingUser = await this.usersService.findUserByEmail(email);
 
     if (existingUser) {
+      if (emailVerified && !existingUser.emailVerifiedAt) {
+        await this.usersService.claimWithOAuth(
+          existingUser.id,
+          existingUser.oauthProvider ?? provider,
+        );
+      }
       return {
         userId: existingUser.id,
         username: existingUser.username,
@@ -134,6 +172,7 @@ export class AuthService {
         email,
         passwordHash: '',
         oauthProvider: provider,
+        emailVerifiedAt: emailVerified ? new Date() : undefined,
       });
 
       return {
@@ -160,7 +199,7 @@ export class AuthService {
     }
   }
 
-  async register(dto: RegisterDto): Promise<AuthResult> {
+  async register(dto: RegisterDto): Promise<AuthResult | PendingVerification> {
     const passwordHash = await bcrypt.hash(dto.password, SALT_ROUNDS);
 
     try {
@@ -171,10 +210,18 @@ export class AuthService {
         passwordHash,
       });
 
+      await this.sendVerificationEmail(user.id, dto.email);
+
+      if (this.emailVerificationRequired) {
+        return { requiresVerification: true };
+      }
+
       return this.signIn({
         userId: user.id,
         username: user.username,
+        email: dto.email,
         hasPassword: true,
+        emailVerified: false,
       });
     } catch (error) {
       if (
@@ -187,6 +234,65 @@ export class AuthService {
       }
       throw error;
     }
+  }
+
+  async sendVerificationEmail(userId: number, email: string): Promise<void> {
+    try {
+      const token = await this.emailTokenService.create(
+        userId,
+        EmailTokenType.VERIFY_EMAIL,
+      );
+      const url = new URL(VERIFY_EMAIL_PATH, process.env.FRONTEND_URL);
+      url.searchParams.set('token', token);
+
+      await this.emailService.sendVerificationEmail(email, url.toString());
+    } catch (error) {
+      console.error('Failed to send the verification email', error);
+    }
+  }
+
+  async verifyEmail(token: string): Promise<{ verified: true }> {
+    const check = await this.emailTokenService.consume(
+      token,
+      EmailTokenType.VERIFY_EMAIL,
+    );
+
+    switch (check.status) {
+      case 'valid':
+        await this.usersService.markEmailVerified(check.userId);
+        return { verified: true };
+      case 'used': {
+        const user = await this.usersService.findById(check.userId);
+        if (user?.emailVerifiedAt) {
+          return { verified: true };
+        }
+        throw new BadRequestException('Ce lien a déjà été utilisé.');
+      }
+      case 'expired':
+        throw new BadRequestException(
+          'Ce lien a expiré. Demandez-en un nouveau.',
+        );
+      case 'invalid':
+        throw new BadRequestException('Ce lien est invalide.');
+    }
+  }
+
+  async resendVerification(email: string): Promise<{ success: true }> {
+    const user = await this.usersService.findUserByEmail(email);
+
+    if (
+      user &&
+      !user.emailVerifiedAt &&
+      !(await this.emailTokenService.wasIssuedRecently(
+        user.id,
+        EmailTokenType.VERIFY_EMAIL,
+        RESEND_COOLDOWN_MS,
+      ))
+    ) {
+      void this.sendVerificationEmail(user.id, user.email);
+    }
+
+    return { success: true };
   }
 
   async signIn(user: SignInData): Promise<AuthResult> {
@@ -215,6 +321,8 @@ export class AuthService {
       birthDate: user.birthDate,
       activityLevel: user.activityLevel,
       hasPassword: user.hasPassword,
+      emailVerified: user.emailVerified,
+      email: user.email,
     };
   }
 

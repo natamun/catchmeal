@@ -14,6 +14,8 @@ export interface NavigationState {
   oauthFailed?: boolean;
   /** The activity to quote when a reply starts from the home page feed. */
   replyTo?: ActivityItem;
+  /** Address a confirmation link was sent to */
+  email?: string;
 }
 
 /** Reads location.state with a safe default: it is untyped and often empty. */

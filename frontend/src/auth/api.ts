@@ -2,6 +2,9 @@ import { JSON_HEADERS, request } from '../utils/request';
 
 const AUTH_URL = `${import.meta.env.VITE_API_URL}/auth`;
 
+/** The `code` the backend sends when an unconfirmed account tries to sign in. */
+export const EMAIL_NOT_VERIFIED = 'EMAIL_NOT_VERIFIED';
+
 /** The logged-in user, as /auth/me, login and register return it. */
 export interface AuthUser {
   userId: number;
@@ -20,6 +23,7 @@ export interface AuthUser {
   birthDate?: string | null;
   activityLevel?: string | null;
   hasPassword?: boolean;
+  emailVerified?: boolean;
 }
 
 export interface RegisterInput {
@@ -34,12 +38,23 @@ export interface LoginInput {
   password: string;
 }
 
+/** What register answers when the email must be confirmed before signing in. */
+export interface PendingVerification {
+  requiresVerification: true;
+}
+
+export function isPendingVerification(
+  result: AuthUser | PendingVerification,
+): result is PendingVerification {
+  return 'requiresVerification' in result;
+}
+
 /**
  * POST /auth/register: creates the account. The backend also sets the session
  * cookie, so the user is logged in right away.
  */
 export function register(input: RegisterInput) {
-  return request<AuthUser>(`${AUTH_URL}/register`, {
+  return request<AuthUser | PendingVerification>(`${AUTH_URL}/register`, {
     method: 'POST',
     headers: JSON_HEADERS,
     body: JSON.stringify(input),
@@ -90,5 +105,26 @@ export function completeOAuthProfile(input: CompleteOAuthProfileInput) {
     method: 'PATCH',
     headers: JSON_HEADERS,
     body: JSON.stringify(input),
+  });
+}
+
+/** POST /auth/verify-email: confirms the address with the token from the email link. */
+export function verifyEmail(token: string) {
+  return request<{ verified: boolean }>(`${AUTH_URL}/verify-email`, {
+    method: 'POST',
+    headers: JSON_HEADERS,
+    body: JSON.stringify({ token }),
+  });
+}
+
+/**
+ * POST /auth/resend-verification: asks for a new link. The backend answers the
+ * same way whether or not the address has an account.
+ */
+export function resendVerification(email: string) {
+  return request<{ success: boolean }>(`${AUTH_URL}/resend-verification`, {
+    method: 'POST',
+    headers: JSON_HEADERS,
+    body: JSON.stringify({ email }),
   });
 }

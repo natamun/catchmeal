@@ -2,7 +2,11 @@ import { useCallback, useEffect, useState, type ReactNode } from 'react';
 
 import * as authApi from './api';
 import type { AuthUser } from './api';
-import { AuthContext, type AuthStatus } from './authContext';
+import {
+  AuthContext,
+  type AuthStatus,
+  type RegisterOutcome,
+} from './authContext';
 
 /**
  * Holds the session for the whole app. It asks /auth/me once when the app
@@ -33,12 +37,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setStatus('authenticated');
   }, []);
 
-  const register = useCallback(async (input: authApi.RegisterInput) => {
-    const me = await authApi.register(input);
-    setUser(me);
-    setLoggedOut(false);
-    setStatus('authenticated');
-  }, []);
+  const register = useCallback(
+    async (input: authApi.RegisterInput): Promise<RegisterOutcome> => {
+      const me = await authApi.register(input);
+      if (authApi.isPendingVerification(me)) {
+        return 'verification-required';
+      }
+      setUser(me);
+      setLoggedOut(false);
+      setStatus('authenticated');
+      return 'signed-in';
+    },
+    [],
+  );
 
   const logout = useCallback(async () => {
     await authApi.logout();

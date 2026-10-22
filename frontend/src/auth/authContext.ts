@@ -5,6 +5,9 @@ import type { AuthUser, LoginInput, RegisterInput } from './api';
 /** 'loading' until /auth/me has answered, then whether a session exists. */
 export type AuthStatus = 'loading' | 'authenticated' | 'unauthenticated';
 
+/** Whether register signed the user in, or the email must be confirmed first. */
+export type RegisterOutcome = 'signed-in' | 'verification-required';
+
 /**
  * What useAuth() gives: the user, the session status and the actions that
  * change them.
@@ -18,7 +21,7 @@ export interface AuthContextValue {
    */
   loggedOut: boolean;
   login: (input: LoginInput) => Promise<void>;
-  register: (input: RegisterInput) => Promise<void>;
+  register: (input: RegisterInput) => Promise<RegisterOutcome>;
   logout: () => Promise<void>;
   updateUser: (partial: Partial<AuthUser>) => void;
 }

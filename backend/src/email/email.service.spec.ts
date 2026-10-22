@@ -99,4 +99,31 @@ describe('EmailService', () => {
       expect.stringContaining('535 The email limit is reached'),
     );
   });
+
+  describe('sendVerificationEmail', () => {
+    const url = 'http://localhost:5173/verify-email?token=abc123';
+
+    it('sends the confirmation link in both the html and the text version', async () => {
+      sendMail.mockResolvedValue({});
+
+      await service.sendVerificationEmail('alice@example.com', url);
+
+      const [mail] = sendMail.mock.calls[0] as [nodemailer.SendMailOptions];
+      expect(mail.to).toBe('alice@example.com');
+      expect(mail.subject).toBe('Confirmez votre adresse e-mail');
+      expect(mail.html).toContain(`href="${url}"`);
+      expect(mail.text).toContain(url);
+    });
+
+    it('logs instead of throwing when the verification email fails', async () => {
+      sendMail.mockRejectedValue(new Error('535 The email limit is reached'));
+
+      await expect(
+        service.sendVerificationEmail('alice@example.com', url),
+      ).resolves.toBeUndefined();
+      expect(logError).toHaveBeenCalledWith(
+        expect.stringContaining('535 The email limit is reached'),
+      );
+    });
+  });
 });

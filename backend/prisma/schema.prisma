@@ -39,6 +39,7 @@ model User {
   email             String        @unique
   passwordHash      String
   oauthProvider     String?
+  emailVerifiedAt   DateTime?
   avatarUrl         String?
   height            Float?
   targetWeight      Float?
@@ -63,6 +64,7 @@ model User {
   weightLogs        WeightLog[]
   goalSettings      GoalSetting[]
   activities        Activity[]
+  emailTokens       EmailToken[]
 }
 
 enum FriendStatus {
@@ -212,4 +214,20 @@ model GoalSetting {
   objective     String?
   startDate     DateTime @default(now())
   @@index([userId, startDate])
+}
+
+enum EmailTokenType {
+  VERIFY_EMAIL
+}
+
+model EmailToken {
+  id            Int       @id @default(autoincrement())
+  userId        Int
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type          EmailTokenType
+  tokenHash     String    @unique
+  expiresAt     DateTime
+  usedAt        DateTime?
+  createdAt     DateTime  @default(now())
+  @@index([userId, type])
 }

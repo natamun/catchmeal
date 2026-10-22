@@ -33,7 +33,12 @@ describe('JwtStrategy', () => {
 
     const result = await strategy.validate({ sub: 1, username: 'alice' });
 
-    expect(result).toEqual({ userId: 1, username: 'alice', hasPassword: true });
+    expect(result).toEqual({
+      userId: 1,
+      username: 'alice',
+      hasPassword: true,
+      emailVerified: false,
+    });
   });
 
   it('should report that an OAuth account has no password', async () => {
@@ -54,5 +59,18 @@ describe('JwtStrategy', () => {
     await expect(
       strategy.validate({ sub: 1, username: 'alice' }),
     ).rejects.toBeInstanceOf(UnauthorizedException);
+  });
+
+  it('should report whether the email is verified', async () => {
+    usersServiceMock.findById.mockResolvedValue({
+      id: 3,
+      username: 'carol',
+      passwordHash: 'hash',
+      emailVerifiedAt: new Date(),
+    });
+
+    const result = await strategy.validate({ sub: 3, username: 'carol' });
+
+    expect(result).toMatchObject({ userId: 3, emailVerified: true });
   });
 });
