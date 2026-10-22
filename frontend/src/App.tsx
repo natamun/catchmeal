@@ -14,6 +14,7 @@ import { AppLayout } from './components/layout/AppLayout';
 import { deleteMyAccount } from './components/profile/api';
 import { useIosVisibleViewport } from './hooks/useIosVisibleViewport';
 import { AuthPage } from './pages/AuthPage';
+import { CheckEmailPage } from './pages/CheckEmailPage';
 import { LandingPage } from './pages/LandingPage';
 import { LegalNoticePage } from './pages/LegalNoticePage';
 import { NotFoundPage } from './pages/NotFoundPage';
@@ -191,6 +192,14 @@ function AppRoutes() {
         element={
           <RequireGuest>
             <AuthPage />
+          </RequireGuest>
+        }
+      />
+      <Route
+        path={PATHS.checkEmail}
+        element={
+          <RequireGuest>
+            <CheckEmailPage />
           </RequireGuest>
         }
       />

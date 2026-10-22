@@ -11,6 +11,7 @@ export const PATHS = {
   terms: '/terms',
   welcome: '/welcome',
   verifyEmail: '/verify-email',
+  checkEmail: '/check-email',
   home: '/home',
   journalAdd: '/home/add/:mealType',
   food: '/food',
