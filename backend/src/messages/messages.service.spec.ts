@@ -13,6 +13,9 @@ describe('MessagesService', () => {
   let service: MessagesService;
 
   const prismaMock = {
+    user: {
+      findUnique: jest.fn(),
+    },
     friend: {
       findFirst: jest.fn(),
     },
@@ -64,6 +67,7 @@ describe('MessagesService', () => {
     });
 
     it('should create a message when the two users are friends', async () => {
+      prismaMock.user.findUnique.mockResolvedValue({ deletedAt: null });
       prismaMock.friend.findFirst.mockResolvedValue({
         id: 5,
         status: 'ACCEPTED',
@@ -107,6 +111,7 @@ describe('MessagesService', () => {
     });
 
     it('should reject quoting an activity that does not belong to the recipient', async () => {
+      prismaMock.user.findUnique.mockResolvedValue({ deletedAt: null });
       prismaMock.friend.findFirst.mockResolvedValue({
         id: 5,
         status: 'ACCEPTED',
@@ -126,6 +131,7 @@ describe('MessagesService', () => {
     it('should store the activity id and return the formatted quote', async () => {
       const activity = { id: 7, user: { id: 2 } };
       const feedItem = { id: 7, message: 'a enregistré un repas' };
+      prismaMock.user.findUnique.mockResolvedValue({ deletedAt: null });
       prismaMock.friend.findFirst.mockResolvedValue({
         id: 5,
         status: 'ACCEPTED',
