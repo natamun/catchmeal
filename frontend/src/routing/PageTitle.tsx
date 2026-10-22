@@ -14,6 +14,7 @@ const TITLES: Record<string, string> = {
   [PATHS.login]: 'Connexion',
   [PATHS.register]: 'Créer un compte',
   [PATHS.welcome]: 'Bienvenue',
+  [PATHS.verifyEmail]: "Confirmation de l'adresse",
   [PATHS.home]: 'Accueil',
   [PATHS.food]: 'Alimentation',
   [PATHS.stats]: 'Statistiques',

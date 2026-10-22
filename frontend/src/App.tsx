@@ -20,6 +20,7 @@ import { NotFoundPage } from './pages/NotFoundPage';
 import { OAuthOnboardingPage } from './pages/OAuthOnboardingPage';
 import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage';
 import { TermsOfServicePage } from './pages/TermsOfServicePage';
+import { VerifyEmailPage } from './pages/VerifyEmailPage';
 import { RequireAdmin, RequireAuth, RequireGuest } from './routing/guards';
 import type { NavigationState } from './routing/navigation';
 import { PageTitle } from './routing/PageTitle';
@@ -196,6 +197,7 @@ function AppRoutes() {
       <Route path={PATHS.legalNotice} element={<LegalNoticePage />} />
       <Route path={PATHS.privacy} element={<PrivacyPolicyPage />} />
       <Route path={PATHS.terms} element={<TermsOfServicePage />} />
+      <Route path={PATHS.verifyEmail} element={<VerifyEmailPage />} />
       <Route
         path={PATHS.welcome}
         element={

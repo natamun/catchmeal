@@ -10,6 +10,7 @@ export const PATHS = {
   privacy: '/privacy',
   terms: '/terms',
   welcome: '/welcome',
+  verifyEmail: '/verify-email',
   home: '/home',
   journalAdd: '/home/add/:mealType',
   food: '/food',
