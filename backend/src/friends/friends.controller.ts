@@ -11,6 +11,16 @@ import {
   Request,
   UseGuards,
 } from '@nestjs/common';
+import {
+  ApiConflictResponse,
+  ApiCookieAuth,
+  ApiCreatedResponse,
+  ApiForbiddenResponse,
+  ApiNotFoundResponse,
+  ApiOkResponse,
+  ApiTags,
+  ApiUnauthorizedResponse,
+} from '@nestjs/swagger';
 
 import { PassportJwtAuthGuard } from '../auth/guards/passport-jwt.guard';
 import { CreateFriendRequestDto } from './dto/create-friend-request.dto';
@@ -20,6 +30,10 @@ interface RequestWithUser extends Express.Request {
   user: { userId: number };
 }
 
+@ApiTags('friends')
+@ApiCookieAuth('jwt')
+@ApiUnauthorizedResponse({ description: 'Non authentifié' })
+@ApiForbiddenResponse({ description: 'Accès interdit' })
 @Controller('users/:userId')
 @UseGuards(PassportJwtAuthGuard)
 export class FriendsController {
@@ -29,6 +43,8 @@ export class FriendsController {
     if (paramUserId !== jwtUserId) throw new ForbiddenException();
   }
 
+  @ApiCreatedResponse({ description: 'Demande envoyée' })
+  @ApiConflictResponse({ description: 'Demande déjà existante' })
   @Post('friends')
   sendRequest(
     @Param('userId', ParseIntPipe) userId: number,
@@ -39,6 +55,7 @@ export class FriendsController {
     return this.friendsService.sendRequest(userId, dto.friendId);
   }
 
+  @ApiOkResponse({ description: 'Liste des amis' })
   @Get('friends')
   listFriends(
     @Param('userId', ParseIntPipe) userId: number,
@@ -48,6 +65,7 @@ export class FriendsController {
     return this.friendsService.listFriends(userId);
   }
 
+  @ApiOkResponse({ description: 'Demandes reçues en attente' })
   @Get('friends/pending')
   listPending(
     @Param('userId', ParseIntPipe) userId: number,
@@ -57,6 +75,7 @@ export class FriendsController {
     return this.friendsService.listPendingReceived(userId);
   }
 
+  @ApiOkResponse({ description: 'Demandes envoyées en attente' })
   @Get('friends/sent')
   listSent(
     @Param('userId', ParseIntPipe) userId: number,
@@ -66,6 +85,8 @@ export class FriendsController {
     return this.friendsService.listPendingSent(userId);
   }
 
+  @ApiOkResponse({ description: 'Demande acceptée' })
+  @ApiNotFoundResponse({ description: 'Demande introuvable' })
   @Patch('friends/:id/accept')
   accept(
     @Param('userId', ParseIntPipe) userId: number,
@@ -76,6 +97,8 @@ export class FriendsController {
     return this.friendsService.acceptRequest(userId, id);
   }
 
+  @ApiOkResponse({ description: 'Ami supprimé ou demande refusée' })
+  @ApiNotFoundResponse({ description: 'Relation introuvable' })
   @Delete('friends/:id')
   remove(
     @Param('userId', ParseIntPipe) userId: number,

@@ -8,6 +8,15 @@ import {
   Request,
   UseGuards,
 } from '@nestjs/common';
+import {
+  ApiBadRequestResponse,
+  ApiCookieAuth,
+  ApiCreatedResponse,
+  ApiForbiddenResponse,
+  ApiTags,
+  ApiTooManyRequestsResponse,
+  ApiUnauthorizedResponse,
+} from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 
 import { PassportJwtAuthGuard } from '../auth/guards/passport-jwt.guard';
@@ -18,11 +27,18 @@ interface RequestWithUser extends Express.Request {
   user: { userId: number; username: string };
 }
 
+@ApiTags('ai')
+@ApiCookieAuth('jwt')
+@ApiUnauthorizedResponse({ description: 'Non authentifié' })
 @Controller('users/:userId')
 @UseGuards(PassportJwtAuthGuard)
 export class AiController {
   constructor(private aiService: AiService) {}
 
+  @ApiCreatedResponse({ description: "Réponse de l'assistant" })
+  @ApiBadRequestResponse({ description: 'Requête invalide' })
+  @ApiForbiddenResponse({ description: 'Accès interdit' })
+  @ApiTooManyRequestsResponse({ description: 'Trop de requêtes' })
   @Throttle({ default: { limit: 10, ttl: 60_000 } })
   @Post('chat')
   chat(

@@ -7,10 +7,18 @@ import {
   Request,
   UseGuards,
 } from '@nestjs/common';
+import {
+  ApiCookieAuth,
+  ApiTags,
+  ApiUnauthorizedResponse,
+} from '@nestjs/swagger';
 
 import { PassportJwtAuthGuard } from '../auth/guards/passport-jwt.guard';
 import { OpenFoodFactsService } from './open-food-facts.service';
 
+@ApiTags('open-food-facts')
+@ApiCookieAuth('jwt')
+@ApiUnauthorizedResponse({ description: 'Non authentifié' })
 @UseGuards(PassportJwtAuthGuard)
 @Controller('users/:userId')
 export class OpenFoodFactsController {

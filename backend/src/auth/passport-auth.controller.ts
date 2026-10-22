@@ -13,9 +13,14 @@ import {
 import { AuthGuard } from '@nestjs/passport';
 import {
   ApiBadRequestResponse,
+  ApiConflictResponse,
+  ApiCookieAuth,
+  ApiCreatedResponse,
+  ApiForbiddenResponse,
   ApiOkResponse,
   ApiTags,
   ApiTooManyRequestsResponse,
+  ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 import type { Request as ExpressRequest, Response } from 'express';
@@ -83,6 +88,10 @@ export class PassportAuthController {
     private usersService: UsersService,
   ) {}
 
+  @ApiCreatedResponse({ description: 'Inscription réussie' })
+  @ApiBadRequestResponse({ description: 'Données invalides' })
+  @ApiConflictResponse({ description: "Nom d'utilisateur ou email déjà pris" })
+  @ApiTooManyRequestsResponse({ description: 'Trop de requêtes' })
   @Throttle({ default: { limit: 5, ttl: 3_600_000 } })
   @Post('register')
   async register(
@@ -95,6 +104,10 @@ export class PassportAuthController {
     return toUserResponse(result);
   }
 
+  @ApiOkResponse({ description: 'Email vérifié' })
+  @ApiBadRequestResponse({
+    description: 'Token invalide, expiré ou déjà utilisé',
+  })
   @Throttle({ default: { limit: 10, ttl: 60_000 } })
   @HttpCode(HttpStatus.OK)
   @Post('verify-email')
@@ -102,6 +115,8 @@ export class PassportAuthController {
     return this.authService.verifyEmail(dto.token);
   }
 
+  @ApiOkResponse({ description: 'Email de vérification renvoyé' })
+  @ApiBadRequestResponse({ description: 'Email invalide' })
   @Throttle({ default: { limit: 5, ttl: 3_600_000 } })
   @HttpCode(HttpStatus.OK)
   @Post('resend-verification')
@@ -122,10 +137,9 @@ export class PassportAuthController {
     return this.authService.forgotPassword(dto.email);
   }
 
-  @ApiOkResponse({ description: 'Mot de passe modifié' })
+  @ApiOkResponse({ description: 'Mot de passe réinitialisé' })
   @ApiBadRequestResponse({
-    description:
-      'Mot de passe invalide, ou lien invalide, expiré ou déjà utilisé',
+    description: 'Lien invalide, expiré ou déjà utilisé',
   })
   @ApiTooManyRequestsResponse({ description: 'Trop de requêtes' })
   @Throttle({ default: { limit: 10, ttl: 60_000 } })
@@ -135,6 +149,11 @@ export class PassportAuthController {
     return this.authService.resetPassword(dto.token, dto.newPassword);
   }
 
+  @ApiOkResponse({ description: 'Connexion réussie' })
+  @ApiBadRequestResponse({ description: 'Données invalides' })
+  @ApiUnauthorizedResponse({ description: 'Identifiants invalides' })
+  @ApiForbiddenResponse({ description: 'Email non vérifié' })
+  @ApiTooManyRequestsResponse({ description: 'Trop de requêtes' })
   @Throttle({
     short: { limit: 5, ttl: 60_000 },
     long: { limit: 20, ttl: 3_600_000 },
@@ -151,6 +170,7 @@ export class PassportAuthController {
     return toUserResponse(result);
   }
 
+  @ApiOkResponse({ description: 'Déconnexion réussie' })
   @Post('logout')
   @HttpCode(HttpStatus.OK)
   logout(@Res({ passthrough: true }) res: Response) {
@@ -158,12 +178,17 @@ export class PassportAuthController {
     return { success: true };
   }
 
+  @ApiCookieAuth('jwt')
+  @ApiOkResponse({ description: 'Utilisateur courant ou null' })
   @Get('me')
   @UseGuards(OptionalJwtAuthGuard)
   getUserInfo(@Request() request: RequestWithOptionalUser) {
     return { user: request.user ? toUserResponse(request.user) : null };
   }
 
+  @ApiCookieAuth('jwt')
+  @ApiOkResponse({ description: 'Profil OAuth complété' })
+  @ApiUnauthorizedResponse({ description: 'Non authentifié' })
   @Patch('complete-profile')
   @UseGuards(PassportJwtAuthGuard)
   completeOAuthProfile(
@@ -239,6 +264,13 @@ export class PassportAuthController {
     }
   }
 
+  @ApiCookieAuth('jwt')
+  @ApiOkResponse({ description: 'Mot de passe modifié' })
+  @ApiBadRequestResponse({
+    description: 'Mot de passe actuel incorrect ou identique',
+  })
+  @ApiUnauthorizedResponse({ description: 'Non authentifié' })
+  @ApiTooManyRequestsResponse({ description: 'Trop de requêtes' })
   @Throttle({ default: { limit: 5, ttl: 900_000 } })
   @Patch('password')
   @UseGuards(PassportJwtAuthGuard)
