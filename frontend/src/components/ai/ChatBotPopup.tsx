@@ -110,7 +110,11 @@ export function ChatBotPopup({
           aria-label="Assistant CatCHMeal"
           className="relative flex h-128 max-h-[calc(100dvh-var(--spacing-header)-4rem-env(safe-area-inset-bottom))] w-[min(24rem,calc(100vw-3rem))] animate-fade-in-up flex-col overflow-hidden rounded-2xl border border-green-200 bg-white shadow-lg pointer-coarse:max-h-[calc(100dvh-var(--spacing-bottom-nav)-4rem-env(safe-area-inset-bottom))] ios-typing:h-[calc(var(--visible-height)-2rem)] ios-typing:max-h-none"
         >
-          {disclaimer && <DisclaimerPopup setDisclaimer={setDisclaimer} />}
+          {disclaimer && (
+            <div className="absolute inset-0 z-10 flex items-center bg-black/30 p-4 backdrop-blur-sm">
+              <DisclaimerPopup setDisclaimer={setDisclaimer} />
+            </div>
+          )}
           <div className="flex items-center justify-between px-4 pt-4 pb-3">
             <h2 className="text-lg font-bold text-green-800">
               Assistant CatCHMeal
