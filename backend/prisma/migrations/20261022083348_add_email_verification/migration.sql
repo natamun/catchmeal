@@ -28,3 +28,6 @@ ALTER TABLE "EmailToken" ADD CONSTRAINT "EmailToken_userId_fkey" FOREIGN KEY ("u
 
 -- Existing accounts count as verified
 UPDATE "User" SET "emailVerifiedAt" = "createAt";
+
+-- Same protection as the other public tables
+ALTER TABLE "EmailToken" ENABLE ROW LEVEL SECURITY;
