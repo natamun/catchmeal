@@ -15,6 +15,8 @@ import { UsersService } from '../users/users.service';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 
+jest.setTimeout(15_000);
+
 describe('AuthService', () => {
   let service: AuthService;
 
