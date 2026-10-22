@@ -8,26 +8,33 @@ export const JSON_HEADERS = { 'Content-Type': 'application/json' };
  */
 export class ApiError extends Error {
   readonly status: number;
+  readonly code?: string;
 
-  constructor(message: string, status: number) {
+  constructor(message: string, status: number, code?: string) {
     super(message);
     this.name = 'ApiError';
     this.status = status;
+    this.code = code;
   }
 }
 
 /**
- * Reads the NestJS error body. Its `message` is a string, or a list of strings
+ * Reads the NestJS error body and builds the ApiError. Its `message` is a string, or a list of strings
  * when several validation rules failed.
  */
-async function parseErrorMessage(response: Response): Promise<string> {
+async function parseError(response: Response): Promise<ApiError> {
   const body = (await response.json().catch(() => null)) as {
     message?: string | string[];
+    code?: string;
   } | null;
   const message = body?.message;
-  return Array.isArray(message)
-    ? message.join(', ')
-    : (message ?? `HTTP ${response.status}`);
+  return new ApiError(
+    Array.isArray(message)
+      ? message.join(', ')
+      : (message ?? `HTTP ${response.status}`),
+    response.status,
+    body?.code,
+  );
 }
 
 /**
@@ -43,7 +50,7 @@ export async function request<T>(url: string, init?: RequestInit): Promise<T> {
   }
   const response = await fetch(url, { ...init, credentials: 'include' });
   if (!response.ok) {
-    throw new ApiError(await parseErrorMessage(response), response.status);
+    throw await parseError(response);
   }
   return (await response.json()) as T;
 }
