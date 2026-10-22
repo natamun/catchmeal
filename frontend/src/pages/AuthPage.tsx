@@ -298,6 +298,14 @@ export function AuthPage() {
                   id="auth-password-error"
                   message={errorMessage('password')}
                 />
+                {mode === 'login' && (
+                  <Link
+                    to={PATHS.forgotPassword}
+                    className="self-end text-xs font-medium text-green-700 transition-colors hover:text-green-500"
+                  >
+                    Mot de passe oublié ?
+                  </Link>
+                )}
               </div>
 
               {error && <p className="text-sm text-red-500">{error}</p>}

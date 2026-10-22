@@ -128,3 +128,24 @@ export function resendVerification(email: string) {
     body: JSON.stringify({ email }),
   });
 }
+
+/**
+ * POST /auth/forgot-password: asks for a reset link. The backend answers the
+ * same way whether or not the address has an account.
+ */
+export function forgotPassword(email: string) {
+  return request<{ success: boolean }>(`${AUTH_URL}/forgot-password`, {
+    method: 'POST',
+    headers: JSON_HEADERS,
+    body: JSON.stringify({ email }),
+  });
+}
+
+/** POST /auth/reset-password: sets a new password with the token from the email link. */
+export function resetPassword(token: string, newPassword: string) {
+  return request<{ success: boolean }>(`${AUTH_URL}/reset-password`, {
+    method: 'POST',
+    headers: JSON_HEADERS,
+    body: JSON.stringify({ token, newPassword }),
+  });
+}
