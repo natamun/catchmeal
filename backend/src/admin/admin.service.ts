@@ -13,63 +13,70 @@ export class AdminService {
   ) {}
 
   async getUsers() {
-    const users = await this.prisma.user.findMany({
-      select: {
-        id: true,
-        username: true,
-        name: true,
-        email: true,
-        role: true,
-        avatarUrl: true,
-        createAt: true,
-        deletedAt: true,
-        passwordHash: true,
-        oauthProvider: true,
-        _count: {
-          select: {
-            userFriend: { where: { status: 'ACCEPTED' } },
+    const [users, hashFlags] = await Promise.all([
+      this.prisma.user.findMany({
+        select: {
+          id: true,
+          username: true,
+          name: true,
+          email: true,
+          role: true,
+          avatarUrl: true,
+          createAt: true,
+          deletedAt: true,
+          oauthProvider: true,
+          _count: {
+            select: {
+              userFriend: { where: { status: 'ACCEPTED' } },
+            },
           },
         },
-      },
-      orderBy: { createAt: 'desc' },
-    });
-    return users.map((u) => {
-      const { passwordHash, ...rest } = u;
-      return {
-        ...rest,
-        hasPassword: passwordHash !== '',
-        onlineStatus: this.presenceService.isOnline(u.id),
-      };
-    });
+        orderBy: { createAt: 'desc' },
+      }),
+      this.prisma.$queryRaw<
+        { id: number; hasPassword: boolean }[]
+      >`SELECT id, "passwordHash" <> '' AS "hasPassword" FROM "User"`,
+    ]);
+    const hasPasswordById = new Map(
+      hashFlags.map((f) => [f.id, f.hasPassword]),
+    );
+    return users.map((u) => ({
+      ...u,
+      hasPassword: hasPasswordById.get(u.id) ?? false,
+      onlineStatus: this.presenceService.isOnline(u.id),
+    }));
   }
 
   async getUserById(userId: number) {
-    const user = await this.prisma.user.findUnique({
-      where: { id: userId },
-      select: {
-        id: true,
-        username: true,
-        name: true,
-        email: true,
-        role: true,
-        avatarUrl: true,
-        createAt: true,
-        deletedAt: true,
-        lastSeenAt: true,
-        passwordHash: true,
-        oauthProvider: true,
-        _count: {
-          select: {
-            userFriend: { where: { status: 'ACCEPTED' } },
+    const [user, hashFlag] = await Promise.all([
+      this.prisma.user.findUnique({
+        where: { id: userId },
+        select: {
+          id: true,
+          username: true,
+          name: true,
+          email: true,
+          role: true,
+          avatarUrl: true,
+          createAt: true,
+          deletedAt: true,
+          lastSeenAt: true,
+          oauthProvider: true,
+          _count: {
+            select: {
+              userFriend: { where: { status: 'ACCEPTED' } },
+            },
           },
         },
-      },
-    });
+      }),
+      this.prisma.$queryRaw<
+        { hasPassword: boolean }[]
+      >`SELECT "passwordHash" <> '' AS "hasPassword" FROM "User" WHERE id = ${userId}`,
+    ]);
     if (!user) return null;
-    const { passwordHash, ...rest } = user;
     return {
-      ...rest,
-      hasPassword: passwordHash !== '',
+      ...user,
+      hasPassword: hashFlag[0]?.hasPassword ?? false,
       onlineStatus: this.presenceService.isOnline(userId),
     };
   }
