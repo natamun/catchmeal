@@ -1,6 +1,7 @@
 import { ConflictException, Injectable } from '@nestjs/common';
 
 import { Prisma } from '../generated/prisma/client';
+import { GdprService } from '../gdpr/gdpr.service';
 import { PresenceService } from '../presence/presence.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { UpdateAdminUserDto } from './dto/update-admin-user.dto';
@@ -10,6 +11,7 @@ export class AdminService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly presenceService: PresenceService,
+    private readonly gdprService: GdprService,
   ) {}
 
   async getUsers() {
@@ -92,11 +94,8 @@ export class AdminService {
   }
 
   async deleteUser(userId: number) {
-    return this.prisma.user.update({
-      where: { id: userId },
-      data: { deletedAt: new Date() },
-      select: { id: true, username: true, deletedAt: true },
-    });
+    // Same full erasure as self-deletion, but without the confirmation email
+    return this.gdprService.deleteAccount(userId, false);
   }
 
   async updateUser(userId: number, dto: UpdateAdminUserDto) {
