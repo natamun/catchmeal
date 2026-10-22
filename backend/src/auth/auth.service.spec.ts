@@ -363,7 +363,11 @@ describe('AuthService', () => {
 
     it('should store a new hash and return success when the current password matches', async () => {
       const passwordHash = await bcrypt.hash(currentPassword, 10);
-      usersServiceMock.findById.mockResolvedValue({ id: 1, passwordHash });
+      usersServiceMock.findById.mockResolvedValue({
+        id: 1,
+        email: 'alice@example.com',
+        passwordHash,
+      });
       usersServiceMock.updatePasswordHash.mockResolvedValue({ id: 1 });
 
       const result = await service.changePassword(
@@ -383,6 +387,24 @@ describe('AuthService', () => {
       expect(userId).toBe(1);
       expect(newHash).not.toBe(newPassword);
       expect(await bcrypt.compare(newPassword, newHash)).toBe(true);
+      expect(emailServiceMock.sendPasswordChangedEmail).toHaveBeenCalledWith(
+        'alice@example.com',
+      );
+    });
+
+    it('should not send the notification when the current password is wrong', async () => {
+      const passwordHash = await bcrypt.hash('ancienmotdepasse', 10);
+      usersServiceMock.findById.mockResolvedValue({
+        id: 1,
+        email: 'alice@example.com',
+        passwordHash,
+      });
+
+      await expect(
+        service.changePassword(1, 'mauvaismotdepasse', 'nouveaumotdepasse'),
+      ).rejects.toBeInstanceOf(BadRequestException);
+
+      expect(emailServiceMock.sendPasswordChangedEmail).not.toHaveBeenCalled();
     });
 
     it('should throw a BadRequestException and keep the hash when the current password is wrong', async () => {

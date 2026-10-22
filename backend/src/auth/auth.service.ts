@@ -432,6 +432,7 @@ export class AuthService {
 
     const passwordHash = await bcrypt.hash(newPassword, SALT_ROUNDS);
     await this.usersService.updatePasswordHash(userId, passwordHash);
+    await this.emailService.sendPasswordChangedEmail(user.email);
 
     return { success: true };
   }
