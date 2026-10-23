@@ -312,7 +312,6 @@ make migrate name=<migration_name>
 make logs-backend     # Stream backend logs
 make logs-frontend    # Stream frontend logs
 make shell-backend    # Open a shell in the backend container
-make prisma-studio    # Open Prisma Studio at http://localhost:5555
 make test             # Run backend unit tests
 make check            # Run format check, lint, build, and all tests
 make clean            # Stop all containers

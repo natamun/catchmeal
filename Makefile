@@ -96,12 +96,9 @@ shellBackend:
 shellFrontend:
 	$(DEV) exec frontend sh
 
-prismaStudio:
-	$(DEV) exec backend npx prisma studio --port 5555 --browser none
-
 .PHONY: all dev prod prodDown prodLogs deploy clean fclean re \
 	logsBackend logsFrontend restartBackend restartFrontend \
 	prodRestartBackend prodRestartFrontend prodRestartCaddy prodReloadCaddy \
 	prodDeployBackend prodDeployFrontend restart prodRestart prodLogsService \
 	format formatCheck lint lintCheck build test testVerbose check \
-	migrate shellBackend shellFrontend prismaStudio
+	migrate shellBackend shellFrontend
