@@ -1,10 +1,9 @@
 {
   "name": "backend",
   "version": "0.0.1",
-  "description": "",
-  "author": "",
+  "description": "CatCHMeal REST API and WebSocket server",
   "private": true,
-  "license": "UNLICENSED",
+  "license": "MIT",
   "scripts": {
     "postinstall": "prisma generate",
     "build": "nest build",
@@ -52,12 +51,10 @@
     "passport-oauth2": "^1.8.0",
     "pg": "^8.22.0",
     "reflect-metadata": "^0.2.2",
-    "resend": "^6.24.0",
     "rxjs": "^7.8.1",
     "socket.io": "^4.8.4"
   },
   "devDependencies": {
-    "@eslint/eslintrc": "^3.2.0",
     "@eslint/js": "^9.18.0",
     "@ianvs/prettier-plugin-sort-imports": "^4.7.1",
     "@nestjs/cli": "^11.0.0",
