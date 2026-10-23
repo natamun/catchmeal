@@ -92,11 +92,12 @@ export function ChatWindow({
   };
 
   const isDeleted = Boolean(friend.deletedAt);
+  const friendDisplayName = isDeleted ? 'Utilisateur supprimé' : friend.name;
 
   return (
     <BaseDialog
       dialogRef={dialogRef}
-      title={isDeleted ? 'Utilisateur supprimé' : friend.name}
+      title={friendDisplayName}
       onClose={onClose}
     >
       <div className="relative -mb-4 flex h-120 flex-col sm:-mb-6 ios-typing:h-[min(--spacing(120),calc(var(--visible-height)-6rem))]">
@@ -124,7 +125,7 @@ export function ChatWindow({
               className={`flex ${m.senderId === userId ? 'justify-end' : ''}`}
             >
               <div
-                aria-label={m.senderId === userId ? 'Vous' : friend.name}
+                aria-label={m.senderId === userId ? 'Vous' : friendDisplayName}
                 className={`max-w-[75%] rounded-2xl px-3 py-2 text-sm wrap-break-word ${
                   m.senderId === userId
                     ? 'rounded-br-sm bg-green-500 text-white'
@@ -168,7 +169,7 @@ export function ChatWindow({
         )}
 
         {isDeleted ? (
-          <p className="shrink-0 border-t border-green-100 p-4 text-center text-sm text-gray-400 italic">
+          <p className="shrink-0 border-t border-green-100 p-4 text-center text-sm text-gray-500 italic">
             Ce compte a été supprimé.
           </p>
         ) : (
