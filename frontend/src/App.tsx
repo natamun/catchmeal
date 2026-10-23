@@ -25,7 +25,7 @@ import { ResetPasswordPage } from './pages/ResetPasswordPage';
 import { TermsOfServicePage } from './pages/TermsOfServicePage';
 import { VerifyEmailPage } from './pages/VerifyEmailPage';
 import { RequireAdmin, RequireAuth, RequireGuest } from './routing/guards';
-import type { NavigationState } from './routing/navigation';
+import type { NavigationState, OAuthError } from './routing/navigation';
 import { PageTitle } from './routing/PageTitle';
 import { PATHS } from './routing/paths';
 import { ScrollToTop } from './routing/ScrollToTop';
@@ -37,6 +37,11 @@ import { SocketProvider } from './socket/SocketProvider';
  */
 const SESSION_HINT_KEY = 'session-hint';
 const PRELOAD_DELAY_MS = 1000;
+
+const OAUTH_ERRORS: Record<string, OAuthError> = {
+  oauth_failed: 'failed',
+  oauth_unverified_email: 'unverified-email',
+};
 
 /**
  * The pages behind the login live in their own files and are loaded on demand
@@ -96,8 +101,9 @@ function LandingRoute() {
   const { status } = useAuth();
   const [params] = useSearchParams();
 
-  if (params.get('error') === 'oauth_failed') {
-    const state: NavigationState = { oauthFailed: true };
+  const oauthError = OAUTH_ERRORS[params.get('error') ?? ''];
+  if (oauthError) {
+    const state: NavigationState = { oauthError };
 
     return <Navigate to={PATHS.login} replace state={state} />;
   }

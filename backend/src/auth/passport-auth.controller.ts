@@ -8,6 +8,7 @@ import {
   Post,
   Request,
   Res,
+  UseFilters,
   UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
@@ -34,9 +35,11 @@ import { RegisterDto } from './dto/register.dto';
 import { ResendVerificationDto } from './dto/resend-verification.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { VerifyEmailDto } from './dto/verify-email.dto';
+import { safeRedirectUrl } from './frontend-redirect';
 import { OptionalJwtAuthGuard } from './guards/optional-jwt.guard';
 import { PassportJwtAuthGuard } from './guards/passport-jwt.guard';
 import { PassportLocalGuard } from './guards/passport-local.guard';
+import { OAuthEmailNotVerifiedFilter } from './oauth-email-not-verified';
 
 type RequestWithUser = ExpressRequest & { user: SignInData };
 type RequestWithOptionalUser = ExpressRequest & { user: SignInData | null };
@@ -67,18 +70,6 @@ function toUserResponse(data: SignInData): UserResponse {
 
 const COOKIE_NAME = 'access_token';
 const COOKIE_MAX_AGE_MS = 24 * 60 * 60 * 1000;
-
-const ALLOWED_FRONTEND_URL =
-  process.env.FRONTEND_URL ?? 'http://localhost:5173';
-
-function safeRedirectUrl(path: string = ''): string {
-  try {
-    const base = new URL(ALLOWED_FRONTEND_URL);
-    return `${base.origin}${path}`;
-  } catch {
-    return `http://localhost:5173${path}`;
-  }
-}
 
 @ApiTags('auth')
 @Controller('auth')
@@ -204,6 +195,7 @@ export class PassportAuthController {
 
   @Get('google/callback')
   @Throttle({ default: { limit: 5, ttl: 3_600_000 } })
+  @UseFilters(OAuthEmailNotVerifiedFilter)
   @UseGuards(AuthGuard('google'))
   async googleCallback(
     @Request() request: RequestWithUser,
@@ -226,6 +218,7 @@ export class PassportAuthController {
 
   @Get('github/callback')
   @Throttle({ default: { limit: 5, ttl: 3_600_000 } })
+  @UseFilters(OAuthEmailNotVerifiedFilter)
   @UseGuards(AuthGuard('github'))
   async githubCallback(
     @Request() request: RequestWithUser,
@@ -248,6 +241,7 @@ export class PassportAuthController {
 
   @Get('42/callback')
   @Throttle({ default: { limit: 5, ttl: 3_600_000 } })
+  @UseFilters(OAuthEmailNotVerifiedFilter)
   @UseGuards(AuthGuard('42'))
   async fortyTwoCallback(
     @Request() request: RequestWithUser,

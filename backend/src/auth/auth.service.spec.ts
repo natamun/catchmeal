@@ -14,6 +14,7 @@ import { EmailTokenType, Prisma } from '../generated/prisma/client';
 import { UsersService } from '../users/users.service';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
+import { OAuthEmailNotVerifiedException } from './oauth-email-not-verified';
 
 jest.setTimeout(15_000);
 
@@ -800,7 +801,7 @@ describe('AuthService', () => {
       expect(usersServiceMock.claimWithOAuth).not.toHaveBeenCalled();
     });
 
-    it('should not claim an unverified account when the provider did not verify the email', async () => {
+    it('should refuse to link an existing account when the provider did not verify the email', async () => {
       usersServiceMock.findUserByEmail.mockResolvedValue({
         id: 7,
         username: 'alice',
@@ -808,9 +809,44 @@ describe('AuthService', () => {
         emailVerifiedAt: null,
       });
 
-      await service.findOrCreateFromOAuth({ ...params, emailVerified: false });
+      await expect(
+        service.findOrCreateFromOAuth({ ...params, emailVerified: false }),
+      ).rejects.toBeInstanceOf(OAuthEmailNotVerifiedException);
 
       expect(usersServiceMock.claimWithOAuth).not.toHaveBeenCalled();
+    });
+
+    it('should still sign in an account known by a made-up address', async () => {
+      usersServiceMock.findUserByEmail.mockResolvedValue({
+        id: 7,
+        username: 'github_42',
+        email: 'github_42@noemail.invalid',
+        emailVerifiedAt: null,
+      });
+
+      const result = await service.findOrCreateFromOAuth({
+        ...params,
+        email: 'github_42@noemail.invalid',
+        emailVerified: false,
+      });
+
+      expect(result).toMatchObject({ userId: 7, isNewUser: false });
+    });
+
+    it('should refuse the account found after a concurrent creation when the email is not verified', async () => {
+      usersServiceMock.findUserByEmail
+        .mockResolvedValueOnce(null)
+        .mockResolvedValueOnce({ id: 7, username: 'alice' });
+      usersServiceMock.create.mockRejectedValue(
+        new Prisma.PrismaClientKnownRequestError('Unique constraint failed', {
+          code: 'P2002',
+          clientVersion: '7.9.1',
+        }),
+      );
+
+      await expect(
+        service.findOrCreateFromOAuth({ ...params, emailVerified: false }),
+      ).rejects.toBeInstanceOf(OAuthEmailNotVerifiedException);
     });
   });
 });
