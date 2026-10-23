@@ -3,7 +3,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](./LICENSE)
 ![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=white)
 ![NestJS](https://img.shields.io/badge/NestJS-11-E0234E?logo=nestjs&logoColor=white)
-![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-5%20%7C%206-3178C6?logo=typescript&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Supabase-4169E1?logo=postgresql&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)
 
@@ -40,7 +40,7 @@ The project combines a React frontend with client-side routing, a NestJS backend
 - Friend system with real-time presence, activity feed, and WebSocket-based chat.
 - Mistral AI assistant with access to the user's meals, goals, and weight history.
 - Admin board for user management (view, edit role, delete).
-- GDPR-compliant data export (JSON), account deletion with anonymization, and legal pages.
+- GDPR-compliant data export (HTML or JSON), account deletion with anonymization, and legal pages.
 - Accessibility: ARIA roles, labels, focus management, and keyboard navigation.
 
 ## Screenshots
@@ -48,7 +48,7 @@ The project combines a React frontend with client-side routing, a NestJS backend
 The home dashboard is your daily hub — log meals, monitor your calorie and macro progress, and stay connected with your friends' activity.
 
 <p align="center">
-  <img src="./docs/acceuil.png" alt="CatCHMeal accueil" height="400" />
+  <img src="./docs/accueil.png" alt="CatCHMeal accueil" height="400" />
   <br/><em>Macro rings update in real time as you add food items to your meals.</em>
 </p>
 
@@ -103,8 +103,8 @@ The statistics page turns your logs into insights — visualize trends across an
 
 ### Infrastructure
 - **Docker + Docker Compose** — containerized dev and prod environments
-- **Nginx** — static file serving and reverse proxy in production
-- **Caddy** — TLS termination in production
+- **Nginx** — serves the built frontend in production
+- **Caddy** — HTTPS (TLS termination) and reverse proxy to the frontend and backend in production
 - **GitHub Actions** — CI/CD pipeline
 
 ## Database Schema
@@ -198,7 +198,7 @@ erDiagram
     Activity ||--o{ Message : "quoted in"
 ```
 
-`FoodItem` is the cornerstone of the entire data model. It stores the nutritional values (kcal, protein, carbs, fat) for a given base quantity and unit (gram, milliliter, or piece). Every logged meal entry (`MealFoodItem`) references a `FoodItem` and records the actual quantity consumed — macros are then scaled proportionally at query time. Without a `FoodItem`, nothing can be logged. A `FoodItem` belongs to a user and can be created manually, filled from a barcode scan via Open Food Facts, or archived when no longer needed. This design keeps nutritional data centralized and reusable across multiple meals and days.
+`FoodItem` is the cornerstone of the data model. It stores the nutritional values (kcal, protein, carbs, fat) for a base quantity and unit (gram, milliliter, or piece). When a food is logged, the `MealFoodItem` line records the quantity eaten along with the kcal and macros scaled to that quantity, computed once at logging time. Editing or archiving a `FoodItem` later therefore leaves past meals unchanged. A quick add logs calories and macros directly, without a `FoodItem` (its `foodItemId` is `null`). A `FoodItem` belongs to a user and can be created manually, filled from a barcode scan via Open Food Facts, or archived when no longer needed. This keeps nutritional data reusable across meals and days.
 
 ## Features
 
@@ -209,7 +209,7 @@ erDiagram
 | User profile | Edit name, username, height, weight, gender, birth date, activity level, goals |
 | Avatar upload/delete | Upload and remove profile picture stored on Supabase Storage |
 | Body composition tracking | Log and track body fat, muscle mass, fat-free mass, body water per weigh-in |
-| Weight history | Full immutable weigh-in history with edit and delete |
+| Weight history | Full weigh-in history, with edit and delete |
 | Calorie & macro goals | Set daily calorie, protein, carbs, fat targets with BMR/TDEE recommendations |
 | Food item CRUD | Create, edit, archive, and search personal food items |
 | Barcode scanner | Scan a barcode with the camera to look up a product on Open Food Facts |
@@ -225,7 +225,7 @@ erDiagram
 | Real-time chat | WebSocket-based chat with friends, with activity quoting |
 | AI assistant | Mistral-powered chatbot with access to user data (meals, goals, weight, analytics) |
 | Admin board | Admin-only user management panel (view, edit role, delete users) |
-| GDPR | Data export (JSON), account deletion with anonymization, legal pages |
+| GDPR | Data export (HTML or JSON), account deletion with anonymization, legal pages |
 | Accessibility | ARIA roles, labels, focus management, keyboard navigation |
 
 ## Instructions
@@ -236,7 +236,7 @@ erDiagram
 - Make
 - A Supabase project (for the database and avatar storage)
 - A Mailtrap account (for transactional emails in dev)
-- OAuth app credentials for Google and/or GitHub (optional)
+- OAuth app credentials for 42, Google and GitHub (required: the backend does not start without them)
 - A Mistral API key and agent ID (for the AI assistant)
 
 ### Environment setup
@@ -257,15 +257,20 @@ Key variables to set in `backend/.env`:
 
 | Variable | Description |
 |---|---|
+| `FRONTEND_URL` | Frontend URL, used for CORS, OAuth redirects and email links |
 | `DATABASE_URL` | PostgreSQL connection string from Supabase |
 | `JWT_SECRET` | Random secret string for signing JWT tokens |
 | `SUPABASE_URL` | Your Supabase project URL |
 | `SUPABASE_SERVICE_ROLE_KEY` | Supabase service role key (for Storage) |
-| `MAILTRAP_HOST/PORT/USER/PASS` | Mailtrap SMTP credentials |
-| `GOOGLE_CLIENT_ID/SECRET` | Google OAuth app credentials (optional) |
-| `GITHUB_CLIENT_ID/SECRET` | GitHub OAuth app credentials (optional) |
+| `EMAIL_FROM` | Sender address of the emails |
+| `MAILTRAP_HOST/PORT/USER/PASS` | SMTP credentials (Mailtrap in dev) |
+| `EMAIL_VERIFICATION_REQUIRED` | `true` to block sign-in until the email address is confirmed |
+| `FORTY_TWO_CLIENT_ID/SECRET/CALLBACK_URL` | 42 OAuth app credentials |
+| `GOOGLE_CLIENT_ID/SECRET/CALLBACK_URL` | Google OAuth app credentials |
+| `GITHUB_CLIENT_ID/SECRET/CALLBACK_URL` | GitHub OAuth app credentials |
 | `MISTRAL_API_KEY` | Mistral API key |
 | `MISTRAL_AGENT_ID` | Mistral agent ID |
+| `OFF_USER_AGENT` | User-Agent sent to Open Food Facts, which asks apps to identify themselves |
 
 3. Copy the frontend `.env.example` to `frontend/.env`:
 
@@ -296,7 +301,7 @@ The backend exposes a Swagger UI in development mode. Once `make dev` is running
 http://localhost:3000/api/docs
 ```
 
-It lists every REST endpoint with its parameters, request body, and response schema. To test authenticated routes, log in through the app first — the JWT cookie is automatically sent by the browser.
+It lists every REST endpoint, grouped by module, with its parameters, request body and possible response codes. To test authenticated routes, log in through the app first — the JWT cookie is automatically sent by the browser.
 
 > Swagger is disabled in production.
 
@@ -309,9 +314,9 @@ make migrate name=<migration_name>
 ### Useful commands
 
 ```bash
-make logs-backend     # Stream backend logs
-make logs-frontend    # Stream frontend logs
-make shell-backend    # Open a shell in the backend container
+make logsBackend      # Stream backend logs
+make logsFrontend     # Stream frontend logs
+make shellBackend     # Open a shell in the backend container
 make test             # Run backend unit tests
 make check            # Run format check, lint, build, and all tests
 make clean            # Stop all containers
@@ -324,7 +329,7 @@ make fclean           # Stop containers and remove images and volumes
 make prod
 ```
 
-Requires additional environment variables: `VITE_API_URL`, `FRONTEND_URL`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`.
+It uses the same `backend/.env`, with `FRONTEND_URL` set to the public URL, and `DOMAIN` in the root `.env`: the domain Caddy serves over HTTPS.
 
 ## Resources
 
