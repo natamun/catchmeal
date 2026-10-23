@@ -17,9 +17,11 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import {
   ApiBadRequestResponse,
+  ApiConflictResponse,
   ApiCookieAuth,
   ApiCreatedResponse,
   ApiForbiddenResponse,
+  ApiNotFoundResponse,
   ApiOkResponse,
   ApiTags,
   ApiUnauthorizedResponse,
@@ -52,6 +54,8 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @ApiOkResponse({ description: 'Profil mis à jour' })
+  @ApiBadRequestResponse({ description: 'Données invalides' })
+  @ApiConflictResponse({ description: "Nom d'utilisateur déjà pris" })
   @ApiForbiddenResponse({ description: 'Accès interdit' })
   @Patch()
   updateProfile(
@@ -88,6 +92,7 @@ export class UsersController {
 
   @ApiOkResponse({ description: 'Pesée mise à jour' })
   @ApiForbiddenResponse({ description: 'Accès interdit' })
+  @ApiNotFoundResponse({ description: 'Pesée introuvable' })
   @Patch('weight/:entryId')
   updateWeight(
     @Param('userId', ParseIntPipe) userId: number,
@@ -124,6 +129,7 @@ export class UsersController {
 
   @ApiOkResponse({ description: 'Pesée supprimée' })
   @ApiForbiddenResponse({ description: 'Accès interdit' })
+  @ApiNotFoundResponse({ description: 'Pesée introuvable' })
   @Delete('weight/:entryId')
   deleteWeight(
     @Param('userId', ParseIntPipe) userId: number,

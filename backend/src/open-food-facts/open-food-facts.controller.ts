@@ -8,8 +8,13 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import {
+  ApiBadRequestResponse,
   ApiCookieAuth,
+  ApiForbiddenResponse,
+  ApiOkResponse,
+  ApiServiceUnavailableResponse,
   ApiTags,
+  ApiTooManyRequestsResponse,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 
@@ -28,6 +33,15 @@ export class OpenFoodFactsController {
     if (paramUserId !== jwtUserId) throw new ForbiddenException();
   }
 
+  @ApiOkResponse({ description: 'Produit trouvé' })
+  @ApiBadRequestResponse({ description: 'Format de code-barres invalide' })
+  @ApiForbiddenResponse({ description: 'Accès interdit' })
+  @ApiTooManyRequestsResponse({
+    description: 'Limite de 12 requêtes/min dépassée',
+  })
+  @ApiServiceUnavailableResponse({
+    description: 'Open Food Facts indisponible',
+  })
   @Get('off-products/:barcode')
   lookup(
     @Param('userId', ParseIntPipe) userId: number,

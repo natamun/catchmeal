@@ -12,6 +12,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import {
+  ApiBadRequestResponse,
   ApiConflictResponse,
   ApiCookieAuth,
   ApiCreatedResponse,
@@ -44,6 +45,7 @@ export class FriendsController {
   }
 
   @ApiCreatedResponse({ description: 'Demande envoyée' })
+  @ApiBadRequestResponse({ description: "Impossible de s'ajouter soi-même" })
   @ApiConflictResponse({ description: 'Demande déjà existante' })
   @Post('friends')
   sendRequest(
