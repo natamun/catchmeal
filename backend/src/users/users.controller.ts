@@ -15,6 +15,17 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
+import {
+  ApiBadRequestResponse,
+  ApiConflictResponse,
+  ApiCookieAuth,
+  ApiCreatedResponse,
+  ApiForbiddenResponse,
+  ApiNotFoundResponse,
+  ApiOkResponse,
+  ApiTags,
+  ApiUnauthorizedResponse,
+} from '@nestjs/swagger';
 
 import 'multer';
 
@@ -34,11 +45,18 @@ interface RequestWithUser extends Express.Request {
   user: { userId: number; username: string };
 }
 
+@ApiTags('users')
+@ApiCookieAuth('jwt')
+@ApiUnauthorizedResponse({ description: 'Non authentifié' })
 @Controller('users/:userId')
 @UseGuards(PassportJwtAuthGuard)
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
+  @ApiOkResponse({ description: 'Profil mis à jour' })
+  @ApiBadRequestResponse({ description: 'Données invalides' })
+  @ApiConflictResponse({ description: "Nom d'utilisateur déjà pris" })
+  @ApiForbiddenResponse({ description: 'Accès interdit' })
   @Patch()
   updateProfile(
     @Param('userId', ParseIntPipe) userId: number,
@@ -51,6 +69,8 @@ export class UsersController {
     return this.usersService.updateProfile(userId, dto);
   }
 
+  @ApiCreatedResponse({ description: 'Pesée enregistrée' })
+  @ApiForbiddenResponse({ description: 'Accès interdit' })
   @Post('weight')
   logWeight(
     @Param('userId', ParseIntPipe) userId: number,
@@ -70,6 +90,9 @@ export class UsersController {
     );
   }
 
+  @ApiOkResponse({ description: 'Pesée mise à jour' })
+  @ApiForbiddenResponse({ description: 'Accès interdit' })
+  @ApiNotFoundResponse({ description: 'Pesée introuvable' })
   @Patch('weight/:entryId')
   updateWeight(
     @Param('userId', ParseIntPipe) userId: number,
@@ -91,6 +114,8 @@ export class UsersController {
     );
   }
 
+  @ApiOkResponse({ description: 'Historique de poids' })
+  @ApiForbiddenResponse({ description: 'Accès interdit' })
   @Get('weight')
   getWeightHistory(
     @Param('userId', ParseIntPipe) userId: number,
@@ -102,6 +127,9 @@ export class UsersController {
     return this.usersService.getWeightHistory(userId);
   }
 
+  @ApiOkResponse({ description: 'Pesée supprimée' })
+  @ApiForbiddenResponse({ description: 'Accès interdit' })
+  @ApiNotFoundResponse({ description: 'Pesée introuvable' })
   @Delete('weight/:entryId')
   deleteWeight(
     @Param('userId', ParseIntPipe) userId: number,
@@ -114,6 +142,8 @@ export class UsersController {
     return this.usersService.deleteWeight(userId, entryId);
   }
 
+  @ApiOkResponse({ description: 'Avatar supprimé' })
+  @ApiForbiddenResponse({ description: 'Accès interdit' })
   @Delete('avatar')
   deleteAvatar(
     @Param('userId', ParseIntPipe) userId: number,
@@ -125,6 +155,9 @@ export class UsersController {
     return this.usersService.deleteAvatar(userId);
   }
 
+  @ApiOkResponse({ description: 'Avatar mis à jour' })
+  @ApiBadRequestResponse({ description: 'Fichier manquant ou type invalide' })
+  @ApiForbiddenResponse({ description: 'Accès interdit' })
   @Patch('avatar')
   @UseInterceptors(
     FileInterceptor('file', { limits: { fileSize: 5 * 1024 * 1024 } }),

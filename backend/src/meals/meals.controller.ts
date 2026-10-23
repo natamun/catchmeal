@@ -13,6 +13,16 @@ import {
   Request,
   UseGuards,
 } from '@nestjs/common';
+import {
+  ApiBadRequestResponse,
+  ApiCookieAuth,
+  ApiCreatedResponse,
+  ApiForbiddenResponse,
+  ApiNotFoundResponse,
+  ApiOkResponse,
+  ApiTags,
+  ApiUnauthorizedResponse,
+} from '@nestjs/swagger';
 
 import { PassportJwtAuthGuard } from '../auth/guards/passport-jwt.guard';
 import { CreateMealDto } from './dto/create-meal.dto';
@@ -20,6 +30,10 @@ import { UpdateMealDto } from './dto/update-meal.dto';
 import { MealsService } from './meals.service';
 import { ParseDateOnlyPipe } from './pipes/parse-date-only.pipe';
 
+@ApiTags('meals')
+@ApiCookieAuth('jwt')
+@ApiUnauthorizedResponse({ description: 'Non authentifié' })
+@ApiForbiddenResponse({ description: 'Accès interdit' })
 @UseGuards(PassportJwtAuthGuard)
 @Controller('users/:userId')
 export class MealsController {
@@ -29,6 +43,8 @@ export class MealsController {
     if (paramUserId !== jwtUserId) throw new ForbiddenException();
   }
 
+  @ApiCreatedResponse({ description: 'Repas créé' })
+  @ApiBadRequestResponse({ description: 'Données de repas invalides' })
   @Post('meals')
   create(
     @Param('userId', ParseIntPipe) userId: number,
@@ -39,6 +55,8 @@ export class MealsController {
     return this.mealsService.create(userId, dto);
   }
 
+  @ApiOkResponse({ description: 'Liste des repas' })
+  @ApiBadRequestResponse({ description: 'Paramètre logged invalide' })
   @Get('meals')
   findAll(
     @Param('userId', ParseIntPipe) userId: number,
@@ -56,6 +74,8 @@ export class MealsController {
     return this.mealsService.findAll(userId, logged, date);
   }
 
+  @ApiOkResponse({ description: 'Repas sur une période' })
+  @ApiBadRequestResponse({ description: 'Format de date invalide' })
   @Get('meals/range')
   findRange(
     @Param('userId', ParseIntPipe) userId: number,
@@ -70,6 +90,8 @@ export class MealsController {
     return this.mealsService.findRange(userId, fromDate, toDate);
   }
 
+  @ApiOkResponse({ description: 'Détail d’un repas' })
+  @ApiNotFoundResponse({ description: 'Repas introuvable' })
   @Get('meals/:id')
   findOne(
     @Param('userId', ParseIntPipe) userId: number,
@@ -80,6 +102,9 @@ export class MealsController {
     return this.mealsService.findOne(userId, id);
   }
 
+  @ApiOkResponse({ description: 'Repas mis à jour' })
+  @ApiBadRequestResponse({ description: 'Données de repas invalides' })
+  @ApiNotFoundResponse({ description: 'Repas introuvable' })
   @Patch('meals/:id')
   update(
     @Param('userId', ParseIntPipe) userId: number,
@@ -91,6 +116,8 @@ export class MealsController {
     return this.mealsService.update(userId, id, dto);
   }
 
+  @ApiOkResponse({ description: 'Repas supprimé' })
+  @ApiNotFoundResponse({ description: 'Repas introuvable' })
   @Delete('meals/:id')
   remove(
     @Param('userId', ParseIntPipe) userId: number,

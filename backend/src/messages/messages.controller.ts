@@ -10,6 +10,16 @@ import {
   Request,
   UseGuards,
 } from '@nestjs/common';
+import {
+  ApiBadRequestResponse,
+  ApiCookieAuth,
+  ApiCreatedResponse,
+  ApiForbiddenResponse,
+  ApiNotFoundResponse,
+  ApiOkResponse,
+  ApiTags,
+  ApiUnauthorizedResponse,
+} from '@nestjs/swagger';
 
 import { PassportJwtAuthGuard } from '../auth/guards/passport-jwt.guard';
 import { SendMessageDto } from './dto/send-message.dto';
@@ -19,11 +29,20 @@ interface RequestWithUser extends Express.Request {
   user: { userId: number; username: string };
 }
 
+@ApiTags('messages')
+@ApiCookieAuth('jwt')
+@ApiUnauthorizedResponse({ description: 'Non authentifié' })
+@ApiForbiddenResponse({ description: 'Accès interdit' })
 @Controller('users/:userId')
 @UseGuards(PassportJwtAuthGuard)
 export class MessagesController {
   constructor(private readonly messagesService: MessagesService) {}
 
+  @ApiCreatedResponse({ description: 'Message envoyé' })
+  @ApiBadRequestResponse({
+    description: 'Requête invalide (message à soi-même)',
+  })
+  @ApiNotFoundResponse({ description: 'Activité introuvable' })
   @Post('messages')
   send(
     @Param('userId', ParseIntPipe) userId: number,
@@ -41,6 +60,7 @@ export class MessagesController {
     );
   }
 
+  @ApiOkResponse({ description: 'Messages non lus' })
   @Get('messages/unread')
   getUnread(
     @Param('userId', ParseIntPipe) userId: number,
@@ -52,6 +72,7 @@ export class MessagesController {
     return this.messagesService.getUnreadSenderIds(userId);
   }
 
+  @ApiOkResponse({ description: 'Conversation' })
   @Get('messages/:otherUserId')
   getConversation(
     @Param('userId', ParseIntPipe) userId: number,
@@ -64,6 +85,7 @@ export class MessagesController {
     return this.messagesService.getConversation(userId, otherUserId);
   }
 
+  @ApiOkResponse({ description: 'Messages marqués comme lus' })
   @Patch('messages/:otherUserId/read')
   markRead(
     @Param('userId', ParseIntPipe) userId: number,
