@@ -16,6 +16,19 @@ import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { OAuthEmailNotVerifiedException } from './oauth-email-not-verified';
 
+// Keep the real bcrypt implementation (tests rely on genuine hashing/compare),
+// but wrap `compare` in a jest mock so we can assert it is called even when the
+// user does not exist (the anti-timing-enumeration path).
+jest.mock('bcryptjs', () => {
+  const actual = jest.requireActual<typeof import('bcryptjs')>('bcryptjs');
+  return {
+    ...actual,
+    // The real implementation is reinstalled in beforeEach (resetAllMocks
+    // clears it), so tests that depend on genuine comparisons keep working.
+    compare: jest.fn(),
+  };
+});
+
 jest.setTimeout(15_000);
 
 describe('AuthService', () => {
@@ -49,6 +62,12 @@ describe('AuthService', () => {
 
   beforeEach(async () => {
     jest.resetAllMocks();
+    // resetAllMocks() wipes the bcrypt.compare implementation installed by the
+    // module mock, so restore the real one for the tests that rely on it.
+    const actualBcrypt =
+      jest.requireActual<typeof import('bcryptjs')>('bcryptjs');
+    (bcrypt.compare as jest.Mock).mockImplementation(actualBcrypt.compare);
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AuthService,
@@ -79,6 +98,27 @@ describe('AuthService', () => {
       });
 
       expect(result).toBeNull();
+    });
+
+    it('should still run a bcrypt comparison when the user does not exist (constant-time, prevents username enumeration)', async () => {
+      usersServiceMock.findUserByName.mockResolvedValue(null);
+      const compareSpy = bcrypt.compare as jest.MockedFunction<
+        typeof bcrypt.compare
+      >;
+
+      const result = await service.validateUser({
+        username: 'ghost',
+        password: 'motdepasse123',
+      });
+
+      expect(result).toBeNull();
+      // The comparison must run even with no user, so the response time does
+      // not reveal whether the username exists.
+      expect(compareSpy).toHaveBeenCalledTimes(1);
+      const [comparedPassword, comparedHash] = compareSpy.mock.calls[0];
+      expect(comparedPassword).toBe('motdepasse123');
+      // Compared against a real bcrypt hash (the dummy), never an empty string.
+      expect(comparedHash).toMatch(/^\$2[aby]\$/);
     });
 
     it('should return null when the password does not match', async () => {

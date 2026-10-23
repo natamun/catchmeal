@@ -18,6 +18,11 @@ import { OAuthEmailNotVerifiedException } from './oauth-email-not-verified';
 
 const SALT_ROUNDS = 10;
 
+// A valid bcrypt hash used to run a comparison when the user does not exist,
+// so login timing is the same whether or not the username is taken.
+const DUMMY_HASH =
+  '$2b$10$TzTHY1XqY4Q4jBnOtyIN1e/3A1k//W8ksPBY0SKhfADHSbM8RurHq';
+
 const RESEND_COOLDOWN_MS = 60_000;
 
 const VERIFY_EMAIL_PATH = '/verify-email';
@@ -102,15 +107,14 @@ export class AuthService {
   async validateUser(input: AuthInput): Promise<SignInData | null> {
     const user = await this.usersService.findUserByName(input.username);
 
-    if (!user) {
-      return null;
-    }
+    // Always run a bcrypt comparison, even when the user does not exist, so the
+    // response time does not reveal whether the username is taken (prevents
+    // username enumeration by timing). DUMMY_HASH is a valid bcrypt hash that
+    // never matches a real password.
+    const hashToCompare = user?.passwordHash || DUMMY_HASH;
+    const passwordMatches = await bcrypt.compare(input.password, hashToCompare);
 
-    const passwordMatches = await bcrypt.compare(
-      input.password,
-      user.passwordHash,
-    );
-    if (!passwordMatches) {
+    if (!user || !passwordMatches) {
       return null;
     }
 
