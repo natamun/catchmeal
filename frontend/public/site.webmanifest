@@ -1,0 +1,17 @@
+{
+  "name": "CatCHMeal",
+  "short_name": "CatCHMeal",
+  "description": "Suivez vos calories, scannez vos produits et motivez-vous entre amis.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#16a34a",
+  "lang": "fr",
+  "icons": [
+    {
+      "src": "/og-image.png",
+      "sizes": "1200x627",
+      "type": "image/png"
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+User-agent: *
+Allow: /
+Allow: /login
+Allow: /register
+Allow: /privacy
+Allow: /terms
+Allow: /legal-notice
+
+Disallow: /home
+Disallow: /food
+Disallow: /stats
+Disallow: /friends
+Disallow: /profile
+Disallow: /admin
+Disallow: /welcome
+Disallow: /api/
+
+Sitemap: https://catchmeal.ch/sitemap.xml
