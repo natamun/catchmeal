@@ -57,7 +57,32 @@ describe('MessagesService', () => {
       expect(prismaMock.friend.findFirst).not.toHaveBeenCalled();
     });
 
+    it('should reject when the sender account is deleted', async () => {
+      prismaMock.user.findUnique
+        .mockResolvedValueOnce({ deletedAt: new Date() }) // sender
+        .mockResolvedValueOnce({ deletedAt: null }); // recipient
+
+      await expect(service.send(1, 2, 'hello')).rejects.toBeInstanceOf(
+        ForbiddenException,
+      );
+      expect(prismaMock.friend.findFirst).not.toHaveBeenCalled();
+      expect(prismaMock.message.create).not.toHaveBeenCalled();
+    });
+
+    it('should reject when the recipient account is deleted', async () => {
+      prismaMock.user.findUnique
+        .mockResolvedValueOnce({ deletedAt: null }) // sender
+        .mockResolvedValueOnce({ deletedAt: new Date() }); // recipient
+
+      await expect(service.send(1, 2, 'hello')).rejects.toBeInstanceOf(
+        ForbiddenException,
+      );
+      expect(prismaMock.friend.findFirst).not.toHaveBeenCalled();
+      expect(prismaMock.message.create).not.toHaveBeenCalled();
+    });
+
     it('should reject when the two users are not friends', async () => {
+      prismaMock.user.findUnique.mockResolvedValue({ deletedAt: null });
       prismaMock.friend.findFirst.mockResolvedValue(null);
 
       await expect(service.send(1, 2, 'hello')).rejects.toBeInstanceOf(
