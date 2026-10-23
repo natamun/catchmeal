@@ -14,9 +14,10 @@ describe('FriendsService', () => {
   let service: FriendsService;
 
   const prismaMock = {
+    $transaction: jest.fn(),
+    $executeRaw: jest.fn(),
     friend: {
       findFirst: jest.fn(),
-      findFirstOrThrow: jest.fn(),
       findMany: jest.fn(),
       create: jest.fn(),
       update: jest.fn(),
@@ -32,6 +33,9 @@ describe('FriendsService', () => {
 
   beforeEach(async () => {
     jest.resetAllMocks();
+    prismaMock.$transaction.mockImplementation(
+      (callback: (tx: typeof prismaMock) => unknown) => callback(prismaMock),
+    );
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         FriendsService,
@@ -112,20 +116,35 @@ describe('FriendsService', () => {
         }),
       );
 
-      await expect(service.sendRequest(1, 2)).rejects.toBeInstanceOf(
-        ConflictException,
+      await expect(service.sendRequest(1, 2)).rejects.toThrow(
+        'Demande déjà envoyée à cet utilisateur',
       );
       expect(friendsGatewayMock.notifyRequestReceived).not.toHaveBeenCalled();
+    });
+
+    it('should lock the pair of users in the same order whoever sends first', async () => {
+      prismaMock.friend.findFirst.mockResolvedValue(null);
+      prismaMock.friend.create.mockResolvedValue({
+        id: 9,
+        user: { id: 1, username: 'alice', name: 'Alice', avatarUrl: null },
+      });
+
+      await service.sendRequest(1, 2);
+      await service.sendRequest(2, 1);
+
+      const calls = prismaMock.$executeRaw.mock.calls as [
+        unknown,
+        number,
+        number,
+      ][];
+      expect([calls[0][1], calls[0][2]]).toEqual([1, 2]);
+      expect([calls[1][1], calls[1][2]]).toEqual([1, 2]);
     });
   });
 
   describe('acceptRequest', () => {
     it('should accept a pending request and notify the sender', async () => {
       const acceptor = { id: 2, username: 'bob', name: 'Bob' };
-      prismaMock.friend.findFirstOrThrow.mockResolvedValue({
-        id: 5,
-        status: 'PENDING',
-      });
       prismaMock.friend.update.mockResolvedValue({
         id: 5,
         userId: 1,
@@ -136,11 +155,8 @@ describe('FriendsService', () => {
 
       await service.acceptRequest(2, 5);
 
-      expect(prismaMock.friend.findFirstOrThrow).toHaveBeenCalledWith({
-        where: { id: 5, friendId: 2, status: 'PENDING' },
-      });
       expect(prismaMock.friend.update).toHaveBeenCalledWith({
-        where: { id: 5 },
+        where: { id: 5, friendId: 2, status: 'PENDING' },
         data: { status: 'ACCEPTED' },
         include: {
           friendUser: {
@@ -155,12 +171,13 @@ describe('FriendsService', () => {
     });
 
     it('should propagate the non-found error when the request does not belong to the user', async () => {
-      prismaMock.friend.findFirstOrThrow.mockRejectedValue(
-        new Error('not found'),
+      const notFound = new Prisma.PrismaClientKnownRequestError(
+        'Record not found',
+        { code: 'P2025', clientVersion: '7.9.1' },
       );
+      prismaMock.friend.update.mockRejectedValue(notFound);
 
-      await expect(service.acceptRequest(2, 5)).rejects.toThrow('not found');
-      expect(prismaMock.friend.update).not.toHaveBeenCalled();
+      await expect(service.acceptRequest(2, 5)).rejects.toBe(notFound);
       expect(friendsGatewayMock.notifyRequestAccepted).not.toHaveBeenCalled();
     });
   });
