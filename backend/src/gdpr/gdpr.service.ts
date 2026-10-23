@@ -125,9 +125,15 @@ export class GdprService {
       });
     });
 
-    // Avatar file lives in Supabase storage, outside the DB transaction
+    // Avatar file lives in Supabase storage, outside the DB transaction.
+    // The data is already erased; a storage failure must not surface as a 500
+    // (the client would think the deletion failed), so log and move on.
     if (user.avatarUrl) {
-      await this.supabase.deleteAvatar(userId);
+      try {
+        await this.supabase.deleteAvatar(userId);
+      } catch (error) {
+        console.error('[GDPR] Failed to delete avatar file:', error);
+      }
     }
 
     // The deletion already happened; a failed email must not surface as an
