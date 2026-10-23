@@ -97,8 +97,8 @@ shellFrontend:
 	$(DEV) exec frontend sh
 
 .PHONY: all dev prod prodDown prodLogs deploy clean fclean re \
-	logsBackend logsFrontend restartBackend restartFrontend \
+	logsBackend logsFrontend \
 	prodRestartBackend prodRestartFrontend prodRestartCaddy prodReloadCaddy \
-	prodDeployBackend prodDeployFrontend restart prodRestart prodLogsService \
+	prodDeployBackend prodDeployFrontend \
 	format formatCheck lint lintCheck build test testVerbose check \
 	migrate shellBackend shellFrontend
