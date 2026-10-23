@@ -234,7 +234,11 @@ export default function FriendsPage() {
       <ConfirmDialog
         dialogRef={confirmDialogRef}
         title="Retirer cet ami ?"
-        description={`${friendToRemove?.friend.name ?? 'Cet ami'} sera retiré de votre liste.`}
+        description={`${
+          friendToRemove?.friend.deletedAt
+            ? 'Utilisateur supprimé'
+            : (friendToRemove?.friend.name ?? 'Cet ami')
+        } sera retiré de votre liste.`}
         confirmLabel="Retirer"
         pendingLabel="Suppression..."
         isPending={busyId === friendToRemove?.friendshipId}

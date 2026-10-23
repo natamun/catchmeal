@@ -13,6 +13,9 @@ describe('MessagesService', () => {
   let service: MessagesService;
 
   const prismaMock = {
+    user: {
+      findUnique: jest.fn(),
+    },
     friend: {
       findFirst: jest.fn(),
     },
@@ -54,7 +57,32 @@ describe('MessagesService', () => {
       expect(prismaMock.friend.findFirst).not.toHaveBeenCalled();
     });
 
+    it('should reject when the sender account is deleted', async () => {
+      prismaMock.user.findUnique
+        .mockResolvedValueOnce({ deletedAt: new Date() }) // sender
+        .mockResolvedValueOnce({ deletedAt: null }); // recipient
+
+      await expect(service.send(1, 2, 'hello')).rejects.toBeInstanceOf(
+        ForbiddenException,
+      );
+      expect(prismaMock.friend.findFirst).not.toHaveBeenCalled();
+      expect(prismaMock.message.create).not.toHaveBeenCalled();
+    });
+
+    it('should reject when the recipient account is deleted', async () => {
+      prismaMock.user.findUnique
+        .mockResolvedValueOnce({ deletedAt: null }) // sender
+        .mockResolvedValueOnce({ deletedAt: new Date() }); // recipient
+
+      await expect(service.send(1, 2, 'hello')).rejects.toBeInstanceOf(
+        ForbiddenException,
+      );
+      expect(prismaMock.friend.findFirst).not.toHaveBeenCalled();
+      expect(prismaMock.message.create).not.toHaveBeenCalled();
+    });
+
     it('should reject when the two users are not friends', async () => {
+      prismaMock.user.findUnique.mockResolvedValue({ deletedAt: null });
       prismaMock.friend.findFirst.mockResolvedValue(null);
 
       await expect(service.send(1, 2, 'hello')).rejects.toBeInstanceOf(
@@ -64,6 +92,7 @@ describe('MessagesService', () => {
     });
 
     it('should create a message when the two users are friends', async () => {
+      prismaMock.user.findUnique.mockResolvedValue({ deletedAt: null });
       prismaMock.friend.findFirst.mockResolvedValue({
         id: 5,
         status: 'ACCEPTED',
@@ -107,6 +136,7 @@ describe('MessagesService', () => {
     });
 
     it('should reject quoting an activity that does not belong to the recipient', async () => {
+      prismaMock.user.findUnique.mockResolvedValue({ deletedAt: null });
       prismaMock.friend.findFirst.mockResolvedValue({
         id: 5,
         status: 'ACCEPTED',
@@ -126,6 +156,7 @@ describe('MessagesService', () => {
     it('should store the activity id and return the formatted quote', async () => {
       const activity = { id: 7, user: { id: 2 } };
       const feedItem = { id: 7, message: 'a enregistré un repas' };
+      prismaMock.user.findUnique.mockResolvedValue({ deletedAt: null });
       prismaMock.friend.findFirst.mockResolvedValue({
         id: 5,
         status: 'ACCEPTED',

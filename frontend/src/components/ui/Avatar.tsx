@@ -3,6 +3,8 @@ interface AvatarProps {
   avatarUrl?: string | null;
   size?: 'xs' | 'sm' | 'lg';
   online?: boolean;
+  /** A deleted account: neutral placeholder, never an online dot. */
+  deleted?: boolean;
 }
 
 const SIZE = {
@@ -20,8 +22,22 @@ export function Avatar({
   avatarUrl,
   size = 'sm',
   online = false,
+  deleted = false,
 }: AvatarProps) {
   const { container, text, initials } = SIZE[size];
+
+  // A deleted account shows a neutral grey placeholder, never a photo or dot.
+  if (deleted) {
+    return (
+      <div
+        role="img"
+        aria-label="Compte supprimé"
+        className={`${container} flex shrink-0 items-center justify-center rounded-full bg-gray-200 font-bold text-gray-400 ${text}`}
+      >
+        ?
+      </div>
+    );
+  }
 
   return (
     <div

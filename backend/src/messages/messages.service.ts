@@ -66,6 +66,31 @@ export class MessagesService {
         'Impossible de vous envoyer un message à vous-même',
       );
     }
+
+    // No messages to or from a deleted account. We check both the sender and
+    // the recipient: the HTTP guard already blocks a deleted sender, but a
+    // websocket is only authenticated on connect, so a user deleted while their
+    // socket is still open could otherwise keep sending. send() is the single
+    // path for both transports, so this one check covers HTTP and websocket.
+    const [sender, recipient] = await Promise.all([
+      this.prisma.user.findUnique({
+        where: { id: userId },
+        select: { deletedAt: true },
+      }),
+      this.prisma.user.findUnique({
+        where: { id: toUserId },
+        select: { deletedAt: true },
+      }),
+    ]);
+    if (!sender || sender.deletedAt) {
+      throw new ForbiddenException('Votre compte a été supprimé');
+    }
+    if (!recipient || recipient.deletedAt) {
+      throw new ForbiddenException(
+        'Ce compte a été supprimé, vous ne pouvez plus lui écrire',
+      );
+    }
+
     await this.assertAreFriends(userId, toUserId);
 
     if (activityId !== undefined) {

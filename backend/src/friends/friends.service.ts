@@ -16,6 +16,12 @@ const SAFE_USER_SELECT = {
   avatarUrl: true,
 } as const;
 
+// Friends list also exposes deletedAt so the UI can flag deleted accounts
+const FRIEND_SELECT = {
+  ...SAFE_USER_SELECT,
+  deletedAt: true,
+} as const;
+
 @Injectable()
 export class FriendsService {
   constructor(
@@ -112,8 +118,8 @@ export class FriendsService {
         OR: [{ userId }, { friendId: userId }],
       },
       include: {
-        user: { select: SAFE_USER_SELECT },
-        friendUser: { select: SAFE_USER_SELECT },
+        user: { select: FRIEND_SELECT },
+        friendUser: { select: FRIEND_SELECT },
       },
     });
 
