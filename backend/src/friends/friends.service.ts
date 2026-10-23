@@ -36,31 +36,42 @@ export class FriendsService {
       );
     }
 
-    const existing = await this.prisma.friend.findFirst({
-      where: {
-        OR: [
-          { userId, friendId },
-          { userId: friendId, friendId: userId },
-        ],
-      },
-    });
-    if (existing) {
-      if (existing.status === 'ACCEPTED') {
-        throw new ConflictException('Déjà ami avec cet utilisateur');
-      }
-      if (existing.userId === userId) {
-        throw new ConflictException('Demande déjà envoyée à cet utilisateur');
-      }
-      throw new ConflictException(
-        'Cet utilisateur vous a déjà envoyé une demande',
-      );
-    }
-
     try {
-      const request = await this.prisma.friend.create({
-        data: { userId, friendId, status: 'PENDING' },
-        include: { user: { select: SAFE_USER_SELECT } },
+      const request = await this.prisma.$transaction(async (tx) => {
+        // Lock the pair of users until the end of the transaction: A→B and
+        // B→A sent at the same time must not both pass the check below.
+        const [low, high] =
+          userId < friendId ? [userId, friendId] : [friendId, userId];
+        await tx.$executeRaw`SELECT pg_advisory_xact_lock(${low}, ${high})`;
+
+        const existing = await tx.friend.findFirst({
+          where: {
+            OR: [
+              { userId, friendId },
+              { userId: friendId, friendId: userId },
+            ],
+          },
+        });
+        if (existing) {
+          if (existing.status === 'ACCEPTED') {
+            throw new ConflictException('Déjà ami avec cet utilisateur');
+          }
+          if (existing.userId === userId) {
+            throw new ConflictException(
+              'Demande déjà envoyée à cet utilisateur',
+            );
+          }
+          throw new ConflictException(
+            'Cet utilisateur vous a déjà envoyé une demande',
+          );
+        }
+
+        return tx.friend.create({
+          data: { userId, friendId, status: 'PENDING' },
+          include: { user: { select: SAFE_USER_SELECT } },
+        });
       });
+
       this.friendsGateway.notifyRequestReceived(friendId, {
         requestId: request.id,
         from: request.user,
@@ -71,19 +82,17 @@ export class FriendsService {
         error instanceof Prisma.PrismaClientKnownRequestError &&
         error.code === 'P2002'
       ) {
-        throw new ConflictException('Déjà ami avec cet utilisateur');
+        throw new ConflictException('Demande déjà envoyée à cet utilisateur');
       }
       throw error;
     }
   }
 
   async acceptRequest(userId: number, id: number) {
-    await this.prisma.friend.findFirstOrThrow({
-      where: { id, friendId: userId, status: 'PENDING' },
-    });
-
+    // One statement checks that the request is still pending and accepts it:
+    // two clicks, or an accept during a cancel, cannot both succeed.
     const friendship = await this.prisma.friend.update({
-      where: { id },
+      where: { id, friendId: userId, status: 'PENDING' },
       data: { status: 'ACCEPTED' },
       include: { friendUser: { select: SAFE_USER_SELECT } },
     });
