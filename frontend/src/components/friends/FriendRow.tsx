@@ -37,7 +37,7 @@ export function FriendRow({
       />
       <div className="min-w-0 flex-1">
         <p
-          className={`truncate text-sm font-semibold ${isDeleted ? 'text-gray-500 italic' : 'text-green-800'}`}
+          className={`truncate text-sm font-semibold ${isDeleted ? 'text-gray-800 italic' : 'text-green-800'}`}
         >
           {isDeleted ? 'Utilisateur supprimé' : friend.name}
         </p>

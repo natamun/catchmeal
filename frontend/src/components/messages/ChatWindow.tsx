@@ -169,7 +169,7 @@ export function ChatWindow({
         )}
 
         {isDeleted ? (
-          <p className="shrink-0 border-t border-green-100 p-4 text-center text-sm text-gray-500 italic">
+          <p className="shrink-0 border-t border-green-100 p-4 text-center text-sm text-gray-800 italic">
             Ce compte a été supprimé.
           </p>
         ) : (
