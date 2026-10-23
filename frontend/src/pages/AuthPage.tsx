@@ -28,7 +28,11 @@ import {
 
 type Mode = 'login' | 'register';
 
-const OAUTH_ERROR_MESSAGE = 'La connexion a échoué. Réessayez.';
+const OAUTH_ERROR_MESSAGES = {
+  failed: 'La connexion a échoué. Réessayez.',
+  'unverified-email':
+    "Votre adresse e-mail n'est pas confirmée chez ce fournisseur. Confirmez-la chez lui, puis réessayez.",
+} as const;
 
 interface AuthFormState {
   username: string;
@@ -101,8 +105,10 @@ export function AuthPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const mode: Mode = useMatch(PATHS.register) ? 'register' : 'login';
-  const oauthError =
-    navigationState(location).oauthFailed === true ? OAUTH_ERROR_MESSAGE : null;
+  const oauthErrorKind = navigationState(location).oauthError;
+  const oauthError = oauthErrorKind
+    ? OAUTH_ERROR_MESSAGES[oauthErrorKind]
+    : null;
   const {
     form,
     handleFocus,

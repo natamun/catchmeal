@@ -13,6 +13,8 @@ import { EmailService } from '../email/email.service';
 import { EmailTokenType, Prisma } from '../generated/prisma/client';
 import { UsersService } from '../users/users.service';
 import { RegisterDto } from './dto/register.dto';
+import { isPlaceholderEmail } from './oauth-email';
+import { OAuthEmailNotVerifiedException } from './oauth-email-not-verified';
 
 const SALT_ROUNDS = 10;
 
@@ -148,6 +150,8 @@ export class AuthService {
     const existingUser = await this.usersService.findUserByEmail(email);
 
     if (existingUser) {
+      if (!emailVerified && !isPlaceholderEmail(email))
+        throw new OAuthEmailNotVerifiedException();
       if (emailVerified && !existingUser.emailVerifiedAt) {
         await this.usersService.claimWithOAuth(
           existingUser.id,
@@ -196,12 +200,15 @@ export class AuthService {
       ) {
         // Race condition: user was created between our check and insert
         const retried = await this.usersService.findUserByEmail(email);
-        if (retried)
+        if (retried) {
+          if (!emailVerified && !isPlaceholderEmail(email))
+            throw new OAuthEmailNotVerifiedException();
           return {
             userId: retried.id,
             username: retried.username,
             isNewUser: false,
           };
+        }
       }
       throw error;
     }

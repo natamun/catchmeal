@@ -4,11 +4,30 @@ import { Strategy } from 'passport-github2';
 
 import { AuthService } from '../auth.service';
 
+interface GitHubEmail {
+  value: string;
+  primary?: boolean;
+  verified?: boolean;
+}
+
 interface GitHubProfile {
   id: string;
   username?: string;
   displayName?: string;
-  emails?: Array<{ value: string; verified?: boolean }>;
+  emails?: GitHubEmail[];
+}
+
+/**
+ * The address GitHub vouches for: the primary verified one, else any verified
+ * one, else the primary (unverified) one.
+ */
+function pickEmail(emails: GitHubEmail[] = []): GitHubEmail | undefined {
+  return (
+    emails.find((e) => e.primary && e.verified) ??
+    emails.find((e) => e.verified) ??
+    emails.find((e) => e.primary) ??
+    emails[0]
+  );
 }
 
 @Injectable()
@@ -19,6 +38,7 @@ export class GitHubStrategy extends PassportStrategy(Strategy, 'github') {
       clientSecret: process.env.GITHUB_CLIENT_SECRET!,
       callbackURL: process.env.GITHUB_CALLBACK_URL!,
       scope: ['user:email'],
+      allRawEmails: true,
     });
   }
 
@@ -27,7 +47,7 @@ export class GitHubStrategy extends PassportStrategy(Strategy, 'github') {
     _refreshToken: string,
     profile: GitHubProfile,
   ) {
-    const emailEntry = profile.emails?.[0];
+    const emailEntry = pickEmail(profile.emails);
     const email = emailEntry?.value ?? `github_${profile.id}@noemail.invalid`;
     const name =
       profile.displayName ?? profile.username ?? `github_${profile.id}`;
