@@ -314,7 +314,6 @@ make logs-frontend    # Stream frontend logs
 make shell-backend    # Open a shell in the backend container
 make prisma-studio    # Open Prisma Studio at http://localhost:5555
 make test             # Run backend unit tests
-make test-e2e         # Run backend e2e tests
 make check            # Run format check, lint, build, and all tests
 make clean            # Stop all containers
 make fclean           # Stop containers and remove images and volumes

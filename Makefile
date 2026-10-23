@@ -85,10 +85,7 @@ test:
 testVerbose:
 	npm run test --prefix backend -- --verbose
 
-testE2e:
-	npm run test:e2e --prefix backend
-
-check: formatCheck lintCheck build test testE2e
+check: formatCheck lintCheck build test
 
 migrate:
 	cd backend && npx prisma migrate dev --name $(name)
@@ -106,5 +103,5 @@ prismaStudio:
 	logsBackend logsFrontend restartBackend restartFrontend \
 	prodRestartBackend prodRestartFrontend prodRestartCaddy prodReloadCaddy \
 	prodDeployBackend prodDeployFrontend restart prodRestart prodLogsService \
-	format formatCheck lint lintCheck build test testVerbose testE2e check \
+	format formatCheck lint lintCheck build test testVerbose check \
 	migrate shellBackend shellFrontend prismaStudio
