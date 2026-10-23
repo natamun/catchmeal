@@ -37,11 +37,4 @@ export default defineConfig([
       'no-console': ['error', { allow: ['warn', 'error'] }],
     },
   },
-  {
-    files: ['test/**/*.ts'],
-    rules: {
-      '@typescript-eslint/no-unsafe-argument': 'off',
-      '@typescript-eslint/no-unsafe-member-access': 'off',
-    },
-  },
 ]);

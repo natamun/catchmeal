@@ -44,7 +44,7 @@ Each commit should represent one complete, logical change, not more, not less. I
 - One PR = one sub-issue = one feature or fix. Keep unrelated infrastructure/config changes in their own PR. If a config change is a direct dependency of the feature you are shipping (e.g. a new environment variable or docker-compose service the feature needs to run), include it in the same PR.
 - Splitting is not about maximizing the number of PRs either. A PR should map to one coherent, reviewable unit, not be broken down further than its natural size.
 - The description includes a short summary and `Closes #<issue-number>`, so the linked issue closes automatically on merge.
-- Run `make check` locally before pushing. It runs the same checks as CI (format, lint, build, unit tests, e2e), so failures show up before you push, not after.
+- Run `make check` locally before pushing. It runs the same checks as CI (format, lint, build, unit tests), so failures show up before you push, not after.
 - The CI pipeline must pass before merging. It checks formatting, linting, build, and unit tests.
 - Codeowners must approve before merging.
 - The PR author merges their own branch once approved and CI passes. If `main` has moved since, rebase first, never merge `main` into your branch.

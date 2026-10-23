@@ -7,8 +7,6 @@ import { ActivityModule } from './activity/activity.module';
 import { AdminModule } from './admin/admin.module';
 import { AiContextModule } from './ai-context/ai-context.module';
 import { AiModule } from './ai/ai.module';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { DashboardAnalyticsModule } from './dashboard-analytics/dashboard-analytics.module';
 import { FoodItemsModule } from './food-items/food-items.module';
@@ -43,7 +41,6 @@ import { WebsocketModule } from './websocket/websocket.module';
     WebsocketModule,
     PresenceModule,
   ],
-  controllers: [AppController],
-  providers: [AppService, { provide: APP_GUARD, useClass: ThrottlerGuard }],
+  providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
 })
 export class AppModule {}
