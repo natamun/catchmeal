@@ -2,6 +2,7 @@ import { useLocation, useNavigate, type Location } from 'react-router';
 
 import type { ActivityItem } from '../components/friends/types';
 
+/** Why an OAuth sign-in came back to the login page. */
 export type OAuthError = 'failed' | 'unverified-email';
 
 /**
