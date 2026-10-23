@@ -11,5 +11,4 @@
 PROGRESS.md
 
 # Logs Caddy
-./logs
-./logs/*
+/logs/
