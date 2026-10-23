@@ -16,6 +16,8 @@ const TITLES: Record<string, string> = {
   [PATHS.welcome]: 'Bienvenue',
   [PATHS.verifyEmail]: "Confirmation de l'adresse",
   [PATHS.checkEmail]: 'Vérifiez votre boîte mail',
+  [PATHS.forgotPassword]: 'Mot de passe oublié',
+  [PATHS.resetPassword]: 'Nouveau mot de passe',
   [PATHS.home]: 'Accueil',
   [PATHS.food]: 'Alimentation',
   [PATHS.stats]: 'Statistiques',

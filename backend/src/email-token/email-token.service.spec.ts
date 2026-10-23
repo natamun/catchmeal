@@ -76,6 +76,14 @@ describe('EmailTokenService', () => {
       );
     });
 
+    it('should expire a password reset token after 1 hour', async () => {
+      await service.create(1, EmailTokenType.RESET_PASSWORD);
+
+      expect(createdData().expiresAt).toEqual(
+        new Date(now.getTime() + HOUR_MS),
+      );
+    });
+
     it('should discard the previous unused tokens of the same user and type', async () => {
       await service.create(1, EmailTokenType.VERIFY_EMAIL);
 
@@ -124,7 +132,7 @@ describe('EmailTokenService', () => {
 
     it('should report a token of another type as invalid', async () => {
       prismaMock.emailToken.findUnique.mockResolvedValue(
-        record({ type: 'RESET_PASSWORD' }),
+        record({ type: EmailTokenType.RESET_PASSWORD }),
       );
 
       const result = await service.consume('abc', EmailTokenType.VERIFY_EMAIL);

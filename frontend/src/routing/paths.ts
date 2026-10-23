@@ -12,6 +12,8 @@ export const PATHS = {
   welcome: '/welcome',
   verifyEmail: '/verify-email',
   checkEmail: '/check-email',
+  forgotPassword: '/forgot-password',
+  resetPassword: '/reset-password',
   home: '/home',
   journalAdd: '/home/add/:mealType',
   food: '/food',

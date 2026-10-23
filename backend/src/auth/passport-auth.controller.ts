@@ -11,6 +11,12 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
+import {
+  ApiBadRequestResponse,
+  ApiOkResponse,
+  ApiTags,
+  ApiTooManyRequestsResponse,
+} from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 import type { Request as ExpressRequest, Response } from 'express';
 
@@ -18,8 +24,10 @@ import { UsersService } from '../users/users.service';
 import { AuthService, type SignInData } from './auth.service';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { CompleteOAuthProfileDto } from './dto/complete-oauth-profile.dto';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { RegisterDto } from './dto/register.dto';
 import { ResendVerificationDto } from './dto/resend-verification.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 import { VerifyEmailDto } from './dto/verify-email.dto';
 import { OptionalJwtAuthGuard } from './guards/optional-jwt.guard';
 import { PassportJwtAuthGuard } from './guards/passport-jwt.guard';
@@ -67,6 +75,7 @@ function safeRedirectUrl(path: string = ''): string {
   }
 }
 
+@ApiTags('auth')
 @Controller('auth')
 export class PassportAuthController {
   constructor(
@@ -98,6 +107,32 @@ export class PassportAuthController {
   @Post('resend-verification')
   resendVerification(@Body() dto: ResendVerificationDto) {
     return this.authService.resendVerification(dto.email);
+  }
+
+  @ApiOkResponse({
+    description:
+      'Lien de réinitialisation envoyé si un compte avec mot de passe existe',
+  })
+  @ApiBadRequestResponse({ description: 'Email invalide' })
+  @ApiTooManyRequestsResponse({ description: 'Trop de requêtes' })
+  @Throttle({ default: { limit: 5, ttl: 3_600_000 } })
+  @HttpCode(HttpStatus.OK)
+  @Post('forgot-password')
+  forgotPassword(@Body() dto: ForgotPasswordDto) {
+    return this.authService.forgotPassword(dto.email);
+  }
+
+  @ApiOkResponse({ description: 'Mot de passe modifié' })
+  @ApiBadRequestResponse({
+    description:
+      'Mot de passe invalide, ou lien invalide, expiré ou déjà utilisé',
+  })
+  @ApiTooManyRequestsResponse({ description: 'Trop de requêtes' })
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
+  @HttpCode(HttpStatus.OK)
+  @Post('reset-password')
+  resetPassword(@Body() dto: ResetPasswordDto) {
+    return this.authService.resetPassword(dto.token, dto.newPassword);
   }
 
   @Throttle({

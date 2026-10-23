@@ -15,11 +15,13 @@ import { deleteMyAccount } from './components/profile/api';
 import { useIosVisibleViewport } from './hooks/useIosVisibleViewport';
 import { AuthPage } from './pages/AuthPage';
 import { CheckEmailPage } from './pages/CheckEmailPage';
+import { ForgotPasswordPage } from './pages/ForgotPasswordPage';
 import { LandingPage } from './pages/LandingPage';
 import { LegalNoticePage } from './pages/LegalNoticePage';
 import { NotFoundPage } from './pages/NotFoundPage';
 import { OAuthOnboardingPage } from './pages/OAuthOnboardingPage';
 import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage';
+import { ResetPasswordPage } from './pages/ResetPasswordPage';
 import { TermsOfServicePage } from './pages/TermsOfServicePage';
 import { VerifyEmailPage } from './pages/VerifyEmailPage';
 import { RequireAdmin, RequireAuth, RequireGuest } from './routing/guards';
@@ -203,6 +205,15 @@ function AppRoutes() {
           </RequireGuest>
         }
       />
+      <Route
+        path={PATHS.forgotPassword}
+        element={
+          <RequireGuest>
+            <ForgotPasswordPage />
+          </RequireGuest>
+        }
+      />
+      <Route path={PATHS.resetPassword} element={<ResetPasswordPage />} />
       <Route path={PATHS.legalNotice} element={<LegalNoticePage />} />
       <Route path={PATHS.privacy} element={<PrivacyPolicyPage />} />
       <Route path={PATHS.terms} element={<TermsOfServicePage />} />
