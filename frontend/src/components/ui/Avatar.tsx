@@ -13,6 +13,13 @@ const SIZE = {
   lg: { container: 'h-16 w-16', text: 'text-2xl', initials: 2 },
 } as const;
 
+function getProxiedUrl(url: string): string {
+  if (url.includes('supabase.co')) {
+    return `/api/avatar-proxy/${encodeURIComponent(url)}`;
+  }
+  return url;
+}
+
 /**
  * Profile picture, or the first letter(s) of the username when there is none.
  * `online` adds a green dot.
@@ -31,7 +38,7 @@ export function Avatar({
     return (
       <div
         role="img"
-        aria-label="Compte supprimé"
+        aria-label="Compte supprimÃ©"
         className={`${container} flex shrink-0 items-center justify-center rounded-full bg-gray-200 font-bold text-gray-400 ${text}`}
       >
         ?
@@ -47,7 +54,7 @@ export function Avatar({
     >
       {avatarUrl ? (
         <img
-          src={avatarUrl}
+          src={getProxiedUrl(avatarUrl)}
           alt={`Avatar de ${username}`}
           className={`${container} rounded-full object-cover`}
         />

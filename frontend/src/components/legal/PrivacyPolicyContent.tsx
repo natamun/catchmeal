@@ -25,8 +25,7 @@ export function PrivacyPolicyContent({ heading: Heading = 'h2' }: Props) {
         projet CatCHMeal dans un cadre strictement académique.
       </p>
       <p>
-        Contact :{' '}
-        <a href="mailto:catchmeal07@gmail.com">catchmeal07@gmail.com</a>
+        Contact : <a href="mailto:contact@catchmeal.ch">contact@catchmeal.ch</a>
       </p>
 
       <Heading>2. Données personnelles collectées</Heading>

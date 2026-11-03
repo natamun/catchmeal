@@ -51,7 +51,7 @@ export function LegalNoticePage() {
         </li>
         <li>
           <strong>Contact :</strong>{' '}
-          <a href="mailto:catchmeal07@gmail.com">catchmeal07@gmail.com</a>
+          <a href="mailto:contact@catchmeal.ch">contact@catchmeal.ch</a>
         </li>
       </ul>
 
