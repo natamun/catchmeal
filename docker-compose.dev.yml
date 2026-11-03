@@ -2,7 +2,7 @@ services:
   frontend:
     build:
       context: ./frontend
-    user: "${UID:-1000}:${GID:-1000}"
+    #user: "${UID:-1000}:${GID:-1000}"
     ports:
       - "5173:5173"
     volumes:
@@ -14,12 +14,12 @@ services:
   backend:
     build:
       context: ./backend
-    user: "${UID:-1000}:${GID:-1000}"
+    #user: "${UID:-1000}:${GID:-1000}"
     ports:
       - "3000:3000"
-    volumes:
-      - ./backend:/app
-      - /app/node_modules
+    #volumes:
+     # - ./backend:/app
+    #  - /app/node_modules
     env_file:
       - ./backend/.env
     command: sh -c "npx prisma generate && npx prisma migrate deploy && npm run start:dev"

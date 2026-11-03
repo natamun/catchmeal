@@ -1,63 +1,81 @@
-DEV = docker compose -f docker-compose.dev.yml
 PROD = docker compose -f docker-compose.prod.yml
+DEV = docker compose -f docker-compose.dev.yml
 
-all: prod
+all: up
+
+#-----	Prod (default)	-----#
+
+up:
+	$(PROD) up --build -d
+
+down:
+	$(PROD) down
+
+re: down up
+
+logs:
+	$(PROD) logs -f
+
+logsBackend:
+	$(PROD) logs -f backend
+
+logsFrontend:
+	$(PROD) logs -f frontend
+
+logsCaddy:
+	$(PROD) logs -f caddy
+
+ps:
+	$(PROD) ps
+
+clean: down
+	$(PROD) down --rmi all --volumes
+
+restartBackend:
+	$(PROD) up -d --force-recreate backend
+
+restartFrontend:
+	$(PROD) up -d --force-recreate frontend
+
+restartCaddy:
+	$(PROD) up -d --force-recreate caddy
+
+reloadCaddy:
+	$(PROD) exec caddy caddy reload --config /etc/caddy/Caddyfile --adapter caddyfile
+
+shellBackend:
+	$(PROD) exec backend sh
+
+shellFrontend:
+	$(PROD) exec frontend sh
+
+#-----	Dev	-----#
 
 dev:
 	$(DEV) up --build -V -d
 
-logsBackend:
+devDown:
+	$(DEV) down
+
+devLogs:
+	$(DEV) logs -f
+
+devLogsBackend:
 	$(DEV) logs -f backend
 
-logsFrontend:
+devLogsFrontend:
 	$(DEV) logs -f frontend
 
-clean:
-	$(DEV) down
-	$(PROD) down
-
-fclean: clean
+devClean:
 	$(DEV) down --rmi all --volumes
-	$(PROD) down --rmi all --volumes
 
-re: fclean all
+devShellBackend:
+	$(DEV) exec backend sh
 
-#-----	Prod	-----#
+devShellFrontend:
+	$(DEV) exec frontend sh
 
-prod:
-	$(PROD) -f docker-compose.build.yml up -d --build
-
-prodDown:
-	$(PROD) down
-
-prodLogs:
-	$(PROD) logs -f
-
-prodRestartBackend:
-	$(PROD) up -d --force-recreate backend
-
-prodRestartFrontend:
-	$(PROD) up -d --force-recreate frontend
-
-prodRestartCaddy:
-	$(PROD) up -d --force-recreate caddy
-
-prodReloadCaddy:
-	$(PROD) exec caddy caddy reload --config /etc/caddy/Caddyfile --adapter caddyfile
-
-deploy:
-	$(PROD) pull
-	$(PROD) up -d
-
-prodDeployBackend:
-	$(PROD) pull backend
-	$(PROD) up -d backend
-
-prodDeployFrontend:
-	$(PROD) pull frontend
-	$(PROD) up -d frontend
-
-#-----	Prod	-----#
+#-----	CI / Quality	-----#
 
 format:
 	npm run format --prefix frontend
@@ -72,8 +90,7 @@ lint:
 	npm run lint --prefix backend
 
 lintCheck:
-	npm run lint:check --prefix frontend
-	npm run lint:check --prefix backend
+	npm run lint:check --prefix frontend exec
 
 build:
 	npm run build --prefix frontend
@@ -87,18 +104,21 @@ testVerbose:
 
 check: formatCheck lintCheck build test
 
+checkDocker:
+	$(DEV) exec frontend sh -c "npm run format:check && npm run lint:check && npm run build"
+	$(DEV) exec backend sh -c "npm run format:check && npm run lint:check && npm run build && npm run test"
+
+formatDocker:
+	$(DEV) exec frontend npm run format
+	$(DEV) exec backend npm run format
 migrate:
 	cd backend && npx prisma migrate dev --name $(name)
 
-shellBackend:
-	$(DEV) exec backend sh
+fclean: clean devClean
 
-shellFrontend:
-	$(DEV) exec frontend sh
-
-.PHONY: all dev prod prodDown prodLogs deploy clean fclean re \
-	logsBackend logsFrontend \
-	prodRestartBackend prodRestartFrontend prodRestartCaddy prodReloadCaddy \
-	prodDeployBackend prodDeployFrontend \
-	format formatCheck lint lintCheck build test testVerbose check \
-	migrate shellBackend shellFrontend
+.PHONY: all up down re logs logsBackend logsFrontend logsCaddy ps clean \
+	restartBackend restartFrontend restartCaddy reloadCaddy \
+	shellBackend shellFrontend \
+	dev devDown devLogs devLogsBackend devLogsFrontend devClean \
+	devShellBackend devShellFrontend \
+	format formatCheck lint lintCheck build test testVerbose check migrate fclean

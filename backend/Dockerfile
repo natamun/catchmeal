@@ -1,14 +1,13 @@
 FROM node:24-alpine
 
 WORKDIR /app
-RUN chown node:node /app
-USER node
 
-COPY --chown=node:node package*.json ./
-COPY --chown=node:node prisma ./prisma
+
+COPY  package*.json ./
+COPY  prisma ./prisma
 RUN npm install
 
-COPY --chown=node:node . .
+COPY . .
 
 EXPOSE 3000
 
