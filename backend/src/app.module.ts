@@ -8,6 +8,7 @@ import { AdminModule } from './admin/admin.module';
 import { AiContextModule } from './ai-context/ai-context.module';
 import { AiModule } from './ai/ai.module';
 import { AuthModule } from './auth/auth.module';
+import { AvatarProxyModule } from './avatar-proxy/avatar-proxy.module';
 import { HttpLoggerMiddleware } from './common/http-logger.middleware';
 import { DashboardAnalyticsModule } from './dashboard-analytics/dashboard-analytics.module';
 import { FoodItemsModule } from './food-items/food-items.module';
@@ -19,7 +20,6 @@ import { OpenFoodFactsModule } from './open-food-facts/open-food-facts.module';
 import { PresenceModule } from './presence/presence.module';
 import { UsersModule } from './users/users.module';
 import { WebsocketModule } from './websocket/websocket.module';
-import { AvatarProxyModule } from './avatar-proxy/avatar-proxy.module';
 
 @Module({
   imports: [
