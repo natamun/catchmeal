@@ -90,7 +90,8 @@ lint:
 	npm run lint --prefix backend
 
 lintCheck:
-	npm run lint:check --prefix frontend exec
+	npm run lint:check --prefix frontend
+	npm run lint:check --prefix backend
 
 build:
 	npm run build --prefix frontend
