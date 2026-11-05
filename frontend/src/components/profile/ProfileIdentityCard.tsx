@@ -401,10 +401,6 @@ export function ProfileIdentityCard({ user, onUpdate }: Props) {
             />
           </div>
 
-          <p className="col-span-2 pt-2 text-xs font-semibold tracking-wide text-green-400 uppercase">
-            Objectifs
-          </p>
-
           {[
             {
               field: 'height' as Field,
