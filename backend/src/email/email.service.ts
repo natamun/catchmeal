@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import * as nodemailer from 'nodemailer';
+import { Resend } from 'resend';
 
 const APP_NAME = 'CatCHMeal';
 
@@ -84,41 +84,47 @@ const BASE_STYLE = `
   </style>
 `;
 
+interface EmailOptions {
+  to: string;
+  subject: string;
+  html: string;
+  text: string;
+}
+
 @Injectable()
 export class EmailService {
   private readonly logger = new Logger(EmailService.name);
-  private readonly transporter: nodemailer.Transporter;
+  private readonly resend: Resend;
 
   constructor() {
-    const port = Number(process.env.MAILTRAP_PORT);
-    this.transporter = nodemailer.createTransport({
-      host: process.env.MAILTRAP_HOST,
-      port,
-      secure: port === 465,
-      requireTLS: process.env.NODE_ENV === 'production',
-      auth: {
-        user: process.env.MAILTRAP_USER,
-        pass: process.env.MAILTRAP_PASS,
-      },
-    });
+    this.resend = new Resend(process.env.RESEND_API_KEY);
   }
 
   private get fromAddress(): string {
-    return process.env.EMAIL_FROM ?? `"${APP_NAME}" <noreply@catchmeal.dev>`;
+    return process.env.EMAIL_FROM ?? `${APP_NAME} <noreply@catchmeal.ch>`;
   }
 
-  private async send(mail: nodemailer.SendMailOptions): Promise<void> {
+  private async send(mail: EmailOptions): Promise<void> {
     try {
-      await this.transporter.sendMail(mail);
+      const { error } = await this.resend.emails.send({
+        from: this.fromAddress,
+        to: mail.to,
+        subject: mail.subject,
+        html: mail.html,
+        text: mail.text,
+      });
+
+      if (error) {
+        this.logger.error(`Email "${mail.subject}" not sent: ${error.message}`);
+      }
     } catch (error) {
       const reason = error instanceof Error ? error.message : String(error);
-      this.logger.error(`Email "${String(mail.subject)}" not sent: ${reason}`);
+      this.logger.error(`Email "${mail.subject}" not sent: ${reason}`);
     }
   }
 
   async sendDataExportConfirmation(userEmail: string): Promise<void> {
     await this.send({
-      from: this.fromAddress,
       to: userEmail,
       subject: 'Vos données ont été exportées',
       html: `<!DOCTYPE html>
@@ -162,7 +168,6 @@ Si vous n'êtes pas à l'origine de cette demande, contactez-nous immédiatement
 
   async sendAccountDeletionConfirmation(userEmail: string): Promise<void> {
     await this.send({
-      from: this.fromAddress,
       to: userEmail,
       subject: 'Votre compte a été supprimé',
       html: `<!DOCTYPE html>
@@ -209,7 +214,6 @@ Si vous n'êtes pas à l'origine de cette demande, contactez-nous immédiatement
     verificationUrl: string,
   ): Promise<void> {
     return this.send({
-      from: this.fromAddress,
       to: userEmail,
       subject: 'Confirmez votre adresse e-mail',
       html: `<!DOCTYPE html>
@@ -259,7 +263,6 @@ Ce lien est valable 24 heures. Si vous n'êtes pas à l'origine de cette inscrip
     resetUrl: string,
   ): Promise<void> {
     await this.send({
-      from: this.fromAddress,
       to: userEmail,
       subject: 'Réinitialisation de votre mot de passe',
       html: `<!DOCTYPE html>
@@ -306,7 +309,6 @@ Ce lien est valable 1 heure. Si vous n'êtes pas à l'origine de cette demande, 
 
   async sendPasswordChangedEmail(userEmail: string): Promise<void> {
     await this.send({
-      from: this.fromAddress,
       to: userEmail,
       subject: 'Votre mot de passe a été modifié',
       html: `<!DOCTYPE html>
